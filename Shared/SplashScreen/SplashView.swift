@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-@available(iOS 15.0, *)
+
 struct SplashView: View {
     var body: some View {
         
@@ -41,7 +41,6 @@ struct SplashView: View {
     }
 }
 
-@available(iOS 15.0, *)
 struct SplashView_Previews: PreviewProvider {
     static var previews: some View {
         SplashView()

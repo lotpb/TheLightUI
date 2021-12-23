@@ -27,7 +27,7 @@ struct RegisterUI: View {
                     }) {
                         Image(systemName: "arrow.left")
                             .font(.largeTitle)
-                            .foregroundColor(.gray)
+                            .foregroundColor(.secondary)
                     }
                     
                     Spacer()
@@ -78,7 +78,7 @@ struct RegisterUI: View {
                 HStack {
                     Text("Already have an account? ")
                         .fontWeight(.heavy)
-                        .foregroundColor(.gray)
+                        .foregroundColor(.secondary)
                     
                     Button(action: {
                         show.toggle()

@@ -11,15 +11,12 @@ import SwiftUI
 struct SideTabViewUI: View {
     
     @State var selectedTab = "house.fill"
-    
     @State var volume: CGFloat = 0.4
-    
     @State var showSideBar = false
     
     var body: some View {
         
         VStack {
-            
             Image("taylor_swift_profile")
                 .resizable()
                 .aspectRatio(contentMode: .fill)
@@ -29,13 +26,9 @@ struct SideTabViewUI: View {
                 .padding(.top)
             
             VStack {
-                
                 TabButtonUI(image: "house.fill", selectedTab: $selectedTab)
-                
                 TabButtonUI(image: "safari.fill", selectedTab: $selectedTab)
-                
                 TabButtonUI(image: "mic.fill", selectedTab: $selectedTab)
-                
                 TabButtonUI(image: "clock.fill", selectedTab: $selectedTab)
             }
             .frame(height: getRectUI().height / 2.3)
@@ -47,21 +40,17 @@ struct SideTabViewUI: View {
                 volume = volume + 0.1 < 1.0 ? volume + 0.1 : 1.0
             }, label: {
                 Image(systemName: "speaker.wave.2.fill")
-                    .font(.title2)
-                    .foregroundColor(.white)
+                    .font(.title2).foregroundColor(.white)
             })
             
             GeometryReader { proxy in
-                
                 let height = proxy.frame(in: .global).height
                 let progress = height * volume
                 
                 ZStack(alignment: .bottom) {
-                    
                     Capsule()
-                        .fill(Color.gray.opacity(0.5))
+                        .fill(Color.secondary.opacity(0.5))
                         .frame(width: 4)
-                    
                     Capsule()
                         .fill(Color.white)
                         .frame(width: 4, height: progress)
@@ -114,7 +103,6 @@ struct SideTabViewUI_Previews: PreviewProvider {
 }
 
 struct TabButtonUI: View {
-    
     var image: String
     @Binding var selectedTab: String
     
@@ -125,7 +113,7 @@ struct TabButtonUI: View {
         }, label: {
             Image(systemName: image)
                 .font(.title)
-                .foregroundColor(selectedTab == image ? .white : Color.gray.opacity(0.6))
+                .foregroundColor(selectedTab == image ? .white : Color.secondary.opacity(0.6))
                 .frame(maxHeight: .infinity)
         })
     }

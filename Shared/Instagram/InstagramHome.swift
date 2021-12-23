@@ -75,7 +75,6 @@ struct TabBarBtn: View {
         } label: {
             
             ZStack {
-                
                 if isSystemImage {
                     Image(systemName: image)
                         .font(.title2)
@@ -88,7 +87,7 @@ struct TabBarBtn: View {
                         .frame(width: 25, height: 25)
                 }
             }
-            .foregroundColor(currentTab == image ? currentTab == "Reels" ? .white : .primary : .gray)
+            .foregroundColor(currentTab == image ? currentTab == "Reels" ? .white : .primary : .secondary)
             .frame(maxWidth: .infinity)
         }
         

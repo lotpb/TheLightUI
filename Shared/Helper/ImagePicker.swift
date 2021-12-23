@@ -7,10 +7,10 @@
 
 import SwiftUI
 
+///LoginView
 struct ImagePicker: UIViewControllerRepresentable {
     
     @Binding var image: UIImage?
-    
     private let controllor = UIImagePickerController()
     
     func makeCoordinator() -> Coordinator {
@@ -18,7 +18,6 @@ struct ImagePicker: UIViewControllerRepresentable {
     }
     
     class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-        
         let parent: ImagePicker
         
         init(parent: ImagePicker) {

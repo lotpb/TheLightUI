@@ -7,22 +7,18 @@
 
 import SwiftUI
 
+///LoginView, CarouselBody
 struct ScrollViewOffsetModifier: ViewModifier {
-    
+
     var anchorPoint: Anchor = .Top
     @Binding var offset: CGFloat
-    
+
     func body(content: Content) -> some View {
-        
         content
             .overlay(
-                
                 GeometryReader { proxy -> Color in
-                
                 let frame = proxy.frame(in: .global)
-                
                 DispatchQueue.main.async {
-                    
                     switch anchorPoint {
                     case .Top:
                         offset = frame.minY
@@ -34,7 +30,6 @@ struct ScrollViewOffsetModifier: ViewModifier {
                         offset = frame.maxX
                     }
                 }
-                
                 return Color.clear
             })
     }

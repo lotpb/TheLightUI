@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-@available(iOS 15.0, *)
+
 struct SplashHome: View {
     
     @State var currentTab = "All Photos"
@@ -50,7 +50,6 @@ struct SplashHome: View {
     }
 }
 
-@available(iOS 15.0, *)
 struct SplashHome_Previews: PreviewProvider {
     static var previews: some View {
         SplashHome()

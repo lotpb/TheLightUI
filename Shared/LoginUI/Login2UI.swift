@@ -26,7 +26,7 @@ struct Login2UI: View {
                     
                     Text("Please sign in to continue")
                         .fontWeight(.semibold)
-                        .foregroundColor(.gray)
+                        .foregroundColor(.secondary)
                 }
                 
                 Spacer(minLength: 0)
@@ -68,7 +68,7 @@ struct Login2UI: View {
             HStack(spacing: 0) {
                 Text("Don't have an account? ")
                     .fontWeight(.heavy)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.secondary)
                 
                 NavigationLink(destination: RegisterUI(show: $show), isActive: $show) {
                     Text("sign up")

@@ -10,7 +10,7 @@ import SwiftUI
 
 struct SpotifyUI: View {
     
-    @State var searchText = ""
+    @State private var searchText = ""
     
     var body: some View {
         

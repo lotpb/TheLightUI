@@ -14,26 +14,17 @@ struct ReelsView: View {
     @State var currentReel = ""
     
     @State var reels = MediaFileJSON.map { item -> Reel in
-        
         let url = Bundle.main.path(forResource: item.url, ofType: "mp4") ?? ""
-        
         let player = AVPlayer(url: URL(fileURLWithPath: url))
         
         return Reel(player: player, mediaFile: item)
-        
     }
     var body: some View {
-        
         GeometryReader { proxy in
-            
             let size = proxy.size
-            
             TabView(selection: $currentReel) {
-                
                 ForEach($reels) { $reel in
-                    
                     ReelsPlayer(reel: $reel, currentReel: $currentReel)
-                    
                     .frame(width: size.width)
                     .padding()
                     .rotationEffect(.init(degrees: -90))
@@ -65,32 +56,20 @@ struct ReelsView_Previews: PreviewProvider {
 struct ReelsPlayer: View {
     
     @Binding var reel: Reel
-    
     @Binding var currentReel: String
-    
     @State var showmore = false
-    
     @State var isMuted = false
     @State var volumeAnimation = false
     
     var body: some View {
-        
         ZStack {
-            
             if let player = reel.player {
-                
                 CustomVideoPlayer(player: player)
-                
                 GeometryReader { proxy -> Color in
-                    
                     let minY = proxy.frame(in: .global).minY
-                    
                     let size = proxy.size
-                    
                     DispatchQueue.main.async {
-                        
                         if -minY < (size.height / 2) && minY < (size.height / 2) && currentReel == reel.id {
-                            
                             player.play()
                         }
                         else {
@@ -99,23 +78,16 @@ struct ReelsPlayer: View {
                     }
                     return Color.clear
                 }
-                
                 Color.black.opacity(0.01)
                     .frame(width: 150, height: 150)
                     .onTapGesture {
-                        
                         if volumeAnimation {
-                        
                             return
                         }
-                        
                         isMuted.toggle()
-                        
                         player.isMuted = isMuted
                         withAnimation {volumeAnimation.toggle()}
-                        
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                            
                             withAnimation{volumeAnimation.toggle()}
                         }
                     }
@@ -124,15 +96,10 @@ struct ReelsPlayer: View {
                     .onTapGesture {
                         withAnimation {showmore.toggle()}
                     }
-                
                 VStack {
-                    
                     HStack(alignment: .bottom) {
-                        
                         VStack(alignment: .leading, spacing: 10) {
-                            
                             HStack(spacing: 15) {
-                                
                                 Image("IMG_3408")
                                     .resizable()
                                     .aspectRatio(contentMode: .fill)
@@ -149,13 +116,9 @@ struct ReelsPlayer: View {
                                         .font(.caption.bold())
                                 }
                             }
-                            
                             ZStack {
-                                
                                 if showmore {
-                                    
                                     ScrollView(.vertical, showsIndicators: false) {
-                                        
                                         Text(reel.mediaFile.title + sampleText)
                                             .font(.callout)
                                             .fontWeight(.semibold)
@@ -167,13 +130,10 @@ struct ReelsPlayer: View {
                                     }
                                 }
                                 else {
-                                    
                                     Button {
                                         withAnimation{showmore.toggle()}
                                     } label: {
-                                        
                                         HStack {
-                                            
                                             Text(reel.mediaFile.title)
                                                 .font(.callout)
                                                 .fontWeight(.semibold)
@@ -181,7 +141,7 @@ struct ReelsPlayer: View {
                                             
                                             Text("more")
                                                 .font(.callout.bold())
-                                                .foregroundColor(.gray)
+                                                .foregroundColor(.secondary)
                                         }
                                         .padding(.top, 5)
                                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -189,14 +149,10 @@ struct ReelsPlayer: View {
                                 }
                             }
                         }
-                        
                         Spacer(minLength: 20)
-                        
                         ActionButtons(reel: reel)
                     }
-                    
                     HStack {
-                        
                         Text("A Sky full of Stars")
                             .font(.caption)
                             .fontWeight(.semibold)
@@ -209,7 +165,6 @@ struct ReelsPlayer: View {
                             .frame(width: 30, height: 30)
                             .cornerRadius(6)
                             .background(
-                            
                                 RoundedRectangle(cornerRadius: 6)
                                     .stroke(Color.white, lineWidth: 3)
                             )
@@ -239,13 +194,10 @@ struct ActionButtons: View {
     var reel: Reel
     
     var body: some View {
-        
         VStack(spacing: 25) {
-            
             Button {
                 
             } label: {
-                
                 VStack(spacing: 10) {
                     
                     Image(systemName: "suit.heart")
@@ -255,33 +207,24 @@ struct ActionButtons: View {
                         .font(.caption.bold())
                 }
             }
-            
             Button {
                 
             } label: {
-                
                 VStack(spacing: 10) {
-                    
                     Image(systemName: "bubble.right")
                         .font(.title)
-                    
                     Text("120")
                         .font(.caption.bold())
                 }
             }
-            
             Button {
                 
             } label: {
-                
                 VStack(spacing: 10) {
-                    
                     Image(systemName: "paperplane")
                         .font(.title)
-
                 }
             }
-            
             Button {
                 
             } label: {
