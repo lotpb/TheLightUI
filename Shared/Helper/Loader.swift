@@ -1,23 +1,40 @@
 //
 //  Loader.swift
-//  TheLight2
+//  TheLightUI
 //
 //  Created by Peter Balsamo on 3/30/21.
-//  Copyright © 2021 Peter Balsamo. All rights reserved.
 //
 
 import SwiftUI
 
-///LoginView
-struct Loader : UIViewRepresentable {
+struct Loader: UIViewRepresentable {
+    var style: UIActivityIndicatorView.Style = .large
+    var color: UIColor?
+    var isAnimating = true
     
-    func makeUIView(context: UIViewRepresentableContext<Loader>) -> UIActivityIndicatorView {
-        let indicator = UIActivityIndicatorView(style: .large)
-        indicator.startAnimating()
+    func makeUIView(context: Context) -> UIActivityIndicatorView {
+        let indicator = UIActivityIndicatorView(style: style)
+        indicator.color = color
+        updateAnimationState(for: indicator)
         return indicator
     }
     
-    func updateUIView(_ uiView: UIActivityIndicatorView, context: UIViewRepresentableContext<Loader>) {
-        
+    func updateUIView(_ uiView: UIActivityIndicatorView, context: Context) {
+        uiView.style = style
+        uiView.color = color
+        updateAnimationState(for: uiView)
     }
+    
+    private func updateAnimationState(for indicator: UIActivityIndicatorView) {
+        if isAnimating {
+            indicator.startAnimating()
+        } else {
+            indicator.stopAnimating()
+        }
+    }
+}
+
+#Preview("Loader") {
+    Loader()
+        .frame(width: 80, height: 80)
 }

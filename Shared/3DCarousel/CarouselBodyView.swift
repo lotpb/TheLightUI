@@ -9,123 +9,112 @@ import SwiftUI
 
 @available(iOS 15.0, *)
 struct CarouselBodyView: View {
-    
-    var index: Int
-    @State var offset: CGFloat = 0
+    let page: CarouselPage
+    @State private var offset: CGFloat = 0
     
     var body: some View {
-        
         GeometryReader { proxy in
-            
             let size = proxy.size
+            let cardSize = CGSize(width: size.width - 8, height: size.height / 1.2)
             
             ZStack {
-                
-                //Image("p\(index)")
-                Image("taylor_swift_profile")
+                Image(page.resolvedImageName)
                     .resizable()
-                    .aspectRatio(contentMode: ContentMode.fill)
-                    .frame(width: size.width - 8, height: size.height / 1.2)
-                    .cornerRadius(12)
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: cardSize.width, height: cardSize.height)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 
                 VStack {
-                    
-                    VStack(alignment: .leading, spacing: 10) {
-                        
-                        Text("Human Integration Supervisor")
-                            .font(.title2.bold())
-                            .kerning(1.5)
-                        
-                        Text("The world's largest collection of animal facts, pictures and more!")
-                            .kerning(1.2)
-                            .foregroundStyle(.secondary)
-                    }
-                    .foregroundStyle(.white)
-                    .padding(.top)
-                    
+                    headerContent
                     Spacer(minLength: 0)
-                    
-                    VStack(alignment: .leading, spacing: 30) {
-                        
-                        HStack(spacing: 15) {
-                            
-                            Image("taylor_swift_profile")
-                                .resizable()
-                                .aspectRatio(contentMode: ContentMode.fill)
-                                .frame(width: 55, height: 55)
-                                .clipShape(Circle())
-                            
-                            VStack(alignment: .leading, spacing: 6) {
-                                
-                                Text("Peter")
-                                    .font(.title2.bold())
-                                
-                                Text("Apple Sheep")
-                                    .foregroundStyle(.secondary)
-                            }
-                            .foregroundStyle(.black)
-                        }
-                        
-                        HStack {
-                            
-                            VStack {
-                                
-                                Text("1303")
-                                    .font(.title2.bold())
-                                
-                                Text("Posts")
-                                    .foregroundStyle(.secondary)
-                            }
-                            .frame(maxWidth: .infinity)
-                            
-                            VStack {
-                                
-                                Text("3103")
-                                    .font(.title2.bold())
-                                
-                                Text("Followers")
-                                    .foregroundStyle(.secondary)
-                            }
-                            .frame(maxWidth: .infinity)
-                            
-                            VStack {
-                                
-                                Text("1603")
-                                    .font(.title2.bold())
-                                
-                                Text("Following")
-                                    .foregroundStyle(.secondary)
-                            }
-                            .frame(maxWidth: .infinity)
-                        }
-                        .foregroundStyle(.black)
-                    }
-                    .padding(20)
-                    .padding(.horizontal, 10)
-                    .background(.white, in: RoundedRectangle(cornerRadius: 4))
+                    profileContent
                 }
                 .padding(20)
             }
-            .frame(width: size.width - 8, height: size.height / 1.2)
+            .frame(width: cardSize.width, height: cardSize.height)
             .frame(width: size.width, height: size.height)
         }
-        .tag("p\(index)")
-        
+        .tag(page.id)
         .modifier(ScrollViewOffsetModifier(anchorPoint: .leading, offset: $offset))
-        //.overlay(Text("\(offset)").foregroundColor(.white))
-        .rotation3DEffect(.init(degrees: getProgress() * 90), axis: (x: 0, y: 1, z: 0), anchor: offset > 0 ? .leading : .trailing, anchorZ: 0, perspective: 0.6)
+        .rotation3DEffect(
+            .degrees(progress * 90),
+            axis: (x: 0, y: 1, z: 0),
+            anchor: offset > 0 ? .leading : .trailing,
+            anchorZ: 0,
+            perspective: 0.6
+        )
     }
     
-    func getProgress()->CGFloat {
-        let progress = -offset / UIScreen.main.bounds.width
-        
-        return progress
+    private var headerContent: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(page.title)
+                .font(.title2.bold())
+                .kerning(1.5)
+            
+            Text(page.subtitle)
+                .kerning(1.2)
+                .foregroundStyle(.secondary)
+        }
+        .foregroundStyle(.white)
+        .padding(.top)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private var profileContent: some View {
+        VStack(alignment: .leading, spacing: 30) {
+            HStack(spacing: 15) {
+                Image(CarouselPage.fallbackImageName)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 55, height: 55)
+                    .clipShape(Circle())
+                
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(page.profileName)
+                        .font(.title2.bold())
+                    
+                    Text(page.profileSubtitle)
+                        .foregroundStyle(.secondary)
+                }
+                .foregroundStyle(.black)
+            }
+            
+            HStack {
+                ForEach(page.stats) { stat in
+                    StatView(value: stat.value, label: stat.label)
+                }
+            }
+            .foregroundStyle(.black)
+        }
+        .padding(20)
+        .padding(.horizontal, 10)
+        .background(.white, in: RoundedRectangle(cornerRadius: 4))
+    }
+    
+    private var progress: CGFloat {
+        -offset / UIScreen.main.bounds.width
     }
 }
 
 @available(iOS 15.0, *)
-struct CarouselBodyView_Previews: PreviewProvider {
-    static var previews: some View {
-        CarouselView()
+private struct StatView: View {
+    let value: String
+    let label: String
+    
+    var body: some View {
+        VStack {
+            Text(value)
+                .font(.title2.bold())
+            
+            Text(label)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
     }
+}
+
+@available(iOS 15.0, *)
+#Preview("Carousel Body - Dark") {
+    CarouselBodyView(page: CarouselPage.pages[0])
+        .preferredColorScheme(.dark)
 }

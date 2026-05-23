@@ -9,11 +9,15 @@
 import SwiftUI
 
 struct Login2UI: View {
-    @State var email = ""
-    @State var password = ""
-    @Namespace var animation
+    @State private var email = ""
+    @State private var password = ""
+    @State private var showRegister = false
+    @State private var validationMessage = ""
+    @Namespace private var animation
     
-    @State var show = false
+    private var isLoginEnabled: Bool {
+        email.contains("@") && password.count >= 6
+    }
     
     var body: some View {
         VStack {
@@ -35,21 +39,34 @@ struct Login2UI: View {
             .padding(.leading)
             
             CustomTextField(image: "envelope", title: "EMAIL", value: $email, animation: animation)
+                .textContentType(.emailAddress)
+                .keyboardType(.emailAddress)
+                .textInputAutocapitalization(.never)
             
             CustomTextField(image: "lock", title: "PASSWORD", value: $password, animation: animation)
+                .textContentType(.password)
                 .padding(.top, 5)
+            
+            if !validationMessage.isEmpty {
+                Text(validationMessage)
+                    .font(.footnote.bold())
+                    .foregroundColor(.red)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 32)
+                    .padding(.top, 8)
+            }
             
             HStack {
                 Spacer(minLength: 0)
             
                 VStack(alignment: .trailing, spacing: 20) {
-                    Button(action: {}) {
+                    Button(action: forgotPassword) {
                         Text("FORGOT")
                             .fontWeight(.heavy)
                             .foregroundColor(.yellow)
                     }
                     
-                    Button(action: {}) {
+                    Button(action: login) {
                         HStack(spacing: 10) {
                             Text("LOGIN")
                                 .fontWeight(.heavy)
@@ -58,7 +75,9 @@ struct Login2UI: View {
                                 .font(.title2)
                         }
                         .modifier(CustomButtonModifier())
+                        .opacity(isLoginEnabled ? 1 : 0.55)
                     }
+                    .disabled(!isLoginEnabled)
                 }
             }
             .padding()
@@ -70,7 +89,9 @@ struct Login2UI: View {
                     .fontWeight(.heavy)
                     .foregroundColor(.secondary)
                 
-                NavigationLink(destination: RegisterUI(show: $show), isActive: $show) {
+                Button {
+                    showRegister = true
+                } label: {
                     Text("sign up")
                         .fontWeight(.heavy)
                         .foregroundColor(.yellow)
@@ -78,14 +99,28 @@ struct Login2UI: View {
             }
             .padding()
         }
+        .navigationDestination(isPresented: $showRegister) {
+            RegisterUI(show: $showRegister)
+        }
+    }
+    
+    private func login() {
+        guard isLoginEnabled else {
+            validationMessage = "Enter a valid email and a password with at least 6 characters."
+            return
+        }
+        
+        validationMessage = ""
+    }
+    
+    private func forgotPassword() {
+        validationMessage = email.isEmpty ? "Enter your email first." : "Password reset is not configured yet."
     }
 }
 
-struct Login_Previews: PreviewProvider {
-    static var previews: some View {
+#Preview("Login - Dark") {
+    NavigationStack {
         Login2UI()
-            .preferredColorScheme(.dark)
-            .navigationBarHidden(true)
-            .navigationBarBackButtonHidden(true)
     }
+    .preferredColorScheme(.dark)
 }

@@ -9,14 +9,22 @@
 import SwiftUI
 
 struct RegisterUI: View {
-    @State var email = ""
-    @State var password = ""
-    @State var name = ""
-    @State var number = ""
+    @State private var email = ""
+    @State private var password = ""
+    @State private var name = ""
+    @State private var number = ""
+    @State private var validationMessage = ""
     
     @Binding var show: Bool
     
-    @Namespace var animation
+    @Namespace private var animation
+    
+    private var isFormValid: Bool {
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        email.contains("@") &&
+        password.count >= 6 &&
+        !number.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
     
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
@@ -47,20 +55,36 @@ struct RegisterUI: View {
                 .padding(.leading)
                 
                 CustomTextField(image: "person", title: "FULL NAME", value: $name, animation: animation)
+                    .textContentType(.name)
                 
                 CustomTextField(image: "envelope", title: "EMAIL", value: $email, animation: animation)
+                    .textContentType(.emailAddress)
+                    .keyboardType(.emailAddress)
+                    .textInputAutocapitalization(.never)
                     .padding(.top, 5)
                 
                 CustomTextField(image: "lock", title: "PASSWORD", value: $password, animation: animation)
+                    .textContentType(.newPassword)
                     .padding(.top, 5)
                 
                 CustomTextField(image: "phone.fill", title: "PHONE NUMBER", value: $number, animation: animation)
+                    .textContentType(.telephoneNumber)
+                    .keyboardType(.phonePad)
                     .padding(.top, 5)
+                
+                if !validationMessage.isEmpty {
+                    Text(validationMessage)
+                        .font(.footnote.bold())
+                        .foregroundColor(.red)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 32)
+                        .padding(.top, 8)
+                }
                 
                 HStack {
                     Spacer()
                     
-                    Button(action: {}) {
+                    Button(action: signUp) {
                         HStack(spacing: 10) {
                             Text("SIGN UP")
                                 .fontWeight(.heavy)
@@ -69,7 +93,9 @@ struct RegisterUI: View {
                                 .font(.title2)
                         }
                         .modifier(CustomButtonModifier())
+                        .opacity(isFormValid ? 1 : 0.55)
                     }
+                    .disabled(!isFormValid)
                 }
                 .padding()
                 .padding(.top)
@@ -97,4 +123,19 @@ struct RegisterUI: View {
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
     }
+    
+    private func signUp() {
+        guard isFormValid else {
+            validationMessage = "Enter a name, valid email, phone number, and a password with at least 6 characters."
+            return
+        }
+        
+        validationMessage = ""
+        show.toggle()
+    }
+}
+
+#Preview("Register - Dark") {
+    RegisterUI(show: .constant(false))
+        .preferredColorScheme(.dark)
 }

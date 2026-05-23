@@ -8,53 +8,39 @@
 import Foundation
 import SwiftUI
 
-///WelcomeView, LoadingView, WeatherUI, WeatherRow
 extension Date {
-
     func descriptiveString(dateStyle: DateFormatter.Style = .short) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = dateStyle
+        let daysBetween = daysBetween(date: Date())
 
-        let daysBetween = self.daysBetween(date: Date())
-
-        if daysBetween == 0 {
-            return "today"
-        }
-        else if daysBetween == 1 {
+        switch daysBetween {
+        case 0:
+            return "Today"
+        case 1:
             return "Yesterday"
+        case 2..<5:
+            return Self.weekdayFormatter.string(from: self)
+        default:
+            let formatter = DateFormatter()
+            formatter.dateStyle = dateStyle
+            return formatter.string(from: self)
         }
-        else if daysBetween < 5 {
-            let weekdayIndex = Calendar.current.component(.weekday, from: self) - 1
-            return formatter.weekdaySymbols[weekdayIndex]
-        }
-        return formatter.string(from: self)
     }
 
     func daysBetween(date: Date) -> Int {
-        let calender = Calendar.current
-        let date1 = calender.startOfDay(for: self)
-        let date2 = calender.startOfDay(for: date)
-        if let daysBetween = calender.dateComponents([.day], from: date1, to: date2).day {
-            return daysBetween
-        }
-        return 0
+        let calendar = Calendar.current
+        let startDate = calendar.startOfDay(for: self)
+        let endDate = calendar.startOfDay(for: date)
+        return calendar.dateComponents([.day], from: startDate, to: endDate).day ?? 0
     }
 
-//    private var formattedDate: DateFormatter {
-//        let dateFormatter = DateFormatter()
-//        dateFormatter.dateStyle = .full
-//        return dateFormatter
-//    }
-//
-//    func asShortDateString() -> String {
-//        return formattedDate.string(from: self)
-//    }
+    private static let weekdayFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE"
+        return formatter
+    }()
 }
 
 extension Color {
     static let background = Color(hue: 0.654, saturation: 0.78, brightness: 0.442)
     static let text = Color(hue: 1.0, saturation: 0.0, brightness: 0.888)
 }
-
-
-

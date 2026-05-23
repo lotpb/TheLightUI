@@ -9,87 +9,79 @@ import SwiftUI
 
 @available(iOS 15.0, *)
 struct InstagramHome: View {
+    @State private var currentTab = InstagramTab.reels.rawValue
     
     init() {
         UITabBar.appearance().isHidden = true
     }
     
-    @State var currentTab = "Reels"
-    
     var body: some View {
-        
         VStack(spacing: 0) {
-            
             TabView(selection: $currentTab) {
-                
                 Text("Home")
-                    .tag("house.fill")
+                    .tag(InstagramTab.home.rawValue)
                 
                 Text("Search")
-                    .tag("magnifyingglass")
+                    .tag(InstagramTab.search.rawValue)
                 
                 ReelsView()
-                    .tag("film")
+                    .tag(InstagramTab.reels.rawValue)
                 
                 Text("Liked")
-                    .tag("suit.heart")
+                    .tag(InstagramTab.liked.rawValue)
                 
                 Text("Profile")
-                    .tag("person.circle")
+                    .tag(InstagramTab.profile.rawValue)
             }
             
             HStack(spacing: 0) {
-                
-                ForEach (
-                    ["house.fill", "magnifyingglass", "film", "suit.heart", "person.circle"], id: \.self) {image in
-                    
-                    TabBarBtn(image: image, isSystemImage: image != "Reels", currentTab: $currentTab)
-                    
+                ForEach(InstagramTab.allCases) { tab in
+                    TabBarBtn(tab: tab, currentTab: $currentTab)
                 }
             }
             .padding(.horizontal)
             .padding(.vertical, 10)
             .overlay(Divider(), alignment: .top)
-            .background(currentTab == "Reels" ? .black : .clear)
+            .background(currentTab == InstagramTab.reels.rawValue ? .black : .clear)
         }
     }
+}
+
+private enum InstagramTab: String, CaseIterable, Identifiable {
+    case home = "house.fill"
+    case search = "magnifyingglass"
+    case reels = "film"
+    case liked = "suit.heart"
+    case profile = "person.circle"
+    
+    var id: String { rawValue }
 }
 
 @available(iOS 15.0, *)
-struct InstagramHome_Previews: PreviewProvider {
-    static var previews: some View {
-        InstagramHome()
-    }
+#Preview("Instagram - Dark") {
+    InstagramHome()
+        .preferredColorScheme(.dark)
 }
 
-struct TabBarBtn: View {
-    
-    var image: String
-    var isSystemImage: Bool
+private struct TabBarBtn: View {
+    let tab: InstagramTab
     @Binding var currentTab: String
     
     var body: some View {
-        
         Button {
-            withAnimation {currentTab = image}
-        } label: {
-            
-            ZStack {
-                if isSystemImage {
-                    Image(systemName: image)
-                        .font(.title2)
-                }
-                else {
-                    Image(image)
-                        .resizable()
-                        .renderingMode(.template)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 25, height: 25)
-                }
+            withAnimation {
+                currentTab = tab.rawValue
             }
-            .foregroundColor(currentTab == image ? currentTab == "Reels" ? .white : .primary : .secondary)
-            .frame(maxWidth: .infinity)
+        } label: {
+            Image(systemName: tab.rawValue)
+                .font(.title2)
+                .foregroundColor(currentTab == tab.rawValue ? selectedColor : .secondary)
+                .frame(maxWidth: .infinity)
         }
-        
+        .accessibilityLabel(tab.rawValue)
+    }
+    
+    private var selectedColor: Color {
+        currentTab == InstagramTab.reels.rawValue ? .white : .primary
     }
 }

@@ -9,13 +9,13 @@
 import SwiftUI
 
 struct SideTabViewUI: View {
+    @State private var selectedTab = "house.fill"
+    @State private var volume: CGFloat = 0.4
+    @State private var showSideBar = false
     
-    @State var selectedTab = "house.fill"
-    @State var volume: CGFloat = 0.4
-    @State var showSideBar = false
+    private let tabs = ["house.fill", "safari.fill", "mic.fill", "clock.fill"]
     
     var body: some View {
-        
         VStack {
             Image("taylor_swift_profile")
                 .resizable()
@@ -26,22 +26,23 @@ struct SideTabViewUI: View {
                 .padding(.top)
             
             VStack {
-                TabButtonUI(image: "house.fill", selectedTab: $selectedTab)
-                TabButtonUI(image: "safari.fill", selectedTab: $selectedTab)
-                TabButtonUI(image: "mic.fill", selectedTab: $selectedTab)
-                TabButtonUI(image: "clock.fill", selectedTab: $selectedTab)
+                ForEach(tabs, id: \.self) { tab in
+                    TabButtonUI(image: tab, selectedTab: $selectedTab)
+                }
             }
             .frame(height: getRectUI().height / 2.3)
             .padding(.top)
             
             Spacer(minLength: 50)
             
-            Button(action: {
-                volume = volume + 0.1 < 1.0 ? volume + 0.1 : 1.0
-            }, label: {
+            Button {
+                adjustVolume(by: 0.1)
+            } label: {
                 Image(systemName: "speaker.wave.2.fill")
-                    .font(.title2).foregroundColor(.white)
-            })
+                    .font(.title2)
+                    .foregroundColor(.white)
+            }
+            .accessibilityLabel("Increase volume")
             
             GeometryReader { proxy in
                 let height = proxy.frame(in: .global).height
@@ -59,19 +60,20 @@ struct SideTabViewUI: View {
             }
             .padding(.vertical, 20)
             
-            Button(action: {
-                volume = volume - 0.1 > 0 ? volume - 0.1 : 0
-            }, label: {
+            Button {
+                adjustVolume(by: -0.1)
+            } label: {
                 Image(systemName: "speaker.wave.1.fill")
                     .font(.title2)
                     .foregroundColor(.white)
-            })
+            }
+            .accessibilityLabel("Decrease volume")
             
-            Button(action: {
+            Button {
                 withAnimation(.easeIn) {
                     showSideBar.toggle()
                 }
-            }, label: {
+            } label: {
                 Image(systemName: "chevron.right")
                     .font(.title2)
                     .foregroundColor(.white)
@@ -80,8 +82,9 @@ struct SideTabViewUI: View {
                     .background(Color.black)
                     .cornerRadius(10)
                     .shadow(radius: 5)
-            })
-            .padding(.top,getRectUI().height < 750 ? 10 : 30)
+            }
+            .accessibilityLabel(showSideBar ? "Hide sidebar" : "Show sidebar")
+            .padding(.top, getRectUI().height < 750 ? 10 : 30)
             .padding(.bottom, getSafeAreaUI().bottom == 0 ? 15 : 0)
             .offset(x: showSideBar ? 0 : 100)
         }
@@ -89,33 +92,34 @@ struct SideTabViewUI: View {
         .background(Color.black.ignoresSafeArea())
         .offset(x: showSideBar ? 0 : -100)
         .padding(.trailing, -100)
-        //.padding(.trailing, showSideBar ? 0 : -100)
         .zIndex(1)
-        
+    }
+    
+    private func adjustVolume(by amount: CGFloat) {
+        volume = min(max(volume + amount, 0), 1)
     }
 }
 
-struct SideTabViewUI_Previews: PreviewProvider {
-    static var previews: some View {
-        SpotifyUI()
-            .preferredColorScheme(.dark)
-    }
+#Preview("Side Tab - Dark") {
+    SideTabViewUI()
+        .preferredColorScheme(.dark)
 }
 
 struct TabButtonUI: View {
-    var image: String
+    let image: String
     @Binding var selectedTab: String
     
     var body: some View {
-        
-        Button(action: {
-            withAnimation{selectedTab = image}
-        }, label: {
+        Button {
+            withAnimation {
+                selectedTab = image
+            }
+        } label: {
             Image(systemName: image)
                 .font(.title)
                 .foregroundColor(selectedTab == image ? .white : Color.secondary.opacity(0.6))
                 .frame(maxHeight: .infinity)
-        })
+        }
+        .accessibilityLabel(image)
     }
 }
-

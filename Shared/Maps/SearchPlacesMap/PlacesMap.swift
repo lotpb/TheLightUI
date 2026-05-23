@@ -9,81 +9,160 @@
 import SwiftUI
 import CoreLocation
 
-
 struct PlacesMap: View {
-    @StateObject var mapData = MapViewModel()
-    @State var width = UIScreen.main.bounds.width
-    
-    var body: some View {
-        ZStack {
-            MapViewUI()
-            // using it as environment object so that it can be used in subView
-                .environmentObject(mapData)
-                .ignoresSafeArea(.all, edges: .all)
-            VStack {
-                VStack(spacing: 0) {
-                    HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.gray)
-                        
-                        TextField("Search", text: $mapData.searchTxt)
-                            .colorScheme(.light)
-                    }
-                    .padding(.vertical, 10)
-                    .padding(.horizontal)
-                    .background(Color.white)
-                    
-                    // Displaying Results
-                    if !mapData.places.isEmpty && mapData.searchTxt != "" {
-                        ScrollView(showsIndicators: true) {
-                            VStack(spacing: 15) {
-                                ForEach(mapData.places) { place in
-                                    Text(place.placemark.name ?? "")
-                                        .foregroundColor(.black)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .padding(.leading)
-                                        .onTapGesture {
-                                            mapData.selectPlace(place: place)
-                                        }
-                                    Divider()
-                                }
-                            }
-                            .padding(.top)
-                        }
-                        .background(Color.white)
-                    }
-                }
-                .padding()
-                
-                Spacer()
-            }
-        }
-        .onAppear {
+    @StateObject private var mapData = MapViewModel()
+    @State private var searchTask: Task<Void, Never>?
+    @FocusState private var isSearchFocused: Bool
 
+    private var trimmedSearchText: String {
+        mapData.searchTxt.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    var body: some View {
+        ZStack(alignment: .top) {
+            MapViewUI()
+                .environmentObject(mapData)
+                .ignoresSafeArea()
+
+            VStack(spacing: 8) {
+                searchBar
+
+                if shouldShowResults {
+                    searchResults
+                }
+            }
+            .padding()
         }
-        // Permission Denied Alert
+        .background(Color.black.ignoresSafeArea())
         .alert(isPresented: $mapData.permissionDenied) {
-            Alert(title: Text("Permission Denied"), message: Text("Please Enable Permission In App Settings"), dismissButton: .default(Text("Go to Settings"), action: {
-                // Redirecting User to Settings
-                UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
-            }))
+            Alert(
+                title: Text("Permission Denied"),
+                message: Text("Please Enable Permission In App Settings"),
+                dismissButton: .default(Text("Go to Settings"), action: openSettings)
+            )
         }
-        .onChange(of: mapData.searchTxt) { (value) in
-            // Searching Places
-            // You can use your own delay time to avoid Continuos Search Request
-            let delay = 0.3
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                if value == mapData.searchTxt {
-                    // Search
-                    self.mapData.searchQuery()
+        .onChange(of: mapData.searchTxt) { value in
+            scheduleSearch(for: value)
+        }
+        .onDisappear {
+            searchTask?.cancel()
+        }
+    }
+
+    private var searchBar: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.gray)
+
+            TextField("Search", text: $mapData.searchTxt)
+                .focused($isSearchFocused)
+                .submitLabel(.search)
+                .colorScheme(.light)
+                .onSubmit {
+                    runSearchIfNeeded()
+                }
+
+            if !mapData.searchTxt.isEmpty {
+                Button {
+                    clearSearch()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.gray)
+                }
+                .accessibilityLabel("Clear search")
+            }
+        }
+        .padding(.vertical, 10)
+        .padding(.horizontal)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .shadow(color: Color.black.opacity(0.15), radius: 12, x: 0, y: 6)
+    }
+
+    private var searchResults: some View {
+        ScrollView(showsIndicators: true) {
+            LazyVStack(spacing: 0) {
+                ForEach(mapData.places) { place in
+                    Button {
+                        select(place)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(place.name)
+                                .font(.body.weight(.semibold))
+                                .foregroundColor(.black)
+
+                            if let location = place.subtitle {
+                                Text(location)
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                                    .lineLimit(2)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal)
+                    }
+
+                    Divider()
                 }
             }
         }
+        .frame(maxHeight: 260)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 5)
+    }
+
+    private var shouldShowResults: Bool {
+        !trimmedSearchText.isEmpty && !mapData.places.isEmpty
+    }
+
+    private func scheduleSearch(for value: String) {
+        searchTask?.cancel()
+
+        let query = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else {
+            mapData.places.removeAll()
+            return
+        }
+
+        searchTask = Task {
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            guard !Task.isCancelled else { return }
+
+            await MainActor.run {
+                guard query == trimmedSearchText else { return }
+                mapData.searchQuery()
+            }
+        }
+    }
+
+    private func runSearchIfNeeded() {
+        searchTask?.cancel()
+        guard !trimmedSearchText.isEmpty else { return }
+        mapData.searchQuery()
+    }
+
+    private func select(_ place: Place) {
+        isSearchFocused = false
+        mapData.selectPlace(place: place)
+    }
+
+
+    private func clearSearch() {
+        searchTask?.cancel()
+        mapData.searchTxt = ""
+        mapData.places.removeAll()
+        isSearchFocused = false
+    }
+
+    private func openSettings() {
+        guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(settingsURL)
     }
 }
 
-struct HomeMap_Previews: PreviewProvider {
-    static var previews: some View {
-            PlacesMap()
-    }
+#Preview("Places Map") {
+    PlacesMap()
+        .preferredColorScheme(.dark)
 }

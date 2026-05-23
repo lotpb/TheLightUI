@@ -12,6 +12,19 @@ struct SpotifyUI: View {
     
     @State private var searchText = ""
     
+    private var filteredRecentlyPlayed: [Song] {
+        filterSongs(recentlyPlayed)
+    }
+    
+    private var filteredLikedSongs: [Song] {
+        filterSongs(likedSongs)
+    }
+    
+    private var filteredGenres: [String] {
+        guard !searchText.isEmpty else { return generes }
+        return generes.filter { $0.localizedCaseInsensitiveContains(searchText) }
+    }
+    
     var body: some View {
         
         HStack(spacing: 0) {
@@ -31,6 +44,7 @@ struct SpotifyUI: View {
                                 .frame(width: 25, height: 25)
                             
                             TextField("Search...", text: $searchText)
+                                .textInputAutocapitalization(.never)
                         }
                         .padding(.vertical, 10)
                         .padding(.horizontal)
@@ -55,54 +69,54 @@ struct SpotifyUI: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 30)
                     
-                    TabView {
-                        
-                        ForEach(recentlyPlayed) { item in
-                            
-                            ZStack(alignment: .bottomLeading) {
-                                
-                                Image(item.album_cover)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .cornerRadius(20)
-                                    //.padding(.horizontal)
-                                    .overlay(
-                                        LinearGradient(gradient: .init(colors: [Color.clear, Color.clear,Color.black]), startPoint: .top, endPoint: .bottom)
-                                            .cornerRadius(20)
-                                    )
-                                
-                                HStack(spacing: 15) {
+                    if filteredRecentlyPlayed.isEmpty {
+                        SpotifyEmptyState()
+                            .frame(height: 160)
+                            .padding(.top, 20)
+                    } else {
+                        TabView {
+                            ForEach(filteredRecentlyPlayed) { item in
+                                ZStack(alignment: .bottomLeading) {
+                                    Image(item.album_cover)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .cornerRadius(20)
+                                        .overlay(
+                                            LinearGradient(gradient: .init(colors: [Color.clear, Color.clear, Color.black]), startPoint: .top, endPoint: .bottom)
+                                                .cornerRadius(20)
+                                        )
                                     
-                                    Button(action: {}, label: {
-                                        Image(systemName: "play.fill")
-                                            .font(.title)
-                                            .foregroundColor(.white)
-                                            .padding(20)
-                                            .background(Color(.red))
-                                            .clipShape(Circle())
-                                    })
-                                    
-                                    VStack(alignment: .leading, spacing: 5, content: {
+                                    HStack(spacing: 15) {
+                                        Button(action: {}, label: {
+                                            Image(systemName: "play.fill")
+                                                .font(.title)
+                                                .foregroundColor(.white)
+                                                .padding(20)
+                                                .background(Color(.red))
+                                                .clipShape(Circle())
+                                        })
                                         
-                                        Text(item.album_name)
-                                            .font(.title2)
-                                            .fontWeight(.heavy)
-                                            .foregroundColor(.white)
-                                        
-                                        Text(item.album_author)
-                                            .font(.none)
-                                            .fontWeight(.bold)
-                                            .foregroundColor(.white)
-                                    })
+                                        VStack(alignment: .leading, spacing: 5, content: {
+                                            Text(item.album_name)
+                                                .font(.title2)
+                                                .fontWeight(.heavy)
+                                                .foregroundColor(.white)
+                                            
+                                            Text(item.album_author)
+                                                .font(.none)
+                                                .fontWeight(.bold)
+                                                .foregroundColor(.white)
+                                        })
+                                    }
+                                    .padding()
                                 }
-                                .padding()
+                                .padding(.horizontal)
                             }
-                            .padding(.horizontal)
                         }
+                        .frame(height: 350)
+                        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                        .padding(.top, 20)
                     }
-                    .frame(height: 350)
-                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                    .padding(.top, 20)
                     
                     Text("Genres")
                         .font(.title)
@@ -113,7 +127,7 @@ struct SpotifyUI: View {
                     
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 15), count: 3), spacing: 20, content: {
                         
-                        ForEach(generes, id: \.self) { genre in
+                        ForEach(filteredGenres, id: \.self) { genre in
                             
                             Text(genre)
                                 .fontWeight(.semibold)
@@ -135,7 +149,7 @@ struct SpotifyUI: View {
                     
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 2), spacing: 10, content: {
                         
-                        ForEach(likedSongs) { song in
+                        ForEach(filteredLikedSongs) { song in
                             
                             GeometryReader { proxy in
                                 
@@ -159,12 +173,33 @@ struct SpotifyUI: View {
         }
         .background(Color(.systemGray6).ignoresSafeArea())
     }
+    
+    private func filterSongs(_ songs: [Song]) -> [Song] {
+        guard !searchText.isEmpty else { return songs }
+        return songs.filter {
+            $0.album_name.localizedCaseInsensitiveContains(searchText) ||
+            $0.album_author.localizedCaseInsensitiveContains(searchText)
+        }
+    }
 }
 
-struct SpotifyUI_Previews: PreviewProvider {
-    static var previews: some View {
-        SpotifyUI()
-            .preferredColorScheme(.dark)
+private struct SpotifyEmptyState: View {
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .font(.largeTitle)
+            Text("No Results")
+                .font(.headline)
+            Text("Try another search.")
+                .font(.subheadline)
+        }
+        .foregroundColor(.white.opacity(0.7))
+        .frame(maxWidth: .infinity)
     }
+}
+
+#Preview("Spotify - Dark") {
+    SpotifyUI()
+        .preferredColorScheme(.dark)
 }
 

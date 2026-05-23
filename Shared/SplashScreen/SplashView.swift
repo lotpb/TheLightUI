@@ -7,42 +7,42 @@
 
 import SwiftUI
 
-
 struct SplashView: View {
+    @State private var showProfile = false
+    
+    private let logoSize = CGSize(width: 128, height: 128)
+    private let profileImageName = "taylor_swift_profile"
+    
     var body: some View {
-        
-        SplashScreen(imageSize: CGSize(width: 128, height: 128)) {
-            
+        SplashScreen(imageSize: logoSize) {
             SplashHome()
-            
         } titleView: {
-            
             Text("TheLight")
                 .font(.system(size: 35).bold())
                 .foregroundColor(.white)
-            
         } logoView: {
-            
-            Image("taylor_swift_profile")
+            Image(profileImageName)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
         } navButtons: {
-            
             Button {
-                
+                showProfile.toggle()
             } label: {
-                Image("taylor_swift_profile")
+                Image(profileImageName)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 35, height: 35)
                     .clipShape(Circle())
             }
+            .accessibilityLabel("Profile")
+        }
+        .sheet(isPresented: $showProfile) {
+            UserFormUI()
         }
     }
 }
 
-struct SplashView_Previews: PreviewProvider {
-    static var previews: some View {
-        SplashView()
-    }
+#Preview("Splash - Dark") {
+    SplashView()
+        .preferredColorScheme(.dark)
 }

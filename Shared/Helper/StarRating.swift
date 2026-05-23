@@ -8,34 +8,44 @@
 import SwiftUI
 
 struct StarRating: View {
+    @Binding private var rating: Int
     
-    @State var rating: Int = 0
+    private let maxRating: Int
+    private let starSize: Font
+    
+    init(
+        rating: Binding<Int> = .constant(0),
+        maxRating: Int = 5,
+        starSize: Font = .largeTitle
+    ) {
+        _rating = rating
+        self.maxRating = maxRating
+        self.starSize = starSize
+    }
     
     var body: some View {
-        ZStack {
-            starsView
-                .overlay(
-                   overlayView.mask(starsView))
-        }
+        starsView
+            .overlay(overlayView.mask(starsView))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Rating")
+            .accessibilityValue("\(clampedRating) out of \(maxRating)")
     }
     
     private var overlayView: some View {
         GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                Rectangle()
-                    .foregroundColor(.yellow)
-                    .frame(width: CGFloat(rating) / 5 * geometry.size.width)
-            }
+            Rectangle()
+                .foregroundColor(.yellow)
+                .frame(width: ratingWidth(in: geometry.size.width), alignment: .leading)
         }
         .allowsHitTesting(false)
     }
     
     private var starsView: some View {
         HStack {
-            ForEach(1..<6) { index in
+            ForEach(1...maxRating, id: \.self) { index in
                 Image(systemName: "star.fill")
-                    .font(.largeTitle)
-                    .foregroundColor(Color.secondary)
+                    .font(starSize)
+                    .foregroundColor(.secondary)
                     .onTapGesture {
                         withAnimation(.easeOut) {
                             rating = index
@@ -44,10 +54,18 @@ struct StarRating: View {
             }
         }
     }
+    
+    private var clampedRating: Int {
+        min(max(rating, 0), maxRating)
+    }
+    
+    private func ratingWidth(in totalWidth: CGFloat) -> CGFloat {
+        guard maxRating > 0 else { return 0 }
+        return CGFloat(clampedRating) / CGFloat(maxRating) * totalWidth
+    }
 }
 
-struct StarRating_Previews: PreviewProvider {
-    static var previews: some View {
-        StarRating()
-    }
+#Preview("Star Rating") {
+    StarRating(rating: .constant(3))
+        .preferredColorScheme(.dark)
 }
