@@ -12,6 +12,8 @@ import Firebase
 @main
 struct TheLightUIApp: App {
     
+    @State private var showLaunch = true
+    
 //    init() {
 //        FirebaseApp.configure()
 //    }
@@ -20,11 +22,28 @@ struct TheLightUIApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .onAppear {
-                    /// This suppresses constraint warnings
-                    UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+            ZStack {
+                ContentView()
+                    .opacity(showLaunch ? 0 : 1)
+                    .animation(.easeInOut(duration: 0.35), value: showLaunch)
+
+                if showLaunch {
+                    LaunchScreenView()
+                        .transition(.opacity)
+                        .animation(.easeInOut(duration: 0.35), value: showLaunch)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                                withAnimation {
+                                    showLaunch = false
+                                }
+                            }
+                        }
                 }
+            }
+            .onAppear {
+                /// This suppresses constraint warnings
+                UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+            }
         }
     }
     
