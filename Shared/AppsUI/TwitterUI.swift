@@ -8,47 +8,55 @@
 
 import SwiftUI
 
+@MainActor
 struct TwitterUI: View {
-    @Environment(\.colorScheme) var colorScheme
-    @State var offset: CGFloat = 0
-    @State var currentTab = "Tweets"
-    @Namespace var animation
-    @State var tabBarOffset: CGFloat = 0
-    @State var titleOffset: CGFloat = 0
-    let maxWidthForIpad: CGFloat = 700
+    fileprivate enum Layout {
+        static let headerHeight: CGFloat = 180
+        static let navigationBleedHeight: CGFloat = 120
+        static let collapsedHeaderOffset: CGFloat = 80
+        static let tabBarPinOffset: CGFloat = 90
+        static let profileImageSize: CGFloat = 75
+        static let compactProfileImageSize: CGFloat = 55
+        static let maxContentWidth: CGFloat = 700
+        static let tweetImageHeight: CGFloat = 250
+    }
+
+    private let tabs = ["Tweets", "Tweets & Likes", "Media", "Likes"]
+
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var offset: CGFloat = 0
+    @State private var currentTab = "Tweets"
+    @State private var tabBarOffset: CGFloat = 0
+    @Namespace private var animation
     
     var body: some View {
         ScrollView(.vertical, showsIndicators: false, content: {
             VStack(spacing: 15) {
-                GeometryReader{ proxy -> AnyView in
+                GeometryReader { proxy in
                     let minY = proxy.frame(in: .global).minY
-                    DispatchQueue.main.async {
-                        self.offset = minY
+                    ZStack {
+                        headerGradient
+                        //Text("TheLight")
+                        @AppStorage(SettingsUI.isCompanyNameKey) var companyName: String = "Main Menu"
+                        Text(companyName).font(.system(size: 40, weight: .heavy))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.9)
+                            .padding(.top, 40)
+                        
+                        BlurViewUI(style: .systemChromeMaterialDark)
+                            .opacity(blurViewOpacity())
                     }
-                    return AnyView(
-                        ZStack {
-                            RadialGradient(
-                                gradient: Gradient(colors: [Color(#colorLiteral(red: 0.3647058904, green: 0.06666667014, blue: 0.9686274529, alpha: 1)), Color(#colorLiteral(red: 0.06274510175, green: 0, blue: 0.1921568662, alpha: 1))]),
-                                center: .center,
-                                startRadius: /*@START_MENU_TOKEN@*/5/*@END_MENU_TOKEN@*/,
-                                endRadius: /*@START_MENU_TOKEN@*/500/*@END_MENU_TOKEN@*/)
-                                .ignoresSafeArea()
-                            
-                            Text("TheLight Software")
-                                .font(.title)
-                                .fontWeight(.heavy)
-                                .foregroundColor(.white)
-                                .padding(.top, 20)
-                            
-                            BlurViewUI(style: .systemChromeMaterialDark)
-                                .opacity(blurViewOpacity())
-                        }
-                            .clipped()
-                            .frame(height: minY > 0 ? 180 + minY : nil)
-                            .offset(y: minY > 0 ? -minY : -minY < 80 ? 0 : -minY - 80)
-                    )
+                    .clipped()
+                    .frame(height: minY > 0 ? Layout.headerHeight + minY : nil)
+                    .offset(y: minY > 0 ? -minY : -minY < Layout.collapsedHeaderOffset ? 0 : -minY - Layout.collapsedHeaderOffset)
+                    .onAppear {
+                        offset = minY
+                    }
+                    .onChange(of: minY) { newValue in
+                        offset = newValue
+                    }
                 }
-                .frame(height: 180)
+                .frame(height: Layout.headerHeight)
                 .zIndex(1)
                 
                 VStack {
@@ -56,7 +64,7 @@ struct TwitterUI: View {
                         Image("taylor_swift_profile")
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .frame(width: 75, height: 75)
+                            .frame(width: Layout.profileImageSize, height: Layout.profileImageSize)
                             .clipShape(Circle())
                             .padding(8)
                             .background(colorScheme == .dark ? Color.black : Color.white)
@@ -66,16 +74,17 @@ struct TwitterUI: View {
                         
                         Spacer()
                         
-                        Button(action: {
-                           //UserFormUI()
-                        }, label: {
+                        Button {
+                        } label: {
                             Text("Edit Profile")
                                 .foregroundColor(.indigo)
-                                .padding(.vertical,10)
+                                .padding(.vertical, 10)
                                 .padding(.horizontal)
-                                .background(Capsule()
-                                .stroke(Color.indigo, lineWidth: 1.5))
-                        })
+                                .background(
+                                    Capsule()
+                                        .stroke(Color.indigo, lineWidth: 1.5)
+                                )
+                        }
                     }
                     .padding(.top, -25)
                     .padding(.bottom, -10)
@@ -113,10 +122,9 @@ struct TwitterUI: View {
                     VStack(spacing: 0) {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 0) {
-                                TabButton(title: "Tweets", currentTab: $currentTab, animation: animation)
-                                TabButton(title: "Tweets & Likes", currentTab: $currentTab, animation: animation)
-                                TabButton(title: "Media", currentTab: $currentTab, animation: animation)
-                                TabButton(title: "Likes", currentTab: $currentTab, animation: animation)
+                                ForEach(tabs, id: \.self) { tab in
+                                    TabButton(title: tab, currentTab: $currentTab, animation: animation)
+                                }
                             }
                         }
                         
@@ -124,28 +132,30 @@ struct TwitterUI: View {
                     }
                     .padding(.top, 30)
                     .background(colorScheme == .dark ? Color.black : Color.white)
-                    .offset(y: tabBarOffset < 90 ? -tabBarOffset + 90 : 0)
+                    .offset(y: tabBarOffset < Layout.tabBarPinOffset ? -tabBarOffset + Layout.tabBarPinOffset : 0)
                     .overlay(
-                        GeometryReader{reader -> Color in
+                        GeometryReader { reader in
                             let minY = reader.frame(in: .global).minY
-                            DispatchQueue.main.async {
-                                self.tabBarOffset = minY
-                            }
-                            return Color.clear
+                            Color.clear
+                                .onAppear {
+                                    tabBarOffset = minY
+                                }
+                                .onChange(of: minY) { newValue in
+                                    tabBarOffset = newValue
+                                }
                         }
                             .frame(width: 0, height: 0)
                         ,alignment: .top
                     )
                     .zIndex(1)
                     
-                    VStack(spacing: 18){
-                        // Sample Tweets...
+                    VStack(spacing: 18) {
                         TweetView(tweet: "New iPhone 12 Purple Review By iJustine 🥳🥳🥳🥳.......", tweetImage: "ZuckBuddist")
                         
                         Divider()
                         
-                        ForEach(1...20,id: \.self){_ in
-                            TweetView(tweet: sampleText)
+                        ForEach(1...20, id: \.self) { _ in
+                            TweetView(tweet: TweetView.sampleText)
                             Divider()
                         }
                     }
@@ -153,47 +163,62 @@ struct TwitterUI: View {
                     .zIndex(0)
                 }
                 .padding(.horizontal)
-                .zIndex(-offset > 80 ? 0 : 1)
+                .zIndex(-offset > Layout.collapsedHeaderOffset ? 0 : 1)
             }
             //.preferredColorScheme(.light)
-            //.background(colorScheme == .dark ? Color.black : Color.white)
+            .background(colorScheme == .dark ? Color.black : Color.white)
         })
-            .frame(maxWidth: maxWidthForIpad)
+            .frame(maxWidth: Layout.maxContentWidth)
+            .background(alignment: .top) {
+                headerGradient
+                    .frame(height: Layout.headerHeight + Layout.navigationBleedHeight)
+                    .ignoresSafeArea(edges: .top)
+            }
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .ignoresSafeArea(.all, edges: .top)
     }
-    
-    func getOffset()->CGFloat {
-        let progress = (-offset / 80) * 20
-        return progress <= 20 ? progress : 20
+
+    private var headerGradient: some View {
+        RadialGradient(
+            gradient: Gradient(colors: [Color(#colorLiteral(red: 0.3647058904, green: 0.06666667014, blue: 0.9686274529, alpha: 1)), Color(#colorLiteral(red: 0.06274510175, green: 0, blue: 0.1921568662, alpha: 1))]),
+            center: .center,
+            startRadius: 5,
+            endRadius: 500
+        )
     }
     
-    func getScale()->CGFloat {
-        let progress = -offset / 80
-        let scale = 1.8 - (progress < 1.0 ? progress : 1)
-        return scale < 1 ? scale : 1
+    private func getOffset() -> CGFloat {
+        let progress = (-offset / Layout.collapsedHeaderOffset) * 20
+        return min(progress, 20)
     }
     
-    func blurViewOpacity()->Double {
-        let progress = -(offset + 80) / 150
-        return Double(-offset > 80 ? progress : 0)
+    private func getScale() -> CGFloat {
+        let progress = -offset / Layout.collapsedHeaderOffset
+        let scale = 1.8 - min(progress, 1)
+        return min(scale, 1)
+    }
+    
+    private func blurViewOpacity() -> Double {
+        let progress = -(offset + Layout.collapsedHeaderOffset) / 150
+        return Double(-offset > Layout.collapsedHeaderOffset ? progress : 0)
     }
 }
 
-struct TwitterUI_Previews: PreviewProvider {
-    static var previews: some View {
-        TwitterUI()
-    }
+@available(iOS 17.0, *)
+#Preview("Twitter UI") {
+    TwitterUI()
 }
 
 struct TabButton: View {
     
-    var title: String
+    let title: String
     @Binding var currentTab: String
-    var animation: Namespace.ID
+    let animation: Namespace.ID
     
     var body: some View {
         Button {
-            withAnimation {
+            withAnimation(.easeInOut(duration: 0.25)) {
                 currentTab = title
             }
         } label: {
@@ -219,16 +244,22 @@ struct TabButton: View {
 }
 
 struct TweetView: View {
-    var tweet: String
-    var tweetImage: String?
+    static let sampleText = "Lorem ipsum, or lipsum as it is sometimes known, is dummy text used in laying out print, graphic or web designs. The passage is attributed to an unknown typesetter in the 15th century who is thought to have scrambled parts of Cicero's De Finibus Bonorum et Malorum for use in a type specimen book."
+    
+    let tweet: String
+    let tweetImage: String?
+    
+    init(tweet: String, tweetImage: String? = nil) {
+        self.tweet = tweet
+        self.tweetImage = tweetImage
+    }
     
     var body: some View {
-        //CustomColor.linenColor
         HStack(alignment: .top, spacing: 10, content: {
             Image("taylor_swift_profile")
                 .resizable()
                 .aspectRatio(contentMode: .fill)
-                .frame(width: 55, height: 55)
+                .frame(width: TwitterUI.Layout.compactProfileImageSize, height: TwitterUI.Layout.compactProfileImageSize)
                 .clipShape(Circle())
             
             VStack(alignment: .leading, spacing: 10, content: {
@@ -246,19 +277,17 @@ struct TweetView: View {
                 Text(tweet)
                     .frame(maxHeight: 100, alignment: .top)
                 if let image = tweetImage {
-                    GeometryReader{proxy in
+                    GeometryReader { proxy in
                         Image(image)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .frame(width: proxy.frame(in: .global).width, height: 250)
-                            .cornerRadius(15)
+                            .frame(width: proxy.size.width, height: TwitterUI.Layout.tweetImageHeight)
+                            .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
                     }
-                    .frame(height: 250)
+                    .frame(height: TwitterUI.Layout.tweetImageHeight)
                 }
             })
         })
     }
 }
-
-var sampleText = "Lorem ipsum, or lipsum as it is sometimes known, is dummy text used in laying out print, graphic or web designs. The passage is attributed to an unknown typesetter in the 15th century who is thought to have scrambled parts of Cicero's De Finibus Bonorum et Malorum for use in a type specimen book."
 
