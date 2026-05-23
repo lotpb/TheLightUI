@@ -5,142 +5,152 @@
 //  Created by Peter Balsamo on 1/15/22.
 //
 
-import Foundation
-import MapKit
 import CoreLocation
-import CoreLocationUI
-import Combine
+import MapKit
 
-
-class LocationManager: NSObject, ObservableObject {
-    
+final class LocationManager: NSObject, ObservableObject {
     @Published var mapView = MKMapView()
-    // Region
-    @Published var region: MKCoordinateRegion = MKCoordinateRegion()
-    // Map Type
+    @Published var region = MKCoordinateRegion.defaultRegion
     @Published var mapType: MKMapType = .standard
-    ///placeListViewModel
     @Published var location: CLLocation?
     @Published var locationStatus: CLAuthorizationStatus = .notDetermined
-    ///placemark
     @Published var currentPlacemark: CLPlacemark?
-    ///requestLocateInfo
-    private var isLocated = false
     
-    var manager = CLLocationManager()
+    private let manager = CLLocationManager()
+    private let geocoder = CLGeocoder()
+    private let regionDistance: CLLocationDistance = 10000
     
-    
-    
-    //    var currentLocation: CLLocationCoordinate2D {
-    //        guard let location = manager.location else {
-    //            return DefaultLocation
-    //        }
-    //        return location.coordinate
-    //    }
-    //
-    
-    ///default NYC
-    //let DefaultLocation = CLLocationCoordinate2D(latitude: 40.71, longitude: -74)
-    
-    public override init() {
+    override init() {
         super.init()
-        locationStatus = manager.authorizationStatus
-        manager.delegate = self
-        manager.activityType = .automotiveNavigation
-        manager.desiredAccuracy = kCLLocationAccuracyBest
-        //manager.allowsBackgroundLocationUpdates = true
-        manager.distanceFilter = kCLDistanceFilterNone
-        manager.requestAlwaysAuthorization()
-        manager.pausesLocationUpdatesAutomatically = true
-        
-        ///startUpdatingLocation
+        configureLocationManager()
         requestLocateInfo()
-        
-        ///MapUI BottomSheet
-        fetchGeocoder(for: manager.location)
     }
     
     func requestLocateInfo() {
-            isLocated = false
-            manager.startUpdatingLocation()
-        }
+        handleAuthorizationStatus(manager.authorizationStatus)
+    }
     
     func updateMapType() {
-        if mapType == .standard {
-            mapType = .hybrid
-        } else {
-            mapType = .standard
-        }
-        self.mapView.mapType = mapType
+        mapType = mapType == .standard ? .hybrid : .standard
+        mapView.mapType = mapType
     }
     
     var statusString: String {
-        
         switch locationStatus {
         case .notDetermined: return "notDetermined"
         case .authorizedWhenInUse: return "authorizedWhenInUse"
         case .authorizedAlways: return "authorizedAlways"
         case .restricted: return "restricted"
         case .denied: return "denied"
-        default: return "unknown"
+        @unknown default: return "unknown"
         }
     }
     
-    ///MapUI BottomSheet
     func fetchGeocoder(for location: CLLocation?) {
-        guard let location = location else { return }
-        let geocoder = CLGeocoder()
-        geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
-            self.currentPlacemark = placemarks?.first
+        guard let location else { return }
+        
+        geocoder.cancelGeocode()
+        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
+            if let error {
+                print("Error reverse geocoding location: \(error.localizedDescription)")
+            }
+            
+            DispatchQueue.main.async {
+                self?.currentPlacemark = placemarks?.first
+            }
         }
+    }
+    
+    func focusLocation() {
+        guard let location else { return }
+        
+        let newRegion = makeRegion(for: location)
+        region = newRegion
+        mapView.setRegion(newRegion, animated: true)
+        mapView.setVisibleMapRect(mapView.visibleMapRect, animated: true)
+    }
+    
+    func requestLocation() {
+        switch manager.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            manager.requestLocation()
+        case .notDetermined:
+            manager.requestWhenInUseAuthorization()
+        case .denied, .restricted:
+            stopUpdating()
+        @unknown default:
+            stopUpdating()
+        }
+    }
+    
+    func startUpdating() {
+        requestLocateInfo()
+    }
+    
+    func stopUpdating() {
+        manager.stopUpdatingLocation()
+    }
+    
+    private func configureLocationManager() {
+        locationStatus = manager.authorizationStatus
+        manager.delegate = self
+        manager.activityType = .automotiveNavigation
+        manager.desiredAccuracy = kCLLocationAccuracyBest
+        manager.distanceFilter = kCLDistanceFilterNone
+        manager.pausesLocationUpdatesAutomatically = true
+    }
+    
+    private func handleAuthorizationStatus(_ status: CLAuthorizationStatus) {
+        updateAuthorizationStatus(status)
+        
+        switch status {
+        case .notDetermined:
+            manager.requestWhenInUseAuthorization()
+        case .authorizedAlways, .authorizedWhenInUse:
+            manager.startUpdatingLocation()
+        case .denied, .restricted:
+            stopUpdating()
+        @unknown default:
+            stopUpdating()
+        }
+    }
+    
+    private func updateAuthorizationStatus(_ status: CLAuthorizationStatus) {
+        DispatchQueue.main.async {
+            self.locationStatus = status
+        }
+    }
+    
+    private func makeRegion(for location: CLLocation) -> MKCoordinateRegion {
+        MKCoordinateRegion(
+            center: location.coordinate,
+            latitudinalMeters: regionDistance,
+            longitudinalMeters: regionDistance
+        )
     }
 }
 
 extension LocationManager: CLLocationManagerDelegate {
-    
-    // Focus Location
-    func focusLocation() {
-        //guard let _ = region else { return }
-        region = MKCoordinateRegion(center: location!.coordinate, latitudinalMeters: 10000, longitudinalMeters: 10000)
-        self.mapView.setRegion(region, animated: true)
-        self.mapView.setVisibleMapRect(self.mapView.visibleMapRect, animated: true)
-    }
-    
-    func requestLocation() {
-        manager.requestLocation()
-    }
-    
-    func startUpdating() {
-        print("****** Location started updated")
-        manager.startUpdatingLocation()
-    }
-    
-    func stopUpdating() {
-        print("***** Location updates stopping")
-        manager.stopUpdatingLocation()
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        handleAuthorizationStatus(manager.authorizationStatus)
     }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        locationStatus = status
-        //print(#function, statusString)
+        handleAuthorizationStatus(status)
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let latestLocation = locations.last else { return }
+        let newRegion = makeRegion(for: latestLocation)
         
-        guard let location = locations.last else { return }
-        print("****** Location updated")
         DispatchQueue.main.async {
-            self.location = manager.location
-            self.region = MKCoordinateRegion(center: location.coordinate, latitudinalMeters: 10000, longitudinalMeters: 10000)
-            //self.mapView.setRegion(self.region, animated: true)
-            //self.mapView.setVisibleMapRect(self.mapView.visibleMapRect, animated: true)
-            //print(#function, location)
+            self.location = latestLocation
+            self.region = newRegion
+            self.fetchGeocoder(for: latestLocation)
         }
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("error getting location \(error.localizedDescription)")
+        print("Error getting location: \(error.localizedDescription)")
     }
 }
-
-

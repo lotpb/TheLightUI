@@ -7,37 +7,55 @@
 
 import SwiftUI
 
-///LoginView, CarouselBody
 struct ScrollViewOffsetModifier: ViewModifier {
-
-    var anchorPoint: Anchor = .Top
+    var anchorPoint: ScrollOffsetAnchor = .top
     @Binding var offset: CGFloat
-
+    
     func body(content: Content) -> some View {
         content
-            .overlay(
-                GeometryReader { proxy -> Color in
-                let frame = proxy.frame(in: .global)
-                DispatchQueue.main.async {
-                    switch anchorPoint {
-                    case .Top:
-                        offset = frame.minY
-                    case .bottom:
-                        offset = frame.maxY
-                    case .leading:
-                        offset = frame.minX
-                    case .trailing:
-                        offset = frame.maxX
-                    }
+            .background(
+                GeometryReader { proxy in
+                    Color.clear.preference(
+                        key: ScrollOffsetPreferenceKey.self,
+                        value: value(from: proxy.frame(in: .global))
+                    )
                 }
-                return Color.clear
-            })
+            )
+            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+                offset = value
+            }
+    }
+    
+    private func value(from frame: CGRect) -> CGFloat {
+        switch anchorPoint {
+        case .top:
+            return frame.minY
+        case .bottom:
+            return frame.maxY
+        case .leading:
+            return frame.minX
+        case .trailing:
+            return frame.maxX
+        }
     }
 }
 
-enum Anchor {
-    case Top
+private struct ScrollOffsetPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
+enum ScrollOffsetAnchor {
+    case top
     case bottom
     case leading
     case trailing
+    
+    @available(*, deprecated, renamed: "top")
+    static var Top: ScrollOffsetAnchor { .top }
 }
+
+typealias Anchor = ScrollOffsetAnchor

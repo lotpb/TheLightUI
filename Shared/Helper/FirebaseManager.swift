@@ -5,28 +5,30 @@
 //  Created by Peter Balsamo on 11/17/21.
 //
 
-import Foundation
-import Firebase
+import FirebaseAuth
+import FirebaseCore
+import FirebaseFirestore
 import FirebaseStorage
 
-///Chat LoginView
-class FirebaseManager: NSObject {
-
+/// Shared Firebase services for chat, login, and storage flows.
+final class FirebaseManager: NSObject {
+    static let shared = FirebaseManager()
+    
     let auth: Auth
     let storage: Storage
     let firestore: Firestore
-
+    
     var currentUser: UserModel?
-
-    static let shared = FirebaseManager()
-
-    override init() {
-        //FirebaseApp.configure()
-
-        self.auth = Auth.auth()
-        self.storage = Storage.storage()
-        self.firestore = Firestore.firestore()
-
+    
+    private override init() {
+        if FirebaseApp.app() == nil {
+            FirebaseApp.configure()
+        }
+        
+        auth = Auth.auth()
+        storage = Storage.storage()
+        firestore = Firestore.firestore()
+        
         super.init()
     }
 }
