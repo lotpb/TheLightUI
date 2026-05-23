@@ -16,19 +16,16 @@ class ListViewModel: ObservableObject {
         }
     }
     
-    let itemsKey: String = "items_liat"
+    private let itemsKey = "items_list"
+    private let legacyItemsKey = "items_liat"
     
     init() {
         getItems()
     }
     
     func getItems() {
-        guard
-            let data = UserDefaults.standard.data(forKey: itemsKey),
-            let savedItems = try? JSONDecoder().decode([ItemModel].self, from: data)
-        else { return }
-        
-        self.items = savedItems
+        guard let savedItems = loadSavedItems() else { return }
+        items = savedItems
     }
     
     func deleteItem(at indexSet: IndexSet) {
@@ -45,16 +42,21 @@ class ListViewModel: ObservableObject {
     }
 
     func updateItem(item: ItemModel) {
-        
-        if let index = items.firstIndex (where: { $0.id == item.id }) {
+        if let index = items.firstIndex(where: { $0.id == item.id }) {
             items[index] = item.updateCompletion()
         }
     }
     
-    func saveItems() {
+    private func saveItems() {
         if let encodedData = try? JSONEncoder().encode(items) {
             UserDefaults.standard.set(encodedData, forKey: itemsKey)
         }
     }
     
+    private func loadSavedItems() -> [ItemModel]? {
+        let defaults = UserDefaults.standard
+        let data = defaults.data(forKey: itemsKey) ?? defaults.data(forKey: legacyItemsKey)
+        guard let data else { return nil }
+        return try? JSONDecoder().decode([ItemModel].self, from: data)
+    }
 }

@@ -8,8 +8,11 @@
 import Foundation
 
 extension URL {
-    func load<T: Decodable>() throws -> T {
+    func load<T: Decodable>(
+        _ type: T.Type = T.self,
+        decoder: JSONDecoder = JSONDecoder()
+    ) throws -> T {
         let data = try Data(contentsOf: self)
-        return try JSONDecoder().decode(T.self, from: data)
+        return try decoder.decode(type, from: data)
     }
 }

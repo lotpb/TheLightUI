@@ -10,10 +10,8 @@ import SwiftUI
 
 struct ListView: View {
     
-    @StateObject var listViewModel : ListViewModel = ListViewModel()
-    //@EnvironmentObject var listViewModel: ListViewModel
+    @StateObject private var listViewModel = ListViewModel()
     @State private var isCompleted = false
-    @State private var isMenu = false
 
     var body: some View {
         
@@ -27,23 +25,6 @@ struct ListView: View {
                         Text("\(countItem) To Do's")
                             .font(.body)
                             .foregroundColor(.gray)
-                            .toolbar {
-                                ToolbarItem(placement: .automatic) {
-                                    Menu {
-                                        Picker(selection: $isMenu, label: Text("Show List Info")) {
-                                            Label("Share List", systemImage: "square.and.arrow.up").tag(0)
-                                            Label("Sort By", systemImage: "folder").tag(1)
-                                            Label("Print", systemImage: "printer").tag(2)
-                                            Button(role: .destructive, action: { }) {
-                                                    Label("Delete List", systemImage: "trash").tag(3)
-                                            }
-                                        }
-                                    }
-                                    label: {
-                                        Label("", systemImage: "bell")
-                                    }
-                                }
-                            }
 
                     }
                     ForEach(listViewModel.items) { item  in
@@ -58,17 +39,48 @@ struct ListView: View {
                     .onDelete(perform: listViewModel.deleteItem)
                     .onMove(perform: listViewModel.moveItem)
                 }
-                .listStyle(PlainListStyle())
+                .listStyle(.plain)
                 .refreshable {
-                    self.listViewModel.getItems()
+                    listViewModel.getItems()
                 }
             }
         }
         .navigationTitle("To Do List ✍️ ")
-        .navigationBarItems(
-            leading: EditButton(),
-            trailing: NavigationLink("Add",
-            destination: AddView().environmentObject(ListViewModel())))
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                EditButton()
+            }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                NavigationLink("Add") {
+                    AddView()
+                        .environmentObject(listViewModel)
+                }
+            }
+            
+            ToolbarItem(placement: .automatic) {
+                Menu {
+                    Button {
+                    } label: {
+                        Label("Share List", systemImage: "square.and.arrow.up")
+                    }
+                    Button {
+                    } label: {
+                        Label("Sort By", systemImage: "folder")
+                    }
+                    Button {
+                    } label: {
+                        Label("Print", systemImage: "printer")
+                    }
+                    Button(role: .destructive) {
+                    } label: {
+                        Label("Delete List", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+            }
+        }
     }
     
 }
@@ -76,9 +88,8 @@ struct ListView: View {
 
 struct ListView_Previews: PreviewProvider {
     static var previews: some View {
-        NavigationView {
+        NavigationStack {
             ListView()
         }
-        .environmentObject(ListViewModel())
     }
 }

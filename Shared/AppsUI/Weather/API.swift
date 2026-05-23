@@ -16,7 +16,20 @@ enum API {
         let longitude: CLLocationDegrees
         
         func url() -> URL {
-            guard let url = URL(string: "https://api.openweathermap.org/data/2.5/weather?lat=\(latitude)&lon=\(longitude)&appid=\(apiKey)&units=metric") else { fatalError("Missing URL") }
+            var components = URLComponents()
+            components.scheme = "https"
+            components.host = "api.openweathermap.org"
+            components.path = "/data/2.5/weather"
+            components.queryItems = [
+                URLQueryItem(name: "lat", value: String(latitude)),
+                URLQueryItem(name: "lon", value: String(longitude)),
+                URLQueryItem(name: "appid", value: apiKey),
+                URLQueryItem(name: "units", value: "imperial")
+            ]
+            
+            guard let url = components.url else {
+                fatalError("Missing weather URL")
+            }
             return url
         }
         

@@ -58,7 +58,7 @@ extension WeatherRow {
             switch self {
             case .minTemp(let value): return "\(value.string())" + "°"
             case .maxTemp(let value): return "\(value.string())" + "°"
-            case .wind(let value): return "\(value.string())" + "m/s"
+            case .wind(let value): return "\(value.string())" + "mph"
             case .humidity(let value): return "\(value.string())" + "%"
             }
         }

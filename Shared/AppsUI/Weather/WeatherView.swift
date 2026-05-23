@@ -35,8 +35,8 @@ struct WeatherView: View {
                         
                         Spacer()
                         
-                        Text(weather.main.feels_like.string() + "°")
-                            .font(.system(size: 100))
+                        Text(weather.main.temp.string() + "°")
+                            .font(.system(size: 80))
                             .fontWeight(.bold)
                             .padding()
                     }
@@ -83,7 +83,7 @@ struct WeatherView: View {
                 .padding(.bottom, 20)
                 .foregroundColor(Color.background)
                 .background(.white)
-                .cornerRadius(20, corners: [.topLeft, .topRight])
+                .clipShape(CustomCorners(corners: [.topLeft, .topRight], radius: 20))
             }
         }
         .edgesIgnoringSafeArea(.bottom)
@@ -98,19 +98,3 @@ struct WeatherView_Previews: PreviewProvider {
         WeatherView(weather: try! Bundle.main.url(forResource: "weatherData", withExtension: "json")!.load())
     }
 }
-
-//private extension View {
-//    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-//        clipShape(RoundedCorner(radius: radius, corners: corners))
-//    }
-//}
-//
-//private struct RoundedCorner: Shape {
-//    var radius: CGFloat = .infinity
-//    var corners: UIRectCorner = .allCorners
-//    
-//    func path(in rect: CGRect) -> Path {
-//        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
-//        return Path(path.cgPath)
-//    }
-//}

@@ -7,7 +7,6 @@
 
 import SwiftUI
 import CoreLocation
-import Combine
 
 @available(iOS 15.0, *)
 struct WeatherUI: View {
@@ -22,7 +21,7 @@ struct WeatherUI: View {
                     WelcomeView(requestLocation: { viewModel.requestLocation() })
                 case .coordinatesFetched(let coordinates):
                     VStack {
-                        Text("Your coordinates are: \(coordinates.longitude), \(coordinates.latitude)")
+                        Text("Your coordinates are: \(coordinates.latitude), \(coordinates.longitude)")
                         ProgressView()
                     }
                     .task {
