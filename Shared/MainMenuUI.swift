@@ -41,7 +41,7 @@ struct MainMenuUI: View {
     
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 
                 MainTopView().padding(.top, 25)
@@ -57,8 +57,8 @@ struct MainMenuUI: View {
                     Section(header: Text("Data").foregroundColor(self.color == 0 ? Color.purple : Color.orange)) {
                         NavigationLink("Leads", destination: CustomerUI(viewModel: CustomerData()))
                         NavigationLink("Customers", destination: CustomerUI(viewModel: CustomerData())).navigationTitle("")
-                        NavigationLink("Vendors", destination: CustomerUI(viewModel: CustomerData()))
-                        NavigationLink("Employee", destination: CustomerUI(viewModel: CustomerData()))
+                        NavigationLink("Vendors", destination: GradientUI())
+                        NavigationLink("Employee", destination: GradientTextUI())
                         NavigationLink("To Do", destination: ListView())
                     }
                     
@@ -104,7 +104,6 @@ struct MainMenuUI: View {
             }
             .navigationTitle("Main Menu")
             .navigationBarTitleDisplayMode(.inline)
-            .navigationViewStyle(StackNavigationViewStyle())
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
@@ -112,27 +111,29 @@ struct MainMenuUI: View {
                     }) {
                         Label("Action", systemImage: "square.and.arrow.up")
                     }
-                    .actionSheet(isPresented: $isShowActionsheet, content: {
-                        let action1 = ActionSheet.Button.default(Text("Email Support")) {
-                            actionSheetContent = .first; showEmailComposer = true //showActionSheet = true
+                    .confirmationDialog("Pick a menu item", isPresented: $isShowActionsheet, titleVisibility: .visible) {
+                        Button("Email Support") {
+                            actionSheetContent = .first
+                            showEmailComposer = true
                         }
-                        let action2 = ActionSheet.Button.default(Text("Settings")) {
-                            actionSheetContent = .second; showActionSheet = true
+                        Button("Settings") {
+                            actionSheetContent = .second
+                            showActionSheet = true
                         }
-                        let action3 = ActionSheet.Button.default(Text("Directions")) {
-                            actionSheetContent = .third; showActionSheet = true
+                        Button("Directions") {
+                            actionSheetContent = .third
+                            showActionSheet = true
                         }
-                        let action4 = ActionSheet.Button.default(Text("Users")) {
-                            actionSheetContent = .forth; showActionSheet = true
+                        Button("Users") {
+                            actionSheetContent = .forth
+                            showActionSheet = true
                         }
-                        let action5 = ActionSheet.Button.default(Text("Membership Card")) {
-                            actionSheetContent = .fifth; showActionSheet = true
+                        Button("Membership Card") {
+                            actionSheetContent = .fifth
+                            showActionSheet = true
                         }
-                        let action6 = Alert.Button
-                            .cancel()
-                        
-                        return ActionSheet(title: Text("Pick a menu item"), buttons: [action1, action2, action3, action4, action5, action6])
-                    })
+                        Button("Cancel", role: .cancel) { }
+                    }
                     .sheet(isPresented: $showActionSheet, onDismiss: nil) {
                         switch actionSheetContent {
                         case .first: SettingView()
@@ -164,14 +165,14 @@ struct MainMenuUI: View {
                     }
                 }
             }
-            .actionSheet(isPresented: $showingLogOut) {
-                .init(title: Text("Settings"), message: Text("What do you want to do?"), buttons: [
-                    .destructive(Text("Sign Out"), action: {
-                        print("handle sign out")
-                        handleSignOut()
-                    }),
-                    .cancel()
-                ])
+            .confirmationDialog("Settings", isPresented: $showingLogOut, titleVisibility: .visible) {
+                Button("Sign Out", role: .destructive) {
+                    print("handle sign out")
+                    handleSignOut()
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("What do you want to do?")
             }
             .fullScreenCover(isPresented: $isUserCurrentlyLoggedOut, onDismiss: nil) {
                 LoginView(didCompleteLoginProcess: {

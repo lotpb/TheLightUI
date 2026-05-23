@@ -10,7 +10,7 @@ import SwiftUI
 struct SideMenuUI: View {
     
     @Binding var selectedTab: String
-    @Namespace var animation
+    @Namespace private var animation
     
     var body: some View {
         
@@ -33,8 +33,6 @@ struct SideMenuUI: View {
                     .foregroundColor(.white)
                 
                 Button {
-                    
-                    
                 } label: {
                     
                     Text("View Profile")
@@ -44,18 +42,18 @@ struct SideMenuUI: View {
                     
                 }
                 
-                // tab Buttons
-                VStack(alignment: .leading,spacing: 15) {
+                // Tab buttons
+                VStack(alignment: .leading, spacing: 15) {
                     
-                    SideMenuBtn(image: "house", title: "Home", selectedTab: $selectedTab, aimation: animation)
+                    SideMenuBtn(image: "house", title: "Home", selectedTab: $selectedTab, animation: animation)
                     
-                    SideMenuBtn(image: "clock.arrow.circlepath", title: "Histories", selectedTab: $selectedTab, aimation: animation)
+                    SideMenuBtn(image: "clock.arrow.circlepath", title: "Histories", selectedTab: $selectedTab, animation: animation)
                     
-                    SideMenuBtn(image: "bell.badge", title: "Notifications", selectedTab: $selectedTab, aimation: animation)
+                    SideMenuBtn(image: "bell.badge", title: "Notifications", selectedTab: $selectedTab, animation: animation)
                     
-                    SideMenuBtn(image: "gearshape.fill", title: "Settings", selectedTab: $selectedTab, aimation: animation)
+                    SideMenuBtn(image: "gearshape.fill", title: "Settings", selectedTab: $selectedTab, animation: animation)
                     
-                    SideMenuBtn(image: "questionmark.circle", title: "Help", selectedTab: $selectedTab, aimation: animation)
+                    SideMenuBtn(image: "questionmark.circle", title: "Help", selectedTab: $selectedTab, animation: animation)
                     
                 }
                 .padding(.leading, -15)
@@ -64,8 +62,7 @@ struct SideMenuUI: View {
                 Spacer()
                 
                 VStack(alignment: .leading, spacing: 8) {
-                                            
-                    SideMenuBtn(image: "arrow.right", title: "Log Out", selectedTab: .constant(""), aimation: animation)
+                    SideMenuBtn(image: "arrow.right", title: "Log Out", selectedTab: .constant(""), animation: animation)
                         .padding(.leading, -15)
                     
                     Text("App version 1.2.34")

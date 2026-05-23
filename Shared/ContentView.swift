@@ -7,15 +7,10 @@
 
 import SwiftUI
 
-@available(iOS 16.0, *)
 struct ContentView: View {
     @State private var selection = 0
     
     var body: some View {
-        
-        //MainView()
-        
-        
         ZStack(alignment: .bottom) {
             TabView(selection: $selection) {
                 MainMenuUI()
@@ -31,18 +26,19 @@ struct ContentView: View {
                 TwitterUI()
                     .tag(5)
             }
-            .tabViewStyle(DefaultTabViewStyle())
             Divider()
             TabBarView(selection: $selection)
         }
+        .background(Color.red)
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .ignoresSafeArea(.all, edges: .top)
     }
 }
 
-@available(iOS 16.0, *)
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+            .preferredColorScheme(.dark)
     }
 }
 
@@ -51,48 +47,51 @@ struct TabBarView: View {
     @Namespace private var currentTab
     
     var body: some View {
-        HStack {
-            ForEach(tabs.indices, id: \.self) { index in
-                GeometryReader { geometry in
-                    VStack(spacing: 4) {
-                        if selection == index {
-                            Color(.label)
-                                .frame(height: 2)
-                                .offset(y: -1)
-                                .matchedGeometryEffect(id: "currentTab", in: currentTab)
-                        }
-                        
-                        if tabs[selection].label == "more" && tabs[index].label == "more" {
-                            Image(systemName: tabs[index].image)
-                                .font(.caption2)
-                                .frame(height: 20)
-                                .rotationEffect(.degrees(90))
-                        } else {
-                            Image(systemName: tabs[index].image)
-                                .font(.caption2)
-                                .frame(height: 20)
-                                .rotationEffect(.degrees(0))
-                        }
-                        
-                        Text(tabs[index].label)
-                            .font(.system(size: 14))
-                            .fixedSize()
-                            .padding(.bottom, 5)
-                    }
-                    .fixedSize(horizontal: true, vertical: true)
-                    .frame(width: geometry.size.width / 2, height: 44, alignment: .bottom)
-                    .padding(.horizontal)
-                    .foregroundColor(selection == index ? Color.primary : .secondary)
-                    .onTapGesture {
-                        withAnimation {
-                            selection = index
-                        }
-                    }
-                }
-                .frame(height: 44, alignment: .bottom)
+        HStack(spacing: 0) {
+            ForEach(Self.tabs.indices, id: \.self) { index in
+                tabButton(for: Self.tabs[index], at: index)
             }
         }
-        .edgesIgnoringSafeArea(.all)
+        .padding(.horizontal, 8)
+        .padding(.top, 6)
+        .padding(.bottom, 8)
+        .background(.ultraThinMaterial)
+    }
+    
+    private func tabButton(for tab: Tab, at index: Int) -> some View {
+        Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                selection = index
+            }
+        } label: {
+            VStack(spacing: 4) {
+                ZStack {
+                    if selection == index {
+                        Capsule()
+                            .fill(Color.primary)
+                            .matchedGeometryEffect(id: "currentTab", in: currentTab)
+                    } else {
+                        Capsule()
+                            .fill(Color.clear)
+                    }
+                }
+                .frame(width: 24, height: 3)
+                
+                Image(systemName: tab.image)
+                    .font(.caption)
+                    .frame(height: 18)
+                
+                Text(tab.label)
+                    .font(.system(size: 12, weight: selection == index ? .semibold : .regular))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .frame(maxWidth: .infinity, minHeight: 48)
+            .foregroundColor(selection == index ? .primary : .secondary)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(tab.label)
     }
 }
 
@@ -104,16 +103,18 @@ struct TabBarView_Previews: PreviewProvider {
     }
 }
 
-struct Tab {
+private struct Tab {
     let image: String
     let label: String
 }
 
-let tabs = [
-    Tab(image: "house.fill", label: "Home"),
-    Tab(image: "message.fill", label: "Chat"),
-    Tab(image: "wave.3.left", label: "Wave"),
-    Tab(image: "cart", label: "Furn"),
-    Tab(image: "network", label: "Web"),
-    Tab(image: "brain.head.profile", label: "tweet"),
-]
+private extension TabBarView {
+    static let tabs = [
+        Tab(image: "house.fill", label: "Home"),
+        Tab(image: "message.fill", label: "Chat"),
+        Tab(image: "wave.3.left", label: "Wave"),
+        Tab(image: "cart", label: "Furn"),
+        Tab(image: "network", label: "Web"),
+        Tab(image: "brain.head.profile", label: "Tweet"),
+    ]
+}

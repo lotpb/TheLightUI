@@ -13,18 +13,15 @@ import SDWebImageSwiftUI
 
 struct MapUI: View {
     @StateObject private var manager = LocationManager()
-    //@State var manager = CLLocationManager()
     @State private var directions: [String] = []
-    //@State var mapType: MKMapType
-    //let mapType : MKMapType = .standard
     //@State private var userTrackingMode: MapUserTrackingMode = .follow
     @State private var offset : CGFloat = 0
     @State private var isDragged: Bool = false
 
-    @State var mapstreet = "1142 Hicksville Road"
-    @State var mapcity = "Massapequa"
-    @State var mapstate = "Ny"
-    @State var mapzip = "11758"
+    @State var mapstreet = "5121 Lakefront Blvd Apt D"
+    @State var mapcity = "Delray Beach"
+    @State var mapstate = "Fl"
+    @State var mapzip = "33484"
     
     @State var travelTime: Double
     @State var distance: Double
@@ -35,33 +32,35 @@ struct MapUI: View {
     var body: some View {
         
         ZStack(alignment: .top) {
-            MapView(travelTime: $travelTime, distance: $distance, directions: $directions, mapstreet: $mapstreet, mapcity: $mapcity, mapstate: $mapstate, mapzip: $mapzip, region: $manager.region, mapType: .standard)
+            MapView(manager: manager, travelTime: $travelTime, distance: $distance, directions: $directions, mapstreet: $mapstreet, mapcity: $mapcity, mapstate: $mapstate, mapzip: $mapzip, region: $manager.region, mapType: manager.mapType)
                 .ignoresSafeArea(.all, edges: .all)
-//                .gesture(
-//                    DragGesture()
-//                        .onChanged({ value in
-//                            isDragged = true
-//                            //locationManager.stopUpdating()
-//                        })
-//                )
-//                .overlay(
-//                    isDragged ?
-//                    AnyView(LocationButton(.shareCurrentLocation) {
-//                        manager.requestLocation()
-//                        //locationManager.stopUpdating()
-//                        isDragged = false
-//                        //locationManager.startUpdating()
-//                    }
-//                    .padding()) : AnyView(EmptyView()), alignment: .center
-//                )
             
             
-            MapButtonView( directions: $directions)
+                .gesture(
+                    DragGesture()
+                        .onChanged({ value in
+                            isDragged = true
+                            manager.stopUpdating()
+                        })
+                )
+                .overlay(
+                    isDragged ?
+                    AnyView(LocationButton(.shareCurrentLocation) {
+                        manager.requestLocation()
+                        manager.stopUpdating()
+                        isDragged = false
+                        manager.startUpdating()
+                    }
+                    .padding()) : AnyView(EmptyView()), alignment: .center
+                )
+            
+            
+            MapButtonView(manager: manager, directions: $directions)
             
             ///BottomSheetUI
             GeometryReader { reader in
                 VStack {
-                    BottomSheetUI(offset: $offset, value: (-reader.frame(in: .global).height + 150), travelTime: $travelTime, distance: $distance)
+                    BottomSheetUI(locationManager: manager, offset: $offset, value: (-reader.frame(in: .global).height + 150), travelTime: $travelTime, distance: $distance)
                         .offset(y: reader.frame(in: .global).height - 60)
                         .offset(y: offset)
                         .gesture(DragGesture().onChanged({ (value) in
@@ -113,7 +112,7 @@ struct MapUI: View {
 
 struct MapView : UIViewRepresentable {
 
-    @ObservedObject var manager = LocationManager()
+    @ObservedObject var manager: LocationManager
     @Binding var travelTime: Double
     @Binding var distance: Double
     @Binding var directions: [String]
@@ -133,13 +132,14 @@ struct MapView : UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: MKMapView, context: Context) {
-        // uiView.addAnnotations(checkpoints)
-        DispatchQueue.main.async {
-            uiView.region = region
+        uiView.mapType = mapType
+
+        if CLLocationCoordinate2DIsValid(region.center),
+           uiView.region.center.latitude != region.center.latitude || uiView.region.center.longitude != region.center.longitude {
             uiView.setRegion(region, animated: true)
-            uiView.setVisibleMapRect(uiView.visibleMapRect, animated: true)
-            uiView.mapType = MKMapType.standard
         }
+
+        updateRoute(on: uiView, context: context)
     }
     
     func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) {
@@ -166,46 +166,50 @@ struct MapView : UIViewRepresentable {
         mapView.isUserInteractionEnabled = true
         mapView.showsUserLocation = true
         
-        let address = "\(mapstreet) \(mapcity), \(mapstate) \(mapzip)"
-        let endPoint = "\(mapstreet), \(mapcity)"
+        updateRoute(on: mapView, context: context)
         
+        return mapView
+    }
+    
+    private func updateRoute(on mapView: MKMapView, context: Context) {
+        guard let userLocation = manager.location else { return }
+
+        let address = "\(mapstreet) \(mapcity), \(mapstate) \(mapzip)"
+        let routeKey = "\(address)-\(userLocation.coordinate.latitude)-\(userLocation.coordinate.longitude)"
+        guard context.coordinator.routeKey != routeKey else { return }
+        context.coordinator.routeKey = routeKey
+
+        let endPoint = "\(mapstreet), \(mapcity)"
         let geocoder = CLGeocoder()
-        geocoder.geocodeAddressString(address, completionHandler: { (placemarks, error) in
-            
-            if let placemarks = placemarks,
-               let location = placemarks.first?.location {
-               
-                let sourceCoordinate = MKPlacemark(coordinate: manager.location!.coordinate)
-                
-                let desinationCoordinate = MKPlacemark(coordinate: location.coordinate)
-                
-                region = MKCoordinateRegion.init(center: manager.region.center, latitudinalMeters: 500.0, longitudinalMeters: 500.0)
-                
-                let sourcePin = MKPointAnnotation()
-                sourcePin.coordinate = sourceCoordinate.coordinate
-                sourcePin.title = "Start"
-                sourcePin.subtitle = "Current Location"
-                
-                ///Boston
-                //let p2 = MKPlacemark(coordinate: CLLocationCoordinate2D(latitude: 42.36, longitude: -71.05))
-                let destPin = MKPointAnnotation()
-                destPin.coordinate = desinationCoordinate.coordinate
-                destPin.title = "Destination"
-                destPin.subtitle = endPoint
-                
-                ///Directions
-                let request = MKDirections.Request()
-                request.source = MKMapItem(placemark: sourceCoordinate)
-                request.destination = MKMapItem(placemark: desinationCoordinate)
-                request.transportType = .automobile
-                
-                let directions = MKDirections(request: request)
-                directions.calculate { response, error in
-                    
-                    guard let route = response?.routes.first else { return }
+
+        geocoder.geocodeAddressString(address) { placemarks, _ in
+            guard let location = placemarks?.first?.location else { return }
+
+            let sourceCoordinate = MKPlacemark(coordinate: userLocation.coordinate)
+            let destinationCoordinate = MKPlacemark(coordinate: location.coordinate)
+            let sourcePin = MKPointAnnotation()
+            sourcePin.coordinate = sourceCoordinate.coordinate
+            sourcePin.title = "Start"
+            sourcePin.subtitle = "Current Location"
+
+            let destPin = MKPointAnnotation()
+            destPin.coordinate = destinationCoordinate.coordinate
+            destPin.title = "Destination"
+            destPin.subtitle = endPoint
+
+            let request = MKDirections.Request()
+            request.source = MKMapItem(placemark: sourceCoordinate)
+            request.destination = MKMapItem(placemark: destinationCoordinate)
+            request.transportType = .automobile
+
+            MKDirections(request: request).calculate { response, _ in
+                guard let route = response?.routes.first else { return }
+
+                DispatchQueue.main.async {
                     travelTime = route.expectedTravelTime
                     distance = route.distance
-                    
+                    directions = route.steps.map { $0.instructions }.filter { !$0.isEmpty }
+
                     mapView.removeAnnotations(mapView.annotations)
                     mapView.removeOverlays(mapView.overlays)
                     mapView.addAnnotations([sourcePin, destPin])
@@ -213,18 +217,15 @@ struct MapView : UIViewRepresentable {
                     mapView.setVisibleMapRect(
                         route.polyline.boundingMapRect,
                         edgePadding: UIEdgeInsets(top: 25, left: 25, bottom: 25, right: 25),
-                        animated: true)
-                    
-                    self.directions = route.steps.map { $0.instructions }.filter { !$0.isEmpty }
-                    mapView.setRegion(region, animated: true)
+                        animated: true
+                    )
                 }
             }
-        })
-        
-        return mapView
+        }
     }
     
     class MapViewCoordinator: NSObject, MKMapViewDelegate {
+        var routeKey: String?
         
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             let renderer = MKPolylineRenderer(overlay: overlay)
@@ -240,7 +241,7 @@ struct MapView : UIViewRepresentable {
 struct MapButtonView: View {
     
     @Environment(\.presentationMode) var presentationMode
-    @ObservedObject var manager = LocationManager()
+    @ObservedObject var manager: LocationManager
     @State private var showDirections = false
     @Binding var directions: [String]
    // @Binding var mapType: MKMapType
@@ -384,7 +385,7 @@ struct MapButtonView: View {
 
 struct BottomSheetUI : View {
     @State private var vm = MainMessagesViewModel()
-    @ObservedObject var locationManager = LocationManager()
+    @ObservedObject var locationManager: LocationManager
     @Binding var offset : CGFloat
     var value : CGFloat
     @Binding var travelTime: Double
@@ -566,18 +567,3 @@ struct MapUI_Previews: PreviewProvider {
         MapUI(travelTime: 0.00, distance: 0.00).preferredColorScheme(.dark)
     }
 }
-
-//extension MKMapType {
-//    var name: String {
-//        switch self {
-//        case .standard:
-//            return "Map"
-//        case .hybrid:
-//            return "Hybrid"
-//        case .satellite:
-//            return "Satellite"
-//        default:
-//            return "Other"
-//        }
-//    }
-//}

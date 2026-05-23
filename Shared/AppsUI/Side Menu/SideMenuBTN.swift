@@ -13,7 +13,7 @@ struct SideMenuBtn: View {
     var title: String
     
     @Binding var selectedTab: String
-    var aimation: Namespace.ID
+    var animation: Namespace.ID
     
     var body: some View {
         
@@ -41,14 +41,14 @@ struct SideMenuBtn: View {
             .frame(maxWidth: getRectUI().width - 170, alignment: .leading)
             .background(
                 
-                // Hero animatioion
+                // Hero animation
                 
                 ZStack {
                     
                     if selectedTab == image {
                         Color.white.opacity(selectedTab == image ? 1 : 0)
                             .clipShape(CustomCorners(corners: [.topRight, .bottomRight], radius: 12))
-                            .matchedGeometryEffect(id: "Tab", in: aimation)
+                            .matchedGeometryEffect(id: "Tab", in: animation)
                     }
                     
                 }

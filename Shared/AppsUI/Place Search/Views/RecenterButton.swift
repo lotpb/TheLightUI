@@ -18,10 +18,8 @@ struct RecenterButton: View {
         } label: {
             Label("Re-center", systemImage: "triangle")
         }
-        .padding(10)
-        .foregroundColor(.white)
-        .background(Color.accentColor)
-        .cornerRadius(12)
+        .buttonStyle(.borderedProminent)
+        .controlSize(.large)
     }
 }
 

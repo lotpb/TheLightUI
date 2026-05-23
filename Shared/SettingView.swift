@@ -1,5 +1,5 @@
 //
-//  Settings.swift
+//  SettingView.swift
 //  TheLightUI (iOS)
 //
 //  Created by Peter Balsamo on 12/24/21.
@@ -7,10 +7,9 @@
 
 import SwiftUI
 
-extension TextField {
-    func settingTextStyle() -> some View {
-        self
-            .multilineTextAlignment(.trailing)
+private extension View {
+    func settingsFieldStyle() -> some View {
+        multilineTextAlignment(.trailing)
     }
 }
 
@@ -47,183 +46,147 @@ struct SettingsUI {
 }
 
 struct SettingView: View {
-    @AppStorage(SettingsUI.firstNameKey) var firstName = ""
-    @AppStorage(SettingsUI.lastNameKey) var lastname = ""
-    @AppStorage(SettingsUI.emailKey) var email = ""
-    @AppStorage(SettingsUI.phoneKey) var phone = ""
-    @AppStorage(SettingsUI.passwordKey) var password = ""
-    @AppStorage(SettingsUI.usernameKey) var username = ""
-    @AppStorage(SettingsUI.websiteKey) var website = ""
+    @AppStorage(SettingsUI.firstNameKey) private var firstName = ""
+    @AppStorage(SettingsUI.lastNameKey) private var lastname = ""
+    @AppStorage(SettingsUI.emailKey) private var email = ""
+    @AppStorage(SettingsUI.phoneKey) private var phone = ""
+    @AppStorage(SettingsUI.passwordKey) private var password = ""
+    @AppStorage(SettingsUI.usernameKey) private var username = ""
+    @AppStorage(SettingsUI.websiteKey) private var website = ""
     
-    @AppStorage(SettingsUI.isCompanyNameKey) var isCompanyName = ""
-    @AppStorage(SettingsUI.isSubscribedKey) var isSubscriber = false
+    @AppStorage(SettingsUI.isCompanyNameKey) private var companyName = "TheLight Software"
+    @AppStorage(SettingsUI.isSubscribedKey) private var isSubscriber = false
     
-    @AppStorage(SettingsUI.backend) var backend = ""
-    @AppStorage(SettingsUI.isBackfetch) var isbackfetch = false
-    @AppStorage(SettingsUI.isAutolockKey) var isautolock = false
+    @AppStorage(SettingsUI.backend) private var backend = "Firebase"
+    @AppStorage(SettingsUI.isBackfetch) private var isBackfetch = false
+    @AppStorage(SettingsUI.isAutolockKey) private var isAutoLockDisabled = false
     
-    @AppStorage(SettingsUI.color) var color = 0
+    @AppStorage(SettingsUI.color) private var color = 0
     
-    @AppStorage(SettingsUI.isSpeakKey) var isSpeak = false
-    @AppStorage(SettingsUI.isMusicKey) var isMusic = false
+    @AppStorage(SettingsUI.isSpeakKey) private var isSpeak = false
+    @AppStorage(SettingsUI.isMusicKey) private var isMusic = false
     
-    @AppStorage(SettingsUI.latitudeKey) var latitude = ""
-    @AppStorage(SettingsUI.longtitudeKey) var longtitude = ""
+    @AppStorage(SettingsUI.latitudeKey) private var latitude = ""
+    @AppStorage(SettingsUI.longtitudeKey) private var longitude = ""
     
-    @AppStorage(SettingsUI.eventKey) var event = ""
-    @AppStorage(SettingsUI.durationKey) var duration = ""
+    @AppStorage(SettingsUI.eventKey) private var event = ""
+    @AppStorage(SettingsUI.durationKey) private var duration = ""
     
-    @AppStorage(SettingsUI.areacodeKey) var areacode = ""
-    @AppStorage(SettingsUI.emailTitleKey) var emailtitle = ""
-    @AppStorage(SettingsUI.emailMessageKey) var emailmessage = ""
-    @AppStorage(SettingsUI.versionKey) var version = ""
-    
-    @State private var pickPersonal = 0
-    @State private var pickGeneral = 0
-    
-    
+    @AppStorage(SettingsUI.areacodeKey) private var areaCode = ""
+    @AppStorage(SettingsUI.emailTitleKey) private var emailTitle = ""
+    @AppStorage(SettingsUI.emailMessageKey) private var emailMessage = ""
+    @AppStorage(SettingsUI.versionKey) private var version = "1.0"
     
     var body: some View {
-        NavigationView {
-            VStack {
-                Form {
-                    Section(header: Text("TheLight Settings")) {
-                        Picker("Personal", selection: $pickPersonal) {
-                            HStack {
-                                Text("First Name")
-                                Spacer()
-                                TextField("First Name", text: $firstName).settingTextStyle()
-                            }
-                            HStack {
-                                Text("Last Name")
-                                Spacer()
-                                TextField("Last Name", text: $lastname).settingTextStyle()
-                            }
-                            HStack {
-                                Text("Email")
-                                Spacer()
-                                TextField("Email", text: $email).settingTextStyle()
-                            }
-                            HStack {
-                                Text("Phone")
-                                Spacer()
-                                TextField("Phone", text: $phone).settingTextStyle()
-                            }
-                            HStack {
-                                Text("Password")
-                                Spacer()
-                                TextField("Password", text: $password).settingTextStyle()
-                            }
-                            HStack {
-                                Text("Username")
-                                Spacer()
-                                
-                                TextField("Username", text: $username).settingTextStyle()
-                            }
-                            HStack {
-                                Text("Website")
-                                Spacer()
-                                TextField("Website", text: $website).settingTextStyle()
-                            }
-                        }
-                    }
-                    
-                    Section(header: Text("Member Status")) {
-                        HStack {
-                            Text("Company")
-                            Spacer()
-                            
-                            TextField("Username", text: $isCompanyName).settingTextStyle()
-                        }
-                        Toggle("isSubscriber", isOn: $isSubscriber)
-                        HStack {
-                            Picker("Backend Data", selection: $backend) {
-                                Text("Firebase").tag("Firebase")
-                                Text("Parse").tag("Parse")
-                            }
-                        }
-                        Toggle("Background Fetch", isOn: $isbackfetch)
-                        Toggle("Prevent Auto-Lock", isOn: $isautolock)
-                        DisclosureGroup("Show Terms") {
-                            Text("Long terms and conditions here long terms and conditions here long terms and conditions here long terms and conditions here long terms and conditions here long terms and conditions here.")
-                        }
-                        .frame(width: 300)
-                    }
-                    
-                    Section(header: Text("Theme")) {
-                        Picker("Color Scheme", selection: $color) {
-                            Text("Purple").tag(0)
-                            Text("Orange").tag(1)
-                        }
-                    }
-                    
-                    Section(header: Text("Sounds")) {
-                        Toggle("Speak", isOn: $isSpeak)
-                        Toggle("Music", isOn: $isMusic)
-                    }
-                    
-                    Section(header: Text("Map")) {
-                        HStack {
-                            Text("Latitude")
-                            Spacer()
-                            TextField("Latitude", text: $latitude).settingTextStyle()
-                        }
-                        HStack {
-                            Text("Longtitude")
-                            Spacer()
-                            TextField("Longtitude", text: $longtitude).settingTextStyle()
-                        }
-                    }
-                    
-                    Section(header: Text("Calender")) {
-                        HStack {
-                            Text("Event")
-                            Spacer()
-                            TextField("Event", text: $event).settingTextStyle()
-                        }
-                        HStack {
-                            Text("Duration")
-                            Spacer()
-                            TextField("Duration", text: $duration).settingTextStyle()
-                        }
-                    }
-                    
-                    Section(header: Text("General")) {
-                        Picker("General", selection: $pickGeneral) {
-                            HStack {
-                                Text("Area Code")
-                                Spacer()
-                                TextField("Area Code", text: $areacode).settingTextStyle()
-                                
-                            }
-                            HStack {
-                                Text("Email Title")
-                                Spacer()
-                                TextField("Email Title", text: $emailtitle).settingTextStyle()
-                                
-                            }
-                            HStack {
-                                Text("Email Message")
-                                Spacer()
-                                TextField("Email Message", text: $emailmessage).settingTextStyle()
-                            }
-                            HStack {
-                                Text("Version")
-                                Spacer()
-                                TextField("Version", text: $version).settingTextStyle()
-                            }
-                        }
-                    }
-                }
+        NavigationStack {
+            Form {
+                accountSection
+                memberSection
+                themeSection
+                soundsSection
+                mapSection
+                calendarSection
+                generalSection
             }
             .navigationTitle("Settings")
         }
     }
+    
+    private var accountSection: some View {
+        Section("TheLight Settings") {
+            settingsTextField("First Name", text: $firstName)
+            settingsTextField("Last Name", text: $lastname)
+            settingsTextField("Email", text: $email, keyboardType: .emailAddress, textInputAutocapitalization: .never)
+            settingsTextField("Phone", text: $phone, keyboardType: .phonePad)
+            passwordField
+            settingsTextField("Username", text: $username, textInputAutocapitalization: .never)
+            settingsTextField("Website", text: $website, keyboardType: .URL, textInputAutocapitalization: .never)
+        }
+    }
+    
+    private var memberSection: some View {
+        Section("Member Status") {
+            settingsTextField("Company", text: $companyName)
+            Toggle("Subscriber", isOn: $isSubscriber)
+            Picker("Backend Data", selection: $backend) {
+                Text("Firebase").tag("Firebase")
+                Text("Parse").tag("Parse")
+            }
+            Toggle("Background Fetch", isOn: $isBackfetch)
+            Toggle("Prevent Auto-Lock", isOn: $isAutoLockDisabled)
+            DisclosureGroup("Show Terms") {
+                Text("Long terms and conditions here long terms and conditions here long terms and conditions here long terms and conditions here.")
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+    
+    private var themeSection: some View {
+        Section("Theme") {
+            Picker("Color Scheme", selection: $color) {
+                Text("Purple").tag(0)
+                Text("Orange").tag(1)
+            }
+        }
+    }
+    
+    private var soundsSection: some View {
+        Section("Sounds") {
+            Toggle("Speak", isOn: $isSpeak)
+            Toggle("Music", isOn: $isMusic)
+        }
+    }
+    
+    private var mapSection: some View {
+        Section("Map") {
+            settingsTextField("Latitude", text: $latitude, keyboardType: .decimalPad)
+            settingsTextField("Longitude", text: $longitude, keyboardType: .decimalPad)
+        }
+    }
+    
+    private var calendarSection: some View {
+        Section("Calendar") {
+            settingsTextField("Event", text: $event)
+            settingsTextField("Duration", text: $duration)
+        }
+    }
+    
+    private var generalSection: some View {
+        Section("General") {
+            settingsTextField("Area Code", text: $areaCode, keyboardType: .numberPad)
+            settingsTextField("Email Title", text: $emailTitle)
+            settingsTextField("Email Message", text: $emailMessage)
+            settingsTextField("Version", text: $version)
+        }
+    }
+    
+    private var passwordField: some View {
+        HStack {
+            Text("Password")
+            Spacer()
+            SecureField("Password", text: $password)
+                .settingsFieldStyle()
+        }
+    }
+    
+    private func settingsTextField(
+        _ title: String,
+        text: Binding<String>,
+        keyboardType: UIKeyboardType = .default,
+        textInputAutocapitalization: TextInputAutocapitalization? = nil
+    ) -> some View {
+        HStack {
+            Text(title)
+            Spacer()
+            TextField(title, text: text)
+                .settingsFieldStyle()
+                .keyboardType(keyboardType)
+                .textInputAutocapitalization(textInputAutocapitalization)
+        }
+    }
 }
 
-struct SettingView_Previews: PreviewProvider {
-    static var previews: some View {
-        SettingView()
-            .preferredColorScheme(.dark)
-    }
+#Preview("Settings - Dark") {
+    SettingView()
+        .preferredColorScheme(.dark)
 }

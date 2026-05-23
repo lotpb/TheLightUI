@@ -9,15 +9,14 @@ import SwiftUI
 
 struct MainView: View {
     
-    @State var selectedTab: String = "house"
-    
-    @State var showMenu: Bool = false
+    @State private var selectedTab = "house"
+    @State private var showMenu = false
     
     var body: some View {
         
         ZStack {
             
-            Color(.blue)
+            Color.blue
                 .ignoresSafeArea()
             
             SideMenuUI(selectedTab: $selectedTab)
@@ -57,7 +56,7 @@ struct MainView: View {
                     
                 } label: {
                     
-                    // Animted Drawer Button..
+                    // Animated drawer button.
                     VStack(spacing: 5){
                         
                         Capsule()
@@ -99,12 +98,3 @@ struct MainView_Previews: PreviewProvider {
     }
 }
 
-//extension View {
-//
-//    func getRect() -> CGRect {
-//
-//        return UIScreen.main.bounds
-//
-//    }
-//
-//}

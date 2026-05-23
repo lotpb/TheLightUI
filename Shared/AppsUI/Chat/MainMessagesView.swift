@@ -36,32 +36,37 @@ class MainMessagesViewModel: ObservableObject {
         guard let uid = FirebaseManager.shared.auth.currentUser?.uid else { return }
         
         firestoreListener?.remove()
-        self.recentMessages.removeAll()
+        recentMessages.removeAll()
         
         firestoreListener = FirebaseManager.shared.firestore
             .collection(FirebaseConstants.recentMessages)
             .document(uid)
             .collection(FirebaseConstants.messages)
             .order(by: FirebaseConstants.timestamp)
-            .addSnapshotListener { querySnapshot, error in
+            .addSnapshotListener { [weak self] querySnapshot, error in
                 if let error = error {
-                    self.errorMessage = "Failed to listen for recent messages: \(error)"
+                    DispatchQueue.main.async {
+                        self?.errorMessage = "Failed to listen for recent messages: \(error)"
+                    }
                     print(error)
                     return
                 }
                 
-                querySnapshot?.documentChanges.forEach({ change in
-                    let docId = change.document.documentID
-                    
-                    if let index = self.recentMessages.firstIndex(where: { rm in
-                        return rm.id == docId
-                    }) {
-                        self.recentMessages.remove(at: index)
+                DispatchQueue.main.async {
+                    querySnapshot?.documentChanges.forEach { change in
+                        let docId = change.document.documentID
+                        
+                        if let index = self?.recentMessages.firstIndex(where: { recentMessage in
+                            recentMessage.id == docId
+                        }) {
+                            self?.recentMessages.remove(at: index)
+                        }
+                        
+                        if let recentMessage = try? change.document.data(as: RecentMessage.self) {
+                            self?.recentMessages.insert(recentMessage, at: 0)
+                        }
                     }
-                    if let rm = try? change.document.data(as: RecentMessage.self) {
-                        self.recentMessages.insert(rm, at: 0)
-                    }
-                })
+                }
             }
     }
     
@@ -71,15 +76,19 @@ class MainMessagesViewModel: ObservableObject {
             return
         }
         
-        FirebaseManager.shared.firestore.collection("users").document(uid).getDocument { snapshot, error in
+        FirebaseManager.shared.firestore.collection("users").document(uid).getDocument { [weak self] snapshot, error in
             if let error = error {
-                self.errorMessage = "Failed to fetch current user: \(error)"
+                DispatchQueue.main.async {
+                    self?.errorMessage = "Failed to fetch current user: \(error)"
+                }
                 print("Failed to fetch current user:", error)
                 return
             }
             
-            self.chatUser = try? snapshot?.data(as: UserModel.self)
-            FirebaseManager.shared.currentUser = self.chatUser
+            DispatchQueue.main.async {
+                self?.chatUser = try? snapshot?.data(as: UserModel.self)
+                FirebaseManager.shared.currentUser = self?.chatUser
+            }
         }
     }
     
@@ -91,35 +100,34 @@ class MainMessagesViewModel: ObservableObject {
 
 struct MainMessagesView: View {
     
-    @State var shouldShowLogOutOptions = false
+    @State private var shouldShowLogOutOptions = false
+    @State private var shouldNavigateToChatLogView = false
+    @State private var shouldShowNewMessageScreen = false
+    @State private var chatUser: UserModel?
     
-    @State var shouldNavigateToChatLogView = false
-    
-    @ObservedObject private var vm = MainMessagesViewModel()
-    
-    private var chatLogViewModel = ChatLogViewModel(chatUser: nil)
+    @StateObject private var vm = MainMessagesViewModel()
+    @StateObject private var chatLogViewModel = ChatLogViewModel(chatUser: nil)
     
     var body: some View {
-        NavigationView {
-            
+        NavigationStack {
             VStack {
                 customNavBar
                 messagesView
-                
-                NavigationLink("", isActive: $shouldNavigateToChatLogView) {
-                    ChatLogView(vm: chatLogViewModel)
-                }
             }
             .overlay(
                 newMessageButton, alignment: .bottom)
+            .ignoresSafeArea(.keyboard, edges: .bottom)
             .navigationBarHidden(true)
+            .navigationDestination(isPresented: $shouldNavigateToChatLogView) {
+                ChatLogView(vm: chatLogViewModel)
+            }
         }
     }
     
     private var customNavBar: some View {
         HStack(spacing: 16) {
             
-            WebImage(url: URL(string: vm.chatUser?.profileImageUrl ?? ""))
+            WebImage(url: URL(string: vm.chatUser?.profileImageUrl ?? "profile-rabbit-toy.png"))
                 .resizable()
                 .scaledToFill()
                 .frame(width: 50, height: 50)
@@ -156,14 +164,13 @@ struct MainMessagesView: View {
             }
         }
         .padding()
-        .actionSheet(isPresented: $shouldShowLogOutOptions) {
-            .init(title: Text("Settings"), message: Text("What do you want to do?"), buttons: [
-                        .destructive(Text("Sign Out"), action: {
-                            print("handle sign out")
-                            vm.handleSignOut()
-                        }),
-                        .cancel()
-                    ])
+        .confirmationDialog("Settings", isPresented: $shouldShowLogOutOptions, titleVisibility: .visible) {
+            Button("Sign Out", role: .destructive) {
+                vm.handleSignOut()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("What do you want to do?")
         }
         .fullScreenCover(isPresented: $vm.isUserCurrentlyLoggedOut, onDismiss: nil) {
             LoginView(didCompleteLoginProcess: {
@@ -227,8 +234,6 @@ struct MainMessagesView: View {
         }
     }
     
-    @State var shouldShowNewMessageScreen = false
-    
     private var newMessageButton: some View {
         Button {
             shouldShowNewMessageScreen.toggle()
@@ -257,15 +262,11 @@ struct MainMessagesView: View {
             })
         }
     }
-    
-    @State var chatUser: UserModel?
 }
 
 struct MainMessagesView_Previews: PreviewProvider {
     static var previews: some View {
         MainMessagesView()
             .preferredColorScheme(.dark)
-        
-        MainMessagesView()
     }
 }

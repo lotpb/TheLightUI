@@ -16,10 +16,14 @@ class Prospect: Identifiable, Codable, Comparable {
     fileprivate(set) var isContacted = false
     
     var displayedDate: String {
+        Self.displayedDateFormatter.string(from: dateAdded)
+    }
+    
+    private static let displayedDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "d MMM y"
-        return formatter.string(from: dateAdded)
-    }
+        return formatter
+    }()
     
     static func <(lhs: Prospect, rhs: Prospect) -> Bool {
         lhs.name < rhs.name
@@ -30,10 +34,11 @@ class Prospect: Identifiable, Codable, Comparable {
     }
 }
 
+@MainActor
 class Prospects: ObservableObject {
     
     @Published private(set) var people: [Prospect]
-    let savedPath = FileManager.documentDirectory.appendingPathComponent("savedProspects")
+    private let savedPath = FileManager.documentDirectory.appendingPathComponent("savedProspects")
     
     init() {
         do {
@@ -41,6 +46,7 @@ class Prospects: ObservableObject {
             people = try JSONDecoder().decode([Prospect].self, from: data)
         } catch {
             people = []
+            print("Unable to load prospects: \(error.localizedDescription)")
         }
     }
     
@@ -49,7 +55,7 @@ class Prospects: ObservableObject {
             let data = try JSONEncoder().encode(people)
             try data.write(to: savedPath, options: [.atomic, .completeFileProtection])
         } catch {
-            print("Unexpected error")
+            print("Unable to save prospects: \(error.localizedDescription)")
         }
     }
     
@@ -59,12 +65,12 @@ class Prospects: ObservableObject {
     }
     
     func toggle(_ prospect: Prospect) {
-        objectWillChange.send()
-        prospect.isContacted.toggle()
+        guard let index = people.firstIndex(of: prospect) else { return }
+        people[index].isContacted.toggle()
+        people = Array(people)
         save()
     }
 }
-
 
 extension FileManager {
     

@@ -5,392 +5,399 @@
 //  Created by Peter Balsamo on 12/22/21.
 //
 
-import Foundation
 import SwiftUI
 import FirebaseFirestore
-import UserNotifications
-
 
 struct CustomerUI: View {
+    @AppStorage("color") private var color: Int?
+    @StateObject private var viewModel: CustomerData
+    @StateObject private var pickerviewModel: PickerDataModel
     
-    @AppStorage("color") var color: Int?
-    @StateObject var viewModel: CustomerData = CustomerData()
-    @StateObject var pickerviewModel: PickerDataModel = PickerDataModel()
+    private let db = Firestore.firestore()
+    private let notificationManager = NotificationManager.shared
     
-    let db = Firestore.firestore()
-    let notificationManager: NotificationManager = NotificationManager.shared
-    
-    @State private var formController = "Customer"
     @State private var searchText = ""
-    @State private var isAddingCust: Bool = false
-    @State private var isCommentBtn = false
-    ///filter
-    @State private var isFavorites = false
-    @State private var filter: FilterType = .none
-    ///sorting
-    @State private var isSortingMenu: Int = 0
+    @State private var isAddingCustomer = false
+    @State private var isActiveOnly = false
+    @State private var selectedSort: SortType = .date
     
-    @State private var isSortedByName = false
+    init(viewModel: CustomerData = CustomerData(), pickerviewModel: PickerDataModel = PickerDataModel()) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+        _pickerviewModel = StateObject(wrappedValue: pickerviewModel)
+    }
     
-    var sortedData: [customerItem] {
-        if isSortedByName {
-            // sort prospects by name
-            return viewModel.items.sorted(by: { $0.lastname < $1.lastname })
-        } else {
-            // sort prospects by Most recent == from the latest id
-            return viewModel.items.reversed()
+    private enum SortType: String, CaseIterable, Identifiable {
+        case date = "Date"
+        case name = "Name"
+        case location = "Location"
+        case active = "Active"
+        
+        var id: Self { self }
+        
+        var systemImage: String {
+            switch self {
+            case .date: return "clock"
+            case .name: return "person"
+            case .location: return "location"
+            case .active: return "folder"
+            }
         }
     }
     
-    enum FilterType {
-        case none, favorites
+    private var themeColor: Color {
+        color == 0 ? .purple : .orange
     }
-
-    var results: [customerItem] {
-        switch filter {
-        case .none:
-            if searchText.isEmpty {
-                return viewModel.items
-            } else {
-                return viewModel.items.filter { $0.lastname.localizedCaseInsensitiveContains(searchText.localizedLowercase) }
-            }
-        case .favorites:
-            return viewModel.items.filter {
-                $0.active != "0"
-            }
+    
+    private var filteredItems: [customerItem] {
+        let items = isActiveOnly ? viewModel.items.filter { $0.active == "1" } : viewModel.items
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !query.isEmpty else { return items }
+        return items.filter {
+            $0.lastname.localizedCaseInsensitiveContains(query) ||
+            $0.first.localizedCaseInsensitiveContains(query) ||
+            $0.city.localizedCaseInsensitiveContains(query)
+        }
+    }
+    
+    private var displayedItems: [customerItem] {
+        switch selectedSort {
+        case .date:
+            return filteredItems
+        case .name:
+            return filteredItems.sorted { $0.lastname.localizedCaseInsensitiveCompare($1.lastname) == .orderedAscending }
+        case .location:
+            return filteredItems.sorted { $0.city.localizedCaseInsensitiveCompare($1.city) == .orderedAscending }
+        case .active:
+            return filteredItems.sorted { $0.active.localizedCaseInsensitiveCompare($1.active) == .orderedDescending }
         }
     }
     
     var body: some View {
-        //NavigationView {
-            VStack {
-                List {
-                    if viewModel.isLoading {
-                        ProgressView("Loading Customers...")
-                    } else {
-                        if self.viewModel.items.isEmpty {
-                            Text("No Customers")
-                        } else {
-                            Toggle(isOn: $isFavorites) {
-                                let countItem = viewModel.items.count
-                                Text("\(countItem) ") + 
-                                Text("Active Only")
-                            }
-                            .onChange(of: isFavorites) {_ in
-                                if isFavorites {
-                                    filter = .favorites
-                                } else {
-                                    filter = .none
-                                }
-                            }
-                            .toggleStyle(SwitchToggleStyle(tint: self.color == 0 ? Color.purple : Color.orange))
-                            
-                            .toolbar {
-                                ToolbarItem(placement: .automatic) {
-                                    Menu {
-                                        Picker(selection: $isSortingMenu, label: Text("Sorting options")) {
-                                            Label("Date", systemImage: "clock").tag(0)
-                                            Label("Name", systemImage: "person").tag(1)
-                                            Label("Location", systemImage: "location").tag(2)
-                                            Label("Active", systemImage: "folder").tag(3)
-                                        }
-                                    }
-                                    label: {
-                                        Label("Sort", systemImage: "line.3.horizontal.decrease.circle")
-                                    }
-                                }
-                            }
-                            
-                            ForEach(results) { item in
-                                NavigationLink(destination: LeadDetailUI(detail: item).environmentObject(pickerviewModel).navigationBarBackButtonHidden(true)) {
-                                    CellView(data: item, formController: $formController, showComments: $isCommentBtn)
-                                }
-                                .swipeActions(edge: .leading) {
-                                    Button { notificationManager.deleteNotifications()
-                                    } label: {
-                                        Label("Mark Contacted", systemImage: "person.crop.circle.fill.badge.checkmark")
-                                    }
-                                    .tint(.green)
-                                    
-                                    Button { //Add Notifications For Morning"
-                                        var dateComponents = DateComponents()
-                                        dateComponents.hour = 8
-                                        dateComponents.minute = 30
-                                        //dateComponents.weekday = 2
-                                        notificationManager.scheduleNotification(title: "Contact \(item.lastname)", body: "Email \(item.email)", categoryIdentifier: "reminder", dateComponents: dateComponents, repeats: true)
-                                        
-                                    } label: {
-                                        Label("Remind Me", systemImage: "bell")
-                                    }
-                                    .tint(.orange)
-                                }
-                                ///fix delete
-                                .swipeActions(edge: .trailing) {
-                                    Button(role: .destructive) {
-                                        withAnimation(.linear(duration: 0.4)) {
-                                            //self.viewModel.items.removeAll { $0.id == self.viewModel.items.i
-                                        }
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
-                                    }
-                                }
-                                .sheet(isPresented: $isAddingCust ) {
-                                    FormUI(detail: item, createDate: Date(), startDate: Date(), completeDate: Date(), status: "New")
-                                }
-                            }
-                            .onDelete { (index) in
-                                db.collection("Customers").document(self.viewModel.items[index.last!].id).delete { (error) in
-                                    if error != nil{
-                                        print((error?.localizedDescription)!)
-                                        return
-                                    }
-                                    self.viewModel.items.remove(atOffsets: index)
-                                }
-                            }
-                            .onMove { index, newOffset in
-                                self.viewModel.items.move(fromOffsets: index, toOffset: newOffset)
-                            }
-                            .onAppear {
-                                UIApplication.shared.applicationIconBadgeNumber = 0
-                            }
-                        }
-                    }
-                }
-                .listStyle(.plain)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: {
-                            isAddingCust.toggle()
-                        }) {
-                            Label("New", systemImage: "plus")
-                        }
-                        
-                        Menu {
-                            Picker(selection: $isSortingMenu, label: Text("Sorting options")) {
-                                Text("Date").tag(0)
-                                Text("Name").tag(1)
-                                Text("Location").tag(2)
-                                Text("Active").tag(3)
-                            }
-                        }
-                        label: {
-                            Label("Sort", systemImage: "line.3.horizontal.decrease.circle")
-                        }
-                    }
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        EditButton()
-                    }
-                }
-                .navigationBarTitle("Customers", displayMode: .inline)
-                //.navigationViewStyle(StackNavigationViewStyle())
-                .foregroundColor(self.color == 0 ? Color.purple : Color.orange)
-                .refreshable {
-                    self.viewModel.fetchData()
-                }
+        List {
+            if viewModel.isLoading {
+                ProgressView("Loading Customers...")
+            } else if viewModel.items.isEmpty {
+                Text("No Customers")
+            } else {
+                activeOnlyToggle
+                customerRows
             }
-        //}
+        }
+        .listStyle(.plain)
+        .navigationTitle("Customers")
+        .navigationBarTitleDisplayMode(.inline)
+        .foregroundColor(themeColor)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                EditButton()
+            }
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button {
+                    isAddingCustomer = true
+                } label: {
+                    Label("New", systemImage: "plus")
+                }
+                sortMenu
+            }
+        }
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always)) {
             Text("Balsamo").searchCompletion("Balsamo")
             Text("Rosch").searchCompletion("Rosch")
         }
-        .foregroundColor(Color.secondary)
-        .onAppear() {
-            
+        .refreshable {
+            viewModel.fetchData()
+        }
+        .sheet(isPresented: $isAddingCustomer) {
+            FormUI(
+                detail: .emptyCustomer,
+                createDate: Date(),
+                startDate: Date(),
+                completeDate: Date(),
+                status: "New"
+            )
+            .environmentObject(viewModel)
+            .environmentObject(pickerviewModel)
+        }
+        .onAppear {
+            UIApplication.shared.applicationIconBadgeNumber = 0
         }
         .environmentObject(viewModel)
         .environmentObject(pickerviewModel)
     }
+    
+    private var activeOnlyToggle: some View {
+        Toggle(isOn: $isActiveOnly) {
+            Text("\(displayedItems.count) Active Only")
+        }
+        .toggleStyle(SwitchToggleStyle(tint: themeColor))
+    }
+    
+    private var customerRows: some View {
+        ForEach(displayedItems) { item in
+            NavigationLink {
+                LeadDetailUI(detail: item)
+                    .environmentObject(pickerviewModel)
+                    .navigationBarBackButtonHidden(true)
+            } label: {
+                CellView(data: item, showsComments: !item.comments.isEmpty)
+            }
+            .swipeActions(edge: .leading) {
+                Button {
+                    notificationManager.deleteNotifications()
+                } label: {
+                    Label("Mark Contacted", systemImage: "person.crop.circle.fill.badge.checkmark")
+                }
+                .tint(.green)
+                
+                Button {
+                    scheduleReminder(for: item)
+                } label: {
+                    Label("Remind Me", systemImage: "bell")
+                }
+                .tint(.orange)
+            }
+            .swipeActions(edge: .trailing) {
+                Button(role: .destructive) {
+                    deleteItems([item])
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            }
+        }
+        .onDelete { offsets in
+            deleteItems(offsets.map { displayedItems[$0] })
+        }
+        .onMove { offsets, newOffset in
+            viewModel.items.move(fromOffsets: offsets, toOffset: newOffset)
+        }
+    }
+    
+    private var sortMenu: some View {
+        Menu {
+            Picker("Sorting options", selection: $selectedSort) {
+                ForEach(SortType.allCases) { sort in
+                    Label(sort.rawValue, systemImage: sort.systemImage)
+                        .tag(sort)
+                }
+            }
+        } label: {
+            Label("Sort", systemImage: "line.3.horizontal.decrease.circle")
+        }
+    }
+    
+    private func scheduleReminder(for item: customerItem) {
+        var dateComponents = DateComponents()
+        dateComponents.hour = 8
+        dateComponents.minute = 30
+        notificationManager.scheduleNotification(
+            title: "Contact \(item.lastname)",
+            body: "Email \(item.email)",
+            categoryIdentifier: "reminder",
+            dateComponents: dateComponents,
+            repeats: true
+        )
+    }
+    
+    private func deleteItems(_ items: [customerItem]) {
+        for item in items {
+            db.collection("Customers").document(item.id).delete { error in
+                if let error {
+                    print(error.localizedDescription)
+                    return
+                }
+                viewModel.items.removeAll { $0.id == item.id }
+            }
+        }
+    }
 }
 
-struct CellView : View {
+struct CellView: View {
+    @AppStorage("color") private var color: Int?
     
-    @AppStorage("color") var color: Int?
-    //@EnvironmentObject var viewModel: CustomerData
-    var data : customerItem
-    @Binding var formController : String
-    @Binding var showComments: Bool
+    let data: customerItem
+    let showsComments: Bool
     
-    var body : some View {
-        VStack {
-            HStack {
-                VStack {
-                    Image("taylor_swift_profile")
-                        .resizable()
-                        .frame(width: 60, height: 60, alignment: .topLeading)
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                        .padding(.top, 5)
-                    Spacer()
-                }
+    private var themeColor: Color {
+        color == 0 ? .purple : .orange
+    }
+    
+    var body: some View {
+        HStack(alignment: .top) {
+            Image("taylor_swift_profile")
+                .resizable()
+                .frame(width: 60, height: 60, alignment: .topLeading)
+                .clipShape(Circle())
+                .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                .padding(.top, 5)
+            
+            VStack(alignment: .leading, spacing: 6) {
+                Text(data.lastname)
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                    .minimumScaleFactor(0.5)
+                    .padding(.top, 3)
                 
-                VStack(alignment: .leading) {
-                    Text(data.lastname)
-                        .font(.title3).fontWeight(.bold)
-                        .foregroundColor(Color.primary)
-                        .minimumScaleFactor(0.5)
-                        .padding(.top, 3)
-                    Spacer()
-                    Text(data.address)
-                        .font(.subheadline)
-                        .foregroundColor(Color.secondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
-                    VStack {
-                        HStack {
-                            Button(action: {
-                                
-                            }) {
-                                Image(systemName: "text.bubble.fill")
-                                    .resizable()
-                                    .frame(width: 20, height: 20)
-                                    .foregroundColor(self.color == 0 ? Color.purple : Color.orange)
-                                    .padding(.leading, 7).padding(.trailing, 20)
-                            }
-                            .disabled(showComments == false)
-                            Button(action: {
-                                
-                            }) {
-                                Image(systemName: "hand.thumbsup.fill")
-                                    .resizable()
-                                    .frame(width: 20, height: 20)
-                                    .foregroundColor(self.color == 0 ? Color.purple : Color.orange)
-                            }
-                        }
-                        Spacer()
+                Text(data.address)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                
+                HStack(spacing: 20) {
+                    Button(action: {}) {
+                        Image(systemName: "text.bubble.fill")
+                            .resizable()
+                            .frame(width: 20, height: 20)
+                            .foregroundColor(themeColor)
+                    }
+                    .disabled(!showsComments)
+                    
+                    Button(action: {}) {
+                        Image(systemName: "hand.thumbsup.fill")
+                            .resizable()
+                            .frame(width: 20, height: 20)
+                            .foregroundColor(themeColor)
                     }
                 }
-                .padding(.leading, 10)
+                .buttonStyle(.plain)
+            }
+            .padding(.leading, 10)
+            
+            Spacer()
+            
+            VStack(alignment: .trailing, spacing: 6) {
+                Text(data.date)
+                    .frame(width: 90, height: 25)
+                    .font(.caption2)
+                    .foregroundColor(themeColor)
+                    .minimumScaleFactor(0.5)
+                    .padding(.top, 3)
                 
-                Spacer()
-                
-                VStack(alignment: .trailing) {
-                    Text(data.date)
-                        .frame(width: 90, height: 25)
-                        .font(.caption2)
-                        .foregroundColor(self.color == 0 ? Color.purple : Color.orange)
-                        .minimumScaleFactor(0.5)
-                        .padding(.top, 3)
-                    Text("$\(data.amount).00")
-                        .frame(width: 90, height: 25, alignment: .center)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
-                        .foregroundColor(Color.primary)
-                        .font(.headline)
-                    Spacer()
-                }
+                Text("$\(data.amount).00")
+                    .frame(width: 90, height: 25)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                    .foregroundColor(.primary)
+                    .font(.headline)
             }
         }
     }
-    
-    func LoadingComments() {
-        if (self.formController == "Customer") {
-            if self.data.comments == "" {
-                showComments = false
-            } else {
-                showComments = true
-            }
-        }
-    }
-
 }
 
-struct CustomerUI_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationView {
-            CustomerUI(viewModel: CustomerData())
-                .preferredColorScheme(.dark)
-        }
+#Preview("Customers - Dark") {
+    NavigationStack {
+        CustomerUI(viewModel: CustomerData())
     }
+    .preferredColorScheme(.dark)
 }
 
 class CustomerData: ObservableObject {
-    
     @Published var items = [customerItem]()
-    @Published var isLoading: Bool = false
+    @Published var isLoading = false
     
     private let db = Firestore.firestore()
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM dd yyyy"
+        return formatter
+    }()
+    private let numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .none
+        return formatter
+    }()
     
     init() {
         fetchData()
     }
     
     func fetchData() {
-        let formatter4 = DateFormatter()
-        formatter4.dateFormat = "MMM dd yyyy"
-        
-        let formatter = NumberFormatter()
-            formatter.numberStyle = .none
-        
-        self.items.removeAll()
-        db.collection("Customers").order(by: "creationDate", descending: true).addSnapshotListener { (snap, error) in
-            DispatchQueue.main.async {
-                if error != nil {
-                    print((error?.localizedDescription)!)
-                    return
-                }
-                for i in snap!.documentChanges {
-                    
-                    let id = i.document.documentID
-                    let stamp = i.document.get("creationDate") as? Timestamp
-                    let active = i.document.get("active") as? String ?? ""
-                    let first = i.document.get("first") as? String ?? ""
-                    let lastname = i.document.get("lastname") as? String ?? ""
-                    let street = i.document.get("street") as? String ?? ""
-                    let city = i.document.get("city") as? String ?? ""
-                    let state = i.document.get("state") as? String ?? ""
-                    let zip = i.document.get("zip") as? String ?? ""
-                    let amount = i.document.get("amount") as? NSNumber ?? 0
-                    let phone = i.document.get("phone") as? String ?? ""
-                    let rate = i.document.get("rate") as? String ?? ""
-                    let spouse = i.document.get("spouse") as? String ?? ""
-                    let comments = i.document.get("comments") as? String ?? ""
-                    let email = i.document.get("email") as? String ?? ""
-                    let contractor = i.document.get("contractor") as? String ?? ""
-                    let photo = i.document.get("photo") as? String ?? ""
-                    let stamp1 = i.document.get("start") as? Timestamp
-                    let stamp2 = i.document.get("completion") as? Timestamp
-                    let stamp3 = i.document.get("lastUpdate") as? Timestamp
-                    let quan = i.document.get("quan") as? NSNumber ?? 0
-                    let salesNo = i.document.get("salesNo") as? NSNumber ?? 0
-                    let jobNo = i.document.get("jobNo") as? NSNumber ?? 0
-                    let prodNo = i.document.get("prodNo") as? NSNumber ?? 0
-                    
-                    //MasterViewController.numberFormatter.numberStyle = .currency
-                    let amountString = formatter.string(from: amount)
-                    
-                    //MasterViewController.numberFormatter.numberStyle = .none
-                    let quanStr = formatter.string(from: quan)
-                    let salesStr = formatter.string(from: salesNo)
-                    let jobStr = formatter.string(from: jobNo)
-                    let prodStr = formatter.string(from: prodNo)
-                    
-                    let address = city + " " + state + " " + zip
-                    
-                    let date = formatter4.string(from: stamp?.dateValue() ?? Date())
-                    let start = formatter4.string(from: stamp1?.dateValue() ?? Date())
-                    let complete = formatter4.string(from: stamp2?.dateValue() ?? Date())
-                    let last = formatter4.string(from: stamp3?.dateValue() ?? Date())
-                    
-                    let l11 = "First"; let l21 = "Rating"
-                    let l12 = "Phone"; let l22 = "Salesman";
-                    let l13 = "Contractor"; let l23 = "Job"
-                    let l14 = "Spouse"; let l24 = "Product";
-                    let l15 = "Email"; let l25 = "Quan"
-                    let l16 = "Last Updated"; let l26 = "Start"
-                    let l17 = "Photo"; let l27 = "Complete"
-                    let l1datetext = "Sale Date:"
-                    let lnewsTitle = Config.NewsCust
-                    let status = "Edit"
-                    let formController = "Customer"
-                    
-                    self.isLoading = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-                        self?.items.append(customerItem(id: id, active: active, first: first, lastname: lastname, address: address, street: street, city: city, state: state, zip: zip, amount: amountString!, date: date, rate: rate, phone: phone, comments: comments, spouse: spouse, email: email, contractor: contractor, photo: photo, last: last, start: start, complete: complete, quan: quanStr!, salesNo: salesStr!, jobNo: jobStr ?? "", prodNo: prodStr ?? "", l11: l11, l12: l12, l13: l13, l14: l14, l15: l15, l16: l16, l17: l17, l21: l21, l22: l22, l23: l23, l24: l24, l25: l25, l26: l26, l27: l27, l1datetext: l1datetext, lnewsTitle: lnewsTitle, status: status, formController: formController))
-                        self?.isLoading = false
+        isLoading = true
+        db.collection("Customers")
+            .order(by: "creationDate", descending: true)
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let self else { return }
+                
+                DispatchQueue.main.async {
+                    if let error {
+                        print(error.localizedDescription)
+                        self.isLoading = false
+                        return
                     }
+                    
+                    guard let documents = snapshot?.documents else {
+                        self.items = []
+                        self.isLoading = false
+                        return
+                    }
+                    
+                    self.items = documents.map { self.makeCustomerItem(from: $0) }
+                    self.isLoading = false
                 }
             }
-        }
+    }
+    
+    private func makeCustomerItem(from document: QueryDocumentSnapshot) -> customerItem {
+        let stamp = document.get("creationDate") as? Timestamp
+        let startStamp = document.get("start") as? Timestamp
+        let completeStamp = document.get("completion") as? Timestamp
+        let lastStamp = document.get("lastUpdate") as? Timestamp
+        let city = document.get("city") as? String ?? ""
+        let state = document.get("state") as? String ?? ""
+        let zip = document.get("zip") as? String ?? ""
+        let amount = document.get("amount") as? NSNumber ?? 0
+        let quantity = document.get("quan") as? NSNumber ?? 0
+        let salesNo = document.get("salesNo") as? NSNumber ?? 0
+        let jobNo = document.get("jobNo") as? NSNumber ?? 0
+        let prodNo = document.get("prodNo") as? NSNumber ?? 0
+        
+        return customerItem(
+            id: document.documentID,
+            active: document.get("active") as? String ?? "",
+            first: document.get("first") as? String ?? "",
+            lastname: document.get("lastname") as? String ?? "",
+            address: [city, state, zip].filter { !$0.isEmpty }.joined(separator: " "),
+            street: document.get("street") as? String ?? "",
+            city: city,
+            state: state,
+            zip: zip,
+            amount: numberFormatter.string(from: amount) ?? "0",
+            date: dateFormatter.string(from: stamp?.dateValue() ?? Date()),
+            rate: document.get("rate") as? String ?? "",
+            phone: document.get("phone") as? String ?? "",
+            comments: document.get("comments") as? String ?? "",
+            spouse: document.get("spouse") as? String ?? "",
+            email: document.get("email") as? String ?? "",
+            contractor: document.get("contractor") as? String ?? "",
+            photo: document.get("photo") as? String ?? "",
+            last: dateFormatter.string(from: lastStamp?.dateValue() ?? Date()),
+            start: dateFormatter.string(from: startStamp?.dateValue() ?? Date()),
+            complete: dateFormatter.string(from: completeStamp?.dateValue() ?? Date()),
+            quan: numberFormatter.string(from: quantity) ?? "0",
+            salesNo: numberFormatter.string(from: salesNo) ?? "0",
+            jobNo: numberFormatter.string(from: jobNo) ?? "0",
+            prodNo: numberFormatter.string(from: prodNo) ?? "0",
+            l11: "First",
+            l12: "Phone",
+            l13: "Contractor",
+            l14: "Spouse",
+            l15: "Email",
+            l16: "Last Updated",
+            l17: "Photo",
+            l21: "Rating",
+            l22: "Salesman",
+            l23: "Job",
+            l24: "Product",
+            l25: "Quan",
+            l26: "Start",
+            l27: "Complete",
+            l1datetext: "Sale Date:",
+            lnewsTitle: Config.NewsCust,
+            status: "Edit",
+            formController: "Customer"
+        )
     }
 }
 
@@ -428,46 +435,100 @@ struct customerItem: Identifiable {
     var salesNo: String
     var jobNo: String
     var prodNo: String
-    var l11: String; var l12: String
-    var l13: String; var l14: String
-    var l15: String; var l16: String
-    var l17: String; var l21: String
-    var l22: String; var l23: String
-    var l24: String; var l25: String
-    var l26: String; var l27: String
-    var l1datetext: String; var lnewsTitle: String
-    var status: String; var formController: String
+    var l11: String
+    var l12: String
+    var l13: String
+    var l14: String
+    var l15: String
+    var l16: String
+    var l17: String
+    var l21: String
+    var l22: String
+    var l23: String
+    var l24: String
+    var l25: String
+    var l26: String
+    var l27: String
+    var l1datetext: String
+    var lnewsTitle: String
+    var status: String
+    var formController: String
+    
+    static var emptyCustomer: customerItem {
+        customerItem(
+            id: "",
+            active: "1",
+            first: "",
+            lastname: "",
+            address: "",
+            street: "",
+            city: "",
+            state: "",
+            zip: "",
+            amount: "",
+            date: "",
+            rate: "",
+            phone: "",
+            comments: "",
+            spouse: "",
+            email: "",
+            contractor: "",
+            photo: "",
+            last: "",
+            start: "",
+            complete: "",
+            quan: "",
+            salesNo: "",
+            jobNo: "",
+            prodNo: "",
+            l11: "First",
+            l12: "Phone",
+            l13: "Contractor",
+            l14: "Spouse",
+            l15: "Email",
+            l16: "Last Updated",
+            l17: "Photo",
+            l21: "Rating",
+            l22: "Salesman",
+            l23: "Job",
+            l24: "Product",
+            l25: "Quan",
+            l26: "Start",
+            l27: "Complete",
+            l1datetext: "Sale Date:",
+            lnewsTitle: Config.NewsCust,
+            status: "New",
+            formController: "Customer"
+        )
+    }
 }
 
 class PickerDataModel: ObservableObject {
-    
-    @Published var pickSalesman: [String] = []
-    @Published var pickJob: [String] = []
-    @Published var pickProduct: [String] = []
-    @Published var pickContractor: [String] = []
-    @Published var pickRate: [String] = []
+    @Published var pickSalesman = [String]()
+    @Published var pickJob = [String]()
+    @Published var pickProduct = [String]()
+    @Published var pickContractor = [String]()
+    @Published var pickRate = [String]()
     
     init() {
         getData()
     }
     
     func getData() {
-        //self.pickCallback.append(contentsOf: ["", "Sold", "follow", "Call back", "Looks Good", "Bought", "Dead", "Cancelled", "future"]
-        self.pickSalesman.append(contentsOf: [
+        pickSalesman.append(contentsOf: [
             "", "Peter Balsamo", "Adam Monteleone", "John Pellegrino", "Mike Agunzo"
         ])
-        self.pickJob.append(contentsOf: [
+        pickJob.append(contentsOf: [
             "", "Windows", "Siding", "Doors", "Roofing"
         ])
-        self.pickProduct.append(contentsOf: [
+        pickProduct.append(contentsOf: [
             "", "Alside", "Andersen", "Ideal", "Marvin"
         ])
-        self.pickContractor.append(contentsOf: [
+        pickContractor.append(contentsOf: [
             "", "A & S Home Improvement", "Islandwide Gutters", "Ashland Home Improvement", "John Kat Windows", "Jose Rosa", "Peter Balsamo"
         ])
-        self.pickRate.append(contentsOf: [
-            "5", "4","1"
+        pickRate.append(contentsOf: [
+            "5", "4", "1"
         ])
     }
 }
-

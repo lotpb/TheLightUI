@@ -16,68 +16,88 @@ struct ChartItem: Identifiable {
 
 @available(iOS 16.0, *)
 struct ChartView: View {
-    @Environment(\.dismiss) var dismiss
-    let maxWidthForIpad: CGFloat = 700
+    @Environment(\.dismiss) private var dismiss
+    private let maxWidthForIpad: CGFloat = 700
     
-    let items: [ChartItem] = [
+    private let items: [ChartItem] = [
         ChartItem(type: "Engineering", value: 100),
         ChartItem(type: "Design", value: 35),
         ChartItem(type: "Operations", value: 72),
         ChartItem(type: "Sales", value: 22),
-        ChartItem(type: "Mgmt", value: 130),
+        ChartItem(type: "Mgmt", value: 130)
     ]
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
-                
-                Chart(items) { item in
-                    BarMark(x: .value("Department", item.type),
-                            y: .value("Profit", item.value)
-                    )
-                    .foregroundStyle(Color.red.gradient)
+                VStack(spacing: 24) {
+                    ChartSection(title: "Bar", color: .red) {
+                        Chart(items) { item in
+                            BarMark(
+                                x: .value("Department", item.type),
+                                y: .value("Profit", item.value)
+                            )
+                            .foregroundStyle(Color.red.gradient)
+                        }
+                    }
+                    
+                    ChartSection(title: "Line", color: .blue) {
+                        Chart(items) { item in
+                            LineMark(
+                                x: .value("Department", item.type),
+                                y: .value("Profit", item.value)
+                            )
+                            .foregroundStyle(Color.blue.gradient)
+                        }
+                    }
+                    
+                    ChartSection(title: "Area", color: .green) {
+                        Chart(items) { item in
+                            AreaMark(
+                                x: .value("Department", item.type),
+                                y: .value("Profit", item.value)
+                            )
+                            .foregroundStyle(Color.green.gradient)
+                        }
+                    }
                 }
-                .frame(height: 200)
                 .padding()
-                
-                Chart(items) { item in
-                    LineMark(x: .value("Department", item.type),
-                            y: .value("Profit", item.value)
-                    )
-                    .foregroundStyle(Color.blue.gradient)
-                }
-                .frame(height: 200)
-                .padding()
-                
-                Chart(items) { item in
-                    AreaMark(x: .value("Department", item.type),
-                            y: .value("Profit", item.value)
-                    )
-                    .foregroundStyle(Color.green.gradient)
-                }
-                .frame(height: 200)
-                .padding()
-                
             }
             .frame(maxWidth: maxWidthForIpad)
             .navigationTitle("Charts")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
+                    Button {
                         dismiss()
-                    }) {
+                    } label: {
                         Label("Close", systemImage: "xmark.circle.fill")
                     }
                 }
             }
         }
-        
     }
 }
 
 @available(iOS 16.0, *)
-struct ChartView_Previews: PreviewProvider {
-    static var previews: some View {
-        ChartView().preferredColorScheme(.dark)
+private struct ChartSection<Content: View>: View {
+    let title: String
+    let color: Color
+    @ViewBuilder let content: Content
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label(title, systemImage: "chart.bar.xaxis")
+                .font(.headline)
+                .foregroundColor(color)
+            
+            content
+                .frame(height: 220)
+        }
     }
+}
+
+@available(iOS 16.0, *)
+#Preview("Charts - Dark") {
+    ChartView()
+        .preferredColorScheme(.dark)
 }

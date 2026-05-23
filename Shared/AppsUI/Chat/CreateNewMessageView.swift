@@ -18,41 +18,46 @@ class CreateNewMessageViewModel: ObservableObject {
     }
     
     private func fetchAllUsers() {
-        FirebaseManager.shared.firestore.collection("users").getDocuments { documentsSnapshot, error in
+        FirebaseManager.shared.firestore.collection("users").getDocuments { [weak self] documentsSnapshot, error in
             if let error = error {
-                self.errorMessage = "failed to fetch users: \(error)"
-                print("failed to fetch users: \(error)")
+                DispatchQueue.main.async {
+                    self?.errorMessage = "Failed to fetch users: \(error)"
+                }
+                print("Failed to fetch users: \(error)")
                 return
             }
             
-            documentsSnapshot?.documents.forEach({ snapshot in
-                let user = try? snapshot.data(as: UserModel.self)
-                if user?.uid != FirebaseManager.shared.auth.currentUser?.uid {
-                    self.users.append(user!)
+            let currentUserId = FirebaseManager.shared.auth.currentUser?.uid
+            let users = documentsSnapshot?.documents.compactMap { snapshot -> UserModel? in
+                guard let user = try? snapshot.data(as: UserModel.self), user.uid != currentUserId else {
+                    return nil
                 }
-                
-            })
+                return user
+            } ?? []
+            
+            DispatchQueue.main.async {
+                self?.users = users
+            }
         }
     }
 }
 
 struct CreateNewMessageView: View {
     
-    let didSelectNewUser: (UserModel) -> ()
-    let maxWidthForIpad: CGFloat = 700
+    let didSelectNewUser: (UserModel) -> Void
+    private let maxWidthForIpad: CGFloat = 700
     
-    @Environment(\.presentationMode) var presentationMode
-    
-    @ObservedObject var vm = CreateNewMessageViewModel()
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var vm = CreateNewMessageViewModel()
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView(showsIndicators: true) {
                 Text(vm.errorMessage)
                 
                 ForEach(vm.users) { user in
                     Button {
-                        presentationMode.wrappedValue.dismiss()
+                        dismiss()
                         didSelectNewUser(user)
                     } label: {
                         HStack(spacing: 16) {
@@ -67,22 +72,22 @@ struct CreateNewMessageView: View {
                             Text(user.email)
                                 .foregroundColor(.primary)
                             Spacer()
-                        }.padding(.horizontal)
-                       Divider()
+                        }
+                        .padding(.horizontal)
+                        Divider()
                             .padding(.vertical, 8)
                     }
                    
                 }
-            }.navigationTitle("New Message")
-                .toolbar {
-                    ToolbarItemGroup(placement: .navigationBarLeading) {
-                        Button {
-                            presentationMode.wrappedValue.dismiss()
-                        } label: {
-                            Text("Cancel")
-                        }
+            }
+            .navigationTitle("New Message")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
                     }
                 }
+            }
         }
         .frame(maxWidth: maxWidthForIpad)
     }
@@ -91,5 +96,6 @@ struct CreateNewMessageView: View {
 struct CreateNewMessageView_Previews: PreviewProvider {
     static var previews: some View {
         MainMessagesView()
+            .preferredColorScheme(.dark)
     }
 }

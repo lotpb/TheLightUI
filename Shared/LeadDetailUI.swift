@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import EventKit
 
 struct ListModel: Identifiable {
     var id = UUID().uuidString
@@ -28,14 +27,8 @@ struct LeadDetailUI: View {
     @State private var showSheet: Bool = false
     @State private var showFullscreen: Bool = false
     @State private var showActionSheet: Bool = false
-    @State private var showActive: Bool = false
-    @State private var height = UIScreen.main.bounds.height
-    @State private var comments = ""
-    @State private var lnewsTitle = ""
-    @State private var index = 0
-    
     @State private var showPopover = false
-    @State var showEmailComposer = false
+    @State private var showEmailComposer = false
     
     //@State var dataArray: [ListModel] = []
     
@@ -49,42 +42,41 @@ struct LeadDetailUI: View {
         let dataArray = [
             ListModel(name: detail.first, label: detail.l11),
             ListModel(name: detail.phone, label: detail.l12),
-            ListModel(name: pickerviewModel.pickContractor[contractNo], label: detail.l13),
+            ListModel(name: pickerValue(pickerviewModel.pickContractor, at: contractNo), label: detail.l13),
             ListModel(name: detail.spouse, label: detail.l14),
             ListModel(name: detail.email, label: detail.l15),
             ListModel(name: detail.last, label: detail.l16),
             ListModel(name: detail.rate, label: detail.l21),
-            ListModel(name: pickerviewModel.pickSalesman[saleNo], label: detail.l22),
-            ListModel(name: pickerviewModel.pickJob[jobNo], label: detail.l23),
-            ListModel(name: pickerviewModel.pickProduct[prodNo], label: detail.l24),
+            ListModel(name: pickerValue(pickerviewModel.pickSalesman, at: saleNo), label: detail.l22),
+            ListModel(name: pickerValue(pickerviewModel.pickJob, at: jobNo), label: detail.l23),
+            ListModel(name: pickerValue(pickerviewModel.pickProduct, at: prodNo), label: detail.l24),
             ListModel(name: "\(detail.quan)", label: detail.l25),
             ListModel(name: detail.start, label: detail.l26),
             ListModel(name: detail.complete, label: detail.l27),
             ListModel(name: detail.photo, label: detail.l17)
         ]
         
-        VStack() {
-            ScrollView(self.height > 800 ? .init() : .vertical, showsIndicators: true) {
+        VStack(spacing: 0) {
+            ScrollView(.vertical, showsIndicators: true) {
                 
                 TopViewUI(detail: $detail, showFullscreen: $showFullscreen, showingSold: $showingSold)
                 
-                ScrollView(self.height > 800 ? .init() : .vertical, showsIndicators: false) {
-                    
-                    List(dataArray) { customer in
+                LazyVStack(spacing: 8) {
+                    ForEach(dataArray) { customer in
                         CenterViewUI(formData: customer)
                     }
-                    .listStyle(.plain)
-                    .onAppear() {
-                        getSold()
-                        getActive()
-                    }
                 }
+                .onAppear() {
+                    getSold()
+                    getActive()
+                }
+                
                 BottomViewUI(detail: $detail, showPopover: $showPopover)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationTitle("Profile")
-        .navigationBarHidden(false)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarLeading) {
                 Button(action: {
@@ -106,7 +98,18 @@ struct LeadDetailUI: View {
                 })
             }
         }
-        .actionSheet(isPresented: $showActionSheet, content: getActionSheet)
+        .confirmationDialog("Pick a menu item", isPresented: $showActionSheet, titleVisibility: .visible) {
+            Button("Send Message") {}
+            Button("Add to Customer") {}
+            Button("Add to Contact") {}
+            Button("Add Calendar Event") {}
+            Button("$ pay") {}
+            Button("Web Page") {}
+            Button("Call Phone") {}
+            Button("Send Email") { showEmailComposer = true }
+            Button("Share My Location") {}
+            Button("Cancel", role: .cancel) {}
+        }
         .sheet(isPresented: $showSheet, content: {
             FormUI(detail: customerItem(id: detail.id, active: detail.active, first: detail.first, lastname: detail.lastname, address: detail.address, street: detail.street, city: detail.city, state: detail.state, zip: detail.zip, amount: detail.amount, date: detail.date, rate: detail.rate, phone: detail.phone, comments: detail.comments, spouse: detail.spouse, email: detail.email, contractor: detail.contractor, photo: detail.photo, last: detail.last, start: detail.start, complete: detail.complete, quan: detail.quan, salesNo: detail.salesNo, jobNo: detail.jobNo, prodNo: detail.prodNo, l11: "", l12: "", l13: "", l14: "", l15: "", l16: "", l17: "", l21: "", l22: "", l23: "", l24: "", l25: "", l26: "", l27: "", l1datetext: "Sale Date:", lnewsTitle: "", status: detail.status, formController: detail.formController), createDate: Date(), startDate: Date(), completeDate: Date(), status: "Edit")
         })
@@ -122,45 +125,18 @@ struct LeadDetailUI: View {
                     )
                 }
         .foregroundColor(self.color == 0 ? Color.purple : Color.orange)
-        .accentColor(self.color == 0 ? Color.purple : Color.orange)
-        .navigationViewStyle(StackNavigationViewStyle())
+        .tint(self.color == 0 ? Color.purple : Color.orange)
         .frame(maxWidth: maxWidthForIpad)
     }
-
-    func getActionSheet() -> ActionSheet {
-        let button1: ActionSheet.Button = .default(Text("Send Message"))
-        let button2: ActionSheet.Button = .default(Text("Add to Customer"))
-        let button3: ActionSheet.Button = .default(Text("Add to Contact"))
-        let button4: ActionSheet.Button = .default(Text("Add Calender Event"))
-        let button5: ActionSheet.Button = .default(Text("$ pay"))
-        let button6: ActionSheet.Button = .default(Text("Web Page"))
-        let button7: ActionSheet.Button = .default(Text("Call Phone"))
-        let button8: ActionSheet.Button = .default(Text("Send Email")) {
-            showEmailComposer = true
-        }
-        
-        let button9: ActionSheet.Button = .default(Text("Share My Location"))
-        let button10: ActionSheet.Button = .cancel()
-        
-        return ActionSheet(
-            title: Text("Pick a menu item"),
-            buttons: [button1, button2, button3, button4, button5, button6, button7, button8, button9, button10])
+    
+    private func pickerValue(_ values: [String], at index: Int) -> String {
+        guard values.indices.contains(index) else { return "" }
+        return values[index]
     }
-
     
     private func getSold() {
         if (self.detail.formController == "Customer") {
             if self.detail.rate == "5" {
-                showingSold = true
-            } else {
-                showingSold = false
-            }
-        }
-    }
-    
-    private func setupSwitch() {
-        if (self.detail.formController == "Leads") {
-            if (self.detail.first == "Sold") {
                 showingSold = true
             } else {
                 showingSold = false
@@ -176,28 +152,7 @@ struct LeadDetailUI: View {
         }
     }
     
-    func callPhone() {
-        
-    }
-    
-    private func getEmail(_ emailfield: NSString) {
-        
-    }
-    
-    private func addEvent() {
-        
-    }
-    
-    private func createContact() {
-        
-    }
-    
-    private func createEvent(_ eventStore: EKEventStore, title: String, startDate: Date, endDate: Date) {
-        
-    }
-    
-    private func getBirthday() {
-        
+    private func callPhone() {
     }
 }
 
@@ -209,6 +164,14 @@ struct TopViewUI: View {
     @Binding var detail: customerItem
     @Binding var showFullscreen: Bool
     @Binding var showingSold: Bool
+    
+    private func formattedAmount(_ raw: String) -> String {
+        if raw.trimmingCharacters(in: .whitespacesAndNewlines).hasPrefix("$") {
+            return raw
+        } else {
+            return "$" + raw
+        }
+    }
    
     var body: some View {
         
@@ -221,15 +184,13 @@ struct TopViewUI: View {
                 //.redacted(reason: .placeholder)
                 Spacer()
                 
-                Text(self.activeColor == 0 ? "Follow" : "Following").font(.system(size: 18, weight: .semibold, design: .rounded))
+                Text(detail.active == "1" ? "Following" : "Follow").font(.system(size: 18, weight: .semibold, design: .rounded))
                     .padding(.top, 10)
                 
-                Button(action: {
-                    
-                }) {
+                Button(action: toggleActive) {
                     Image(systemName: "star.fill")
                         .frame(width: 21, height: 21)
-                        .foregroundColor(self.activeColor == 0 ? Color.secondary : Color.blue)
+                        .foregroundColor(detail.active == "1" ? Color.blue : Color.secondary)
                         .padding(.top, 7).padding(.trailing, 15)
                 }
             }
@@ -241,7 +202,9 @@ struct TopViewUI: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 0) {
                         //let amountStr = NSDecimalNumber(string: "\(detail.amount).00")
-                        Text("$\(detail.amount).00").font(.largeTitle).fontWeight(.semibold)
+                        Text(formattedAmount(detail.amount))
+                            .font(.largeTitle)
+                            .fontWeight(.semibold)
                             .lineLimit(1)
                             .minimumScaleFactor(0.9)
                         Spacer()
@@ -324,6 +287,11 @@ struct TopViewUI: View {
         .clipShape(CustomShape(corner: .bottomLeft, radii: 55))
         .shadow(radius: 10)
     }
+    
+    private func toggleActive() {
+        detail.active = detail.active == "1" ? "0" : "1"
+        activeColor = detail.active == "1" ? 1 : 0
+    }
 }
 
 struct CenterViewUI : View {
@@ -342,57 +310,56 @@ struct CenterViewUI : View {
                 .minimumScaleFactor(0.5)
         }
         .font(.body)
-        //.frame(height: 20)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 8)
     }
 }
 
-struct BottomViewUI : View {
-    
+struct BottomViewUI: View {
     @AppStorage("color") var color: Int?
-    @Binding var detail : customerItem
+    @Binding var detail: customerItem
     @Binding var showPopover: Bool
     
-    var body : some View {
-        HStack {
-            VStack {
-                VStack() {
-                    HStack {
-                        Text(detail.lnewsTitle)
-                            .foregroundColor(.secondary)
-                            .frame(maxWidth: .infinity, maxHeight: 55, alignment: .topLeading)
-                            .lineLimit(2)
-                            .font(.body)
-                    }
-                    
-                    HStack(spacing: 0) {
-                        Text("Comments").foregroundColor(self.color == 0 ? Color.purple : Color.orange)
-                            .lineLimit(1)
-                        
-                        Spacer()
-                        
-                        Button {
-                            showPopover = true
-                        } label: {
-                            Text("Read more").foregroundColor(self.color == 0 ? Color.purple : Color.orange)
-                                .lineLimit(1)
-                        }
-                        .popover(isPresented: $showPopover) {
-                            PopoverContent(detail: $detail)
-                        }
-                    }
-                    .padding(.top, -16)
-                    .font(.caption)
-                    
-                    Text(detail.comments)
-                        .foregroundColor(Color.primary)
-                        .frame( maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, alignment: .topLeading)
-                        .cornerRadius(10)
-                        .textSelection(.enabled)
+    private var accentColor: Color {
+        color == 0 ? Color.purple : Color.orange
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(detail.lnewsTitle)
+                .foregroundColor(.secondary)
+                .lineLimit(2)
+                .font(.body)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+            
+            HStack(spacing: 12) {
+                Text("Comments")
+                    .foregroundColor(accentColor)
+                    .lineLimit(1)
+                
+                Spacer()
+                
+                Button {
+                    showPopover = true
+                } label: {
+                    Text("Read more")
+                        .foregroundColor(accentColor)
+                        .lineLimit(1)
                 }
-                .padding(.leading, 20).padding(.trailing, 20)
+                .popover(isPresented: $showPopover) {
+                    PopoverContent(detail: $detail)
+                }
             }
-            .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, maxHeight: 100)
+            .font(.caption)
+            
+            Text(detail.comments)
+                .foregroundColor(.primary)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .textSelection(.enabled)
         }
+        .padding(.horizontal, 20)
+        .padding(.top, 18)
+        .padding(.bottom, 24)
     }
 }
 
@@ -428,7 +395,9 @@ struct LeadDetailUI_Previews: PreviewProvider {
             LeadDetailUI(detail: customerItem(
                 id: "8899999", active: "1", first: "Peter", lastname: "Balsamo", address: "Massapequa Ny 11758", street: "1142 Hicksville Road", city: "", state: "", zip: "", amount: "$5000.00", date:"Mar 30 2021", rate: "5", phone: "516-241-4786", comments: "Hello", spouse: "Janet", email: "email.com", contractor: "Jose", photo: "none", last: "Mar 12 1989", start: "Mar 7 2090", complete: "Nov 23 1958", quan: "5", salesNo: "", jobNo: "", prodNo: "", l11: "First", l12: "Phone", l13: "Contractor", l14: "Spouse", l15: "Email", l16: "Last Updated", l17: "Photo", l21: "Rating", l22: "Salesman", l23: "Job", l24: "Product", l25: "Quan", l26: "Start", l27: "Completion", l1datetext: "Sale Date:", lnewsTitle: "Comment News:", status: "Edit", formController: "Customer"
             ))
-                //.environmentObject(pickerviewModel)
-                .preferredColorScheme(.dark)
+            .environmentObject(CustomerData())
+            .environmentObject(PickerDataModel())
+            .preferredColorScheme(.dark)
        }
 }
+

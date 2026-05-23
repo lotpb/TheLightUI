@@ -8,86 +8,108 @@
 import SwiftUI
 
 struct FurnitureDetail: View {
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
-    let maxWidthForIpad: CGFloat = 700
+    @Environment(\.dismiss) private var dismiss
     
-    // Hiding Tab Bar... //fix not working
-    init() {
-        UITabBar.appearance().isHidden = true
+    private let product: FurnitureDetailProduct
+    private let maxWidthForIpad: CGFloat = 700
+    
+    init(product: FurnitureDetailProduct = .defaultProduct) {
+        self.product = product
     }
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             CustomColor.linenColor
-            ScrollView(showsIndicators: true)  {
-                //Product Image
-                    Image("chair_1")
-                        .resizable()
-                        .aspectRatio(1,contentMode: .fit)
-                        .edgesIgnoringSafeArea(.top)
+                .ignoresSafeArea()
+            
+            ScrollView(showsIndicators: true) {
+                Image(product.imageName)
+                    .resizable()
+                    .aspectRatio(1, contentMode: .fit)
+                    .ignoresSafeArea(edges: .top)
                 
-                DescriptionView()
-                
+                DescriptionView(product: product)
             }
             .foregroundColor(.black)
-            .edgesIgnoringSafeArea(.top)
+            .ignoresSafeArea(edges: .top)
             
-            HStack {
-                Text("$1299")
-                    .font(.title)
-                    .foregroundColor(.black)
-                Spacer()
-                
-                Text("Add to Cart")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .foregroundColor(Color.black)
-                    .padding()
-                    .padding(.horizontal, 8)
-                    .background(Color.white)
-                    .cornerRadius(10.0)
-                
-            }
-            .padding()
-            .padding(.horizontal)
-            .background(Color.white)
-            .cornerRadius(60.0, corners: .topLeft)
-            .frame(maxHeight: .infinity, alignment: .bottom)
-            .edgesIgnoringSafeArea(.bottom)
+            bottomBar
         }
         .frame(maxWidth: maxWidthForIpad)
         .navigationBarBackButtonHidden(true)
-        .navigationBarItems(leading: BackButton(action: {presentationMode.wrappedValue.dismiss()}), trailing: Image(systemName: "star"))
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                BackButton {
+                    dismiss()
+                }
+            }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {}) {
+                    Image(systemName: "star")
+                        .foregroundColor(.black)
+                }
+            }
+        }
     }
-       
+    
+    private var bottomBar: some View {
+        HStack {
+            Text(product.price)
+                .font(.title)
+                .foregroundColor(.black)
+            Spacer()
+            
+            Button(action: {}) {
+                Text("Add to Cart")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.black)
+                    .padding()
+                    .padding(.horizontal, 8)
+                    .background(Color.white)
+                    .cornerRadius(10)
+            }
+        }
+        .padding()
+        .padding(.horizontal)
+        .background(Color.white)
+        .clipShape(CustomCorners(corners: .topLeft, radius: 60))
+        .ignoresSafeArea(edges: .bottom)
+    }
 }
 
-
-struct RoundedCorner: Shape {
-
-    var radius: CGFloat = .infinity
-    var corners: UIRectCorner = .allCorners
-
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
-        return Path(path.cgPath)
-    }
+struct FurnitureDetailProduct {
+    let title: String
+    let imageName: String
+    let price: String
+    let rating: Double
+    let description: String
+    let sizes: [String]
+    let treatment: String
+    let colors: [Color]
+    
+    static let defaultProduct = FurnitureDetailProduct(
+        title: "Luxury Swedish Chair",
+        imageName: "chair_1",
+        price: "$1299",
+        rating: 4.9,
+        description: "Luxury Swedish Chair is a contemporary chair based on the virtues of modern craft. It carries on the simplicity and honesty of the archetypal chair.",
+        sizes: ["Height: 120 cm", "Wide: 80 cm", "Diameter: 72 cm"],
+        treatment: "Jati Wood, Canvas,\nAmazing Love",
+        colors: [.white, .black, Color(red: 0.18, green: 0.64, blue: 0.67)]
+    )
 }
 
-extension View {
-    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape(RoundedCorner(radius: radius, corners: corners) )
-    }
-}
-
-struct FurnitureDetail_Previews: PreviewProvider {
-    static var previews: some View {
+#Preview("Furniture Detail") {
+    NavigationStack {
         FurnitureDetail()
     }
 }
 
-struct ColorDotView: View {
+private struct ColorDotView: View {
     let color: Color
+    
     var body: some View {
         color
             .frame(width: 24, height: 24)
@@ -95,119 +117,131 @@ struct ColorDotView: View {
     }
 }
 
-struct DescriptionView: View {
+private struct DescriptionView: View {
+    let product: FurnitureDetailProduct
+    @State private var quantity = 1
+    
     var body: some View {
-        VStack (alignment: .leading) {
-            //                Title
-            Text("Luruxy Swedia \nChair")
+        VStack(alignment: .leading, spacing: 12) {
+            Text(product.title)
                 .font(.title)
                 .fontWeight(.bold)
-            //                Rating
-            HStack (spacing: 4) {
-                ForEach(0 ..< 5) { item in
-                    Image(systemName: "star")
-                }
-                Text("(4.9)")
-                    .opacity(0.5)
-                    .padding(.leading, 8)
-                Spacer()
-            }
             
-            Text("Description")
-                .fontWeight(.medium)
-                .padding(.vertical, 8)
-            Text("Luxury Swedian Chair is a contemporary chair based on the virtues of modern craft. it carries on the simplicity and honestly of the archetypical chair.")
-                .lineSpacing(8.0)
-                .opacity(0.6)
-            
-            //                Info
-            HStack (alignment: .top) {
-                VStack (alignment: .leading) {
-                    Text("Size")
-                        .font(.system(size: 16))
-                        .fontWeight(.semibold)
-                    Text("Height: 120 cm")
-                        .opacity(0.6)
-                    Text("Wide: 80 cm")
-                        .opacity(0.6)
-                    Text("Diameter: 72 cm")
-                        .opacity(0.6)
-                }
-                
-                .frame(maxWidth: .infinity, alignment: .leading)
-                
-                Spacer()
-                
-                VStack (alignment: .leading) {
-                    Text("Treatment")
-                        .font(.system(size: 16))
-                        .fontWeight(.semibold)
-                    Text("Jati Wood, Canvas, \nAmazing Love")
-                        .opacity(0.6)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .padding(.vertical)
-            
-            //                Colors and Counter
-            HStack {
-                VStack (alignment: .leading) {
-                    Text("Colors")
-                        .fontWeight(.semibold)
-                    HStack {
-                        ColorDotView(color: Color.white)
-                        ColorDotView(color: Color.black)
-                        ColorDotView(color: Color(#colorLiteral(red: 0.1803921569, green: 0.6352941176, blue: 0.6705882353, alpha: 1)))
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                
-                HStack {
-                    //                        Minus Button
-                    Button(action: {}) {
-                        Image(systemName: "minus")
-                            .padding(.all, 8)
-                        
-                    }
-                    .frame(width: 30, height: 30)
-                    .overlay(RoundedCorner(radius: 50).stroke())
-                    .foregroundColor(.black)
-                    
-                    Text("1")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .padding(.horizontal, 8)
-                    
-                    //                        Plus Button
-                    Button(action: {}) {
-                        Image(systemName: "plus")
-                            .foregroundColor(.black)
-                            .padding(.all, 8)
-                            .background(Color.white)
-                            .clipShape(Circle())
-                    }
-                }
-                
-            }
-            
+            ratingView
+            descriptionSection
+            infoSection
+            colorsAndQuantitySection
         }
         .padding()
         .padding(.top)
         .background(CustomColor.linenColor)
-        .cornerRadius(30, corners: [.topLeft, .topRight])
-        .offset(x: 0, y: -30.0)
+        .clipShape(CustomCorners(corners: [.topLeft, .topRight], radius: 30))
+        .offset(y: -30)
+    }
+    
+    private var ratingView: some View {
+        HStack(spacing: 4) {
+            ForEach(0..<5, id: \.self) { index in
+                Image(systemName: Double(index) < product.rating.rounded(.down) ? "star.fill" : "star")
+            }
+            Text("(\(product.rating, specifier: "%.1f"))")
+                .opacity(0.5)
+                .padding(.leading, 8)
+            Spacer()
+        }
+    }
+    
+    private var descriptionSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Description")
+                .fontWeight(.medium)
+            Text(product.description)
+                .lineSpacing(8)
+                .opacity(0.6)
+        }
+        .padding(.vertical, 8)
+    }
+    
+    private var infoSection: some View {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Size")
+                    .font(.system(size: 16))
+                    .fontWeight(.semibold)
+                ForEach(product.sizes, id: \.self) { size in
+                    Text(size)
+                        .opacity(0.6)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Spacer()
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Treatment")
+                    .font(.system(size: 16))
+                    .fontWeight(.semibold)
+                Text(product.treatment)
+                    .opacity(0.6)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.vertical)
+    }
+    
+    private var colorsAndQuantitySection: some View {
+        HStack {
+            VStack(alignment: .leading) {
+                Text("Colors")
+                    .fontWeight(.semibold)
+                HStack {
+                    ForEach(Array(product.colors.enumerated()), id: \.offset) { _, color in
+                        ColorDotView(color: color)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            HStack {
+                Button {
+                    quantity = max(1, quantity - 1)
+                } label: {
+                    Image(systemName: "minus")
+                        .padding(8)
+                }
+                .frame(width: 30, height: 30)
+                .overlay(Circle().stroke())
+                .foregroundColor(.black)
+                
+                Text("\(quantity)")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, 8)
+                
+                Button {
+                    quantity += 1
+                } label: {
+                    Image(systemName: "plus")
+                        .foregroundColor(.black)
+                        .padding(8)
+                        .background(Color.white)
+                        .clipShape(Circle())
+                }
+            }
+        }
     }
 }
 
-struct BackButton: View {
+private struct BackButton: View {
     let action: () -> Void
+    
     var body: some View {
         Button(action: action) {
             Image(systemName: "chevron.backward")
                 .foregroundColor(.black)
-                .padding(.all, 12)
+                .padding(12)
                 .background(Color.white)
-                .cornerRadius(8.0)
+                .cornerRadius(8)
         }
     }
 }

@@ -8,46 +8,113 @@
 
 import SwiftUI
 
+// MARK: - GradientUI
+@MainActor
 struct GradientUI: View {
-    
-    let timer = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
-//
-//    @State var timeRemaining: String = ""
-//
-//    let futureDate: Date = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
-//
-//    func updateTimeRemaining() {
-//
-//    }
-    
+    fileprivate enum Layout {
+        static let titleSize: CGFloat = 60
+        static let titlePadding: CGFloat = 28
+        static let stackSpacing: CGFloat = 18
+        static let subtitleTracking: CGFloat = 1.5
+        static let topHighlightHeight: CGFloat = 180
+        static let topHighlightBlur: CGFloat = 28
+    }
+
     var body: some View {
         ZStack {
-            RadialGradient(
-                gradient: Gradient(colors: [Color(#colorLiteral(red: 0.3647058904, green: 0.06666667014, blue: 0.9686274529, alpha: 1)), Color(#colorLiteral(red: 0.06274510175, green: 0, blue: 0.1921568662, alpha: 1))]),
-                center: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/,
-                startRadius: /*@START_MENU_TOKEN@*/5/*@END_MENU_TOKEN@*/,
-                endRadius: /*@START_MENU_TOKEN@*/500/*@END_MENU_TOKEN@*/)
-                .ignoresSafeArea()
-            
-            
-            Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-                .font(.system(size: 100, weight: .semibold, design: .rounded))
-                .foregroundColor(.white)
-                .lineLimit(1)
-                .minimumScaleFactor(0.1)
-                .padding()
+            GradientBackground()
+
+            VStack(spacing: Layout.stackSpacing) {
+                TitleText("TheLight")
+                SubtitleText("Software")
+            }
+            .padding(.horizontal, Layout.titlePadding)
+            .multilineTextAlignment(.center)
+            // Accessibility: combine for a concise announcement
+            .accessibilityElement(children: .combine)
         }
-        .onReceive(timer, perform: { _ in
-            //updateTimeRemaining()
-        })
-        
     }
 }
 
-@available(iOS 15.0, *)
-struct GradientUI_Previews: PreviewProvider {
-    static var previews: some View {
-        GradientUI()
-        .previewInterfaceOrientation(.portrait)
+// MARK: - Reusable Text Components
+private struct TitleText: View {
+    let text: String
+    init(_ text: String) { self.text = text }
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: GradientUI.Layout.titleSize, weight: .bold, design: .rounded))
+            .foregroundColor(.white)
+            .lineLimit(1)
+            .minimumScaleFactor(0.45)
+            .accessibilityAddTraits(.isHeader)
     }
 }
+
+private struct SubtitleText: View {
+    let text: String
+    init(_ text: String) { self.text = text }
+
+    var body: some View {
+        Text(text)
+            .font(.headline)
+            .fontWeight(.semibold)
+            .foregroundColor(.white.opacity(0.78))
+            .textCase(.uppercase)
+            .tracking(GradientUI.Layout.subtitleTracking)
+    }
+}
+
+// MARK: - Background
+private struct GradientBackground: View {
+    private enum Colors {
+        static let radialStart = Color(red: 0.42, green: 0.16, blue: 0.95)
+        static let radialEnd = Color(red: 0.04, green: 0.02, blue: 0.16)
+        static let linearStart = Color.cyan.opacity(0.0)
+        static let linearMid = Color.clear
+        static let linearEnd = Color.pink.opacity(0.0)
+        static let topHighlight = Color.white.opacity(0.00)
+    }
+
+    private enum Metrics {
+        static let radialStartRadius: CGFloat = 5
+        static let radialEndRadius: CGFloat = 550
+        static let topHighlightHeight: CGFloat = GradientUI.Layout.topHighlightHeight
+        static let topHighlightBlur: CGFloat = GradientUI.Layout.topHighlightBlur
+    }
+
+    var body: some View {
+        ZStack {
+            RadialGradient(
+                colors: [Colors.radialStart, Colors.radialEnd],
+                center: .center,
+                startRadius: Metrics.radialStartRadius,
+                endRadius: Metrics.radialEndRadius
+            )
+
+            LinearGradient(
+                colors: [Colors.linearStart, Colors.linearMid, Colors.linearEnd],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+
+            VStack(spacing: 0) {
+                Colors.topHighlight
+                    .frame(height: Metrics.topHighlightHeight)
+                    .blur(radius: Metrics.topHighlightBlur)
+
+                Spacer(minLength: 0)
+            }
+        }
+        .ignoresSafeArea()
+        // Performance: gradients are cheap; avoid unnecessary overlays/clipping
+        .drawingGroup(opaque: false, colorMode: .extendedLinear)
+    }
+}
+
+// MARK: - Preview
+@available(iOS 17.0, *)
+#Preview("Gradient UI", traits: .portrait) {
+    GradientUI()
+}
+

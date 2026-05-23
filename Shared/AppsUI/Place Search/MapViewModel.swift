@@ -6,7 +6,6 @@
 //  Copyright © 2021 Peter Balsamo. All rights reserved.
 //
 
-import SwiftUI
 import MapKit
 import CoreLocation
 
@@ -16,7 +15,7 @@ class MapViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var mapView = MKMapView()
     
     // Region
-    @Published var region: MKCoordinateRegion!
+    @Published var region = MKCoordinateRegion.defaultRegion
     // Based on Location it will set up
     
     // Alert
@@ -30,18 +29,24 @@ class MapViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     // Search Places
     func searchQuery() {
+        let trimmedSearchText = searchTxt.trimmingCharacters(in: .whitespacesAndNewlines)
         places.removeAll()
+        guard !trimmedSearchText.isEmpty else { return }
         
         let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = searchTxt
+        request.naturalLanguageQuery = trimmedSearchText
         
         // Fetch
-        MKLocalSearch(request: request).start { (response, _) in
+        MKLocalSearch(request: request).start { [weak self] response, _ in
             guard let result = response else { return }
             
-            self.places = result.mapItems.compactMap({ (item) -> Place? in
-                return Place(placemark: item.placemark)
-            })
+            let places = result.mapItems.map { item in
+                Place(placemark: item.placemark)
+            }
+            
+            DispatchQueue.main.async {
+                self?.places = places
+            }
         }
     }
     

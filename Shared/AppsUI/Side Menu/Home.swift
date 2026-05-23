@@ -51,7 +51,7 @@ struct HomePage: View {
     
     var body: some View{
         
-        NavigationView{
+        NavigationStack{
             
             ScrollView(.vertical, showsIndicators: false) {
                 
@@ -87,7 +87,7 @@ struct History: View {
     
     var body: some View{
         
-        NavigationView{
+        NavigationStack{
             
             Text("History")
                 .font(.largeTitle)
@@ -102,7 +102,7 @@ struct Notifications: View {
     
     var body: some View{
         
-        NavigationView{
+        NavigationStack{
             
             Text("Notifications")
                 .font(.largeTitle)
@@ -117,7 +117,7 @@ struct Settings: View {
     
     var body: some View{
         
-        NavigationView{
+        NavigationStack{
             
             Text("Settings")
                 .font(.largeTitle)
@@ -132,7 +132,7 @@ struct Help: View {
     
     var body: some View{
         
-        NavigationView{
+        NavigationStack{
             
             Text("Help")
                 .font(.largeTitle)

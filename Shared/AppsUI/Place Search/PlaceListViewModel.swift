@@ -7,48 +7,49 @@
 
 import Foundation
 import Combine
-//import CoreLocation
 import MapKit
-import SwiftUI
 
 
 class PlaceListViewModel: ObservableObject {
     
-    @State var locationManager = LocationManager()
-    var cancellable: AnyCancellable?
+    private let locationManager = LocationManager()
+    private var cancellable: AnyCancellable?
     @Published var currentLocation: CLLocationCoordinate2D?
     @Published var landMarks: [LandMark] = []
     
     init() {
-        //locationManager.startUpdates()
-        
-        cancellable = locationManager.$location.sink { location in
-            if let location = location {
-                DispatchQueue.main.async { [self] in
-                    self.currentLocation = location.coordinate
-                    self.locationManager.stopUpdating()///not working
-                }
-                
+        cancellable = locationManager.$location.sink { [weak self] location in
+            guard let self, let location else { return }
+            DispatchQueue.main.async {
+                self.currentLocation = location.coordinate
+                self.locationManager.stopUpdating()
             }
         }
     }
     
     func searchLandmarks(_ searchTerm: String) {
+        let trimmedSearchTerm = searchTerm.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedSearchTerm.isEmpty else {
+            landMarks = []
+            return
+        }
         
         let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = searchTerm
+        request.naturalLanguageQuery = trimmedSearchTerm
         
         let search = MKLocalSearch(request: request)
-        search.start { response, error in
+        search.start { [weak self] response, error in
             if let error = error {
                 print(error)
-            } else if let response = response {
-                
-                let mapItems = response.mapItems
-                // populate the landmarks
-                self.landMarks = mapItems.map { mapItem in
-                    return LandMark(display_phone: "", placemark: mapItem.placemark)
-                }
+                return
+            }
+            
+            let landMarks = response?.mapItems.map { mapItem in
+                LandMark(displayPhone: "", placemark: mapItem.placemark)
+            } ?? []
+            
+            DispatchQueue.main.async {
+                self?.landMarks = landMarks
             }
         }
     }

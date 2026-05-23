@@ -12,7 +12,7 @@ import MapKit
 struct LandMark: Identifiable {
     let id: UUID = UUID()
     
-    let display_phone: String
+    let displayPhone: String
     
     let placemark: MKPlacemark
     

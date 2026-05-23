@@ -10,8 +10,7 @@ import SwiftUI
 @available(iOS 15.0, *)
 struct HalfSheet: View {
     var body: some View {
-        
-        HSheet()
+        HalfSheetDemoView()
     }
 }
 
@@ -23,127 +22,160 @@ struct HalfSheet_Previews: PreviewProvider {
 }
 
 @available(iOS 15.0, *)
-struct HSheet: View {
-    
-    @State var showSheet: Bool = false
-    
+private struct HalfSheetDemoView: View {
+    @State private var showSheet = false
+
     var body: some View {
-        
         NavigationView {
-            Button {
-                showSheet.toggle()
-            } label: {
-                
-                Text("Present Sheet")
-            }
-            .navigationTitle("half Modal Sheet")
-            .halfsheet(showSheet: $showSheet) {
-                
-                ZStack {
-                    
-                    Color.red
-                    
-                    VStack {
-                        Text("hello iJustine")
-                            .font(.title.bold())
-                            .foregroundColor(.white)
-                        
-                        Button {
-                            showSheet.toggle()
-                        } label: {
-                            
-                            Text("Close From Sheet")
-                                .foregroundColor(.white)
-                        }
-                        .padding()
-                    }
+            VStack(spacing: 20) {
+                Image(systemName: "rectangle.bottomthird.inset.filled")
+                    .font(.system(size: 54))
+                    .foregroundColor(.accentColor)
+
+                Text("Present a UIKit-backed half sheet with medium and large detents.")
+                    .font(.headline)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal)
+
+                Button {
+                    showSheet = true
+                } label: {
+                    Text("Present Sheet")
+                        .fontWeight(.semibold)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 12)
                 }
-                .ignoresSafeArea()
-            } onEnd: {
-                print("Dismissed")
+                .buttonStyle(.borderedProminent)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .navigationTitle("Half Modal Sheet")
+            .halfSheet(showSheet: $showSheet) {
+                SheetSampleContent {
+                    showSheet = false
+                }
+            } onDismiss: {
+                showSheet = false
             }
         }
+    }
+}
+
+@available(iOS 15.0, *)
+private struct SheetSampleContent: View {
+    let onClose: () -> Void
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [Color.red, Color.pink],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+
+            VStack(spacing: 18) {
+                Image(systemName: "sparkles")
+                    .font(.largeTitle)
+                    .foregroundColor(.white)
+
+                Text("Hello iJustine")
+                    .font(.title.bold())
+                    .foregroundColor(.white)
+
+                Button {
+                    onClose()
+                } label: {
+                    Text("Close Sheet")
+                        .fontWeight(.semibold)
+                        .foregroundColor(.red)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 10)
+                        .background(Color.white)
+                        .clipShape(Capsule())
+                }
+            }
+        }
+        .ignoresSafeArea()
     }
 }
 
 @available(iOS 15.0, *)
 extension View {
-    
-    func halfsheet<SheetView: View>(showSheet: Binding<Bool>,@ViewBuilder sheetView: @escaping ()->SheetView, onEnd: @escaping ()->())->some View {
-        
-        return self
-            .background(
-                HalfSheetHelper(sheetView: sheetView(), showSheet: showSheet, onEnd: onEnd)
+    func halfSheet<SheetView: View>(
+        showSheet: Binding<Bool>,
+        @ViewBuilder sheetView: @escaping () -> SheetView,
+        onDismiss: @escaping () -> Void = {}
+    ) -> some View {
+        background(
+            HalfSheetPresenter(
+                sheetView: sheetView(),
+                showSheet: showSheet,
+                onDismiss: onDismiss
             )
+        )
     }
 }
 
 @available(iOS 15.0, *)
-struct HalfSheetHelper<SheetView: View>: UIViewControllerRepresentable {
-    
-    var sheetView: SheetView
+private struct HalfSheetPresenter<SheetView: View>: UIViewControllerRepresentable {
+    let sheetView: SheetView
     @Binding var showSheet: Bool
-    var onEnd: ()->()
-    
-    let controller = UIViewController()
-    
+    let onDismiss: () -> Void
+
     func makeCoordinator() -> Coordinator {
-        
-        return Coordinator(parent: self)
+        Coordinator(parent: self)
     }
-    
+
     func makeUIViewController(context: Context) -> UIViewController {
-        
+        let controller = UIViewController()
         controller.view.backgroundColor = .clear
-        
         return controller
     }
-    
+
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
-        
+        context.coordinator.parent = self
+
         if showSheet {
-            
-            let sheetController = CustomHostingController(rootView: sheetView)
+            if let sheetController = uiViewController.presentedViewController as? HalfSheetHostingController<SheetView> {
+                sheetController.rootView = sheetView
+                return
+            }
+
+            guard uiViewController.presentedViewController == nil else { return }
+
+            let sheetController = HalfSheetHostingController(rootView: sheetView)
             sheetController.presentationController?.delegate = context.coordinator
             uiViewController.present(sheetController, animated: true)
-            
-        }
-        else {
+        } else if uiViewController.presentedViewController != nil {
             uiViewController.dismiss(animated: true)
         }
     }
-    
-    class Coordinator: NSObject,UISheetPresentationControllerDelegate {
-        
-        var parent: HalfSheetHelper
-        
-        init(parent: HalfSheetHelper) {
+
+    final class Coordinator: NSObject, UISheetPresentationControllerDelegate {
+        var parent: HalfSheetPresenter
+
+        init(parent: HalfSheetPresenter) {
             self.parent = parent
         }
-        
+
         func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-            
             parent.showSheet = false
-            parent.onEnd()
+            parent.onDismiss()
         }
     }
 }
 
 @available(iOS 15.0, *)
-class CustomHostingController<Content: View>: UIHostingController<Content> {
-    
+private final class HalfSheetHostingController<Content: View>: UIHostingController<Content> {
     override func viewDidLoad() {
-        
+        super.viewDidLoad()
+
         view.backgroundColor = .clear
-        
+
         if let presentationController = presentationController as? UISheetPresentationController {
-            
-            presentationController.detents = [
-                .medium(),
-                .large()
-            ]
-            
+            presentationController.detents = [.medium(), .large()]
             presentationController.prefersGrabberVisible = true
+            presentationController.preferredCornerRadius = 24
         }
     }
 }

@@ -8,73 +8,59 @@
 import SwiftUI
 import SafariServices
 
-
 struct WebUI: View {
-    @State private var showCNN: Bool = false
-    @State private var showDrudge: Bool = false
-    @State private var showBongino: Bool = false
-    @State private var showBlaze: Bool = false
+    @State private var selectedBookmark: WebBookmark?
+    
+    private let bookmarks = WebBookmark.defaultBookmarks
     
     var body: some View {
-        NavigationView {
-            List {
-                Label("Bongino Report", systemImage: "book")
-                    .onTapGesture {
-                        showBongino.toggle()
-                    }
-                    .fullScreenCover(isPresented: $showBongino, content: {
-                        SFSafariViewWrapper(url: URL(string: "https://bonginoreport.com")!)
-                    })
-                
-                Label("Blaze", systemImage: "book")
-                    .onTapGesture {
-                        showBlaze.toggle()
-                    }
-                    .fullScreenCover(isPresented: $showBlaze, content: {
-                        SFSafariViewWrapper(url: URL(string: "https://www.theblaze.com")!)
-                    })
-                
-                Label("Drudge Report", systemImage: "book")
-                    .onTapGesture {
-                        showDrudge.toggle()
-                    }
-                    .fullScreenCover(isPresented: $showDrudge, content: {
-                        SFSafariViewWrapper(url: URL(string: "https://www.drudgereport.com")!)
-                    })
-                
-                Label("CNN", systemImage: "book")
-                    .onTapGesture {
-                        showCNN.toggle()
-                    }
-                    .fullScreenCover(isPresented: $showCNN, content: {
-                        SFSafariViewWrapper(url: URL(string: "https://www.cnn.com")!)
-                    })
-            }
-            .onAppear {
-                withAnimation(.spring()) {
-                    showCNN.toggle()
+        NavigationStack {
+            List(bookmarks) { bookmark in
+                Button {
+                    selectedBookmark = bookmark
+                } label: {
+                    Label(bookmark.title, systemImage: bookmark.systemImage)
                 }
             }
             .navigationTitle("Bookmarks")
+            .sheet(item: $selectedBookmark) { bookmark in
+                SFSafariViewWrapper(url: bookmark.url)
+                    .ignoresSafeArea()
+            }
         }
     }
 }
 
+private struct WebBookmark: Identifiable {
+    let id = UUID()
+    let title: String
+    let url: URL
+    let systemImage: String
+    
+    static let defaultBookmarks: [WebBookmark] = [
+        ("Apple", "https://apple.com", "book"),
+        ("Google News", "https://news.google.com", "book"),
+        ("Bongino Report", "https://bonginoreport.com", "book"),
+        ("Blaze", "https://www.theblaze.com", "book"),
+        ("Drudge Report", "https://www.drudgereport.com", "book"),
+        ("CNN", "https://www.cnn.com", "book")
+    ].compactMap { title, urlString, systemImage in
+        guard let url = URL(string: urlString) else { return nil }
+        return WebBookmark(title: title, url: url, systemImage: systemImage)
+    }
+}
 
 struct SFSafariViewWrapper: UIViewControllerRepresentable {
     let url: URL
 
-    func makeUIViewController(context: UIViewControllerRepresentableContext<Self>) -> SFSafariViewController {
-        return SFSafariViewController(url: url)
+    func makeUIViewController(context: Context) -> SFSafariViewController {
+        SFSafariViewController(url: url)
     }
 
-    func updateUIViewController(_ uiViewController: SFSafariViewController, context: UIViewControllerRepresentableContext<SFSafariViewWrapper>) {
-        return
-    }
+    func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) { }
 }
 
-struct WebUI_Previews: PreviewProvider {
-    static var previews: some View {
-        WebUI().preferredColorScheme(.dark)
-    }
+#Preview("Bookmarks - Dark") {
+    WebUI()
+        .preferredColorScheme(.dark)
 }

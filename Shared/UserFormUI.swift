@@ -1,9 +1,8 @@
 //
-//  UserDetail.swift
-//  TheLight2
+//  UserFormUI.swift
+//  TheLightUI (iOS)
 //
 //  Created by Peter Balsamo on 4/30/21.
-//  Copyright © 2021 Peter Balsamo. All rights reserved.
 //
 
 import SwiftUI
@@ -11,64 +10,86 @@ import MapKit
 import SDWebImageSwiftUI
 
 struct UserFormUI: View {
-    @State private var vm = MainMessagesViewModel()
-    @State private var directions: [String] = []
-    //@AppStorage(SettingsUI.latitudeKey) var latitude: Double = 0
-    //@AppStorage(SettingsUI.longtitudeKey) var longtitude: Double = 0
+    @StateObject private var viewModel = MainMessagesViewModel()
     
-    @State private var coordinateRegion: MKCoordinateRegion = MKCoordinateRegion(
-            center: CLLocationCoordinate2DMake(40.71, -74),
-            span: MKCoordinateSpan.init(latitudeDelta: 0.5, longitudeDelta: 0.5)
-        )
+    @State private var coordinateRegion = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: 40.71, longitude: -74),
+        span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
+    )
     @State private var trackingMode: MapUserTrackingMode = .follow
+    
+    private let profileName = "Peter Balsamo"
+    private let profileCity = "Delray Beach"
+    private let profileState = "Florida"
+    private let profileTitle = "President"
+    private let profileDescription = "I am the owner of the company"
     
     var body: some View {
         ScrollView(showsIndicators: true) {
-            Map(coordinateRegion: $coordinateRegion, interactionModes: .zoom, showsUserLocation: true, userTrackingMode: $trackingMode)
-                .ignoresSafeArea(edges: .top)
-                .frame(height: 300)
-                .cornerRadius(10)
-                .shadow(radius: 4)
-
-            //Image("taylor_swift_profile")
-            WebImage(url: URL(string: vm.chatUser?.profileImageUrl ?? ""))
-                .resizable()
-                .scaledToFill()
-                .frame(width: 200, height: 200)
-                .clipShape(Circle())//.clipped()
-                .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                .offset(y: -130)
-                .padding(.bottom, -130)
-
-            VStack(alignment: .leading) {
-                Text("Peter Balsamo")
-                    .font(.title)
-                    .foregroundColor(.primary)
-
-                HStack {
-                    Text("Massapequa")
-                    Spacer()
-                    Text("New York")
-                }
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-
-                Divider()
-
-                Text("President")
-                    .font(.title2)
-                Text("I am the owner of the company")
-            }
-            .padding()
+            profileMap
+            profileImage
+            profileDetails
         }
         .navigationTitle("Profile")
         .navigationBarTitleDisplayMode(.inline)
     }
+    
+    private var profileMap: some View {
+        Map(
+            coordinateRegion: $coordinateRegion,
+            interactionModes: .all,
+            showsUserLocation: true,
+            userTrackingMode: $trackingMode
+        )
+        .ignoresSafeArea(edges: .top)
+        .frame(height: 300)
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .shadow(radius: 4)
+    }
+    
+    private var profileImage: some View {
+        WebImage(url: URL(string: viewModel.chatUser?.profileImageUrl ?? ""))
+            .placeholder {
+                Image("taylor_swift_profile")
+                    .resizable()
+                    .scaledToFill()
+            }
+            .resizable()
+            .scaledToFill()
+            .frame(width: 200, height: 200)
+            .clipShape(Circle())
+            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+            .offset(y: -130)
+            .padding(.bottom, -130)
+    }
+    
+    private var profileDetails: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(profileName)
+                .font(.title)
+                .foregroundColor(.primary)
+            
+            HStack {
+                Text(profileCity)
+                Spacer()
+                Text(profileState)
+            }
+            .font(.subheadline)
+            .foregroundColor(.secondary)
+            
+            Divider()
+            
+            Text(profileTitle)
+                .font(.title2)
+            Text(profileDescription)
+        }
+        .padding()
+    }
 }
 
-struct UserDetail_Previews: PreviewProvider {
-    static var previews: some View {
+#Preview("User Profile - Dark") {
+    NavigationStack {
         UserFormUI()
-            .preferredColorScheme(.dark)
     }
+    .preferredColorScheme(.dark)
 }

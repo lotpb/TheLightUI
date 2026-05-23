@@ -16,7 +16,7 @@ extension TextField {
             .foregroundColor(.primary)
             .frame(minWidth: 50, maxWidth: .infinity)
             .multilineTextAlignment(.leading)
-            .autocapitalization(.sentences)
+            .textInputAutocapitalization(.sentences)
             .cornerRadius(10)
     }
 }
@@ -51,7 +51,6 @@ struct FormUI: View {
     @State private var showAlertUpdate = false
     
     @State private var activeIsOn = true
-    @State private var selDate = Date()
     @State private var height = UIScreen.main.bounds.height
     
     @State private var pickDate: Date
@@ -67,13 +66,14 @@ struct FormUI: View {
     
     @State private var amountStr = 0
     @State private var quanStr: Int = 0
-    
-    //@State var navigateNext = false
-    
-    ///disabe save button ot workinh
+
     private var isButtonDisabled: Bool {
         detail.first.isEmpty
-        }
+    }
+    
+    private var themeColor: Color {
+        color == 0 ? .purple : .orange
+    }
     
     @FocusState private var firstNameInFocus: Bool
     
@@ -84,26 +84,15 @@ struct FormUI: View {
         self._pickStartDate = State(initialValue: startDate)
         self._pickCompleteDate = State(initialValue: completeDate)
         self._status = State(initialValue: status)
-        
-        //UISegmentedControl.appearance().backgroundColor = .white
+
         UISegmentedControl.appearance().selectedSegmentTintColor = UIColor.lightGray
         UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
-        //UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor: UIColor.purple], for: .normal)
-        //UISegmentedControl.appearance().selectedSegmentTintColor = .orange
-        
-        let formatter4 = DateFormatter()
-        formatter4.dateFormat = "MMM dd yyyy"
-        
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.maximumFractionDigits = 2
     }
     
-    
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
-                ScrollView(self.height > 800 ? .init() : .vertical, showsIndicators: false) {
+                ScrollView(height > 800 ? .init() : .vertical, showsIndicators: false) {
                     VStack {
                         Form {
                             Section {
@@ -117,8 +106,10 @@ struct FormUI: View {
                                             .padding(.trailing, 5)
                                         
                                         Button(action: {}, label: {
-                                            Text("Edit").font(.callout).fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
-                                                .foregroundColor(self.color == 0 ? Color.purple : Color.orange)
+                                            Text("Edit")
+                                                .font(.callout)
+                                                .fontWeight(.bold)
+                                                .foregroundColor(themeColor)
                                         })
                                             .padding(.top, 8)
                                     }
@@ -168,7 +159,7 @@ struct FormUI: View {
                                     TextField("state", text: $detail.state)
                                         .formStyle()
                                         .frame(width: 50)
-                                        .autocapitalization(.allCharacters)
+                                        .textInputAutocapitalization(.characters)
                                     
                                     Text("Zip:")
                                         .formTextStyle()
@@ -223,10 +214,10 @@ struct FormUI: View {
                                         Text("\(self.activeIsOn == true ? "Active:" : "Not Active:")")
                                             .formTextStyle()
                                     }
-                                    .onChange(of: activeIsOn) {_ in
-                                        isOnActive()  
+                                    .onChange(of: activeIsOn) { _ in
+                                        updateActiveStatus()
                                     }
-                                    .toggleStyle(SwitchToggleStyle(tint: self.color == 0 ? Color.purple : Color.orange))
+                                    .toggleStyle(SwitchToggleStyle(tint: themeColor))
                                 }
                                 HStack {
                                     Picker("Salesman:", selection: $selectSalesman) {
@@ -316,15 +307,12 @@ struct FormUI: View {
                                     Text("Rating: **\(Image(systemName: "star"))**")
                                         .formTextStyle()
                                         .imageScale(.small).symbolVariant(.fill)
-//                                        .symbolRenderingMode(.palette)
-//                                        .foregroundStyle(Color.purple, Color.blue)
                                     Picker("Pick rating here", selection: $selectedRate) {
                                         ForEach(pickerviewModel.pickRate, id: \.self) {
                                             Text($0)//.font(.headline)
                                         }
                                     }.pickerStyle(SegmentedPickerStyle())
-                                    //.font(.title)
-                                        .foregroundColor(self.color == 0 ? Color.purple : Color.orange)
+                                        .foregroundColor(themeColor)
                                     
                                 }
                                 HStack {
@@ -352,43 +340,14 @@ struct FormUI: View {
                             }
                         }
                         .font(.system(size: 20.0))
-                        .padding(.top, -20)
+                        .padding(.top, -100)
                     }
-                    .onAppear() {
-                        
-                        let formatter4 = DateFormatter()
-                        formatter4.dateFormat = "MMM dd yyyy"
-                        
-                        let formatter = NumberFormatter()
-                        formatter.numberStyle = .none
-                        
-                        amountStr = formatter.number(from: detail.amount)?.intValue ?? 0
-                        
-                        if status == "New" {
-                            resetTextFields()
-                            pickDate = Date()
-                            detail.active = "1"
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-                                firstNameInFocus = true
-                            }
-                        } else {
-                            selectSalesman = Int(detail.salesNo) ?? 0
-                            selectJob = Int(detail.jobNo) ?? 0
-                            selectProduct = Int(detail.prodNo) ?? 0
-                            quanStr = Int(detail.quan) ?? 0
-                            selectedRate = detail.rate
-                            selectContractor = Int(detail.contractor) ?? 0
-                            getActive()
-                            pickDate = formatter4.date(from: detail.date) ?? Date()
-                            pickStartDate = formatter4.date(from: detail.start) ?? Date()
-                            pickCompleteDate = formatter4.date(from: detail.complete) ?? Date()
-                        }
-                    }
+                    .onAppear(perform: loadFormState)
                 }
             }
             .navigationTitle("Data Entry")
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button(action: {
                         dismiss()
                     }) {
@@ -396,63 +355,88 @@ struct FormUI: View {
                     }
                 }
                 
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        if status == "New" {
-                            saveData()
-                        } else {
-                            updateData()
-                        }
-                        resetTextFields()
-                        self.showAlertUpdate.toggle()
+                        saveButtonTapped()
                     } label: {
                         Text("Save")
-                            .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
+                            .fontWeight(.bold)
                     }
-                    .disabled(isButtonDisabled)///not working
+                    .disabled(isButtonDisabled)
                 }
                 
             }
-            .foregroundColor(self.color == 0 ? Color.purple : Color.orange)
-            .alert(isPresented: $showAlertUpdate) {
-                Alert(
-                    title: Text("Success"),
-                    message: Text("Record updated successfully"),
-                    dismissButton: Alert.Button.default(
-                        Text("Ok"), action: {
-                            //navigateNext.toggle()
-                            dismiss()
-                        }
-                    )
-                )
+            .foregroundColor(themeColor)
+            .alert("Success", isPresented: $showAlertUpdate) {
+                Button("Ok") {
+                    dismiss()
+                }
+            } message: {
+                Text("Record updated successfully")
             }
         }
-        .accentColor(self.color == 0 ? Color.purple : Color.orange)
+        .accentColor(themeColor)
     }
     
-    func isOnActive() {
-        if activeIsOn == true {
-            detail.active = "1"
+    private func saveButtonTapped() {
+        if status == "New" {
+            saveData()
         } else {
-            detail.active = "0"
+            updateData()
         }
     }
     
-    func getActive() {
-        if (self.detail.active == "1") {
-            self.activeIsOn.toggle()
+    private func updateActiveStatus() {
+        detail.active = activeIsOn ? "1" : "0"
+    }
+    
+    private func loadFormState() {
+        amountStr = intValue(from: detail.amount)
+        
+        if status == "New" {
+            resetTextFields()
+            pickDate = Date()
+            detail.active = "1"
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+                firstNameInFocus = true
+            }
+            return
         }
+        
+        selectSalesman = Int(detail.salesNo) ?? 0
+        selectJob = Int(detail.jobNo) ?? 0
+        selectProduct = Int(detail.prodNo) ?? 0
+        quanStr = Int(detail.quan) ?? 0
+        selectedRate = detail.rate
+        selectContractor = Int(detail.contractor) ?? 0
+        syncActiveToggle()
+        pickDate = dateValue(from: detail.date)
+        pickStartDate = dateValue(from: detail.start)
+        pickCompleteDate = dateValue(from: detail.complete)
+    }
+    
+    private func intValue(from string: String) -> Int {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .none
+        return formatter.number(from: string)?.intValue ?? 0
+    }
+    
+    private func dateValue(from string: String) -> Date {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM dd yyyy"
+        return formatter.date(from: string) ?? Date()
+    }
+    
+    private func syncActiveToggle() {
+        activeIsOn = detail.active == "1"
     }
     
     func saveData() {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .none
+        let salesStr = intValue(from: detail.salesNo)
+        let jobStr = intValue(from: detail.jobNo)
+        let prodStr = intValue(from: detail.prodNo)
         
-        let salesStr = formatter.number(from: detail.salesNo)?.intValue ?? 0
-        let jobStr = formatter.number(from: detail.jobNo)?.intValue ?? 0
-        let prodStr = formatter.number(from: detail.prodNo)?.intValue ?? 0
-        
-        let uid = Auth.auth().currentUser!.uid
+        guard let uid = Auth.auth().currentUser?.uid else { return }
         var ref: DocumentReference? = nil
         ref = db.collection("Customers").addDocument(data: [
             "active": detail.active,
@@ -486,31 +470,51 @@ struct FormUI: View {
             if let error = error {
                 print("Error adding document: \(error)")
             } else {
-                self.showAlertUpdate.toggle()
-                print("Document added with ID: \(ref!.documentID)")
+                resetTextFields()
+                self.showAlertUpdate = true
+                print("Document added with ID: \(ref?.documentID ?? "")")
             }
         }
     }
     
     func updateData() {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .none
-        
-        let salesStr = formatter.number(from: detail.salesNo)?.intValue ?? 0
-        let jobStr = formatter.number(from: detail.jobNo)?.intValue ?? 0
-        let prodStr = formatter.number(from: detail.prodNo)?.intValue ?? 0
-        
-        let createDate: Date? = pickDate
-        let startDate: Date? = pickStartDate
-        let completeDate: Date? = pickCompleteDate
+        let salesStr = intValue(from: detail.salesNo)
+        let jobStr = intValue(from: detail.jobNo)
+        let prodStr = intValue(from: detail.prodNo)
         
         db.collection("Customers")
             .document(detail.id)
-            .setData(["creationDate": Timestamp(date: createDate ?? Date()), "active": detail.active, "first": detail.first, "lastname": self.detail.lastname, "contractor": self.detail.contractor, "street": detail.street, "city":self.detail.city, "state": self.detail.state, "zip":detail.zip, "phone":self.detail.phone, "amount":amountStr, "email":self.detail.email, "quan": quanStr, "rate": selectedRate, "salesNo": Int(truncating: NSNumber(value: salesStr)), "jobNo": Int(truncating: NSNumber(value: jobStr)), "prodNo": Int(truncating: NSNumber(value: prodStr)), "start": Timestamp(date: startDate ?? Date()),"completion": Timestamp(date: completeDate ?? Date()), "lastUpdate":Timestamp(date:Date()), "comments": self.detail.comments, "spouse": self.detail.spouse, "photo": self.detail.photo]) { (error) in
-                if error != nil{
-                    print((error?.localizedDescription)!)
+            .setData([
+                "creationDate": Timestamp(date: pickDate),
+                "active": detail.active,
+                "first": detail.first,
+                "lastname": detail.lastname,
+                "contractor": detail.contractor,
+                "street": detail.street,
+                "city": detail.city,
+                "state": detail.state,
+                "zip": detail.zip,
+                "phone": detail.phone,
+                "amount": amountStr,
+                "email": detail.email,
+                "quan": quanStr,
+                "rate": selectedRate,
+                "salesNo": salesStr,
+                "jobNo": jobStr,
+                "prodNo": prodStr,
+                "start": Timestamp(date: pickStartDate),
+                "completion": Timestamp(date: pickCompleteDate),
+                "lastUpdate": Timestamp(date: Date()),
+                "comments": detail.comments,
+                "spouse": detail.spouse,
+                "photo": detail.photo
+            ]) { error in
+                if let error = error {
+                    print(error.localizedDescription)
                     return
                 }
+                resetTextFields()
+                self.showAlertUpdate = true
             }
     }
     
@@ -537,13 +541,12 @@ struct FormUI: View {
     }
 }
 
-struct FormUI_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationView {
-            FormUI(detail: customerItem(id: "", active: "1", first: "Peter", lastname: "Balsamo", address: "Massapequa Ny, 11758", street: "", city: "Bethpage", state: "NY", zip: "11758", amount: "5000", date:"", rate: "5", phone: "", comments: "", spouse: "", email: "", contractor: "", photo: "", last: "", start: "", complete: "", quan: "", salesNo: "", jobNo: "", prodNo: "", l11: "First", l12: "Phone", l13: "Contractor", l14: "Spouse", l15: "Email", l16: "Last Updated", l17: "Photo", l21: "Rating", l22: "Saleman", l23: "Job", l24: "Product", l25: "Quan", l26: "Start", l27: "Completion", l1datetext: "", lnewsTitle: "", status: "New", formController: "Customer"), createDate: Date(), startDate: Date(), completeDate: Date(), status: "")
-                .preferredColorScheme(.dark)
-            //.environmentObject(CustomerData())
-        }
+#Preview("Form - Dark") {
+    NavigationStack {
+        FormUI(detail: customerItem(id: "", active: "1", first: "Peter", lastname: "Balsamo", address: "Massapequa Ny, 11758", street: "5121 Lakefront Blvd", city: "Bethpage", state: "NY", zip: "11758", amount: "5000", date:"", rate: "5", phone: "", comments: "", spouse: "", email: "", contractor: "", photo: "", last: "", start: "", complete: "", quan: "", salesNo: "", jobNo: "", prodNo: "", l11: "First", l12: "Phone", l13: "Contractor", l14: "Spouse", l15: "Email", l16: "Last Updated", l17: "Photo", l21: "Rating", l22: "Saleman", l23: "Job", l24: "Product", l25: "Quan", l26: "Start", l27: "Completion", l1datetext: "", lnewsTitle: "", status: "New", formController: "Customer"), createDate: Date(), startDate: Date(), completeDate: Date(), status: "")
+            .environmentObject(CustomerData())
+            .environmentObject(PickerDataModel())
     }
+    .preferredColorScheme(.dark)
 }
 

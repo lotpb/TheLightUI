@@ -14,17 +14,20 @@ struct LandMarkListView: View {
     let index: Int
     
     var body: some View {
-        List(landMarks, id: \.id) { landMark in
+        List(landMarks) { landMark in
             VStack(alignment: .leading, spacing: 10) {
-                Text("\(index + 1). \(landMark.name) ").font(.headline)
+                Text("\(index + 1). \(landMark.name)")
+                    .font(.headline)
                 
-                Text(landMark.title).foregroundColor(.secondary)
+                Text(landMark.title)
+                    .foregroundColor(.secondary)
                 
-                HStack {
-                    Image(systemName: "phone")
-                    Text(landMark.display_phone)
+                if !landMark.displayPhone.isEmpty {
+                    HStack {
+                        Image(systemName: "phone")
+                        Text(landMark.displayPhone)
+                    }
                 }
-                //.foregroundColor(.blue)
             }
             .padding(.vertical, 8)
         }

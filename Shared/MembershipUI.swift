@@ -25,34 +25,39 @@ struct MembershipUI: View {
     
     var body: some View {
         
-        NavigationView {
-            VStack {
-                TextField(last, text: $last).textFieldStyle(RoundedBorderTextFieldStyle())
-                    .textContentType(.none)
+        NavigationStack {
+            VStack(spacing: 16) {
+                TextField("Last Name", text: $last)
+                    .textFieldStyle(.roundedBorder)
+                    .textContentType(.familyName)
                     .font(.headline)
                     .padding(.top, 15)
                 
-                TextField(emailAddress, text: $emailAddress).textFieldStyle(RoundedBorderTextFieldStyle())
-                    .textContentType(.none)
+                TextField("Email Address", text: $emailAddress)
+                    .textFieldStyle(.roundedBorder)
+                    .textContentType(.emailAddress)
+                    .keyboardType(.emailAddress)
+                    .textInputAutocapitalization(.never)
                     .font(.headline)
                 
                 Image(uiImage: qrCode)
                     .resizable()
                     .interpolation(.none)
                     .scaledToFit()
-                    .frame(width:200, height: 200)
+                    .frame(width: 220, height: 220)
                     .contextMenu {
                         Button {
                             let imageSaver = ImageSaver()
                             imageSaver.writeToPhotoAlbum(image: qrCode)
                         } label: {
-                            Label("Save to Photo's", systemImage: "square.and.arrow.down")
+                            Label("Save to Photos", systemImage: "square.and.arrow.down")
                         }
                     }
                     .padding(.top, 15)
                 
                 Spacer()
             }
+            .padding(.horizontal)
             .navigationTitle("Membership")
             .toolbar {
                 Button {
@@ -69,13 +74,18 @@ struct MembershipUI: View {
                 CodeScannerView(codeTypes: [.qr], simulatedData: "\(name) \(lastName)\nvainikkaxd@gmail.com", completion: handleScan)
             }
             .onAppear(perform: updateCode)
+            .onChange(of: first) { _ in updateCode() }
             .onChange(of: last) { _ in updateCode() }
             .onChange(of: emailAddress) { _ in updateCode() }
         }
     }
     
+    private var membershipPayload: String {
+        "\(first) \(last)\n\(emailAddress)"
+    }
+    
     func updateCode() {
-        qrCode = generateQRCode(from: "\(last)\n\(emailAddress)")
+        qrCode = generateQRCode(from: membershipPayload)
     }
     
     func generateQRCode(from string: String) -> UIImage {
@@ -108,9 +118,7 @@ struct MembershipUI: View {
     }
 }
 
-struct MembershipUI_Previews: PreviewProvider {
-    static var previews: some View {
-        MembershipUI()
-            .preferredColorScheme(.dark)
-    }
+#Preview("Membership - Dark") {
+    MembershipUI()
+        .preferredColorScheme(.dark)
 }
