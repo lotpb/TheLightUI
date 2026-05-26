@@ -36,6 +36,8 @@ struct SplashScreen<Content: View, Title: View, Logo: View, NavButton: View>: Vi
     var body: some View {
         VStack(spacing: 0) {
             ZStack {
+                SplashHeaderBackground()
+
                 titleView
                     .scaleEffect(endAnimation ? 0.75 : 1)
                     .offset(y: textAnimation ? -5 : 110)
@@ -44,6 +46,8 @@ struct SplashScreen<Content: View, Title: View, Logo: View, NavButton: View>: Vi
                     logoView
                         .matchedGeometryEffect(id: "splashLogo", in: animation)
                         .frame(width: imageSize.width, height: imageSize.height)
+                        .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+                        .shadow(color: .black.opacity(0.18), radius: 22, x: 0, y: 12)
                 }
                 
                 HStack {
@@ -55,13 +59,13 @@ struct SplashScreen<Content: View, Title: View, Logo: View, NavButton: View>: Vi
                         logoView
                             .matchedGeometryEffect(id: "splashLogo", in: animation)
                             .frame(width: 30, height: 30)
+                            .clipShape(Circle())
                             .offset(y: -5)
                     }
                 }
                 .padding(.horizontal)
             }
-            .frame(height: endAnimation ? 60 : nil)
-            .background(Color.purple.ignoresSafeArea())
+            .frame(height: endAnimation ? 64 : nil)
             .zIndex(1)
             
             content
@@ -88,6 +92,26 @@ struct SplashScreen<Content: View, Title: View, Logo: View, NavButton: View>: Vi
                 }
             }
         }
+    }
+}
+
+private struct SplashHeaderBackground: View {
+    var body: some View {
+        LinearGradient(
+            colors: [
+                Color(red: 0.47, green: 0.23, blue: 0.88),
+                Color(red: 0.30, green: 0.20, blue: 0.72),
+                Color(red: 0.16, green: 0.12, blue: 0.35)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(.white.opacity(0.12))
+                .frame(height: 1)
+        }
+        .ignoresSafeArea()
     }
 }
 

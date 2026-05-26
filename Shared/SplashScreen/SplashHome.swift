@@ -14,30 +14,53 @@ struct SplashHome: View {
     private let photoIndexes = Array(1...6)
     
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 0) {
-                ForEach(SplashTab.allCases) { tab in
-                    TabButtonSplash(title: tab.rawValue, animation: animation, currentTab: $currentTab)
-                }
+        ZStack {
+            SplashHomeBackground()
+
+            VStack(alignment: .leading, spacing: 18) {
+                tabBar
+                header
+                photoGrid
             }
-            .padding(.top, 20)
-            .background(Color.purple)
-            
-            ScrollView(.vertical, showsIndicators: false) {
-                LazyVStack(spacing: 15) {
-                    ForEach(photoIndexes, id: \.self) { _ in
-                        Image("taylor_swift_profile")
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 250)
-                            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                    }
-                }
-                .padding(15)
+            .padding(.top, 18)
+        }
+    }
+
+    private var tabBar: some View {
+        HStack(spacing: 6) {
+            ForEach(SplashTab.allCases) { tab in
+                TabButtonSplash(title: tab.rawValue, animation: animation, currentTab: $currentTab)
             }
         }
-        .background(.quaternary)
+        .padding(6)
+        .background(.regularMaterial, in: Capsule())
+        .overlay(Capsule().stroke(Color(.separator).opacity(0.12), lineWidth: 1))
+        .padding(.horizontal, 16)
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(currentTab)
+                .font(.system(size: 32, weight: .bold, design: .rounded))
+                .foregroundStyle(.primary)
+
+            Text("Recent moments from your visual library.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 18)
+    }
+
+    private var photoGrid: some View {
+        ScrollView(.vertical, showsIndicators: false) {
+            LazyVStack(spacing: 14) {
+                ForEach(photoIndexes, id: \.self) { index in
+                    SplashPhotoCard(index: index)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 24)
+        }
     }
 }
 
@@ -47,6 +70,55 @@ private enum SplashTab: String, CaseIterable, Identifiable {
     case status = "Status"
     
     var id: String { rawValue }
+}
+
+private struct SplashHomeBackground: View {
+    var body: some View {
+        LinearGradient(
+            colors: [Color(.systemGroupedBackground), Color(.secondarySystemGroupedBackground)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .ignoresSafeArea()
+    }
+}
+
+private struct SplashPhotoCard: View {
+    let index: Int
+
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            Image("taylor_swift_profile")
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(maxWidth: .infinity)
+                .frame(height: 250)
+                .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+
+            LinearGradient(
+                colors: [.clear, .black.opacity(0.62)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Moment \(index)")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+
+                Text("TheLight photo collection")
+                    .font(.footnote.weight(.medium))
+                    .foregroundStyle(.white.opacity(0.72))
+            }
+            .padding(18)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .stroke(.white.opacity(0.18), lineWidth: 1)
+        }
+        .shadow(color: .black.opacity(0.12), radius: 18, x: 0, y: 10)
+    }
 }
 
 #Preview("Splash Home - Dark") {
@@ -59,33 +131,29 @@ struct TabButtonSplash: View {
     let animation: Namespace.ID
     @Binding var currentTab: String
     
+    private var isSelected: Bool { currentTab == title }
+
     var body: some View {
         Button {
-            withAnimation(.spring()) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
                 currentTab = title
             }
         } label: {
-            VStack {
-                Text(title)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white)
-                
-                ZStack {
-                    if currentTab == title {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(isSelected ? .white : .secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.82)
+                .frame(maxWidth: .infinity)
+                .frame(height: 38)
+                .background {
+                    if isSelected {
                         Capsule()
-                            .fill(.white)
-                            .shadow(radius: 15)
+                            .fill(Color.purple)
                             .matchedGeometryEffect(id: "TAB", in: animation)
-                            .frame(height: 3.5)
-                    } else {
-                        Capsule()
-                            .fill(.clear)
-                            .frame(height: 3.5)
                     }
                 }
-            }
-            .frame(maxWidth: .infinity)
-            .contentShape(Rectangle())
+                .contentShape(Capsule())
         }
         .buttonStyle(.plain)
     }
