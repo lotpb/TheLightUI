@@ -26,152 +26,129 @@ struct SpotifyUI: View {
     }
     
     var body: some View {
-        
-        HStack(spacing: 0) {
-            
-            SideTabViewUI()
-            
-            ScrollView(showsIndicators: false, content: {
-                
-                VStack(spacing: 15) {
-                    
-                    HStack(spacing: 15) {
-                        
-                        HStack(spacing: 15) {
-                            
-                            Circle()
-                                .stroke(Color.white, lineWidth: 4)
-                                .frame(width: 25, height: 25)
-                            
-                            TextField("Search...", text: $searchText)
-                                .textInputAutocapitalization(.never)
-                        }
-                        .padding(.vertical, 10)
-                        .padding(.horizontal)
-                        .background(Color.white.opacity(0.08))
-                        .cornerRadius(8)
-                        
-                        Button(action: {
-                            
-                        }, label: {
-                            Image("taylor_swift_profile")
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 45, height: 45)
-                                .cornerRadius(10)
-                        })
+        ZStack {
+            SpotifyBackground()
+
+            HStack(spacing: 0) {
+                SideTabViewUI()
+
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 28) {
+                        topBar
+                        heroHeader
+                        recentlyPlayedSection
+                        genresSection
+                        likedSongsSection
                     }
-                    
-                    Text("Recently Played")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, 30)
-                    
-                    if filteredRecentlyPlayed.isEmpty {
-                        SpotifyEmptyState()
-                            .frame(height: 160)
-                            .padding(.top, 20)
-                    } else {
-                        TabView {
-                            ForEach(filteredRecentlyPlayed) { item in
-                                ZStack(alignment: .bottomLeading) {
-                                    Image(item.album_cover)
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .cornerRadius(20)
-                                        .overlay(
-                                            LinearGradient(gradient: .init(colors: [Color.clear, Color.clear, Color.black]), startPoint: .top, endPoint: .bottom)
-                                                .cornerRadius(20)
-                                        )
-                                    
-                                    HStack(spacing: 15) {
-                                        Button(action: {}, label: {
-                                            Image(systemName: "play.fill")
-                                                .font(.title)
-                                                .foregroundColor(.white)
-                                                .padding(20)
-                                                .background(Color(.red))
-                                                .clipShape(Circle())
-                                        })
-                                        
-                                        VStack(alignment: .leading, spacing: 5, content: {
-                                            Text(item.album_name)
-                                                .font(.title2)
-                                                .fontWeight(.heavy)
-                                                .foregroundColor(.white)
-                                            
-                                            Text(item.album_author)
-                                                .font(.none)
-                                                .fontWeight(.bold)
-                                                .foregroundColor(.white)
-                                        })
-                                    }
-                                    .padding()
-                                }
-                                .padding(.horizontal)
-                            }
-                        }
-                        .frame(height: 350)
-                        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                        .padding(.top, 20)
-                    }
-                    
-                    Text("Genres")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, 30)
-                    
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 15), count: 3), spacing: 20, content: {
-                        
-                        ForEach(filteredGenres, id: \.self) { genre in
-                            
-                            Text(genre)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white)
-                                .padding(.vertical, 8)
-                                .frame(maxWidth: .infinity)
-                                .background(Color.white.opacity(0.06))
-                                .clipShape(Capsule())
-                        }
-                    })
-                    .padding(.top, 20)
-                    
-                    Text("Liked Songs")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, 30)
-                    
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 2), spacing: 10, content: {
-                        
-                        ForEach(filteredLikedSongs) { song in
-                            
-                            GeometryReader { proxy in
-                                
-                                Image(song.album_cover)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(width: proxy.frame(in: .global).width, height: 150)
-                                    .cornerRadius(10)
-                            }
-                            .frame(height: 150)
-                        }
-                        .padding(.horizontal)
-                        .padding(.top, 20)
-                    })
-                    
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 18)
+                    .frame(maxWidth: .infinity)
                 }
-                .padding()
-                .frame(maxWidth: .infinity)
-            })
-            
+            }
         }
-        .background(Color(.systemGray6).ignoresSafeArea())
+    }
+
+    private var topBar: some View {
+        HStack(spacing: 12) {
+            HStack(spacing: 10) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(.white.opacity(0.68))
+
+                TextField("Search music", text: $searchText)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .foregroundStyle(.white)
+            }
+            .font(.subheadline)
+            .padding(.horizontal, 14)
+            .frame(height: 46)
+            .background(.white.opacity(0.10), in: Capsule())
+            .overlay(Capsule().stroke(.white.opacity(0.10), lineWidth: 1))
+
+            Button {} label: {
+                Image("taylor_swift_profile")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 46, height: 46)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(.white.opacity(0.25), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var heroHeader: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Good Evening")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(SpotifyStyle.accent)
+
+            Text("Pick up where you left off")
+                .font(.system(size: 34, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+                .lineLimit(2)
+                .minimumScaleFactor(0.8)
+
+            Text("Recently played tracks, liked songs, and calm discovery in one place.")
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.68))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var recentlyPlayedSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            SectionHeader(title: "Recently Played", subtitle: "Fresh from your queue")
+
+            if filteredRecentlyPlayed.isEmpty {
+                SpotifyEmptyState()
+                    .frame(height: 190)
+            } else {
+                TabView {
+                    ForEach(filteredRecentlyPlayed) { item in
+                        FeaturedSongCard(song: item)
+                            .padding(.horizontal, 2)
+                    }
+                }
+                .frame(height: 360)
+                .tabViewStyle(.page(indexDisplayMode: .automatic))
+            }
+        }
+    }
+
+    private var genresSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            SectionHeader(title: "Genres", subtitle: "Browse by mood")
+
+            if filteredGenres.isEmpty {
+                SpotifyEmptyState()
+                    .frame(height: 130)
+            } else {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 104), spacing: 10)], spacing: 10) {
+                    ForEach(filteredGenres, id: \.self) { genre in
+                        GenreChip(title: genre)
+                    }
+                }
+            }
+        }
+    }
+
+    private var likedSongsSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            SectionHeader(title: "Liked Songs", subtitle: "Saved to your library")
+
+            if filteredLikedSongs.isEmpty {
+                SpotifyEmptyState()
+                    .frame(height: 150)
+            } else {
+                LazyVStack(spacing: 10) {
+                    ForEach(filteredLikedSongs) { song in
+                        LikedSongRow(song: song)
+                    }
+                }
+            }
+        }
+        .padding(.bottom, 24)
     }
     
     private func filterSongs(_ songs: [Song]) -> [Song] {
@@ -183,18 +160,184 @@ struct SpotifyUI: View {
     }
 }
 
+enum SpotifyStyle {
+    static let background = Color(red: 0.04, green: 0.05, blue: 0.08)
+    static let surface = Color.white.opacity(0.10)
+    static let accent = Color(red: 0.28, green: 0.90, blue: 0.46)
+    static let warmAccent = Color(red: 0.82, green: 0.28, blue: 0.38)
+}
+
+private struct SpotifyBackground: View {
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Color(red: 0.10, green: 0.13, blue: 0.18),
+                    SpotifyStyle.background,
+                    Color(red: 0.02, green: 0.03, blue: 0.05)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+
+            VStack(spacing: 0) {
+                SpotifyStyle.accent.opacity(0.16)
+                    .frame(height: 220)
+                    .blur(radius: 54)
+
+                Spacer()
+
+                SpotifyStyle.warmAccent.opacity(0.12)
+                    .frame(height: 260)
+                    .blur(radius: 60)
+            }
+        }
+        .ignoresSafeArea()
+    }
+}
+
+private struct SectionHeader: View {
+    let title: String
+    let subtitle: String
+
+    var body: some View {
+        HStack(alignment: .lastTextBaseline) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.system(.title3, design: .rounded, weight: .bold))
+                    .foregroundStyle(.white)
+
+                Text(subtitle)
+                    .font(.footnote)
+                    .foregroundStyle(.white.opacity(0.56))
+            }
+
+            Spacer()
+
+            Button("See All") {}
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.white.opacity(0.68))
+        }
+    }
+}
+
+private struct FeaturedSongCard: View {
+    let song: Song
+
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            Image(song.album_cover)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+
+            LinearGradient(
+                colors: [.clear, .black.opacity(0.18), .black.opacity(0.82)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+
+            HStack(spacing: 14) {
+                Button {} label: {
+                    Image(systemName: "play.fill")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundStyle(.black)
+                        .frame(width: 58, height: 58)
+                        .background(SpotifyStyle.accent, in: Circle())
+                }
+                .buttonStyle(.plain)
+
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(song.album_name)
+                        .font(.system(.title2, design: .rounded, weight: .bold))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+
+                    Text(song.album_author)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.72))
+                        .lineLimit(1)
+                }
+            }
+            .padding(20)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 30, style: .continuous)
+                .stroke(.white.opacity(0.12), lineWidth: 1)
+        }
+        .shadow(color: .black.opacity(0.30), radius: 26, x: 0, y: 18)
+    }
+}
+
+private struct GenreChip: View {
+    let title: String
+
+    var body: some View {
+        Text(title)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.white)
+            .lineLimit(1)
+            .frame(maxWidth: .infinity)
+            .frame(height: 42)
+            .background(.white.opacity(0.10), in: Capsule())
+            .overlay(Capsule().stroke(.white.opacity(0.08), lineWidth: 1))
+    }
+}
+
+private struct LikedSongRow: View {
+    let song: Song
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(song.album_cover)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 58, height: 58)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(song.album_name)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+
+                Text(song.album_author)
+                    .font(.footnote)
+                    .foregroundStyle(.white.opacity(0.56))
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            Image(systemName: "heart.fill")
+                .foregroundStyle(SpotifyStyle.accent)
+        }
+        .padding(12)
+        .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(.white.opacity(0.08), lineWidth: 1)
+        }
+    }
+}
+
 private struct SpotifyEmptyState: View {
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
-                .font(.largeTitle)
+                .font(.system(size: 30, weight: .semibold))
+                .foregroundStyle(SpotifyStyle.accent)
             Text("No Results")
                 .font(.headline)
+                .foregroundStyle(.white)
             Text("Try another search.")
                 .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.62))
         }
-        .foregroundColor(.white.opacity(0.7))
         .frame(maxWidth: .infinity)
+        .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 }
 
@@ -202,4 +345,3 @@ private struct SpotifyEmptyState: View {
     SpotifyUI()
         .preferredColorScheme(.dark)
 }
-
