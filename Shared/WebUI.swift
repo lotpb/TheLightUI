@@ -8,35 +8,50 @@
 import SwiftUI
 import SafariServices
 
+// MARK: - Bookmarks
 struct WebUI: View {
     @State private var selectedBookmark: WebBookmark?
-    
+
     private let bookmarks = WebBookmark.defaultBookmarks
-    
+
     var body: some View {
         NavigationStack {
-            List(bookmarks) { bookmark in
-                Button {
-                    selectedBookmark = bookmark
-                } label: {
-                    Label(bookmark.title, systemImage: bookmark.systemImage)
+            bookmarkList
+                .navigationTitle("Bookmarks")
+                .sheet(item: $selectedBookmark) { bookmark in
+                    safariView(for: bookmark)
                 }
-            }
-            .navigationTitle("Bookmarks")
-            .sheet(item: $selectedBookmark) { bookmark in
-                SFSafariViewWrapper(url: bookmark.url)
-                    .ignoresSafeArea()
-            }
+                .padding(.top, 30)
         }
+    }
+
+    private var bookmarkList: some View {
+        List(bookmarks) { bookmark in
+            bookmarkRow(bookmark)
+        }
+    }
+
+    private func bookmarkRow(_ bookmark: WebBookmark) -> some View {
+        Button {
+            selectedBookmark = bookmark
+        } label: {
+            Label(bookmark.title, systemImage: bookmark.systemImage)
+        }
+    }
+
+    private func safariView(for bookmark: WebBookmark) -> some View {
+        SFSafariViewWrapper(url: bookmark.url)
+            .ignoresSafeArea()
     }
 }
 
+// MARK: - Model
 private struct WebBookmark: Identifiable {
     let id = UUID()
     let title: String
     let url: URL
     let systemImage: String
-    
+
     static let defaultBookmarks: [WebBookmark] = [
         ("Apple", "https://apple.com", "book"),
         ("Google News", "https://news.google.com", "book"),
@@ -50,6 +65,7 @@ private struct WebBookmark: Identifiable {
     }
 }
 
+// MARK: - Safari Wrapper
 struct SFSafariViewWrapper: UIViewControllerRepresentable {
     let url: URL
 
@@ -60,6 +76,7 @@ struct SFSafariViewWrapper: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) { }
 }
 
+// MARK: - Preview
 #Preview("Bookmarks - Dark") {
     WebUI()
         .preferredColorScheme(.dark)

@@ -7,249 +7,275 @@
 
 import SwiftUI
 import Firebase
-import FirebaseFirestoreSwift
 
+// MARK: - Main Menu
 @available(iOS 16.0, *)
 @MainActor
 struct MainMenuUI: View {
-    
-    @AppStorage("color") var color: Int?
-    
-    private var menuItems1 = ["Snapshot","Statistics"]
-    //private var menuItems3 = ["Geotify","Search Places","Music","YouTube","Contacts","Spot Beacon","Transmit Beacon", "Show Detail"]
-    
-    ///logout
-    @State var isUserCurrentlyLoggedOut = false
-    @State var showingLogOut = false
-    
-    ///fullSheet
-    @State private var isshowStacks = false
-    @State private var isshowPlaces = false
-    @State private var isshowWeather = false
-    @State private var isshowYouTube = false
-    @State private var isshowContacts = false
-    
-    ///actionSheet
-    enum SheetContent {
-        case first, second, third, forth, fifth
+    private enum ModalContent {
+        case settings
+        case directions
+        case users
+        case membership
     }
-    @State private var isShowActionsheet = false
-    @State private var actionSheetContent: SheetContent = .first
-    @State private var showActionSheet = false
-    
-    @State var showEmailComposer = false
-    
-    
+
+    @AppStorage("color") private var color: Int?
+    @State private var isUserCurrentlyLoggedOut = false
+    @State private var showingLogOut = false
+    @State private var isShowingActionDialog = false
+    @State private var selectedModal: ModalContent = .settings
+
+    @State private var activeSheet: ActiveSheet?
+
+    @State private var showGeotify = false
+    @State private var showPlaces = false
+    @State private var showWeather = false
+    @State private var showStacks = false
+    @State private var showContacts = false
+
+    private enum ActiveSheet: Identifiable {
+        case modal(ModalContent)
+        case email
+
+        var id: String {
+            switch self {
+            case .modal(let modal):
+                return "modal_\(modal)"
+            case .email:
+                return "email"
+            }
+        }
+    }
+
+    private var themeColor: Color {
+        color == 0 ? .purple : .orange
+    }
+
     var body: some View {
         NavigationStack {
             VStack {
-                
                 MainTopView().padding(.top, 25)
-                
-                List {
-                    Section(header: Text("Incoming").foregroundColor(self.color == 0 ? Color.purple : Color.orange)) {
-                        ForEach(menuItems1, id: \.self) { message in
-                            Label(message, systemImage: "message").badge("NEW ITEMS!")
-                                .listItemTint(self.color == 0 ? Color.purple : Color.orange)
-                        }
-                    }
-                    
-                    Section(header: Text("Data").foregroundColor(self.color == 0 ? Color.purple : Color.orange)) {
-                        NavigationLink("Leads", destination: CustomerUI(viewModel: CustomerData()))
-                        NavigationLink("Customers", destination: CustomerUI(viewModel: CustomerData())).navigationTitle("")
-                        NavigationLink("Vendors", destination: GradientUI())
-                        NavigationLink("Employee", destination: GradientTextUI())
-                        NavigationLink("To Do", destination: ListView())
-                    }
-                    
-                    Section(header: Text("Outgoing").foregroundColor(self.color == 0 ? Color.purple : Color.orange)) {
-                        
-                        Button("Geotify") {
-                            isshowStacks = true
-                        }
-                        Button("Search Places") {
-                            isshowPlaces = true
-                        }
-                        Button("Weather") {
-                            isshowWeather = true
-                        }
-                        Button("Stacks") {
-                            isshowYouTube = true
-                        }
-                        Button("Contacts") {
-                            isshowContacts = true
-                        }
-                    }
-                    .foregroundColor(.primary)
-                }
-                .listStyle(.insetGrouped)
-                .fullScreenCover(isPresented: $isshowStacks, onDismiss: nil) {
-                    MapUI(travelTime: 0.00, distance: 0.00)
-                }
-                .fullScreenCover(isPresented: $isshowPlaces, onDismiss: nil) {
-                    PlaceSearch( index: 1)
-                }
-                .fullScreenCover(isPresented: $isshowWeather, onDismiss: nil) {
-                    WeatherUI()
-                }
-                .fullScreenCover(isPresented: $isshowYouTube, onDismiss: nil) {
-                    StacksView()
-                }
-                .fullScreenCover(isPresented: $isshowContacts, onDismiss: nil) {
-                    ChartView()
-                }
-                .onAppear() {
-                    
-                }
+                menuList
             }
             .navigationTitle("Main Menu")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        isShowActionsheet.toggle()
-                    }) {
-                        Label("Action", systemImage: "square.and.arrow.up")
-                    }
-                    .confirmationDialog("Pick a menu item", isPresented: $isShowActionsheet, titleVisibility: .visible) {
-                        Button("Email Support") {
-                            actionSheetContent = .first
-                            showEmailComposer = true
-                        }
-                        Button("Settings") {
-                            actionSheetContent = .second
-                            showActionSheet = true
-                        }
-                        Button("Directions") {
-                            actionSheetContent = .third
-                            showActionSheet = true
-                        }
-                        Button("Users") {
-                            actionSheetContent = .forth
-                            showActionSheet = true
-                        }
-                        Button("Membership Card") {
-                            actionSheetContent = .fifth
-                            showActionSheet = true
-                        }
-                        Button("Cancel", role: .cancel) { }
-                    }
-                    .sheet(isPresented: $showActionSheet, onDismiss: nil) {
-                        switch actionSheetContent {
-                        case .first: SettingView()
-                        case .second: SettingView()
-                        case .third: DirectionsUI()
-                        case .forth: UserFormUI()
-                        case .fifth: MembershipUI()
-                        }
-                    }
-                    .sheet(isPresented: $showEmailComposer) {
-                                MailView(
-                                    subject: "Email support",
-                                    message: "Message",
-                                    attachment: nil,
-                                    onResult: { _ in
-                                         // Handle the result if needed.
-                                         self.showEmailComposer = false
-                                    }
-                                )
-                            }
-                }
-                
                 ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Sign Out") { showingLogOut.toggle() }
+                        .font(.footnote).fontWeight(.bold)
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        showingLogOut.toggle()
+                        isShowingActionDialog.toggle()
                     } label: {
-                        Text("Sign Out").fontWeight(.bold)
-                            .font(.footnote)
+                        Label("Action", systemImage: "square.and.arrow.up")
                     }
                 }
             }
             .confirmationDialog("Settings", isPresented: $showingLogOut, titleVisibility: .visible) {
-                Button("Sign Out", role: .destructive) {
-                    print("handle sign out")
-                    handleSignOut()
-                }
+                Button("Sign Out", role: .destructive) { handleSignOut() }
                 Button("Cancel", role: .cancel) { }
             } message: {
                 Text("What do you want to do?")
             }
-            .fullScreenCover(isPresented: $isUserCurrentlyLoggedOut, onDismiss: nil) {
-                LoginView(didCompleteLoginProcess: {
-                    self.isUserCurrentlyLoggedOut = false
-                })
+            .confirmationDialog("Pick a menu item", isPresented: $isShowingActionDialog, titleVisibility: .visible) {
+                Button("Email Support") { activeSheet = .email }
+                Button("Settings") { showModal(.settings) }
+                Button("Directions") { showModal(.directions) }
+                Button("Users") { showModal(.users) }
+                Button("Membership Card") { showModal(.membership) }
+                Button("Cancel", role: .cancel) { }
             }
-            
+            .fullScreenCover(isPresented: $isUserCurrentlyLoggedOut) {
+                LoginView { isUserCurrentlyLoggedOut = false }
+            }
+            .sheet(item: $activeSheet, content: sheetContent)
         }
-        .accentColor(self.color == 0 ? Color.purple : Color.orange)
+        .accentColor(themeColor)
     }
-    
-    func openSetting() {
-        //SettingsUI()
+
+    private var menuList: some View {
+        List {
+            IncomingSection(themeColor: themeColor)
+            DataSection(themeColor: themeColor)
+            OutgoingSection(
+                themeColor: themeColor,
+                showGeotify: $showGeotify,
+                showPlaces: $showPlaces,
+                showWeather: $showWeather,
+                showStacks: $showStacks,
+                showContacts: $showContacts
+            )
+        }
+        .listStyle(.insetGrouped)
+        .fullScreenCover(isPresented: $showGeotify) { MapUI(travelTime: 0.00, distance: 0.00) }
+        .fullScreenCover(isPresented: $showPlaces) { PlaceSearch(index: 1) }
+        .fullScreenCover(isPresented: $showWeather) { WeatherUI() }
+        .fullScreenCover(isPresented: $showStacks) { StacksView() }
+        .fullScreenCover(isPresented: $showContacts) { InstagramHome() }
     }
-    
-    func handleSignOut() {
-        isUserCurrentlyLoggedOut.toggle()
+
+    @ViewBuilder
+    private func sheetContent(_ sheet: ActiveSheet) -> some View {
+        switch sheet {
+        case .modal:
+            modalContent
+        case .email:
+            MailView(
+                subject: "Email support",
+                message: "Message",
+                attachment: nil,
+                onResult: { _ in activeSheet = nil }
+            )
+        }
+    }
+
+    @ViewBuilder
+    private var modalContent: some View {
+        switch selectedModal {
+        case .settings:
+            SettingView()
+        case .directions:
+            DirectionsUI()
+        case .users:
+            UserFormUI()
+        case .membership:
+            MembershipUI()
+        }
+    }
+
+    private func showModal(_ modal: ModalContent) {
+        selectedModal = modal
+        activeSheet = .modal(modal)
+    }
+
+    private func handleSignOut() {
+        isUserCurrentlyLoggedOut = true
         HapticManager.notification(type: .success)
-        //try? FirebaseManager.shared.auth.signOut()
+        // try? FirebaseManager.shared.auth.signOut()
     }
 }
 
+private struct IncomingSection: View {
+    let themeColor: Color
+    private let menuItems = ["Snapshot", "Statistics"]
+
+    var body: some View {
+        Section(header: Text("Incoming").foregroundColor(themeColor)) {
+            ForEach(menuItems, id: \.self) { message in
+                Label(message, systemImage: "message")
+                    .badge("NEW ITEMS!")
+                    .listItemTint(themeColor)
+            }
+        }
+    }
+}
+
+private struct DataSection: View {
+    let themeColor: Color
+
+    var body: some View {
+        Section(header: Text("Data").foregroundColor(themeColor)) {
+            NavigationLink("Leads") { CustomerUI(viewModel: CustomerData()) }
+            NavigationLink("Customers") { CustomerUI(viewModel: CustomerData()) }
+            NavigationLink("Vendors") { GradientUI() }
+            NavigationLink("Employee") { GradientTextUI() }
+            NavigationLink("To Do") { ListView() }
+        }
+    }
+}
+
+private struct OutgoingSection: View {
+    let themeColor: Color
+    @Binding var showGeotify: Bool
+    @Binding var showPlaces: Bool
+    @Binding var showWeather: Bool
+    @Binding var showStacks: Bool
+    @Binding var showContacts: Bool
+
+    var body: some View {
+        Section(header: Text("Outgoing").foregroundColor(themeColor)) {
+            Button("Geotify") { showGeotify = true }
+            Button("Search Places") { showPlaces = true }
+            Button("Weather") { showWeather = true }
+            Button("Stacks") { showStacks = true }
+            Button("Contacts") { showContacts = true }
+        }
+        .foregroundColor(.primary)
+    }
+}
+
+// MARK: - Preview
 @available(iOS 16.0, *)
 struct MainMenuUI_Previews: PreviewProvider {
     static var previews: some View {
-        Group {
-            MainMenuUI().preferredColorScheme(.dark)
-        }
+        MainMenuUI()
+            .preferredColorScheme(.dark)
     }
 }
 
+// MARK: - Header
 struct MainTopView: View {
-    @AppStorage("color") var color: Int?
-    @AppStorage(SettingsUI.isCompanyNameKey) var companyName: String = "Main Menu"
-    @AppStorage(SettingsUI.backend) var backEnd: String = "None"
+    private enum Layout {
+        static let height: CGFloat = 115
+        static let cornerRadius: CGFloat = 10
+        static let titleSize: CGFloat = 32
+    }
+
+    @AppStorage("color") private var color: Int?
+    @AppStorage(SettingsUI.isCompanyNameKey) private var companyName: String = "Main Menu"
+    @AppStorage(SettingsUI.backend) private var backEnd: String = "None"
+
+    private var themeColor: Color {
+        color == 0 ? .purple : .orange
+    }
+
     var body: some View {
-        
         VStack(alignment: .leading) {
-            HStack {
-                Text(companyName).font(.system(size: 32, weight: .bold, design: .rounded))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.9)
-                    .padding(.top, 15)
-                    .padding(.leading, 15)
-            }
-            
+            titleRow
             Divider()
-            
-            HStack {
-                Text("Backend:")
-                Spacer()
-                Text(backEnd)
-                Image(systemName: "circle.hexagongrid.fill")
-                    .font(.callout).imageScale(.large)
-            }
-            .font(.footnote.bold())
-            .padding(.horizontal)
-            
+            backendRow
             Spacer()
-            
-            HStack {
-                Text("Weather:")
-                Spacer()
-                    
-                Text("Cloudy")
-                    //.baselineOffset(-6)
-                Image(systemName: "cloud.sun.fill")
-                    .font(.callout).imageScale(.large)
-            }
-            .font(.footnote.bold())
-            .padding(.horizontal).padding(.bottom, 15)
+            weatherRow
         }
         .symbolRenderingMode(.multicolor)
-        .foregroundColor(Color.white)
-        .background(self.color == 0 ? Color.purple : Color.orange).cornerRadius(10)
-        .frame(height: 115, alignment: .leading)
+        .foregroundColor(.white)
+        .background(themeColor)
+        .cornerRadius(Layout.cornerRadius)
+        .frame(height: Layout.height, alignment: .leading)
         .padding()
     }
-}
 
+    private var titleRow: some View {
+        HStack {
+            Text(companyName)
+                .font(.system(size: Layout.titleSize, weight: .bold, design: .rounded))
+                .lineLimit(1)
+                .minimumScaleFactor(0.9)
+                .padding(.top, 15)
+                .padding(.leading, 15)
+        }
+    }
+
+    private var backendRow: some View {
+        statusRow(title: "Backend:", value: backEnd, systemImage: "circle.hexagongrid.fill")
+    }
+
+    private var weatherRow: some View {
+        statusRow(title: "Weather:", value: "Cloudy", systemImage: "cloud.sun.fill")
+            .padding(.bottom, 15)
+    }
+
+    private func statusRow(title: String, value: String, systemImage: String) -> some View {
+        HStack {
+            Text(title)
+            Spacer()
+            Text(value)
+            Image(systemName: systemImage)
+                .font(.callout)
+                .imageScale(.large)
+        }
+        .font(.footnote.bold())
+        .padding(.horizontal)
+    }
+}

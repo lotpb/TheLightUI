@@ -23,14 +23,25 @@ struct LeadDetailUI: View {
     let maxWidthForIpad: CGFloat = 700
     
     @State var detail: customerItem
-    @State private var showingSold: Bool = false
-    @State private var showSheet: Bool = false
     @State private var showFullscreen: Bool = false
     @State private var showActionSheet: Bool = false
     @State private var showPopover = false
-    @State private var showEmailComposer = false
     
-    //@State var dataArray: [ListModel] = []
+    @State private var activeSheet: ActiveSheet?
+
+    private enum ActiveSheet: Identifiable {
+        case edit
+        case email
+
+        var id: String {
+            switch self {
+            case .edit: return "edit"
+            case .email: return "email"
+            }
+        }
+    }
+    
+    private var themeColor: Color { (color == 0) ? .purple : .orange }
     
     var body: some View {
         
@@ -56,76 +67,90 @@ struct LeadDetailUI: View {
             ListModel(name: detail.photo, label: detail.l17)
         ]
         
-        VStack(spacing: 0) {
+        ZStack {
+            // Subtle system background that adapts to appearance
+            Color(.systemGroupedBackground)
+                .ignoresSafeArea()
+
             ScrollView(.vertical, showsIndicators: true) {
-                
-                TopViewUI(detail: $detail, showFullscreen: $showFullscreen, showingSold: $showingSold)
-                
-                LazyVStack(spacing: 8) {
-                    ForEach(dataArray) { customer in
-                        CenterViewUI(formData: customer)
+                VStack(spacing: 16) {
+                    TopViewUI(detail: $detail, showFullscreen: $showFullscreen)
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+
+                    // Card-style list of fields
+                    LazyVStack(spacing: 0) {
+                        ForEach(Array(dataArray.enumerated()), id: \.offset) { index, customer in
+                            CenterViewUI(formData: customer)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .background(Color(.secondarySystemGroupedBackground))
+                                .overlay(
+                                    index < dataArray.count - 1 ? Divider().padding(.leading, 16) : nil
+                                )
+                        }
                     }
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .strokeBorder(Color(.separator).opacity(0.2))
+                    )
+                    .padding(.horizontal)
+                    .onAppear {
+                        self.activeColor = (self.detail.active == "1") ? 1 : 0
+                    }
+                    .onChange(of: detail.active) { newValue in
+                        self.activeColor = (newValue == "1") ? 1 : 0
+                    }
+
+                    BottomViewUI(detail: $detail, showPopover: $showPopover)
+                        .padding(.horizontal)
+                        .padding(.bottom, 24)
                 }
-                .onAppear() {
-                    getSold()
-                    getActive()
-                }
-                
-                BottomViewUI(detail: $detail, showPopover: $showPopover)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationTitle("Profile")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItemGroup(placement: .navigationBarLeading) {
-                Button(action: {
-                    dismiss()
-                }) {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button(action: { dismiss() }) {
                     Label("Close", systemImage: "xmark.circle")
                 }
+                .accessibilityLabel("Close")
             }
-            ToolbarItemGroup(placement: .navigationBarTrailing) {
-                Button(action: {
-                    showActionSheet.toggle()
-                }) {
-                    Label("Action", systemImage: "square.and.arrow.up")
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button("Send Message") {}
+                    Button("Add to Customer") {}
+                    Button("Add to Contact") {}
+                    Button("Add Calendar Event") {}
+                    Button("$ pay") {}
+                    Button("Web Page") {}
+                    Button("Call Phone") { callPhoneNumber(detail.phone) }
+                    Button("Send Email") { activeSheet = .email }
+                    Button("Share My Location") {}
+                } label: {
+                    Label("Action", systemImage: "ellipsis.circle")
                 }
-                Button(action: {
-                    showSheet.toggle()
-                }, label: {
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: { activeSheet = .edit }) {
                     Text("Edit").fontWeight(.semibold)
-                })
+                }
+                .accessibilityLabel("Edit")
             }
         }
-        .confirmationDialog("Pick a menu item", isPresented: $showActionSheet, titleVisibility: .visible) {
-            Button("Send Message") {}
-            Button("Add to Customer") {}
-            Button("Add to Contact") {}
-            Button("Add Calendar Event") {}
-            Button("$ pay") {}
-            Button("Web Page") {}
-            Button("Call Phone") {}
-            Button("Send Email") { showEmailComposer = true }
-            Button("Share My Location") {}
-            Button("Cancel", role: .cancel) {}
+        .sheet(item: $activeSheet) { sheet in
+            switch sheet {
+            case .edit:
+                editForm()
+            case .email:
+                mailSheet()
+            }
         }
-        .sheet(isPresented: $showSheet, content: {
-            FormUI(detail: customerItem(id: detail.id, active: detail.active, first: detail.first, lastname: detail.lastname, address: detail.address, street: detail.street, city: detail.city, state: detail.state, zip: detail.zip, amount: detail.amount, date: detail.date, rate: detail.rate, phone: detail.phone, comments: detail.comments, spouse: detail.spouse, email: detail.email, contractor: detail.contractor, photo: detail.photo, last: detail.last, start: detail.start, complete: detail.complete, quan: detail.quan, salesNo: detail.salesNo, jobNo: detail.jobNo, prodNo: detail.prodNo, l11: "", l12: "", l13: "", l14: "", l15: "", l16: "", l17: "", l21: "", l22: "", l23: "", l24: "", l25: "", l26: "", l27: "", l1datetext: "Sale Date:", lnewsTitle: "", status: detail.status, formController: detail.formController), createDate: Date(), startDate: Date(), completeDate: Date(), status: "Edit")
-        })
-        .sheet(isPresented: $showEmailComposer) {
-                    MailView(
-                        subject: "Email support",
-                        message: "Message",
-                        attachment: nil,
-                        onResult: { _ in
-                             // Handle the result if needed.
-                             self.showEmailComposer = false
-                        }
-                    )
-                }
-        .foregroundColor(self.color == 0 ? Color.purple : Color.orange)
-        .tint(self.color == 0 ? Color.purple : Color.orange)
+        .foregroundColor(themeColor)
+        .tint(themeColor)
+        .background(Color(.systemGroupedBackground))
         .frame(maxWidth: maxWidthForIpad)
     }
     
@@ -134,25 +159,81 @@ struct LeadDetailUI: View {
         return values[index]
     }
     
-    private func getSold() {
-        if (self.detail.formController == "Customer") {
-            if self.detail.rate == "5" {
-                showingSold = true
-            } else {
-                showingSold = false
-            }
-        }
+
+    private func callPhoneNumber(_ raw: String) {
+        let digits = raw.filter { $0.isNumber }
+        guard !digits.isEmpty, let url = URL(string: "tel://\(digits)") else { return }
+        #if targetEnvironment(simulator)
+        // Prevent simulator crash/unsupported behavior by just printing
+        print("Dialing: \(digits)")
+        #else
+        UIApplication.shared.open(url)
+        #endif
     }
     
-    private func getActive() {
-        if (self.detail.active == "1") {
-            self.activeColor = 1
-        } else {
-            self.activeColor = 0
-        }
+    @ViewBuilder
+    private func editForm() -> some View {
+        FormUI(
+            detail: customerItem(
+                id: detail.id,
+                active: detail.active,
+                first: detail.first,
+                lastname: detail.lastname,
+                address: detail.address,
+                street: detail.street,
+                city: detail.city,
+                state: detail.state,
+                zip: detail.zip,
+                amount: detail.amount,
+                date: detail.date,
+                rate: detail.rate,
+                phone: detail.phone,
+                comments: detail.comments,
+                spouse: detail.spouse,
+                email: detail.email,
+                contractor: detail.contractor,
+                photo: detail.photo,
+                last: detail.last,
+                start: detail.start,
+                complete: detail.complete,
+                quan: detail.quan,
+                salesNo: detail.salesNo,
+                jobNo: detail.jobNo,
+                prodNo: detail.prodNo,
+                l11: "",
+                l12: "",
+                l13: "",
+                l14: "",
+                l15: "",
+                l16: "",
+                l17: "",
+                l21: "",
+                l22: "",
+                l23: "",
+                l24: "",
+                l25: "",
+                l26: "",
+                l27: "",
+                l1datetext: "Sale Date:",
+                lnewsTitle: "",
+                status: detail.status,
+                formController: detail.formController
+            ),
+            createDate: Date(),
+            startDate: Date(),
+            completeDate: Date(),
+            status: "Edit"
+        )
     }
-    
-    private func callPhone() {
+
+    @ViewBuilder
+    private func mailSheet() -> some View {
+        MailView(
+            subject: "Email support",
+            message: "Message",
+            attachment: nil,
+            onResult: { _ in activeSheet = nil }
+        )
     }
 }
 
@@ -163,7 +244,6 @@ struct TopViewUI: View {
     
     @Binding var detail: customerItem
     @Binding var showFullscreen: Bool
-    @Binding var showingSold: Bool
     
     private func formattedAmount(_ raw: String) -> String {
         if raw.trimmingCharacters(in: .whitespacesAndNewlines).hasPrefix("$") {
@@ -174,118 +254,97 @@ struct TopViewUI: View {
     }
    
     var body: some View {
-        
-        VStack(alignment: .trailing, spacing: 13) {
-            HStack {
-                Text(detail.lastname).font(.system(size: 38, weight: .semibold, design: .rounded))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.1)
-                    .padding(.top, 3).padding(.leading, 20).padding(.bottom, -10)
-                //.redacted(reason: .placeholder)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .center, spacing: 12) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(detail.lastname)
+                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+
+                    Text(detail.street)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                    Text(detail.address)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+                Spacer(minLength: 8)
+                VStack(spacing: 8) {
+                    Image("taylor_swift_profile")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 88, height: 88)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(.white.opacity(0.7), lineWidth: 1))
+                        .shadow(radius: 2)
+
+                    Text(detail.id)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+            }
+
+            HStack(alignment: .center, spacing: 12) {
+                Label(detail.active == "1" ? "Following" : "Follow", systemImage: detail.active == "1" ? "star.fill" : "star")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(detail.active == "1" ? .blue : .secondary)
+                    .onTapGesture { toggleActive() }
+                    .accessibilityLabel("Toggle Follow")
+
                 Spacer()
-                
-                Text(detail.active == "1" ? "Following" : "Follow").font(.system(size: 18, weight: .semibold, design: .rounded))
-                    .padding(.top, 10)
-                
-                Button(action: toggleActive) {
-                    Image(systemName: "star.fill")
-                        .frame(width: 21, height: 21)
-                        .foregroundColor(detail.active == "1" ? Color.blue : Color.secondary)
-                        .padding(.top, 7).padding(.trailing, 15)
+
+                Button {
+                    showFullscreen.toggle()
+                } label: {
+                    Label("Map", systemImage: "map")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white)
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(.blue)
+                .controlSize(.mini)
+                //.accessibilityLabel("Show Map")
             }
-            
+
             Divider()
-            
-            VStack {
-                
-                HStack {
-                    VStack(alignment: .leading, spacing: 0) {
-                        //let amountStr = NSDecimalNumber(string: "\(detail.amount).00")
-                        Text(formattedAmount(detail.amount))
-                            .font(.largeTitle)
-                            .fontWeight(.semibold)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.9)
-                        Spacer()
-                        Text(detail.street).font(.system(size: 20, weight: .regular, design: .rounded))
+
+            HStack(alignment: .center) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(formattedAmount(detail.amount))
+                        .font(.title2).fontWeight(.semibold)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.9)
-                        Text(detail.address).font(.system(size: 20, weight: .regular, design: .rounded))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.9)
-                        Spacer()
-                        Text(detail.l1datetext).font(.caption2.bold())
-                            .foregroundColor(Color(.lightGray))
-                        Text(detail.date).font(.headline)
-                    }
-                    .padding(.leading, 20)
-                    
-                    Spacer()
-                    
-                    VStack(alignment: .trailing, spacing: 0) {
-                        
-                        Image("taylor_swift_profile")
-                            .resizable()
-                            .frame(width: 115, height: 115)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                        
-                        Text(detail.id).font(.caption2)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                            .padding(.top, 15)
-                    }
-                    .frame(width: 120)
-                    .padding(.trailing, 15)
+                    Text(detail.l1datetext)
+                        .font(.caption).foregroundStyle(.secondary)
+                    Text(detail.date)
+                        .font(.headline)
                 }
-                
-                HStack {
-                    VStack(alignment: .leading) {
-                        HStack {
-                            Toggle("", isOn: $showingSold.animation(.spring()))
-                                .frame(width:80)
-                                .toggleStyle(SwitchToggleStyle(tint: .blue))
-                                .cornerRadius(10)
-                            
-                            if showingSold {
-                                Text("Priority").font(.system(size: 18, weight: .semibold, design: .rounded))
-                                    .frame(width: 75, height: 30)
-                                    .background(Color.red.cornerRadius(10))
-                                    .foregroundColor(.white)
-                                    .padding(.leading, 10)
-                            }
-                        }
-                    }
-                    
-                    Spacer()
-                    
-                    VStack {
-                        Button {
-                            showFullscreen.toggle()
-                        } label: {
-                            Text("Map").font(.headline).fontWeight(.semibold)
-                                .frame(maxWidth: 130)
-                        }
-                        .tint(.blue)
+                Spacer()
+                if detail.rate == "5" {
+                    Text("Priority")
+                        .font(.subheadline.weight(.semibold))
+                        //.font(.footnote.weight(.semibold))
+                        .padding(.horizontal, 13)
+                        .padding(.vertical, 6)
+                        .background(Color.red.opacity(0.9), in: Capsule())
                         .foregroundColor(.white)
-                        .buttonStyle(.borderedProminent)
-                        .buttonBorderShape(.automatic)
-                        .controlSize(.regular)
-                    }
-                    .frame(width: 120)
-                    .padding(.trailing, 20)
                 }
-                .padding(.bottom, 20)
             }
-            .fullScreenCover(isPresented: $showFullscreen, content: {
-                MapUI(mapstreet: detail.street, mapcity: detail.city, mapstate: detail.state, mapzip: detail.zip, travelTime: 0.00, distance: 0.00)
-            })
         }
-        .foregroundColor(self.color == 0 ? Color.white : Color.black)
-        .background(self.color == 0 ? Color.purple : Color.orange)
-        .clipShape(CustomShape(corner: .bottomLeft, radii: 55))
-        .shadow(radius: 10)
+        .padding(16)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(Color(.separator).opacity(0.2))
+        )
+        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+        .fullScreenCover(isPresented: $showFullscreen, content: {
+            MapUI(mapstreet: detail.street, mapcity: detail.city, mapstate: detail.state, mapzip: detail.zip, travelTime: 0.00, distance: 0.00)
+        })
     }
     
     private func toggleActive() {
@@ -300,18 +359,17 @@ struct CenterViewUI : View {
     @AppStorage("color") var color: Int?
     
     var body: some View {
-        HStack {
+        HStack(spacing: 12) {
             Text(formData.label)
-                .foregroundColor(self.color == 0 ? Color.purple : Color.orange)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.secondary)
             Spacer()
             Text(formData.name)
-                .foregroundColor(Color.primary)
+                .font(.body)
+                .foregroundStyle(Color.primary)
                 .lineLimit(1)
-                .minimumScaleFactor(0.5)
+                .minimumScaleFactor(0.8)
         }
-        .font(.body)
-        .padding(.horizontal, 20)
-        .padding(.vertical, 8)
     }
 }
 
@@ -326,40 +384,36 @@ struct BottomViewUI: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(detail.lnewsTitle)
-                .foregroundColor(.secondary)
-                .lineLimit(2)
-                .font(.body)
-                .frame(maxWidth: .infinity, alignment: .topLeading)
-            
-            HStack(spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "text.bubble")
                 Text("Comments")
-                    .foregroundColor(accentColor)
-                    .lineLimit(1)
-                
+                    .font(.subheadline.weight(.semibold))
                 Spacer()
-                
-                Button {
-                    showPopover = true
-                } label: {
-                    Text("Read more")
-                        .foregroundColor(accentColor)
-                        .lineLimit(1)
-                }
-                .popover(isPresented: $showPopover) {
-                    PopoverContent(detail: $detail)
-                }
+                Button("Read more") { showPopover = true }
+                    .buttonStyle(.bordered)
+                    .tint(accentColor)
             }
-            .font(.caption)
-            
+            .foregroundStyle(accentColor)
+
+            Text(detail.lnewsTitle)
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+                .font(.footnote)
+
             Text(detail.comments)
                 .foregroundColor(.primary)
                 .frame(maxWidth: .infinity, alignment: .topLeading)
                 .textSelection(.enabled)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 18)
-        .padding(.bottom, 24)
+        .padding(16)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(Color(.separator).opacity(0.2))
+        )
+        .popover(isPresented: $showPopover) {
+            PopoverContent(detail: $detail)
+        }
     }
 }
 
@@ -385,7 +439,7 @@ struct PopoverContent: View {
                 .font(.headline)
                 .foregroundColor(.primary)
         }
-        .frame(width: 350, height: 200)
+        .frame(width: 380, height: 260)
     }
 }
 
@@ -400,4 +454,3 @@ struct LeadDetailUI_Previews: PreviewProvider {
             .preferredColorScheme(.dark)
        }
 }
-

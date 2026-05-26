@@ -7,114 +7,155 @@
 
 import SwiftUI
 
+// MARK: - Root Content
 struct ContentView: View {
-    @State private var selection = 0
+    @State private var selection: RootTab = .home
     
+    @Environment(\.openURL) private var openURL
+
+  //  private func callPhone(_ number: String) {
+  //      guard let url = URL(string: "tel://\(number)") else { return }
+   //     openURL(url)
+  //  }
+
     var body: some View {
         ZStack(alignment: .bottom) {
-            TabView(selection: $selection) {
-                MainMenuUI()
-                    .tag(0)
-                MainMessagesView()
-                    .tag(1)
-                WaveUI()
-                    .tag(2)
-                FurnitureUI()
-                    .tag(3)
-                WebUI()
-                    .tag(4)
-                TwitterUI()
-                    .tag(5)
-            }
+            tabContent
             Divider()
             TabBarView(selection: $selection)
         }
-        .background(Color.red)
         .ignoresSafeArea(.keyboard, edges: .bottom)
-        .ignoresSafeArea(.all, edges: .top)
+    }
+
+    @ViewBuilder
+    private var tabContent: some View {
+        TabView(selection: $selection) {
+            MainMenuUI()
+                .tag(RootTab.home)
+            MainMessagesView()
+                .tag(RootTab.chat)
+            WaveUI()
+                .tag(RootTab.wave)
+            FurnitureUI()
+                .tag(RootTab.furniture)
+            WebUI()
+                .tag(RootTab.web)
+            TwitterUI()
+                .tag(RootTab.twitter)
+        }
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-            .preferredColorScheme(.dark)
+// MARK: - Root Tabs
+private enum RootTab: CaseIterable, Identifiable {
+    case home
+    case chat
+    case wave
+    case furniture
+    case web
+    case twitter
+
+    var id: Self { self }
+
+    var image: String {
+        switch self {
+        case .home: return "house.fill"
+        case .chat: return "message.fill"
+        case .wave: return "wave.3.left"
+        case .furniture: return "cart"
+        case .web: return "network"
+        case .twitter: return "brain.head.profile"
+        }
+    }
+
+    var label: String {
+        switch self {
+        case .home: return "Home"
+        case .chat: return "Chat"
+        case .wave: return "Wave"
+        case .furniture: return "Furn"
+        case .web: return "Web"
+        case .twitter: return "Tweet"
+        }
     }
 }
 
-struct TabBarView: View {
-    @Binding var selection: Int
+// MARK: - Tab Bar
+private struct TabBarView: View {
+    @Binding var selection: RootTab
     @Namespace private var currentTab
-    
+
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(Self.tabs.indices, id: \.self) { index in
-                tabButton(for: Self.tabs[index], at: index)
-            }
-        }
-        .padding(.horizontal, 8)
-        .padding(.top, 6)
-        .padding(.bottom, 8)
-        .background(.ultraThinMaterial)
-    }
-    
-    private func tabButton(for tab: Tab, at index: Int) -> some View {
-        Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                selection = index
-            }
-        } label: {
-            VStack(spacing: 4) {
-                ZStack {
-                    if selection == index {
-                        Capsule()
-                            .fill(Color.primary)
-                            .matchedGeometryEffect(id: "currentTab", in: currentTab)
-                    } else {
-                        Capsule()
-                            .fill(Color.clear)
+            ForEach(RootTab.allCases) { tab in
+                TabBarItem(
+                    tab: tab,
+                    isSelected: selection == tab,
+                    namespace: currentTab
+                ) {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        selection = tab
                     }
                 }
-                .frame(width: 24, height: 3)
-                
+            }
+        }
+        .padding(EdgeInsets(top: 6, leading: 8, bottom: 8, trailing: 8))
+        .background(.ultraThinMaterial)
+    }
+}
+
+private struct TabBarItem: View {
+    let tab: RootTab
+    let isSelected: Bool
+    let namespace: Namespace.ID
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                selectionIndicator
+
                 Image(systemName: tab.image)
                     .font(.caption)
                     .frame(height: 18)
-                
+
                 Text(tab.label)
-                    .font(.system(size: 12, weight: selection == index ? .semibold : .regular))
+                    .font(.system(size: 12, weight: isSelected ? .semibold : .regular))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity, minHeight: 48)
-            .foregroundColor(selection == index ? .primary : .secondary)
+            .foregroundColor(isSelected ? .primary : .secondary)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel(tab.label)
     }
-}
 
-struct TabBarView_Previews: PreviewProvider {
-    static var previews: some View {
-        TabBarView(selection: Binding.constant(0))
-            .previewLayout(.sizeThatFits)
-            .preferredColorScheme(.dark)
+    @ViewBuilder
+    private var selectionIndicator: some View {
+        if isSelected {
+            Capsule()
+                .fill(Color.primary)
+                .matchedGeometryEffect(id: "currentTab", in: namespace)
+                .frame(width: 24, height: 3)
+        } else {
+            Capsule()
+                .fill(Color.clear)
+                .frame(width: 24, height: 3)
+        }
     }
 }
 
-private struct Tab {
-    let image: String
-    let label: String
+// MARK: - Previews
+#Preview("Content - Dark") {
+    ContentView()
+        .preferredColorScheme(.dark)
 }
 
-private extension TabBarView {
-    static let tabs = [
-        Tab(image: "house.fill", label: "Home"),
-        Tab(image: "message.fill", label: "Chat"),
-        Tab(image: "wave.3.left", label: "Wave"),
-        Tab(image: "cart", label: "Furn"),
-        Tab(image: "network", label: "Web"),
-        Tab(image: "brain.head.profile", label: "Tweet"),
-    ]
+@available(iOS 17.0, *)
+#Preview("Tab Bar - Dark", traits: .sizeThatFitsLayout) {
+    TabBarView(selection: .constant(.home))
+        .preferredColorScheme(.dark)
 }
+

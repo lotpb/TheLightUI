@@ -8,6 +8,7 @@
 import SwiftUI
 import FirebaseFirestore
 
+// MARK: - Customer List
 struct CustomerUI: View {
     @AppStorage("color") private var color: Int?
     @StateObject private var viewModel: CustomerData
@@ -74,6 +75,32 @@ struct CustomerUI: View {
     }
     
     var body: some View {
+        customerList
+            .listStyle(.plain)
+            .navigationTitle("Customers")
+            .navigationBarTitleDisplayMode(.inline)
+            .foregroundColor(themeColor)
+            .toolbar { toolbarContent }
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always)) {
+                Text("Balsamo").searchCompletion("Balsamo")
+                Text("Rosch").searchCompletion("Rosch")
+            }
+            .refreshable {
+                viewModel.fetchData()
+            }
+            .sheet(isPresented: $isAddingCustomer) {
+                addCustomerForm
+            }
+            .onAppear {
+                UIApplication.shared.applicationIconBadgeNumber = 0
+            }
+            .environmentObject(viewModel)
+            .environmentObject(pickerviewModel)
+    }
+
+    // MARK: - Content
+
+    private var customerList: some View {
         List {
             if viewModel.isLoading {
                 ProgressView("Loading Customers...")
@@ -84,46 +111,6 @@ struct CustomerUI: View {
                 customerRows
             }
         }
-        .listStyle(.plain)
-        .navigationTitle("Customers")
-        .navigationBarTitleDisplayMode(.inline)
-        .foregroundColor(themeColor)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                EditButton()
-            }
-            ToolbarItemGroup(placement: .topBarTrailing) {
-                Button {
-                    isAddingCustomer = true
-                } label: {
-                    Label("New", systemImage: "plus")
-                }
-                sortMenu
-            }
-        }
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always)) {
-            Text("Balsamo").searchCompletion("Balsamo")
-            Text("Rosch").searchCompletion("Rosch")
-        }
-        .refreshable {
-            viewModel.fetchData()
-        }
-        .sheet(isPresented: $isAddingCustomer) {
-            FormUI(
-                detail: .emptyCustomer,
-                createDate: Date(),
-                startDate: Date(),
-                completeDate: Date(),
-                status: "New"
-            )
-            .environmentObject(viewModel)
-            .environmentObject(pickerviewModel)
-        }
-        .onAppear {
-            UIApplication.shared.applicationIconBadgeNumber = 0
-        }
-        .environmentObject(viewModel)
-        .environmentObject(pickerviewModel)
     }
     
     private var activeOnlyToggle: some View {
@@ -141,6 +128,18 @@ struct CustomerUI: View {
                     .navigationBarBackButtonHidden(true)
             } label: {
                 CellView(data: item, showsComments: !item.comments.isEmpty)
+            }
+            .contextMenu {
+                Button {
+                    callPhoneNumber(item.phone)
+                } label: {
+                    Label("Call", systemImage: "phone")
+                }
+                Button {
+                    scheduleReminder(for: item)
+                } label: {
+                    Label("Remind", systemImage: "bell")
+                }
             }
             .swipeActions(edge: .leading) {
                 Button {
@@ -185,6 +184,35 @@ struct CustomerUI: View {
             Label("Sort", systemImage: "line.3.horizontal.decrease.circle")
         }
     }
+
+    private var addCustomerForm: some View {
+        FormUI(
+            detail: .emptyCustomer,
+            createDate: Date(),
+            startDate: Date(),
+            completeDate: Date(),
+            status: "New"
+        )
+        .environmentObject(viewModel)
+        .environmentObject(pickerviewModel)
+    }
+
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            EditButton()
+        }
+
+        ToolbarItemGroup(placement: .topBarTrailing) {
+            Button(action: { isAddingCustomer = true }) {
+                Label("New", systemImage: "plus")
+            }
+
+            sortMenu
+        }
+    }
+
+    // MARK: - Actions
     
     private func scheduleReminder(for item: customerItem) {
         var dateComponents = DateComponents()
@@ -197,6 +225,12 @@ struct CustomerUI: View {
             dateComponents: dateComponents,
             repeats: true
         )
+    }
+    
+    private func callPhoneNumber(_ raw: String) {
+        let digits = raw.filter { $0.isNumber }
+        guard !digits.isEmpty, let url = URL(string: "tel://\(digits)") else { return }
+        UIApplication.shared.open(url)
     }
     
     private func deleteItems(_ items: [customerItem]) {
@@ -212,7 +246,15 @@ struct CustomerUI: View {
     }
 }
 
+// MARK: - Customer Cell
 struct CellView: View {
+    private enum Layout {
+        static let avatarSize: CGFloat = 60
+        static let actionIconSize: CGFloat = 20
+        static let summaryWidth: CGFloat = 90
+        static let summaryHeight: CGFloat = 25
+    }
+
     @AppStorage("color") private var color: Int?
     
     let data: customerItem
@@ -224,68 +266,83 @@ struct CellView: View {
     
     var body: some View {
         HStack(alignment: .top) {
-            Image("taylor_swift_profile")
-                .resizable()
-                .frame(width: 60, height: 60, alignment: .topLeading)
-                .clipShape(Circle())
-                .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                .padding(.top, 5)
-            
-            VStack(alignment: .leading, spacing: 6) {
-                Text(data.lastname)
-                    .font(.title3)
-                    .fontWeight(.bold)
-                    .foregroundColor(.primary)
-                    .minimumScaleFactor(0.5)
-                    .padding(.top, 3)
-                
-                Text(data.address)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
-                
-                HStack(spacing: 20) {
-                    Button(action: {}) {
-                        Image(systemName: "text.bubble.fill")
-                            .resizable()
-                            .frame(width: 20, height: 20)
-                            .foregroundColor(themeColor)
-                    }
-                    .disabled(!showsComments)
-                    
-                    Button(action: {}) {
-                        Image(systemName: "hand.thumbsup.fill")
-                            .resizable()
-                            .frame(width: 20, height: 20)
-                            .foregroundColor(themeColor)
-                    }
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(.leading, 10)
-            
+            avatar
+            customerSummary
             Spacer()
-            
-            VStack(alignment: .trailing, spacing: 6) {
-                Text(data.date)
-                    .frame(width: 90, height: 25)
-                    .font(.caption2)
-                    .foregroundColor(themeColor)
-                    .minimumScaleFactor(0.5)
-                    .padding(.top, 3)
-                
-                Text("$\(data.amount).00")
-                    .frame(width: 90, height: 25)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
-                    .foregroundColor(.primary)
-                    .font(.headline)
+            amountSummary
+        }
+    }
+
+    private var avatar: some View {
+        Image("taylor_swift_profile")
+            .resizable()
+            .frame(width: Layout.avatarSize, height: Layout.avatarSize, alignment: .topLeading)
+            .clipShape(Circle())
+            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+            .padding(.top, 5)
+    }
+
+    private var customerSummary: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(data.lastname)
+                .font(.title3)
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
+                .minimumScaleFactor(0.5)
+                .padding(.top, 3)
+
+            Text(data.address)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+
+            rowActions
+        }
+        .padding(.leading, 10)
+    }
+
+    private var rowActions: some View {
+        HStack(spacing: 20) {
+            Button(action: {}) {
+                actionIcon("text.bubble.fill")
+            }
+            .disabled(!showsComments)
+
+            Button(action: {}) {
+                actionIcon("hand.thumbsup.fill")
             }
         }
+        .buttonStyle(.plain)
+    }
+
+    private var amountSummary: some View {
+        VStack(alignment: .trailing, spacing: 6) {
+            Text(data.date)
+                .frame(width: Layout.summaryWidth, height: Layout.summaryHeight)
+                .font(.caption2)
+                .foregroundColor(themeColor)
+                .minimumScaleFactor(0.5)
+                .padding(.top, 3)
+
+            Text("$\(data.amount).00")
+                .frame(width: Layout.summaryWidth, height: Layout.summaryHeight)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+                .foregroundColor(.primary)
+                .font(.headline)
+        }
+    }
+
+    private func actionIcon(_ systemName: String) -> some View {
+        Image(systemName: systemName)
+            .resizable()
+            .frame(width: Layout.actionIconSize, height: Layout.actionIconSize)
+            .foregroundColor(themeColor)
     }
 }
 
+// MARK: - Preview
 #Preview("Customers - Dark") {
     NavigationStack {
         CustomerUI(viewModel: CustomerData())
@@ -293,6 +350,7 @@ struct CellView: View {
     .preferredColorScheme(.dark)
 }
 
+// MARK: - Customer Data
 class CustomerData: ObservableObject {
     @Published var items = [customerItem]()
     @Published var isLoading = false
@@ -308,6 +366,7 @@ class CustomerData: ObservableObject {
         formatter.numberStyle = .none
         return formatter
     }()
+    private var listener: ListenerRegistration?
     
     init() {
         fetchData()
@@ -315,7 +374,8 @@ class CustomerData: ObservableObject {
     
     func fetchData() {
         isLoading = true
-        db.collection("Customers")
+        listener?.remove()
+        listener = db.collection("Customers")
             .order(by: "creationDate", descending: true)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self else { return }
@@ -399,8 +459,13 @@ class CustomerData: ObservableObject {
             formController: "Customer"
         )
     }
+    
+    deinit {
+        listener?.remove()
+    }
 }
 
+// MARK: - Configuration
 enum Config {
     static let NewsLead = "Company to expand to a new web advertising directive this week."
     static let NewsCust = "Check our new line of fabulous windows and siding."
@@ -409,6 +474,7 @@ enum Config {
     static let BaseUrl = "http://lotpb.github.io/UnitedWebPage/index.html"
 }
 
+// MARK: - Customer Model
 struct customerItem: Identifiable {
     var id: String
     var active: String
@@ -503,6 +569,7 @@ struct customerItem: Identifiable {
     }
 }
 
+// MARK: - Picker Data
 class PickerDataModel: ObservableObject {
     @Published var pickSalesman = [String]()
     @Published var pickJob = [String]()
@@ -532,3 +599,4 @@ class PickerDataModel: ObservableObject {
         ])
     }
 }
+
