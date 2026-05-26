@@ -14,10 +14,22 @@ struct CarouselSliderUI: View {
     }
 }
 
-struct CarouselSliderUI_Previews: PreviewProvider {
-    static var previews: some View {
-        CarouselSliderUI()
-    }
+@available(iOS 17.0, *)
+#Preview("Carousel Slider") {
+    CarouselSliderUI()
+}
+
+private enum CarouselStyle {
+    static let maxContentWidth: CGFloat = 430
+    static let horizontalPadding: CGFloat = 24
+    static let slideCornerRadius: CGFloat = 32
+    static let buttonHeight: CGFloat = 54
+    static let imageMaxHeight: CGFloat = 270
+
+    static let ink = Color(red: 0.08, green: 0.10, blue: 0.16)
+    static let secondaryInk = Color(red: 0.36, green: 0.40, blue: 0.48)
+    static let accent = Color(red: 0.05, green: 0.52, blue: 0.74)
+    static let coral = Color(red: 0.95, green: 0.48, blue: 0.50)
 }
 
 private struct CarouselSlide: Identifiable {
@@ -25,6 +37,13 @@ private struct CarouselSlide: Identifiable {
     let imageName: String
     let title: String
     let subtitle: String
+}
+
+private struct SignupAction: Identifiable {
+    let id = UUID()
+    let title: String
+    let systemImage: String
+    let style: SignupButton.Style
 }
 
 private struct CarouselSliderHomeView: View {
@@ -51,69 +70,81 @@ private struct CarouselSliderHomeView: View {
         )
     ]
 
+    private let actions = [
+        SignupAction(title: "Sign up with Apple", systemImage: "applelogo", style: .primary),
+        SignupAction(title: "Sign up with Google", systemImage: "globe", style: .secondary(iconColor: .red)),
+        SignupAction(title: "Sign up with Email", systemImage: "envelope.fill", style: .secondary(iconColor: CarouselStyle.accent))
+    ]
+
     var body: some View {
-        VStack(spacing: 0) {
-            TabView(selection: $currentIndex) {
-                ForEach(slides) { slide in
-                    CarouselSlideView(slide: slide)
-                        .tag(slide.id)
+        ZStack {
+            CarouselBackground()
+
+            VStack(spacing: 20) {
+                TabView(selection: $currentIndex) {
+                    ForEach(slides) { slide in
+                        CarouselSlideView(slide: slide)
+                            .tag(slide.id)
+                    }
                 }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+
+                CustomTabIndicator(count: slides.count, current: currentIndex)
+
+                signupActions
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-
-            CustomTabIndicator(count: slides.count, current: $currentIndex)
-                .padding(.vertical, 24)
-
-            signupActions
-                .padding()
+            .padding(.horizontal, CarouselStyle.horizontalPadding)
+            .padding(.vertical, 28)
+            .frame(maxWidth: CarouselStyle.maxContentWidth)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemTeal).ignoresSafeArea())
     }
 
     private var signupActions: some View {
-        VStack(spacing: 15) {
-            SignupButton(
-                title: "Sign up with Apple",
-                systemImage: "applelogo",
-                iconColor: .white,
-                textColor: .white,
-                backgroundColor: .black,
-                borderColor: .white
-            )
-
-            SignupButton(
-                title: "Sign up with Google",
-                systemImage: "globe",
-                iconColor: .red,
-                textColor: .black,
-                backgroundColor: .white,
-                borderColor: .black
-            )
-
-            SignupButton(
-                title: "Sign up with Email",
-                systemImage: "envelope",
-                iconColor: .black,
-                textColor: .black,
-                backgroundColor: .white,
-                borderColor: .black
-            )
+        VStack(spacing: 12) {
+            ForEach(actions) { action in
+                SignupButton(action: action)
+            }
 
             HStack(spacing: 4) {
                 Text("Already have an account?")
-                    .foregroundColor(.white)
+                    .foregroundStyle(CarouselStyle.secondaryInk)
 
-                Button {
-                } label: {
-                    Text("Log in")
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                        .underline(true, color: .white)
-                }
+                Button("Log in") {}
+                    .fontWeight(.semibold)
+                    .foregroundStyle(CarouselStyle.ink)
             }
-            .padding(.top, 24)
+            .font(.footnote)
+            .padding(.top, 10)
         }
+    }
+}
+
+private struct CarouselBackground: View {
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Color(red: 0.93, green: 0.98, blue: 0.99),
+                    Color(red: 0.80, green: 0.91, blue: 0.95),
+                    Color(red: 0.99, green: 0.88, blue: 0.84)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+
+            VStack(spacing: 0) {
+                Color.white.opacity(0.58)
+                    .frame(height: 220)
+                    .blur(radius: 34)
+
+                Spacer()
+
+                CarouselStyle.coral.opacity(0.16)
+                    .frame(height: 240)
+                    .blur(radius: 44)
+            }
+        }
+        .ignoresSafeArea()
     }
 }
 
@@ -124,86 +155,133 @@ private struct CarouselSlideView: View {
         GeometryReader { proxy in
             let minX = proxy.frame(in: .global).minX
             let width = max(proxy.size.width, 1)
-            let progress = -minX / (width * 2)
-            let scale = max(0.7, progress > 0 ? 1 - progress : 1 + progress)
+            let progress = abs(minX / width)
+            let scale = max(0.9, 1 - (progress * 0.08))
 
-            VStack(spacing: 0) {
+            VStack(spacing: 22) {
+                Spacer(minLength: 0)
+
                 Image(slide.imageName)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .padding(.horizontal, 70)
+                    .frame(maxHeight: CarouselStyle.imageMaxHeight)
+                    .padding(.horizontal, 18)
 
-                Text(slide.title)
-                    .font(.largeTitle)
-                    .fontWeight(.heavy)
-                    .foregroundColor(.white)
-                    .padding(.top, 20)
+                VStack(spacing: 10) {
+                    Text(slide.title)
+                        .font(.system(size: 36, weight: .heavy, design: .rounded))
+                        .foregroundStyle(CarouselStyle.ink)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
 
-                Text(slide.subtitle)
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-                    .padding(.top, 10)
+                    Text(slide.subtitle)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(CarouselStyle.secondaryInk)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: 0)
             }
-            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .center)
+            .padding(24)
+            .frame(width: proxy.size.width, height: proxy.size.height)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: CarouselStyle.slideCornerRadius, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: CarouselStyle.slideCornerRadius, style: .continuous)
+                    .stroke(.white.opacity(0.72), lineWidth: 1)
+            }
+            .shadow(color: .black.opacity(0.10), radius: 26, x: 0, y: 18)
             .scaleEffect(scale)
+            .animation(.easeOut(duration: 0.2), value: scale)
         }
     }
 }
 
 private struct SignupButton: View {
-    let title: String
-    let systemImage: String
-    let iconColor: Color
-    let textColor: Color
-    let backgroundColor: Color
-    let borderColor: Color
+    enum Style {
+        case primary
+        case secondary(iconColor: Color)
+
+        var foregroundColor: Color {
+            switch self {
+            case .primary: .white
+            case .secondary: CarouselStyle.ink
+            }
+        }
+
+        var backgroundColor: Color {
+            switch self {
+            case .primary: CarouselStyle.ink
+            case .secondary: .white.opacity(0.70)
+            }
+        }
+
+        var borderColor: Color {
+            switch self {
+            case .primary: .clear
+            case .secondary: .white.opacity(0.86)
+            }
+        }
+
+        var iconColor: Color {
+            switch self {
+            case .primary: .white
+            case .secondary(let iconColor): iconColor
+            }
+        }
+    }
+
+    let action: SignupAction
 
     var body: some View {
-        Button {
-        } label: {
-            HStack(spacing: 12) {
-                Image(systemName: systemImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 25, height: 25)
-                    .foregroundColor(iconColor)
-
-                Text(title)
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(textColor)
+        Button {} label: {
+            Label {
+                Text(action.title)
+                    .font(.system(size: 16, weight: .semibold))
                     .frame(maxWidth: .infinity, alignment: .center)
+            } icon: {
+                Image(systemName: action.systemImage)
+                    .font(.system(size: 19, weight: .semibold))
+                    .frame(width: 24)
+                    .foregroundStyle(action.style.iconColor)
             }
-            .padding(.vertical, 13)
-            .padding(.horizontal)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(backgroundColor)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(borderColor, lineWidth: 1)
-                    )
-            )
+            .foregroundStyle(action.style.foregroundColor)
+            .padding(.horizontal, 18)
+            .frame(height: CarouselStyle.buttonHeight)
+            .background(action.style.backgroundColor, in: Capsule())
+            .overlay {
+                Capsule()
+                    .stroke(action.style.borderColor, lineWidth: 1)
+            }
+            .shadow(color: .black.opacity(action.style.shadowOpacity), radius: 16, x: 0, y: 8)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private extension SignupButton.Style {
+    var shadowOpacity: Double {
+        switch self {
+        case .primary: 0.14
+        case .secondary: 0.06
         }
     }
 }
 
 private struct CustomTabIndicator: View {
     let count: Int
-    @Binding var current: Int
+    let current: Int
 
     var body: some View {
-        HStack(spacing: 8) {
-            ForEach(0..<count, id: \.self) { index in
-                Circle()
-                    .fill((current - 1) == index ? Color.black : Color.white)
-                    .overlay(
-                        Circle()
-                            .stroke(Color.black, lineWidth: (current - 1) == index ? 0 : 1.5)
-                    )
-                    .frame(width: 10, height: 10)
+        HStack(spacing: 7) {
+            ForEach(1...count, id: \.self) { index in
+                Capsule()
+                    .fill(current == index ? CarouselStyle.ink : CarouselStyle.ink.opacity(0.18))
+                    .frame(width: current == index ? 22 : 8, height: 8)
+                    .animation(.spring(response: 0.28, dampingFraction: 0.8), value: current)
             }
         }
+        .padding(.vertical, 2)
     }
 }

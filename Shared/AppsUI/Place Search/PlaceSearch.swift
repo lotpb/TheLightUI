@@ -17,7 +17,7 @@ struct PlaceSearch: View {
     
     @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel: PlaceListViewModel = PlaceListViewModel()
-    @StateObject var locationManager = LocationManager()
+    @StateObject private var locationManager = LocationManager()
     
     @State private var userTrackingMode: MapUserTrackingMode = .follow
     @State private var searchText: String = ""
@@ -36,59 +36,22 @@ struct PlaceSearch: View {
     
     
     var body: some View {
-        NavigationView {
-            VStack {
-                LandMarkCategoryView { selectedCategory in
-                    viewModel.searchLandmarks(selectedCategory)
+        NavigationStack {
+            ZStack {
+                PlaceSearchBackground()
+
+                VStack(alignment: .leading, spacing: 14) {
+                    header
+                    LandMarkCategoryView { selectedCategory in
+                        viewModel.searchLandmarks(selectedCategory)
+                    }
+
+                    displayPicker
+                    resultSummary
+                    contentView
                 }
-                .padding(.horizontal, 8)
-                
-                Picker(selection: $displayType, label: Text("Select")) {
-                    Text("Map").tag(DisplayType.map)
-                    Text("List").tag(DisplayType.list)
-                }
-                .pickerStyle(.segmented)
-                .frame(maxWidth: 700).clipped()
-                
-                switch displayType {
-                case .list:
-                    LandMarkListView(landMarks: viewModel.landMarks, index: index)
-                    
-                case .map:
-                    Map(
-                        coordinateRegion: getRegion(),
-                        interactionModes: .all,
-                        showsUserLocation: true,
-                        userTrackingMode: $userTrackingMode,
-                        annotationItems: viewModel.landMarks,
-                        annotationContent: { LandMark in
-                            MapAnnotation(coordinate: LandMark.coordinate) {
-                                //Image("mappin").foregroundColor(.red)
-                                MapAnnotationView()
-                                    .scaleEffect( 0.7)
-                            }
-                        }
-                    )
-                        .cornerRadius(10)
-                        .padding(.top, 5)
-                        .gesture(
-                            DragGesture()
-                                .onChanged({ value in
-                                    isDragged = true
-                                })
-                        )
-                        .overlay(
-                            isDragged ?
-                            AnyView(RecenterButton {
-                                locationManager.startUpdating()
-                                isDragged = false
-                                locationManager.stopUpdating()
-                            }.padding())
-                            : AnyView(EmptyView()),
-                            alignment: .bottom
-                        )
-                    
-                }
+                .padding(.horizontal, 16)
+                .padding(.top, 14)
             }
             .onAppear {
                 locationManager.stopUpdating()
@@ -96,31 +59,126 @@ struct PlaceSearch: View {
             .onDisappear {
                 locationManager.stopUpdating()
             }
-            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
-            .onChange(of: searchText) { newsearch in
-                // get all land marks
-                viewModel.searchLandmarks(searchText)
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search places")
+            .onChange(of: searchText) { newSearch in
+                viewModel.searchLandmarks(newSearch)
             }
-            
-            .navigationTitle("Search Places")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItemGroup(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     Button {
                         dismiss()
                     } label: {
-                        Image(systemName: "xmark.circle.fill")
+                        Image(systemName: "xmark")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundStyle(.primary)
+                            .frame(width: 32, height: 32)
+                            .background(.regularMaterial, in: Circle())
                     }
+                    .buttonStyle(.plain)
                 }
             }
         }
-        .padding(.horizontal, 10)
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text("Search Places")
+                .font(.system(size: 34, weight: .bold, design: .rounded))
+                .foregroundStyle(.primary)
+
+            //Text("Find nearby spots and switch between map and list views.")
+            //    .font(.subheadline)
+             //   .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 4)
+    }
+
+    private var displayPicker: some View {
+        Picker("Display", selection: $displayType) {
+            Label("Map", systemImage: "map.fill").tag(DisplayType.map)
+            Label("List", systemImage: "list.bullet").tag(DisplayType.list)
+        }
+        .pickerStyle(.segmented)
+        .frame(maxWidth: 700)
+    }
+
+    private var resultSummary: some View {
+        HStack(spacing: 8) {
+            Image(systemName: displayType == .map ? "mappin.and.ellipse" : "building.2")
+                .foregroundStyle(.blue)
+
+            Text("\(viewModel.landMarks.count) places nearby")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            Spacer()
+        }
+        .padding(.horizontal, 4)
+    }
+
+    @ViewBuilder
+    private var contentView: some View {
+        switch displayType {
+        case .list:
+            LandMarkListView(landMarks: viewModel.landMarks, index: index)
+                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        case .map:
+            mapView
+        }
+    }
+
+    private var mapView: some View {
+        Map(
+            coordinateRegion: getRegion(),
+            interactionModes: .all,
+            showsUserLocation: true,
+            userTrackingMode: $userTrackingMode,
+            annotationItems: viewModel.landMarks,
+            annotationContent: { landMark in
+                MapAnnotation(coordinate: landMark.coordinate) {
+                    MapAnnotationView()
+                        .scaleEffect(0.7)
+                }
+            }
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .stroke(Color(.separator).opacity(0.12), lineWidth: 1)
+        }
+        .shadow(color: .black.opacity(0.12), radius: 22, x: 0, y: 12)
+        .gesture(
+            DragGesture()
+                .onChanged { _ in
+                    isDragged = true
+                }
+        )
+        .overlay(alignment: .bottom) {
+            if isDragged {
+                RecenterButton {
+                    locationManager.startUpdating()
+                    isDragged = false
+                    locationManager.stopUpdating()
+                }
+                .padding(.bottom, 18)
+            }
+        }
     }
 }
 
-struct PlaceSearch_Previews: PreviewProvider {
-    static let index = 1
-    static var previews: some View {
-        PlaceSearch( index: index)
+private struct PlaceSearchBackground: View {
+    var body: some View {
+        LinearGradient(
+            colors: [Color(.systemGroupedBackground), Color(.secondarySystemGroupedBackground)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .ignoresSafeArea()
     }
+}
+
+#Preview("Place Search") {
+    PlaceSearch(index: 1)
 }

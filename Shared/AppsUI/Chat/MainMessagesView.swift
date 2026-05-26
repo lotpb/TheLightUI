@@ -10,7 +10,6 @@ import SDWebImageSwiftUI
 import Firebase
 import FirebaseFirestoreSwift
 
-
 class MainMessagesViewModel: ObservableObject {
     
     @Published var errorMessage = ""
@@ -110,12 +109,17 @@ struct MainMessagesView: View {
     
     var body: some View {
         NavigationStack {
-            VStack {
-                customNavBar
-                messagesView
+            ZStack(alignment: .bottomTrailing) {
+                InboxBackground()
+
+                VStack(spacing: 0) {
+                    customNavBar
+                    messagesView
+                }
+
+                newMessageButton
             }
-            .overlay(
-                newMessageButton, alignment: .bottom)
+            .overlay(alignment: .top) { errorBanner }
             .ignoresSafeArea(.keyboard, edges: .bottom)
             .navigationBarHidden(true)
             .navigationDestination(isPresented: $shouldNavigateToChatLogView) {
@@ -125,45 +129,43 @@ struct MainMessagesView: View {
     }
     
     private var customNavBar: some View {
-        HStack(spacing: 16) {
-            
-            WebImage(url: URL(string: vm.chatUser?.profileImageUrl ?? "profile-rabbit-toy.png"))
-                .resizable()
-                .scaledToFill()
-                .frame(width: 50, height: 50)
-                .clipped()
-                .cornerRadius(50)
-                .overlay(RoundedRectangle(cornerRadius: 44)
-                        .stroke(Color.primary, lineWidth: 1)
-                )
-                .shadow(radius: 5)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                let email = vm.chatUser?.email.replacingOccurrences(of: "@optonline.net", with: "") ?? ""
-                Text(email)
-                    .font(.system(size: 24, weight: .bold))
+        HStack(spacing: 14) {
+            CurrentUserAvatar(urlString: vm.chatUser?.profileImageUrl)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(displayName(for: vm.chatUser?.email) ?? "Messages")
+                    .font(.system(.title2, design: .rounded, weight: .bold))
+                    .foregroundStyle(.primary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                HStack {
+                    .minimumScaleFactor(0.75)
+
+                HStack(spacing: 6) {
                     Circle()
-                        .foregroundColor(.green)
-                        .frame(width: 14, height: 14)
-                    Text("online")
-                        .font(.system(size: 12))
-                        .foregroundColor(Color(.lightGray))
+                        .fill(.green)
+                        .frame(width: 8, height: 8)
+
+                    Text("Online")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
                 }
             }
             
             Spacer()
+
             Button {
                 shouldShowLogOutOptions.toggle()
             } label: {
-                Image(systemName: "gear")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(Color.primary)
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(.primary)
+                    .frame(width: 42, height: 42)
+                    .background(.regularMaterial, in: Circle())
             }
+            .buttonStyle(.plain)
         }
-        .padding()
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .padding(.bottom, 14)
         .confirmationDialog("Settings", isPresented: $shouldShowLogOutOptions, titleVisibility: .visible) {
             Button("Sign Out", role: .destructive) {
                 vm.handleSignOut()
@@ -182,76 +184,69 @@ struct MainMessagesView: View {
     }
     
     private var messagesView: some View {
-        ScrollView(showsIndicators: true) {
-            ForEach(vm.recentMessages) { recentMessage in
-                VStack {
-                    Button {
-                        let uid = FirebaseManager.shared.auth.currentUser?.uid == recentMessage.fromId ? recentMessage.toId : recentMessage.fromId
-                        
-                        self.chatUser = .init(id: uid, uid: uid, email: recentMessage.email, profileImageUrl: recentMessage.profileImageUrl)
-                        
-                        self.chatLogViewModel.chatUser = self.chatUser
-                        self.chatLogViewModel.fetchMessages()
-                        self.shouldNavigateToChatLogView.toggle()
-                    } label : {
-                        HStack(spacing: 16) {
-                            WebImage(url: URL(string: recentMessage.profileImageUrl))
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 64, height: 64)
-                                .clipped()
-                                .cornerRadius(64)
-                                .overlay(RoundedRectangle(cornerRadius: 64)
-                                            .stroke(Color.black, lineWidth: 1))
-                                .shadow(radius: 5)
-                            
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(recentMessage.email.replacingOccurrences(of: "@optonline.net", with: ""))
-                                    .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(Color.primary)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.7)
-                                    .multilineTextAlignment(.leading)
-                                Text(recentMessage.text)
-                                    .font(.system(size: 14))
-                                    .foregroundColor(Color(.darkGray))
-                                    .lineLimit(3)
-                                    .multilineTextAlignment(.leading)
-                            }
-                            Spacer()
-                            
-                            Text(recentMessage.timeAgo)
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(Color.primary)
+        ScrollView(showsIndicators: false) {
+            LazyVStack(spacing: 12) {
+                inboxHeader
+
+                if vm.recentMessages.isEmpty {
+                    EmptyInboxView()
+                        .padding(.top, 44)
+                } else {
+                    ForEach(vm.recentMessages) { recentMessage in
+                        Button {
+                            openChat(for: recentMessage)
+                        } label: {
+                            RecentMessageRow(recentMessage: recentMessage)
                         }
+                        .buttonStyle(.plain)
                     }
-                    
-                    Divider()
-                        .padding(.vertical, 8)
-                }.padding(.horizontal)
-                
-            }.padding(.bottom, 50)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 108)
         }
+    }
+
+    private var inboxHeader: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Inbox")
+                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                    .foregroundStyle(.primary)
+
+                Text("Recent conversations")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Text("\(vm.recentMessages.count)")
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 12)
+                .frame(height: 32)
+                .background(Color.blue, in: Capsule())
+        }
+        .padding(.top, 6)
+        .padding(.bottom, 8)
     }
     
     private var newMessageButton: some View {
         Button {
             shouldShowNewMessageScreen.toggle()
         } label: {
-            HStack {
-                Spacer()
-                Text("+ New Message")
-                    .font(.system(size: 16, weight: .bold))
-                Spacer()
-            }
-            .foregroundColor(.white)
-            .padding(.vertical)
-            .background(Color.blue)
-            .cornerRadius(15)
-            .padding(.horizontal)
-            .shadow(radius: 15)
+            Label("New", systemImage: "square.and.pencil")
+                .font(.system(.subheadline, design: .rounded, weight: .bold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 18)
+                .frame(height: 52)
+                .background(Color.blue, in: Capsule())
+                .shadow(color: .blue.opacity(0.28), radius: 18, x: 0, y: 10)
         }
-        .padding(.bottom, 20) //added
+        .buttonStyle(.plain)
+        .padding(.trailing, 20)
+        .padding(.bottom, 24)
         .fullScreenCover(isPresented: $shouldShowNewMessageScreen) {
             CreateNewMessageView(didSelectNewUser: { user in
                 print(user.email)
@@ -262,11 +257,136 @@ struct MainMessagesView: View {
             })
         }
     }
+
+    private var errorBanner: some View {
+        Group {
+            if !vm.errorMessage.isEmpty {
+                Text(vm.errorMessage)
+                    .font(.footnote.weight(.medium))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(Color.red.opacity(0.92), in: Capsule())
+                    .padding(.horizontal, 16)
+                    .padding(.top, 10)
+            }
+        }
+    }
+
+    private func openChat(for recentMessage: RecentMessage) {
+        let uid = FirebaseManager.shared.auth.currentUser?.uid == recentMessage.fromId ? recentMessage.toId : recentMessage.fromId
+
+        chatUser = .init(id: uid, uid: uid, email: recentMessage.email, profileImageUrl: recentMessage.profileImageUrl)
+        chatLogViewModel.chatUser = chatUser
+        chatLogViewModel.fetchMessages()
+        shouldNavigateToChatLogView.toggle()
+    }
+
+    private func displayName(for email: String?) -> String? {
+        email?.replacingOccurrences(of: "@optonline.net", with: "")
+    }
 }
 
-struct MainMessagesView_Previews: PreviewProvider {
-    static var previews: some View {
-        MainMessagesView()
-            .preferredColorScheme(.dark)
+private struct InboxBackground: View {
+    var body: some View {
+        LinearGradient(
+            colors: [Color(.systemGroupedBackground), Color(.secondarySystemGroupedBackground)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .ignoresSafeArea()
     }
+}
+
+private struct CurrentUserAvatar: View {
+    let urlString: String?
+
+    var body: some View {
+        WebImage(url: URL(string: urlString ?? ""))
+            .resizable()
+            .scaledToFill()
+            .frame(width: 52, height: 52)
+            .background(Color(.tertiarySystemFill))
+            .clipShape(Circle())
+            .overlay(Circle().stroke(.white.opacity(0.9), lineWidth: 2))
+            .shadow(color: .black.opacity(0.10), radius: 10, x: 0, y: 6)
+    }
+}
+
+private struct RecentMessageRow: View {
+    let recentMessage: RecentMessage
+
+    private var displayName: String {
+        recentMessage.email.replacingOccurrences(of: "@optonline.net", with: "")
+    }
+
+    var body: some View {
+        HStack(spacing: 14) {
+            WebImage(url: URL(string: recentMessage.profileImageUrl))
+                .resizable()
+                .scaledToFill()
+                .frame(width: 56, height: 56)
+                .background(Color(.tertiarySystemFill))
+                .clipShape(Circle())
+
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(displayName)
+                        .font(.system(.subheadline, design: .rounded, weight: .bold))
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+
+                    Spacer(minLength: 8)
+
+                    Text(recentMessage.timeAgo)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+
+                Text(recentMessage.text)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+            }
+        }
+        .padding(14)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(Color(.separator).opacity(0.12), lineWidth: 1)
+        }
+    }
+}
+
+private struct EmptyInboxView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "bubble.left.and.bubble.right.fill")
+                .font(.system(size: 34, weight: .semibold))
+                .foregroundStyle(.blue)
+                .frame(width: 70, height: 70)
+                .background(.regularMaterial, in: Circle())
+
+            VStack(spacing: 4) {
+                Text("No conversations yet")
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+
+                Text("Start a new message to begin chatting.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .padding(28)
+        .frame(maxWidth: .infinity)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+    }
+}
+
+#Preview("Main Messages") {
+    MainMessagesView()
+        .preferredColorScheme(.dark)
 }

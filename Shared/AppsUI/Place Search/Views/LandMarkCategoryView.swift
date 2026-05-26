@@ -27,28 +27,44 @@ struct LandMarkCategoryView: View {
     
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack {
+            HStack(spacing: 10) {
                 ForEach(Self.categories, id: \.self) { category in
                     Button {
-                        selectedCategory = category
+                        withAnimation(.spring(response: 0.25, dampingFraction: 0.85)) {
+                            selectedCategory = category
+                        }
                         onSelectedCategory(category)
                     } label: {
-                        Text(category)
-                            .padding(.vertical, 1)
-                            .padding(.horizontal)
+                        CategoryChip(title: category, isSelected: selectedCategory == category)
                     }
-                    .foregroundColor(selectedCategory == category ? Color.primary : Color.secondary)
-                    .background(selectedCategory == category ? Color.secondary : Color.clear)
-                    .cornerRadius(10)
+                    .buttonStyle(.plain)
                 }
             }
+            .padding(.horizontal, 4)
+            .padding(.vertical, 2)
         }
     }
 }
 
-struct LandMarkCategoryView_Previews: PreviewProvider {
-    static var previews: some View {
-        LandMarkCategoryView(onSelectedCategory: { _ in })
-            .previewLayout(.sizeThatFits)
+private struct CategoryChip: View {
+    let title: String
+    let isSelected: Bool
+
+    var body: some View {
+        Text(title)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(isSelected ? .white : .primary)
+            .padding(.horizontal, 14)
+            .frame(height: 36)
+            .background(isSelected ? Color.blue : Color(.secondarySystemGroupedBackground), in: Capsule())
+            .overlay {
+                Capsule()
+                    .stroke(Color(.separator).opacity(isSelected ? 0 : 0.12), lineWidth: 1)
+            }
     }
+}
+
+#Preview("Landmark Categories") {
+    LandMarkCategoryView(onSelectedCategory: { _ in })
+        .padding()
 }

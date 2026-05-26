@@ -16,17 +16,20 @@ struct RecenterButton: View {
         Button {
             onTapped()
         } label: {
-            Label("Re-center", systemImage: "triangle")
+            Label("Re-center", systemImage: "location.fill")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.primary)
+                .padding(.horizontal, 16)
+                .frame(height: 44)
+                .background(.regularMaterial, in: Capsule())
+                .overlay(Capsule().stroke(Color(.separator).opacity(0.16), lineWidth: 1))
+                .shadow(color: .black.opacity(0.14), radius: 14, x: 0, y: 8)
         }
-        .buttonStyle(.borderedProminent)
-        .controlSize(.large)
+        .buttonStyle(.plain)
     }
 }
 
-struct RecenterButton_Previews: PreviewProvider {
-    static var previews: some View {
-        RecenterButton { }
-        .previewLayout(.sizeThatFits)
+#Preview("Recenter Button") {
+    RecenterButton { }
         .padding()
-    }
 }
