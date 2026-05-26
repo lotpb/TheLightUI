@@ -14,10 +14,6 @@ struct TheLightUIApp: App {
     
     @State private var showLaunch = true
     
-//    init() {
-//        FirebaseApp.configure()
-//    }
-    
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
     var body: some Scene {
