@@ -11,13 +11,6 @@ import SwiftUI
 struct ContentView: View {
     @State private var selection: RootTab = .home
     
-    @Environment(\.openURL) private var openURL
-
-  //  private func callPhone(_ number: String) {
-  //      guard let url = URL(string: "tel://\(number)") else { return }
-   //     openURL(url)
-  //  }
-
     var body: some View {
         ZStack(alignment: .bottom) {
             tabContent

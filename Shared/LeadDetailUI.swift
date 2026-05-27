@@ -6,6 +6,9 @@
 //
 
 import SwiftUI
+#if canImport(MessageUI)
+import MessageUI
+#endif
 
 struct ListModel: Identifiable {
     var id = UUID().uuidString
@@ -20,6 +23,7 @@ struct LeadDetailUI: View {
     @AppStorage("color") var color: Int?
     @AppStorage("activeColor") var activeColor: Int?
     @Environment(\.dismiss) var dismiss
+    @Environment(\.openURL) private var openURL
     let maxWidthForIpad: CGFloat = 700
     
     @State var detail: customerItem
@@ -32,16 +36,44 @@ struct LeadDetailUI: View {
     private enum ActiveSheet: Identifiable {
         case edit
         case email
+        case message
 
         var id: String {
             switch self {
             case .edit: return "edit"
             case .email: return "email"
+            case .message: return "message"
             }
         }
     }
     
     private var themeColor: Color { (color == 0) ? .purple : .orange }
+    
+    private var canSendMessages: Bool {
+        #if canImport(MessageUI)
+        return MFMessageComposeViewController.canSendText()
+        #else
+        return false
+        #endif
+    }
+
+    private func parsedRecipients(from raw: String) -> [String] {
+        // Split on comma/semicolon/space and keep only digits for each token
+        let separators = CharacterSet(charactersIn: ",; ")
+        return raw
+            .components(separatedBy: separators)
+            .map { $0.filter { $0.isNumber } }
+            .filter { !$0.isEmpty }
+    }
+
+    private var defaultMessageBody: String {
+        let firstName = detail.first.trimmingCharacters(in: .whitespacesAndNewlines)
+        if firstName.isEmpty {
+            return "Hi, following up on your inquiry."
+        } else {
+            return "Hi \(firstName), following up on your inquiry."
+        }
+    }
     
     var body: some View {
         
@@ -120,15 +152,7 @@ struct LeadDetailUI: View {
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
-                    Button("Send Message") {}
-                    Button("Add to Customer") {}
-                    Button("Add to Contact") {}
-                    Button("Add Calendar Event") {}
-                    Button("$ pay") {}
-                    Button("Web Page") {}
-                    Button("Call Phone") { callPhoneNumber(detail.phone) }
-                    Button("Send Email") { activeSheet = .email }
-                    Button("Share My Location") {}
+                    actionMenuButtons()
                 } label: {
                     Label("Action", systemImage: "ellipsis.circle")
                 }
@@ -146,6 +170,8 @@ struct LeadDetailUI: View {
                 editForm()
             case .email:
                 mailSheet()
+            case .message:
+                messageSheet()
             }
         }
         .foregroundColor(themeColor)
@@ -158,19 +184,7 @@ struct LeadDetailUI: View {
         guard values.indices.contains(index) else { return "" }
         return values[index]
     }
-    
 
-    private func callPhoneNumber(_ raw: String) {
-        let digits = raw.filter { $0.isNumber }
-        guard !digits.isEmpty, let url = URL(string: "tel://\(digits)") else { return }
-        #if targetEnvironment(simulator)
-        // Prevent simulator crash/unsupported behavior by just printing
-        print("Dialing: \(digits)")
-        #else
-        UIApplication.shared.open(url)
-        #endif
-    }
-    
     @ViewBuilder
     private func editForm() -> some View {
         FormUI(
@@ -234,6 +248,54 @@ struct LeadDetailUI: View {
             attachment: nil,
             onResult: { _ in activeSheet = nil }
         )
+    }
+    
+    @ViewBuilder
+    private func messageSheet() -> some View {
+        let recipients = parsedRecipients(from: detail.phone)
+        #if canImport(MessageUI)
+        if MFMessageComposeViewController.canSendText() {
+            MessageComposeView(recipients: recipients.isEmpty ? nil : recipients, body: defaultMessageBody) { _ in
+                activeSheet = nil
+            }
+        } else {
+            // Fallback UI when messaging is unavailable (e.g., simulator or iPad without SMS)
+            VStack(spacing: 16) {
+                Image(systemName: "message")
+                    .font(.largeTitle)
+                    .foregroundStyle(.secondary)
+                Text("Messaging is not available on this device.")
+                    .font(.headline)
+                Button("Close") { activeSheet = nil }
+            }
+            .padding()
+        }
+        #else
+        VStack(spacing: 16) {
+            Image(systemName: "message")
+                .font(.largeTitle)
+                .foregroundStyle(.secondary)
+            Text("Messaging framework not available.")
+                .font(.headline)
+            Button("Close") { activeSheet = nil }
+        }
+        .padding()
+        #endif
+    }
+    
+    @ViewBuilder
+    private func actionMenuButtons() -> some View {
+        if canSendMessages {
+            Button("Send Message") { activeSheet = .message }
+        }
+        Button("Add to Customer") {}
+        Button("Add to Contact") {}
+        Button("Add Calendar Event") {}
+        Button("$ pay") {}
+        Button("Web Page") {}
+        Button("Call Phone") { openURL.callPhoneNumber(detail.phone) }
+        Button("Send Email") { activeSheet = .email }
+        Button("Share My Location") {}
     }
 }
 
@@ -442,6 +504,34 @@ struct PopoverContent: View {
         .frame(width: 380, height: 260)
     }
 }
+
+#if canImport(MessageUI)
+struct MessageComposeView: UIViewControllerRepresentable {
+    var recipients: [String]? = nil
+    var body: String? = nil
+    var onResult: (MessageComposeResult) -> Void
+
+    func makeCoordinator() -> Coordinator { Coordinator(onResult: onResult) }
+
+    func makeUIViewController(context: Context) -> MFMessageComposeViewController {
+        let vc = MFMessageComposeViewController()
+        vc.messageComposeDelegate = context.coordinator
+        vc.recipients = recipients
+        vc.body = body
+        return vc
+    }
+
+    func updateUIViewController(_ uiViewController: MFMessageComposeViewController, context: Context) { }
+
+    final class Coordinator: NSObject, MFMessageComposeViewControllerDelegate {
+        let onResult: (MessageComposeResult) -> Void
+        init(onResult: @escaping (MessageComposeResult) -> Void) { self.onResult = onResult }
+        func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
+            onResult(result)
+        }
+    }
+}
+#endif
 
 struct LeadDetailUI_Previews: PreviewProvider {
     static var previews: some View {

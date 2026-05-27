@@ -13,6 +13,7 @@ struct CustomerUI: View {
     @AppStorage("color") private var color: Int?
     @StateObject private var viewModel: CustomerData
     @StateObject private var pickerviewModel: PickerDataModel
+    @Environment(\.openURL) private var openURL
     
     private let db = Firestore.firestore()
     private let notificationManager = NotificationManager.shared
@@ -129,46 +130,55 @@ struct CustomerUI: View {
             } label: {
                 CellView(data: item, showsComments: !item.comments.isEmpty)
             }
-            .contextMenu {
-                Button {
-                    callPhoneNumber(item.phone)
-                } label: {
-                    Label("Call", systemImage: "phone")
-                }
-                Button {
-                    scheduleReminder(for: item)
-                } label: {
-                    Label("Remind", systemImage: "bell")
-                }
-            }
-            .swipeActions(edge: .leading) {
-                Button {
-                    notificationManager.deleteNotifications()
-                } label: {
-                    Label("Mark Contacted", systemImage: "person.crop.circle.fill.badge.checkmark")
-                }
-                .tint(.green)
-                
-                Button {
-                    scheduleReminder(for: item)
-                } label: {
-                    Label("Remind Me", systemImage: "bell")
-                }
-                .tint(.orange)
-            }
-            .swipeActions(edge: .trailing) {
-                Button(role: .destructive) {
-                    deleteItems([item])
-                } label: {
-                    Label("Delete", systemImage: "trash")
-                }
-            }
+            .contextMenu { rowContextMenu(for: item) }
+            .swipeActions(edge: .leading) { leadingSwipeActions(for: item) }
+            .swipeActions(edge: .trailing) { trailingSwipeActions(for: item) }
         }
         .onDelete { offsets in
             deleteItems(offsets.map { displayedItems[$0] })
         }
         .onMove { offsets, newOffset in
             viewModel.items.move(fromOffsets: offsets, toOffset: newOffset)
+        }
+    }
+    
+    @ViewBuilder
+    private func rowContextMenu(for item: customerItem) -> some View {
+        Button {
+            openURL.callPhoneNumber(item.phone)
+        } label: {
+            Label("Call", systemImage: "phone")
+        }
+        Button {
+            scheduleReminder(for: item)
+        } label: {
+            Label("Remind", systemImage: "bell")
+        }
+    }
+    
+    @ViewBuilder
+    private func leadingSwipeActions(for item: customerItem) -> some View {
+        Button {
+            notificationManager.deleteNotifications()
+        } label: {
+            Label("Mark Contacted", systemImage: "person.crop.circle.fill.badge.checkmark")
+        }
+        .tint(.green)
+
+        Button {
+            scheduleReminder(for: item)
+        } label: {
+            Label("Remind Me", systemImage: "bell")
+        }
+        .tint(.orange)
+    }
+
+    @ViewBuilder
+    private func trailingSwipeActions(for item: customerItem) -> some View {
+        Button(role: .destructive) {
+            deleteItems([item])
+        } label: {
+            Label("Delete", systemImage: "trash")
         }
     }
     
@@ -225,12 +235,6 @@ struct CustomerUI: View {
             dateComponents: dateComponents,
             repeats: true
         )
-    }
-    
-    private func callPhoneNumber(_ raw: String) {
-        let digits = raw.filter { $0.isNumber }
-        guard !digits.isEmpty, let url = URL(string: "tel://\(digits)") else { return }
-        UIApplication.shared.open(url)
     }
     
     private func deleteItems(_ items: [customerItem]) {
