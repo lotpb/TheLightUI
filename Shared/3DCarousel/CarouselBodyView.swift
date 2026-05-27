@@ -35,7 +35,7 @@ struct CarouselBodyView: View {
             .frame(width: size.width, height: size.height)
         }
         .tag(page.id)
-        .modifier(ScrollViewOffsetModifier(anchorPoint: .leading, offset: $offset))
+        .modifier(ScrollViewOffsetModifier(anchor: .leading, offset: $offset))
         .rotation3DEffect(
             .degrees(progress * 90),
             axis: (x: 0, y: 1, z: 0),
