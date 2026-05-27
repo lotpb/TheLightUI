@@ -8,66 +8,42 @@
 import SwiftUI
 
 /// UIKit image picker bridge used by SwiftUI views.
+@MainActor
 struct ImagePicker: UIViewControllerRepresentable {
     @Binding var image: UIImage?
-    
-    let sourceType: UIImagePickerController.SourceType
-    let allowsEditing: Bool
-    
-    init(
-        image: Binding<UIImage?>,
-        sourceType: UIImagePickerController.SourceType = .photoLibrary,
-        allowsEditing: Bool = false
-    ) {
-        _image = image
-        self.sourceType = sourceType
-        self.allowsEditing = allowsEditing
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(parent: self)
-    }
-    
+
+    // Defaults reduce the need for a custom initializer
+    var sourceType: UIImagePickerController.SourceType = .photoLibrary
+    var allowsEditing: Bool = false
+
+    func makeCoordinator() -> Coordinator { Coordinator(parent: self) }
+
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let controller = UIImagePickerController()
         controller.delegate = context.coordinator
-        controller.sourceType = availableSourceType
+        controller.sourceType = UIImagePickerController.isSourceTypeAvailable(sourceType) ? sourceType : .photoLibrary
         controller.allowsEditing = allowsEditing
         return controller
     }
-    
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {
-    }
-    
-    private var availableSourceType: UIImagePickerController.SourceType {
-        UIImagePickerController.isSourceTypeAvailable(sourceType) ? sourceType : .photoLibrary
-    }
-    
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+
     final class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
         private let parent: ImagePicker
-        
-        init(parent: ImagePicker) {
-            self.parent = parent
-        }
-        
+
+        init(parent: ImagePicker) { self.parent = parent }
+
         func imagePickerController(
             _ picker: UIImagePickerController,
             didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
         ) {
-            parent.image = selectedImage(from: info)
+            // Prefer edited image when allowed, otherwise fall back to original
+            parent.image = (parent.allowsEditing ? (info[.editedImage] as? UIImage) : nil) ?? (info[.originalImage] as? UIImage)
             picker.dismiss(animated: true)
         }
-        
+
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
             picker.dismiss(animated: true)
-        }
-        
-        private func selectedImage(from info: [UIImagePickerController.InfoKey: Any]) -> UIImage? {
-            if parent.allowsEditing, let editedImage = info[.editedImage] as? UIImage {
-                return editedImage
-            }
-            
-            return info[.originalImage] as? UIImage
         }
     }
 }

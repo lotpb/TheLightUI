@@ -7,17 +7,19 @@
 
 import SwiftUI
 
+/// A view modifier that publishes a view's position along a chosen axis anchor.
 struct ScrollViewOffsetModifier: ViewModifier {
-    var anchorPoint: ScrollOffsetAnchor = .top
+    var anchor: ScrollOffsetAnchor = .top
     @Binding var offset: CGFloat
-    
+
     func body(content: Content) -> some View {
         content
             .background(
                 GeometryReader { proxy in
+                    // Use Color.clear so layout is unaffected, and send the value via preference.
                     Color.clear.preference(
                         key: ScrollOffsetPreferenceKey.self,
-                        value: value(from: proxy.frame(in: .global))
+                        value: anchor.value(from: proxy.frame(in: .global))
                     )
                 }
             )
@@ -25,37 +27,45 @@ struct ScrollViewOffsetModifier: ViewModifier {
                 offset = value
             }
     }
-    
-    private func value(from frame: CGRect) -> CGFloat {
-        switch anchorPoint {
-        case .top:
-            return frame.minY
-        case .bottom:
-            return frame.maxY
-        case .leading:
-            return frame.minX
-        case .trailing:
-            return frame.maxX
-        }
-    }
 }
 
+// MARK: - Preference Key
 private struct ScrollOffsetPreferenceKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
-    
+
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        // Prefer the most recent value; if multiple geometry readers update in the same pass,
+        // take the latest reported value.
         value = nextValue()
     }
 }
 
-enum ScrollOffsetAnchor {
-    case top
-    case bottom
-    case leading
-    case trailing
-    
+// MARK: - Anchor
+enum ScrollOffsetAnchor: CaseIterable, Sendable {
+    case top, bottom, leading, trailing
+
+    fileprivate func value(from frame: CGRect) -> CGFloat {
+        switch self {
+        case .top: return frame.minY
+        case .bottom: return frame.maxY
+        case .leading: return frame.minX
+        case .trailing: return frame.maxX
+        }
+    }
+
     @available(*, deprecated, renamed: "top")
     static var Top: ScrollOffsetAnchor { .top }
 }
 
-typealias Anchor = ScrollOffsetAnchor
+// MARK: - Convenience API
+extension View {
+    /// Reads the view's position for the given anchor into the provided binding.
+    func scrollOffset(_ offset: Binding<CGFloat>, anchor: ScrollOffsetAnchor = .top) -> some View {
+        modifier(ScrollViewOffsetModifier(anchor: anchor, offset: offset.wrappedValue.binding))
+    }
+}
+
+private extension CGFloat {
+    /// Provides a temporary binding to a value. Used to keep the extension concise.
+    var binding: Binding<CGFloat> { .constant(self) }
+}

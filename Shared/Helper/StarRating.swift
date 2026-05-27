@@ -1,18 +1,10 @@
-//
-//  StarRating.swift
-//  TheLightUI (iOS)
-//
-//  Created by Peter Balsamo on 12/23/21.
-//
-
 import SwiftUI
 
 struct StarRating: View {
     @Binding private var rating: Int
-    
     private let maxRating: Int
     private let starSize: Font
-    
+
     init(
         rating: Binding<Int> = .constant(0),
         maxRating: Int = 5,
@@ -22,46 +14,50 @@ struct StarRating: View {
         self.maxRating = maxRating
         self.starSize = starSize
     }
-    
+
     var body: some View {
-        starsView
-            .overlay(overlayView.mask(starsView))
+        let clamped = clampedRating
+        let stars = StarsRow(max: maxRating, size: starSize) { index in
+            withAnimation(.easeOut) { rating = index }
+        }
+
+        stars
+            .foregroundStyle(.secondary)
+            .overlay { Color.yellow.mask(stars).frame(maxWidth: .infinity, alignment: .leading) }
+            .overlay(alignment: .leading) {
+                GeometryReader { proxy in
+                    Color.clear
+                        .frame(width: width(for: clamped, total: proxy.size.width))
+                }
+                .allowsHitTesting(false)
+            }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Rating")
-            .accessibilityValue("\(clampedRating) out of \(maxRating)")
+            .accessibilityValue("\(clamped) out of \(maxRating)")
     }
-    
-    private var overlayView: some View {
-        GeometryReader { geometry in
-            Rectangle()
-                .foregroundColor(.yellow)
-                .frame(width: ratingWidth(in: geometry.size.width), alignment: .leading)
-        }
-        .allowsHitTesting(false)
+
+    private var clampedRating: Int { min(max(rating, 0), maxRating) }
+
+    private func width(for rating: Int, total: CGFloat) -> CGFloat {
+        guard maxRating > 0 else { return 0 }
+        return CGFloat(rating) / CGFloat(maxRating) * total
     }
-    
-    private var starsView: some View {
+}
+
+private struct StarsRow: View {
+    let max: Int
+    let size: Font
+    let onTap: (Int) -> Void
+
+    var body: some View {
         HStack {
-            ForEach(1...maxRating, id: \.self) { index in
+            ForEach(1...max, id: \.self) { index in
                 Image(systemName: "star.fill")
-                    .font(starSize)
-                    .foregroundColor(.secondary)
-                    .onTapGesture {
-                        withAnimation(.easeOut) {
-                            rating = index
-                        }
-                    }
+                    .font(size)
+                    .contentShape(Rectangle())
+                    .onTapGesture { onTap(index) }
             }
         }
-    }
-    
-    private var clampedRating: Int {
-        min(max(rating, 0), maxRating)
-    }
-    
-    private func ratingWidth(in totalWidth: CGFloat) -> CGFloat {
-        guard maxRating > 0 else { return 0 }
-        return CGFloat(clampedRating) / CGFloat(maxRating) * totalWidth
     }
 }
 
