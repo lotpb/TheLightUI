@@ -82,14 +82,14 @@ extension WeatherUI {
         // MARK: Public interface
         public func requestLocation() {
             viewState = .loading
-            LocationWeatherManager().requestLocation { result in
+            LocationWeatherManager().requestLocation(completion: { result in
                 switch result {
                 case .success(let coordinates):
                     self.viewState = .coordinatesFetched(coordinates)
                 case .failure(let error):
                     self.viewState = .failed(error)
                 }
-            }
+            })
         }
         public func fetchWeather(from coordinates: CLLocationCoordinate2D) async {
             do {
