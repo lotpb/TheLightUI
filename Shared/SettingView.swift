@@ -7,39 +7,6 @@
 
 import SwiftUI
 
-// MARK: - Settings Keys
-enum SettingsUI {
-    static let firstNameKey = "firstName"
-    static let lastNameKey = "lastName"
-    static let emailKey = "email"
-    static let phoneKey = "phone"
-    static let passwordKey = "password"
-    static let usernameKey = "username"
-    static let websiteKey = "website"
-
-    static let isCompanyNameKey = "isCompanyName"
-    static let isSubscribedKey = "isSubscriber"
-    static let backend = "backend"
-    static let isBackfetch = "isbackfetch"
-    static let isAutolockKey = "isautolock"
-
-    static let color = "color"
-
-    static let isSpeakKey = "isSpeak"
-    static let isMusicKey = "isMusic"
-
-    static let latitudeKey = "latitude"
-    static let longtitudeKey = "longtitude"
-
-    static let eventKey = "event"
-    static let durationKey = "duration"
-
-    static let areacodeKey = "areacode"
-    static let emailTitleKey = "emailtitle"
-    static let emailMessageKey = "emailmessage"
-    static let versionKey = "version"
-}
-
 // MARK: - Settings Form
 struct SettingView: View {
     private enum BackendOption: String, CaseIterable, Identifiable {
@@ -63,32 +30,11 @@ struct SettingView: View {
         }
     }
 
-    @AppStorage(SettingsUI.firstNameKey) private var firstName = ""
-    @AppStorage(SettingsUI.lastNameKey) private var lastname = ""
-    @AppStorage(SettingsUI.emailKey) private var email = ""
-    @AppStorage(SettingsUI.phoneKey) private var phone = ""
-    @AppStorage(SettingsUI.passwordKey) private var password = ""
-    @AppStorage(SettingsUI.usernameKey) private var username = ""
-    @AppStorage(SettingsUI.websiteKey) private var website = ""
+    @StateObject private var settings: AppSettingsStore
 
-    @AppStorage(SettingsUI.isCompanyNameKey) private var companyName = "TheLight Software"
-    @AppStorage(SettingsUI.isSubscribedKey) private var isSubscriber = false
-    @AppStorage(SettingsUI.backend) private var backend = "Firebase"
-    @AppStorage(SettingsUI.isBackfetch) private var isBackfetch = false
-    @AppStorage(SettingsUI.isAutolockKey) private var isAutoLockDisabled = false
-
-    @AppStorage(SettingsUI.color) private var color = 0
-    @AppStorage(SettingsUI.isSpeakKey) private var isSpeak = false
-    @AppStorage(SettingsUI.isMusicKey) private var isMusic = false
-
-    @AppStorage(SettingsUI.latitudeKey) private var latitude = ""
-    @AppStorage(SettingsUI.longtitudeKey) private var longitude = ""
-    @AppStorage(SettingsUI.eventKey) private var event = ""
-    @AppStorage(SettingsUI.durationKey) private var duration = ""
-    @AppStorage(SettingsUI.areacodeKey) private var areaCode = ""
-    @AppStorage(SettingsUI.emailTitleKey) private var emailTitle = ""
-    @AppStorage(SettingsUI.emailMessageKey) private var emailMessage = ""
-    @AppStorage(SettingsUI.versionKey) private var version = "1.0"
+    init(settings: AppSettingsStore = AppSettingsStore()) {
+        _settings = StateObject(wrappedValue: settings)
+    }
 
     var body: some View {
         NavigationStack {
@@ -113,30 +59,30 @@ struct SettingView: View {
 
     private var accountSection: some View {
         Section("TheLight Settings") {
-            settingsTextField("First Name", text: $firstName)
-            settingsTextField("Last Name", text: $lastname)
-            settingsTextField("Email", text: $email, keyboardType: .emailAddress, textInputAutocapitalization: .never)
-            settingsTextField("Phone", text: $phone, keyboardType: .phonePad)
+            settingsTextField("First Name", text: $settings.firstName)
+            settingsTextField("Last Name", text: $settings.lastName)
+            settingsTextField("Email", text: $settings.email, keyboardType: .emailAddress, textInputAutocapitalization: .never)
+            settingsTextField("Phone", text: $settings.phone, keyboardType: .phonePad)
             passwordField
-            settingsTextField("Username", text: $username, textInputAutocapitalization: .never)
-            settingsTextField("Website", text: $website, keyboardType: .URL, textInputAutocapitalization: .never)
+            settingsTextField("Username", text: $settings.username, textInputAutocapitalization: .never)
+            settingsTextField("Website", text: $settings.website, keyboardType: .URL, textInputAutocapitalization: .never)
         }
     }
 
     private var memberSection: some View {
         Section("Member Status") {
-            settingsTextField("Company", text: $companyName)
-            SettingsToggleRow(title: "Subscriber", isOn: $isSubscriber)
+            settingsTextField("Company", text: $settings.companyName)
+            SettingsToggleRow(title: "Subscriber", isOn: $settings.isSubscriber)
             backendPicker
-            SettingsToggleRow(title: "Background Fetch", isOn: $isBackfetch)
-            SettingsToggleRow(title: "Prevent Auto-Lock", isOn: $isAutoLockDisabled)
+            SettingsToggleRow(title: "Background Fetch", isOn: $settings.isBackfetch)
+            SettingsToggleRow(title: "Prevent Auto-Lock", isOn: $settings.isAutoLockDisabled)
             termsDisclosure
         }
     }
 
     private var themeSection: some View {
         Section("Theme") {
-            Picker("Color Scheme", selection: $color) {
+            Picker("Color Scheme", selection: $settings.color) {
                 ForEach(ThemeOption.allCases) { option in
                     Text(option.title)
                         .tag(option.rawValue)
@@ -147,38 +93,38 @@ struct SettingView: View {
 
     private var soundsSection: some View {
         Section("Sounds") {
-            SettingsToggleRow(title: "Speak", isOn: $isSpeak)
-            SettingsToggleRow(title: "Music", isOn: $isMusic)
+            SettingsToggleRow(title: "Speak", isOn: $settings.isSpeak)
+            SettingsToggleRow(title: "Music", isOn: $settings.isMusic)
         }
     }
 
     private var mapSection: some View {
         Section("Map") {
-            settingsTextField("Latitude", text: $latitude, keyboardType: .decimalPad)
-            settingsTextField("Longitude", text: $longitude, keyboardType: .decimalPad)
+            settingsTextField("Latitude", text: $settings.latitude, keyboardType: .decimalPad)
+            settingsTextField("Longitude", text: $settings.longitude, keyboardType: .decimalPad)
         }
     }
 
     private var calendarSection: some View {
         Section("Calendar") {
-            settingsTextField("Event", text: $event)
-            settingsTextField("Duration", text: $duration)
+            settingsTextField("Event", text: $settings.event)
+            settingsTextField("Duration", text: $settings.duration)
         }
     }
 
     private var generalSection: some View {
         Section("General") {
-            settingsTextField("Area Code", text: $areaCode, keyboardType: .numberPad)
-            settingsTextField("Email Title", text: $emailTitle)
-            settingsTextField("Email Message", text: $emailMessage)
-            settingsTextField("Version", text: $version)
+            settingsTextField("Area Code", text: $settings.areaCode, keyboardType: .numberPad)
+            settingsTextField("Email Title", text: $settings.emailTitle)
+            settingsTextField("Email Message", text: $settings.emailMessage)
+            settingsTextField("Version", text: $settings.version)
         }
     }
 
     // MARK: - Rows
 
     private var backendPicker: some View {
-        Picker("Backend Data", selection: $backend) {
+        Picker("Backend Data", selection: $settings.backend) {
             ForEach(BackendOption.allCases) { option in
                 Text(option.rawValue)
                     .tag(option.rawValue)
@@ -197,7 +143,7 @@ struct SettingView: View {
         HStack {
             Text("Password")
             Spacer()
-            SecureField("Password", text: $password)
+            SecureField("Password", text: $settings.password)
                 .settingsFieldStyle()
         }
     }

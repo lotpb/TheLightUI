@@ -48,14 +48,7 @@ struct UserFormUI: View {
     }
     
     private var profileImage: some View {
-        WebImage(url: URL(string: viewModel.chatUser?.profileImageUrl ?? ""))
-            .placeholder {
-                Image("taylor_swift_profile")
-                    .resizable()
-                    .scaledToFill()
-            }
-            .resizable()
-            .scaledToFill()
+        ProfileAvatarImage(urlString: viewModel.chatUser?.profileImageUrl)
             .frame(width: 200, height: 200)
             .clipShape(Circle())
             .overlay(Circle().stroke(Color.white, lineWidth: 2))

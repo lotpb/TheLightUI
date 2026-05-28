@@ -9,7 +9,7 @@ import SwiftUI
 
 // MARK: - Login
 struct LoginView: View {
-    @Environment(\.openURL) private var openURL
+    @StateObject private var viewModel: LoginViewModel
 
     fileprivate enum Layout {
         static let maxContentWidth: CGFloat = 700
@@ -21,28 +21,28 @@ struct LoginView: View {
         static let buttonHeight: CGFloat = 30
     }
 
-    let didCompleteLoginProcess: () -> Void
-
-    @State private var isLoginMode = true
-    @State private var email = "eunited@aol.net"
-    @State private var password = "united"
-    @State private var shouldShowImagePicker = false
-    @State private var image: UIImage?
-    @State private var isAuthenticated = false
-    @State private var loginStatusMessage = ""
-
-    private var navigationTitle: String {
-        isLoginMode ? "Log In" : "Create Account"
+    init(
+        loginService: LoginServicing = FirebaseLoginService(),
+        authenticationService: AuthenticationService = AuthenticationService(),
+        didCompleteLoginProcess: @escaping () -> Void
+    ) {
+        _viewModel = StateObject(
+            wrappedValue: LoginViewModel(
+                loginService: loginService,
+                authenticationService: authenticationService,
+                didCompleteLoginProcess: didCompleteLoginProcess
+            )
+        )
     }
 
     var body: some View {
         NavigationStack {
             loginContent
-                .navigationTitle(navigationTitle)
+                .navigationTitle(viewModel.navigationTitle)
                 .background(Color(.init(white: 0, alpha: 0.05)).ignoresSafeArea())
         }
-        .fullScreenCover(isPresented: $shouldShowImagePicker) {
-            ImagePicker(image: $image)
+        .fullScreenCover(isPresented: $viewModel.shouldShowImagePicker) {
+            ImagePicker(image: $viewModel.image)
         }
         .frame(maxWidth: Layout.maxContentWidth)
     }
@@ -54,7 +54,7 @@ struct LoginView: View {
             VStack(spacing: Layout.contentSpacing) {
                 modePicker
 
-                if !isLoginMode {
+                if !viewModel.isLoginMode {
                     profileImageButton
                 }
 
@@ -67,7 +67,7 @@ struct LoginView: View {
     }
 
     private var modePicker: some View {
-        Picker("Mode", selection: $isLoginMode) {
+        Picker("Mode", selection: $viewModel.isLoginMode) {
             Text("Login")
                 .tag(true)
             Text("Create Account")
@@ -78,7 +78,7 @@ struct LoginView: View {
 
     private var profileImageButton: some View {
         Button {
-            shouldShowImagePicker.toggle()
+            viewModel.shouldShowImagePicker.toggle()
         } label: {
             avatarContent
                 .overlay(Circle().stroke(Color.primary, lineWidth: Layout.avatarBorderWidth))
@@ -87,7 +87,7 @@ struct LoginView: View {
 
     @ViewBuilder
     private var avatarContent: some View {
-        if let image {
+        if let image = viewModel.image {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFill()
@@ -103,24 +103,24 @@ struct LoginView: View {
 
     private var credentialsFields: some View {
         Group {
-            TextField("Email", text: $email)
+            TextField("Email", text: $viewModel.email)
                 .keyboardType(.emailAddress)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
 
-            SecureField("Password", text: $password)
+            SecureField("Password", text: $viewModel.password)
         }
         .loginFieldStyle()
     }
 
     private var primaryActionButton: some View {
-        Button(action: handlePrimaryAction) {
-            fullWidthButtonLabel(isLoginMode ? "Log In" : "Create Account", color: .blue)
+        Button(action: viewModel.handlePrimaryAction) {
+            fullWidthButtonLabel(viewModel.primaryActionTitle, color: .blue)
         }
     }
 
     private var biometricLoginButton: some View {
-        Button(action: loginUsingTouchId) {
+        Button(action: viewModel.loginUsingTouchId) {
             fullWidthButtonLabel("Sign in with Face ID", color: .orange)
         }
     }
@@ -128,14 +128,14 @@ struct LoginView: View {
     private var touchIDButton: some View {
         HStack {
             Spacer()
-            Button(action: loginUsingTouchId) {
+            Button(action: viewModel.loginUsingTouchId) {
                 Image(systemName: "touchid")
             }
         }
     }
 
     private var statusMessage: some View {
-        Text(loginStatusMessage)
+        Text(viewModel.loginStatusMessage)
             .foregroundColor(.red)
     }
 
@@ -156,115 +156,6 @@ struct LoginView: View {
             .padding(.vertical, 10)
             .background(color)
             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-    }
-
-    // MARK: - Actions
-
-    private func handlePrimaryAction() {
-        if isLoginMode {
-            loginUser()
-        } else {
-            createNewAccount()
-        }
-    }
-
-    private func loginUsingTouchId() {
-        AuthenticationService().authenticateUsingTouchId { success, error in
-            if success {
-                isAuthenticated = true
-                didCompleteLoginProcess()
-            } else if let error {
-                print(error.localizedDescription)
-            }
-        }
-    }
-
-    private func loginUser() {
-        FirebaseManager.shared.auth.signIn(withEmail: email, password: password) { result, error in
-            if let error {
-                print("failed to login user:", error)
-                loginStatusMessage = "Failed to login user: \(error)"
-                return
-            }
-
-            let uid = result?.user.uid ?? ""
-            print("Successfully logged in user: \(uid)")
-            loginStatusMessage = "Successfully logged in user: \(uid)"
-            didCompleteLoginProcess()
-        }
-    }
-
-    private func createNewAccount() {
-        guard image != nil else {
-            loginStatusMessage = "You must select an avatar image"
-            return
-        }
-
-        FirebaseManager.shared.auth.createUser(withEmail: email, password: password) { result, error in
-            if let error {
-                print("failed to create user:", error)
-                loginStatusMessage = "Failed to create user: \(error)"
-                return
-            }
-
-            let uid = result?.user.uid ?? ""
-            print("Successfully created user: \(uid)")
-            loginStatusMessage = "Successfully created user: \(uid)"
-            persistImageToStorage()
-        }
-    }
-
-    // MARK: - Persistence
-
-    private func persistImageToStorage() {
-        guard let uid = FirebaseManager.shared.auth.currentUser?.uid else { return }
-        guard let imageData = image?.jpegData(compressionQuality: 0.5) else { return }
-
-        let ref = FirebaseManager.shared.storage.reference(withPath: uid)
-        ref.putData(imageData, metadata: nil) { result in
-            switch result {
-            case .success:
-                ref.downloadURL { url, error in
-                    handleProfileImageURL(url, error: error)
-                }
-            case .failure(let error):
-                loginStatusMessage = "Failed to push image to Storage: \(error)"
-            }
-        }
-    }
-
-    private func handleProfileImageURL(_ url: URL?, error: Error?) {
-        if let error {
-            loginStatusMessage = "Failed to retrieve downloadURL: \(error)"
-            return
-        }
-
-        guard let url else { return }
-        loginStatusMessage = "Successfully stored image with url: \(url.absoluteString)"
-        print(url.absoluteString)
-        storeUserInformation(imageProfileUrl: url)
-    }
-
-    private func storeUserInformation(imageProfileUrl: URL) {
-        guard let uid = FirebaseManager.shared.auth.currentUser?.uid else { return }
-
-        let userData = [
-            FirebaseConstants.email: email,
-            FirebaseConstants.uid: uid,
-            FirebaseConstants.profileImageUrl: imageProfileUrl.absoluteString
-        ]
-
-        FirebaseManager.shared.firestore.collection(FirebaseConstants.users)
-            .document(uid)
-            .setData(userData) { error in
-                if let error {
-                    loginStatusMessage = "\(error)"
-                    return
-                }
-
-                print("Success")
-                didCompleteLoginProcess()
-            }
     }
 }
 
