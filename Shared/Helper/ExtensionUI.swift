@@ -31,13 +31,13 @@ extension UIApplication {
     }
 }
 
-enum PhoneCallURL {
-    /// Builds a tel:// URL from a raw phone string using `PhoneNumber` normalization.
-    /// - Returns nil if no digits are found.
-    static func telephoneURL(from rawValue: String) -> URL? {
-        PhoneNumber(raw: rawValue).url
-    }
-}
+//enum PhoneCallURL {
+//    /// Builds a tel:// URL from a raw phone string using `PhoneNumber` normalization.
+//    /// - Returns nil if no digits are found.
+//    static func telephoneURL(from rawValue: String) -> URL? {
+//        PhoneNumber(raw: rawValue).url
+//    }
+//}
 
 extension OpenURLAction {
     /// Attempts to initiate a phone call by converting a raw string into a tel:// URL and opening it.

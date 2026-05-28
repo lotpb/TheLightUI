@@ -16,7 +16,7 @@ enum DisplayType {
 struct PlaceSearch: View {
     
     @Environment(\.dismiss) var dismiss
-    @StateObject private var viewModel: PlaceListViewModel = PlaceListViewModel()
+    @StateObject private var viewModel: PlaceListViewModel
     @StateObject private var locationManager = LocationManager()
     
     @State private var userTrackingMode: MapUserTrackingMode = .follow
@@ -24,6 +24,17 @@ struct PlaceSearch: View {
     @State private var displayType: DisplayType = .map
     @State private var isDragged: Bool = false
     let index: Int
+
+    init(
+        index: Int,
+        viewModel: PlaceListViewModel = PlaceListViewModel(
+            locationProvider: LocationManager(),
+            placeSearchService: MKLocalPlaceSearchService()
+        )
+    ) {
+        self.index = index
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
     
     private func getRegion() -> Binding<MKCoordinateRegion> {
         guard let coordinate = viewModel.currentLocation else {

@@ -80,6 +80,6 @@ struct AddView_Previews: PreviewProvider {
         NavigationStack {
             AddView()
         }
-        .environmentObject(ListViewModel())
+        .environmentObject(ListViewModel(itemStore: UserDefaultsItemStore()))
     }
 }

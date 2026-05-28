@@ -12,17 +12,21 @@ import MapKit
 
 class PlaceListViewModel: ObservableObject {
     
-    private let locationManager = LocationManager()
+    private let locationProvider: CurrentLocationProviding
+    private let placeSearchService: PlaceSearchServicing
     private var cancellable: AnyCancellable?
     @Published var currentLocation: CLLocationCoordinate2D?
     @Published var landMarks: [LandMark] = []
     
-    init() {
-        cancellable = locationManager.$location.sink { [weak self] location in
+    init(locationProvider: CurrentLocationProviding, placeSearchService: PlaceSearchServicing) {
+        self.locationProvider = locationProvider
+        self.placeSearchService = placeSearchService
+
+        cancellable = locationProvider.locationPublisher.sink { [weak self] location in
             guard let self, let location else { return }
             DispatchQueue.main.async {
                 self.currentLocation = location.coordinate
-                self.locationManager.stopUpdating()
+                self.locationProvider.stopUpdating()
             }
         }
     }
@@ -34,23 +38,64 @@ class PlaceListViewModel: ObservableObject {
             return
         }
         
-        let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = trimmedSearchTerm
-        
-        let search = MKLocalSearch(request: request)
-        search.start { [weak self] response, error in
-            if let error = error {
-                print(error)
+        placeSearchService.searchLandmarks(matching: trimmedSearchTerm) { [weak self] result in
+            switch result {
+            case .success(let landMarks):
+                DispatchQueue.main.async {
+                    self?.landMarks = landMarks
+                }
+            case .failure(let error):
+                print(error.localizedDescription)
                 return
             }
-            
-            let landMarks = response?.mapItems.map { mapItem in
-                LandMark(displayPhone: "", placemark: mapItem.placemark)
-            } ?? []
-            
-            DispatchQueue.main.async {
-                self?.landMarks = landMarks
+        }
+    }
+}
+
+protocol CurrentLocationProviding {
+    var locationPublisher: AnyPublisher<CLLocation?, Never> { get }
+    func stopUpdating()
+}
+
+extension LocationManager: CurrentLocationProviding {
+    var locationPublisher: AnyPublisher<CLLocation?, Never> {
+        $location.eraseToAnyPublisher()
+    }
+}
+
+protocol PlaceSearchServicing {
+    func searchLandmarks(matching searchTerm: String, completion: @escaping (Result<[LandMark], Error>) -> Void)
+    func searchPlaces(matching searchTerm: String, completion: @escaping (Result<[Place], Error>) -> Void)
+}
+
+struct MKLocalPlaceSearchService: PlaceSearchServicing {
+    func searchLandmarks(matching searchTerm: String, completion: @escaping (Result<[LandMark], Error>) -> Void) {
+        search(matching: searchTerm) { result in
+            completion(result.map { mapItems in
+                mapItems.map { LandMark(displayPhone: "", placemark: $0.placemark) }
+            })
+        }
+    }
+
+    func searchPlaces(matching searchTerm: String, completion: @escaping (Result<[Place], Error>) -> Void) {
+        search(matching: searchTerm) { result in
+            completion(result.map { mapItems in
+                mapItems.map { Place(placemark: $0.placemark) }
+            })
+        }
+    }
+
+    private func search(matching searchTerm: String, completion: @escaping (Result<[MKMapItem], Error>) -> Void) {
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = searchTerm
+
+        MKLocalSearch(request: request).start { response, error in
+            if let error {
+                completion(.failure(error))
+                return
             }
+
+            completion(.success(response?.mapItems ?? []))
         }
     }
 }

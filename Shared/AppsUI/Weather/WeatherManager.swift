@@ -8,7 +8,11 @@
 import Foundation
 import CoreLocation
 
-class WeatherManager {
+protocol WeatherManaging {
+    func getCurrentWeather(latitude: CLLocationDegrees, longitude: CLLocationDegrees) async throws -> API.CurrentWeather.Response
+}
+
+class WeatherManager: WeatherManaging {
     
 }
 

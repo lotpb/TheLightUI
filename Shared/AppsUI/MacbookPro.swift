@@ -127,7 +127,7 @@ private struct MacBookBase: View {
     }
 
     private var lowerBody: some View {
-        MacBookRoundedCorners(corners: [.bottomLeft, .bottomRight], radius: 20)
+        CustomCorners(corners: [.bottomLeft, .bottomRight], radius: 20)
             .fill(Color("Gray1").opacity(0.5))
             .frame(height: 50)
             .overlay(baseMaterialGradient)
@@ -135,7 +135,7 @@ private struct MacBookBase: View {
     }
 
     private var baseMaterialGradient: some View {
-        MacBookRoundedCorners(corners: [.bottomLeft, .bottomRight], radius: 20)
+        CustomCorners(corners: [.bottomLeft, .bottomRight], radius: 20)
             .fill(
                 LinearGradient(
                     colors: [
@@ -150,7 +150,7 @@ private struct MacBookBase: View {
     }
 
     private var baseDepthGradient: some View {
-        MacBookRoundedCorners(corners: [.bottomLeft, .bottomRight], radius: 20)
+        CustomCorners(corners: [.bottomLeft, .bottomRight], radius: 20)
             .fill(
                 LinearGradient(
                     colors: [
@@ -198,19 +198,5 @@ private struct MacBookBase: View {
         ]
 
         return colors + clearColors + colors.reversed()
-    }
-}
-
-private struct MacBookRoundedCorners: Shape {
-    let corners: UIRectCorner
-    let radius: CGFloat
-
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(
-            roundedRect: rect,
-            byRoundingCorners: corners,
-            cornerRadii: CGSize(width: radius, height: radius)
-        )
-        return Path(path.cgPath)
     }
 }

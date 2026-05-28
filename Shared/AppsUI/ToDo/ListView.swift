@@ -10,8 +10,12 @@ import SwiftUI
 
 struct ListView: View {
     
-    @StateObject private var listViewModel = ListViewModel()
+    @StateObject private var listViewModel: ListViewModel
     @State private var isCompleted = false
+
+    init(listViewModel: ListViewModel = ListViewModel(itemStore: UserDefaultsItemStore())) {
+        _listViewModel = StateObject(wrappedValue: listViewModel)
+    }
 
     var body: some View {
         ZStack {

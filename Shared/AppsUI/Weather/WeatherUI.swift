@@ -11,7 +11,15 @@ import CoreLocation
 @available(iOS 15.0, *)
 struct WeatherUI: View {
     @Environment(\.presentationMode) var presentationMode
-    @StateObject var viewModel = ViewModel()
+    @StateObject private var viewModel: ViewModel
+
+    @MainActor
+    init(
+        apiManager: WeatherManaging = WeatherManager(),
+        locationManager: WeatherLocationProviding = LocationWeatherManager()
+    ) {
+        _viewModel = StateObject(wrappedValue: ViewModel(apiManager: apiManager, locationManager: locationManager))
+    }
     
     var body: some View {
         NavigationView {
@@ -60,9 +68,11 @@ struct WeatherUI: View {
 
 @available(iOS 15.0, *)
 extension WeatherUI {
+    @MainActor
     class ViewModel: ObservableObject {
         // MARK: Private variables
-        private let apiManager: WeatherManager
+        private let apiManager: WeatherManaging
+        private let locationManager: WeatherLocationProviding
         // MARK: Public variables
         @Published public var viewState: ViewState = .welcome
         // MARK: Nested objects
@@ -75,32 +85,30 @@ extension WeatherUI {
         }
         
         // MARK: Lifecycle
-        init(apiManager: WeatherManager = WeatherManager()) {
+        init(apiManager: WeatherManaging, locationManager: WeatherLocationProviding) {
             self.apiManager = apiManager
+            self.locationManager = locationManager
         }
         
         // MARK: Public interface
         public func requestLocation() {
             viewState = .loading
-            LocationWeatherManager().requestLocation(completion: { result in
-                switch result {
-                case .success(let coordinates):
-                    self.viewState = .coordinatesFetched(coordinates)
-                case .failure(let error):
-                    self.viewState = .failed(error)
+            Task {
+                do {
+                    let coordinates = try await locationManager.requestLocation()
+                    viewState = .coordinatesFetched(coordinates)
+                } catch {
+                    viewState = .failed(error)
                 }
-            })
+            }
         }
+
         public func fetchWeather(from coordinates: CLLocationCoordinate2D) async {
             do {
                 let weather = try await apiManager.getCurrentWeather(latitude: coordinates.latitude, longitude: coordinates.longitude)
-                DispatchQueue.onMain {
-                    self.viewState = .weatherFetched(weather)
-                }
+                viewState = .weatherFetched(weather)
             } catch {
-                DispatchQueue.onMain {
-                    self.viewState = .failed(error)
-                }
+                viewState = .failed(error)
             }
         }
     }

@@ -12,7 +12,8 @@ import CoreLocation
 
 class MapViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     
-    @Published var mapView = MKMapView()
+    @Published var mapView: MKMapView
+    private let placeSearchService: PlaceSearchServicing
     
     // Region
     @Published var region = MKCoordinateRegion.defaultRegion
@@ -26,6 +27,12 @@ class MapViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     // Searched Places
     @Published var places: [Place] = []
+
+    init(mapView: MKMapView, placeSearchService: PlaceSearchServicing) {
+        self.mapView = mapView
+        self.placeSearchService = placeSearchService
+        super.init()
+    }
     
     // Search Places
     func searchQuery() {
@@ -33,17 +40,9 @@ class MapViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         places.removeAll()
         guard !trimmedSearchText.isEmpty else { return }
         
-        let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = trimmedSearchText
-        
-        // Fetch
-        MKLocalSearch(request: request).start { [weak self] response, _ in
-            guard let result = response else { return }
-            
-            let places = result.mapItems.map { item in
-                Place(placemark: item.placemark)
-            }
-            
+        placeSearchService.searchPlaces(matching: trimmedSearchText) { [weak self] result in
+            guard case .success(let places) = result else { return }
+
             DispatchQueue.main.async {
                 self?.places = places
             }
