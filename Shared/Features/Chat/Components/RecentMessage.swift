@@ -35,6 +35,7 @@ struct RecentMessage: Codable, Identifiable {
         MessageDateFormatting.compactDateTime(for: timestamp)
     }
 
+
     var daysAndHoursAgoText: String {
         daysAndHoursAgoText(relativeTo: Date())
     }

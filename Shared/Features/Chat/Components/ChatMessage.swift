@@ -17,6 +17,6 @@ struct ChatMessage: Codable, Identifiable {
     let timestamp: Date
 
     var sentDateText: String {
-        MessageDateFormatting.compactDateTime(for: timestamp)
+        MessageDateFormatting.weekdayAndTime(for: timestamp)
     }
 }
