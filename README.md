@@ -1,3 +1,4 @@
+<img width="295" height="640" alt="Screenshot 2026-06-14 at 10 14 07 PM Medium" src="https://github.com/user-attachments/assets/b00c724d-c7f1-41c3-bec5-40d5a1c98410" />
 # TheLightUI
 
 <img src="https://github.com/lotpb/TheLightShop/blob/master/IMG_2720.jpg" alt="Sign Up" width="320" height="568"/>
