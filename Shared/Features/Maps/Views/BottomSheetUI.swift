@@ -14,15 +14,22 @@ struct BottomSheetUI: View {
         let color: Color
     }
 
-    @StateObject private var vm = MainMessagesViewModel()
+    private struct LocationInfoRow: Identifiable {
+        let id: String
+        let title: String
+        let value: String
+        let systemImage: String
+    }
+
     @ObservedObject var locationManager: LocationManager
-    @Binding var offset: CGFloat
-    var value: CGFloat
+    let profileImageURL: String?
     @Binding var travelTime: Double
     @Binding var distance: Double
     @Environment(\.openURL) private var openURL
 
     @State private var selection = 0
+    @State private var offset: CGFloat = 0
+    @State private var dragStartOffset: CGFloat?
 
     private let metersPerMile: Double = 1609.344
     private let favorites = [
@@ -31,8 +38,10 @@ struct BottomSheetUI: View {
         Favorite(title: "Add", systemImage: "mappin", color: .pink)
     ]
 
-    private var isExpanded: Bool { offset <= value + 2 }
-    private var handleScale: CGFloat { isExpanded ? 1.0 : 0.9 }
+    private let collapsedVisibleHeight: CGFloat = 16
+    private let minimumExpandedTopInset: CGFloat = 150
+    private let halfExpandedBottomInset: CGFloat = 60
+    private let safeAreaSpacing: CGFloat = 12
 
     private var speedText: String {
         let metersPerSecond = max(locationManager.location?.speed ?? 0.0, 0.0)
@@ -45,13 +54,40 @@ struct BottomSheetUI: View {
         return String(format: "Course: %.0f", course)
     }
 
-    private var locationRows: [String] {
-        [
-            String(format: "Altitude: %.0f", locationManager.location?.altitude ?? 0),
-            courseText,
-            String(format: "Latitude: %.6f", locationManager.location?.coordinate.latitude ?? 0),
-            String(format: "Longitude: %.6f", locationManager.location?.coordinate.longitude ?? 0),
-            speedText
+    private var locationRows: [LocationInfoRow] {
+        let coordinate = locationManager.location?.coordinate
+
+        return [
+            LocationInfoRow(
+                id: "altitude",
+                title: "Altitude",
+                value: String(format: "%.0f ft", locationManager.location?.altitude ?? 0),
+                systemImage: "arrow.up.and.down.circle"
+            ),
+            LocationInfoRow(
+                id: "course",
+                title: "Course",
+                value: String(format: "%.0f°", max(locationManager.location?.course ?? 0.0, 0.0)),
+                systemImage: "location.north.line"
+            ),
+            LocationInfoRow(
+                id: "latitude",
+                title: "Latitude",
+                value: String(format: "%.6f", coordinate?.latitude ?? 0),
+                systemImage: "location.north"
+            ),
+            LocationInfoRow(
+                id: "longitude",
+                title: "Longitude",
+                value: String(format: "%.6f", coordinate?.longitude ?? 0),
+                systemImage: "location"
+            ),
+            LocationInfoRow(
+                id: "speed",
+                title: "Speed",
+                value: String(format: "%.0f mph", max(locationManager.location?.speed ?? 0.0, 0.0) * 2.23694),
+                systemImage: "gauge.medium"
+            )
         ]
     }
 
@@ -74,8 +110,19 @@ struct BottomSheetUI: View {
     }
 
     var body: some View {
+        GeometryReader { reader in
+            VStack {
+                sheetBody(reader: reader)
+                    .offset(y: collapsedYPosition(for: reader))
+                    .offset(y: offset)
+                    .gesture(bottomSheetDragGesture(reader: reader))
+            }
+        }
+    }
+
+    private func sheetBody(reader: GeometryProxy) -> some View {
         VStack {
-            dragHandle
+            dragHandle(reader: reader)
             routeSummary
             sheetContent
         }
@@ -86,16 +133,85 @@ struct BottomSheetUI: View {
                 .strokeBorder(Color.black.opacity(0.08), lineWidth: 1)
         )
         .shadow(color: Color.black.opacity(0.15), radius: 20, x: 0, y: 10)
-        .task { await vm.fetchCurrentUser() }
     }
 
-    private var dragHandle: some View {
-        Capsule()
+    private func dragHandle(reader: GeometryProxy) -> some View {
+        let handleScale: CGFloat = isExpanded(reader: reader) ? 1.0 : 0.9
+
+        return Capsule()
             .fill(Color.secondary.opacity(0.35))
             .frame(width: 36, height: 5)
             .scaleEffect(x: handleScale, y: 1.0, anchor: .center)
             .animation(.easeInOut(duration: 0.2), value: handleScale)
             .padding(.top, 8)
+    }
+
+    private func bottomSheetDragGesture(reader: GeometryProxy) -> some Gesture {
+        DragGesture()
+            .onChanged { value in
+                updateOffset(value: value, reader: reader)
+            }
+            .onEnded { value in
+                let startingOffset = dragStartOffset ?? offset
+                let targetOffset = nearestOffset(
+                    to: startingOffset + value.predictedEndTranslation.height,
+                    reader: reader
+                )
+                dragStartOffset = nil
+
+                withAnimation(.spring(response: 0.34, dampingFraction: 0.88, blendDuration: 0.12)) {
+                    offset = targetOffset
+                }
+                impact(.light)
+            }
+    }
+
+    private func updateOffset(value: DragGesture.Value, reader: GeometryProxy) {
+        if dragStartOffset == nil {
+            dragStartOffset = offset
+        }
+
+        let startingOffset = dragStartOffset ?? offset
+        offset = clampedOffset(startingOffset + value.translation.height, reader: reader)
+    }
+
+    private func isExpanded(reader: GeometryProxy) -> Bool {
+        offset <= expandedOffset(for: reader) + 2
+    }
+
+    private func nearestOffset(to proposedOffset: CGFloat, reader: GeometryProxy) -> CGFloat {
+        snapOffsets(for: reader)
+            .min { abs($0 - proposedOffset) < abs($1 - proposedOffset) } ?? 0
+    }
+
+    private func clampedOffset(_ proposedOffset: CGFloat, reader: GeometryProxy) -> CGFloat {
+        min(max(proposedOffset, expandedOffset(for: reader)), collapsedOffset)
+    }
+
+    private func snapOffsets(for reader: GeometryProxy) -> [CGFloat] {
+        [expandedOffset(for: reader), halfExpandedOffset(for: reader), collapsedOffset]
+    }
+
+    private func expandedOffset(for reader: GeometryProxy) -> CGFloat {
+        -reader.size.height + expandedTopInset(for: reader)
+    }
+
+    private func halfExpandedOffset(for reader: GeometryProxy) -> CGFloat {
+        -(reader.size.height * 0.5) + halfExpandedBottomInset + reader.safeAreaInsets.bottom
+    }
+
+    private func collapsedYPosition(for reader: GeometryProxy) -> CGFloat {
+        reader.size.height - collapsedVisibleHeight - reader.safeAreaInsets.bottom
+    }
+
+    private func expandedTopInset(for reader: GeometryProxy) -> CGFloat {
+        max(minimumExpandedTopInset, reader.safeAreaInsets.top + safeAreaSpacing)
+    }
+
+    private var collapsedOffset: CGFloat { 0 }
+
+    private func impact(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .light) {
+        UIImpactFeedbackGenerator(style: style).impactOccurred()
     }
 
     private var routeSummary: some View {
@@ -137,7 +253,7 @@ struct BottomSheetUI: View {
     }
 
     private var profileImage: some View {
-        ProfileAvatarImage(urlString: vm.chatUser?.profileImageUrl)
+        ProfileAvatarImage(urlString: profileImageURL)
             .frame(width: 36, height: 36)
             .clipShape(Circle())
             .overlay(Circle().stroke(Color.white.opacity(0.6), lineWidth: 1))
@@ -302,13 +418,22 @@ struct BottomSheetUI: View {
                 .padding(.horizontal)
                 .padding(.top, 8)
 
-            ForEach(locationRows, id: \.self) { row in
+            ForEach(locationRows) { row in
                 HStack(spacing: 12) {
-                    Image(systemName: iconForRow(row))
+                    Image(systemName: row.systemImage)
                         .foregroundStyle(.blue)
-                    Text(row)
-                        .lineLimit(1)
+                        .frame(width: 22)
+
+                    Text(row.title)
                         .font(.callout)
+
+                    Spacer(minLength: 8)
+
+                    Text(row.value)
+                        .font(.callout.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 8)
@@ -343,14 +468,6 @@ struct BottomSheetUI: View {
         .padding(.horizontal, 4)
     }
 
-    private func iconForRow(_ row: String) -> String {
-        if row.contains("Altitude") { return "arrow.up.and.down.circle" }
-        if row.contains("Course") { return "location.north.line" }
-        if row.contains("Latitude") { return "location.north" }
-        if row.contains("Longitude") { return "location" }
-        if row.contains("Speed") { return "gauge.medium" }
-        return "info.circle"
-    }
 }
 
 private struct OnChangeCompat: ViewModifier {

@@ -27,10 +27,14 @@ struct LeadDetailHeaderView: View {
         .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
         .fullScreenCover(isPresented: $showFullscreen) {
             MapUI(
-                mapstreet: detail.street,
-                mapcity: detail.city,
-                mapstate: detail.state,
-                mapzip: detail.zip,
+                mode: .route(
+                    destination: MapDestination(
+                        street: detail.street,
+                        city: detail.city,
+                        state: detail.state,
+                        zip: detail.zip
+                    )
+                ),
                 travelTime: 0.00,
                 distance: 0.00
             )

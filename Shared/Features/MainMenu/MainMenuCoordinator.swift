@@ -111,7 +111,7 @@ struct MainMenuCoordinator {
     func fullscreenDestination(_ route: MainMenuFullscreenRoute) -> some View {
         switch route {
         case .geotify:
-            MapUI(travelTime: 0.00, distance: 0.00)
+            MapUI(mode: .currentLocation, travelTime: 0.00, distance: 0.00)
         case .places:
             PlaceSearch(index: 1)
         case .weather:

@@ -224,6 +224,9 @@
 		AFDEAF9C2692A73500B99B15 /* MacbookPro.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFDEAF9B2692A73500B99B15 /* MacbookPro.swift */; };
 		AFDF37BA2FCA0495007A8C8F /* SFSafariViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFDF37B92FCA0495007A8C8F /* SFSafariViewWrapper.swift */; };
 		AFDF37BB2FCA0495007A8C8F /* SFSafariViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFDF37B92FCA0495007A8C8F /* SFSafariViewWrapper.swift */; };
+		AFE2C80C2FE08CA80086C5C8 /* SwiftUIRouteMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE2C80B2FE08CA80086C5C8 /* SwiftUIRouteMapView.swift */; };
+		AFE2C80D2FE08CA80086C5C8 /* SwiftUIRouteMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE2C80B2FE08CA80086C5C8 /* SwiftUIRouteMapView.swift */; };
+		AFE2C80F2FE0906B0086C5C8 /* MapRouteService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE2C80E2FE0906B0086C5C8 /* MapRouteService.swift */; };
 		AFE3621527C144E50010A881 /* MailUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE3621427C144E50010A881 /* MailUI.swift */; };
 		AFE4AE092FC8678B00F86B2E /* FirebaseAsyncExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE4AE082FC8678B00F86B2E /* FirebaseAsyncExtensions.swift */; };
 		AFE4AE0A2FC8678B00F86B2E /* FirebaseAsyncExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE4AE082FC8678B00F86B2E /* FirebaseAsyncExtensions.swift */; };
@@ -380,6 +383,8 @@
 		AFDE91D8279337C300302CF2 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		AFDEAF9B2692A73500B99B15 /* MacbookPro.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacbookPro.swift; sourceTree = "<group>"; };
 		AFDF37B92FCA0495007A8C8F /* SFSafariViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFSafariViewWrapper.swift; sourceTree = "<group>"; };
+		AFE2C80B2FE08CA80086C5C8 /* SwiftUIRouteMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUIRouteMapView.swift; sourceTree = "<group>"; };
+		AFE2C80E2FE0906B0086C5C8 /* MapRouteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapRouteService.swift; sourceTree = "<group>"; };
 		AFE3621427C144E50010A881 /* MailUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailUI.swift; sourceTree = "<group>"; };
 		AFE4AE082FC8678B00F86B2E /* FirebaseAsyncExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseAsyncExtensions.swift; sourceTree = "<group>"; };
 		AFE4AE0B2FC8698F00F86B2E /* AppDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
@@ -651,6 +656,8 @@
 		AF4F5E012FC75D540003B277 /* Maps */ = {
 			isa = PBXGroup;
 			children = (
+				AF105A0C27741204001F3F74 /* MapUI.swift */,
+				AFE2C80E2FE0906B0086C5C8 /* MapRouteService.swift */,
 				AF4F5E022FC75D570003B277 /* Views */,
 			);
 			path = Maps;
@@ -662,6 +669,7 @@
 				AF4F5E032FC75D860003B277 /* RouteMapView.swift */,
 				AF4F5E062FC75D870003B277 /* MapButtonView.swift */,
 				AF4F5E092FC75DC40003B277 /* BottomSheetUI.swift */,
+				AFE2C80B2FE08CA80086C5C8 /* SwiftUIRouteMapView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -718,7 +726,6 @@
 				AF92B85C267812A300729208 /* Assets.xcassets */,
 				AFF9FE05279E4536006DB401 /* Launch Screen.storyboard */,
 				AFCE46ED2FC1EECF00B3B208 /* LaunchScreenView.swift */,
-				AF105A0C27741204001F3F74 /* MapUI.swift */,
 				AF92B90626781A5500729208 /* UserFormUI.swift */,
 				AF92B8912678148B00729208 /* WaveUI.swift */,
 				AF92B8CE2678178B00729208 /* GradientTextUI.swift */,
@@ -1003,6 +1010,7 @@
 				AF9CC6F5279B2C6B0087E9FC /* ListViewModel.swift in Sources */,
 				AF5CF3E5277B42150044B06E /* FurnitureDetail.swift in Sources */,
 				AFB1A464267B702800E298D5 /* SplashView.swift in Sources */,
+				AFE2C80C2FE08CA80086C5C8 /* SwiftUIRouteMapView.swift in Sources */,
 				AF4F5E082FC75D870003B277 /* MapButtonView.swift in Sources */,
 				AF4F5DE32FC750A70003B277 /* CustomerModels.swift in Sources */,
 				AFE3621527C144E50010A881 /* MailUI.swift in Sources */,
@@ -1022,6 +1030,7 @@
 				AF5E019C2FCB9D1600945764 /* LeadDetailCoordinator.swift in Sources */,
 				AF4F5DF72FC75C330003B277 /* LeadDetailHeaderView.swift in Sources */,
 				AF86C06B2FDF1EF100F450F9 /* CustomerPresentation.swift in Sources */,
+				AFE2C80F2FE0906B0086C5C8 /* MapRouteService.swift in Sources */,
 				AF4F5DE02FC74EDA0003B277 /* LoginViewModel.swift in Sources */,
 				AF4F5DF02FC758540003B277 /* CustomerFirestoreDTO.swift in Sources */,
 				AFC2EBF12795C00700ACE275 /* MainView.swift in Sources */,
@@ -1147,6 +1156,7 @@
 				AF92B89C2678151700729208 /* InstagramUI.swift in Sources */,
 				AFA9531C2FDF33150003ADD1 /* LocationCaptureManager.swift in Sources */,
 				AF86C06C2FDF1EF100F450F9 /* CustomerPresentation.swift in Sources */,
+				AFE2C80D2FE08CA80086C5C8 /* SwiftUIRouteMapView.swift in Sources */,
 				AF4F5E072FC75D870003B277 /* MapButtonView.swift in Sources */,
 				AF4F5DC92FC7430B0003B277 /* CreateNewMessageViewModel.swift in Sources */,
 				AF4F5DE62FC750A80003B277 /* CustomerService.swift in Sources */,

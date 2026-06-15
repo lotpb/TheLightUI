@@ -58,7 +58,11 @@ struct MainMenuUI: View {
     var body: some View {
         NavigationStack(path: $path) {
             VStack {
-                MainTopView().padding(.top, 25)
+                MainTopView(
+                    makeWeatherManager: makeWeatherManager,
+                    makeWeatherLocationProvider: makeWeatherLocationProvider
+                )
+                .padding(.top, 25)
                 menuList
             }
             .navigationTitle("Main Menu")
@@ -183,14 +187,16 @@ private struct DataSection: View {
                 title: "Leads",
                 subtitle: "Potential customers",
                 systemImage: "person.crop.circle.badge.plus",
-                tint: themeColor
+                tint: themeColor,
+                isCompact: true
             ) { onSelect(.leads) }
 
             MenuRouteButton(
                 title: "Customers",
                 subtitle: "Active accounts",
                 systemImage: "person.2.fill",
-                tint: themeColor
+                tint: themeColor,
+                isCompact: true
             ) { onSelect(.customers) }
 
             #if DEBUG
@@ -198,14 +204,16 @@ private struct DataSection: View {
                 title: "Vendors",
                 subtitle: "Suppliers",
                 systemImage: "shippingbox.fill",
-                tint: themeColor
+                tint: themeColor,
+                isCompact: true
             ) { onSelect(.vendors) }
 
             MenuRouteButton(
                 title: "Employee",
                 subtitle: "Team directory",
                 systemImage: "person.text.rectangle",
-                tint: themeColor
+                tint: themeColor,
+                isCompact: true
             ) { onSelect(.employee) }
             #endif
 
@@ -214,7 +222,8 @@ private struct DataSection: View {
                     title: "Expenses",
                     subtitle: "Track spending",
                     systemImage: "creditcard.fill",
-                    tint: themeColor
+                    tint: themeColor,
+                    isCompact: true
                 ) { onSelect(.expenses) }
             }
         }
@@ -232,28 +241,32 @@ private struct OutgoingSection: View {
                 title: "Chart",
                 subtitle: "Analytics",
                 systemImage: "chart.bar.fill",
-                tint: themeColor
+                tint: themeColor,
+                isCompact: true
             ) { onSelectRoute(.chart) }
             #endif
             
             MenuRouteButton(
                 title: "Geotify",
                 subtitle: "Region monitoring",
-                tint: themeColor
+                tint: themeColor,
+                isCompact: true
             ) { onSelectRoute(.geotify) }
 
             MenuRouteButton(
                 title: "Search Places",
                 subtitle: "Find a place nearby",
                 systemImage: "magnifyingglass.circle.fill",
-                tint: themeColor
+                tint: themeColor,
+                isCompact: true
             ) { onSelectRoute(.places) }
 
             MenuRouteButton(
                 title: "Weather",
                 subtitle: "Forecast and conditions",
                 systemImage: "cloud.sun.fill",
-                tint: themeColor
+                tint: themeColor,
+                isCompact: true
             ) { onSelectRoute(.weather) }
 
             #if DEBUG
@@ -261,14 +274,16 @@ private struct OutgoingSection: View {
                 title: "Stacks",
                 subtitle: "Layout demos",
                 systemImage: "square.stack.3d.up.fill",
-                tint: themeColor
+                tint: themeColor,
+                isCompact: true
             ) { onSelectRoute(.stacks) }
 
             MenuRouteButton(
                 title: "Instagram",
                 subtitle: "Social feed",
                 systemImage: "camera.circle.fill",
-                tint: themeColor
+                tint: themeColor,
+                isCompact: true
             ) { onSelectRoute(.instagram) }
             #endif
         }
@@ -281,34 +296,44 @@ private struct MenuRouteButton: View {
     var subtitle: String? = nil
     var systemImage: String = "mappin.and.ellipse"
     var tint: Color = .accentColor
+    var isCompact = false
     var action: () -> Void
+
+    private var iconSize: CGFloat {
+        isCompact ? 32 : 40
+    }
+
+    private var verticalPadding: CGFloat {
+        isCompact ? 4 : 8
+    }
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 12) {
+            HStack(spacing: isCompact ? 10 : 12) {
                 ZStack {
                     Circle()
                         .fill(tint.opacity(0.15))
-                        .frame(width: 40, height: 40)
+                        .frame(width: iconSize, height: iconSize)
                     Image(systemName: systemImage)
                         .foregroundStyle(tint)
-                        .imageScale(.large)
+                        .imageScale(isCompact ? .medium : .large)
                 }
 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: isCompact ? 1 : 2) {
                     Text(title)
-                        .font(.headline)
+                        .font(isCompact ? .subheadline.weight(.semibold) : .headline)
                     if let subtitle {
                         Text(subtitle)
-                            .font(.subheadline)
+                            .font(isCompact ? .caption : .subheadline)
                             .foregroundStyle(.secondary)
                     }
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
+                    .font(isCompact ? .caption : .body)
                     .foregroundStyle(.tertiary)
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, verticalPadding)
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
@@ -343,6 +368,18 @@ struct MainTopView: View {
     @AppStorage("color") private var color: Int?
     @AppStorage(SettingsUI.isCompanyNameKey) private var companyName: String = "Main Menu"
     @AppStorage(SettingsUI.backend) private var backEnd: String = "None"
+    @State private var currentTemperatureText = "--°F"
+
+    private let makeWeatherManager: () -> WeatherManaging
+    private let makeWeatherLocationProvider: () -> WeatherLocationProviding
+
+    init(
+        makeWeatherManager: @escaping () -> WeatherManaging = { WeatherManager() },
+        makeWeatherLocationProvider: @escaping () -> WeatherLocationProviding = { LocationWeatherManager() }
+    ) {
+        self.makeWeatherManager = makeWeatherManager
+        self.makeWeatherLocationProvider = makeWeatherLocationProvider
+    }
 
     private var themeColor: Color {
         AppTheme.accentColor(for: color)
@@ -362,6 +399,9 @@ struct MainTopView: View {
         .cornerRadius(Layout.cornerRadius)
         .frame(height: Layout.height, alignment: .leading)
         .padding()
+        .task {
+            await loadCurrentTemperature()
+        }
     }
 
     private var titleRow: some View {
@@ -380,8 +420,22 @@ struct MainTopView: View {
     }
 
     private var weatherRow: some View {
-        statusRow(title: "Weather:", value: "Cloudy", systemImage: "cloud.sun.fill")
+        statusRow(title: "Temp:", value: currentTemperatureText, systemImage: "thermometer.sun.fill")
             .padding(.bottom, 15)
+    }
+
+    @MainActor
+    private func loadCurrentTemperature() async {
+        do {
+            let coordinates = try await makeWeatherLocationProvider().requestLocation()
+            let weather = try await makeWeatherManager().getCurrentWeather(
+                latitude: coordinates.latitude,
+                longitude: coordinates.longitude
+            )
+            currentTemperatureText = "\(Int(weather.main.temp.rounded()))°F"
+        } catch {
+            currentTemperatureText = "Unavailable"
+        }
     }
 
     private func statusRow(title: String, value: String, systemImage: String) -> some View {
