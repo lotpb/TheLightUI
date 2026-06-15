@@ -10,12 +10,11 @@ import MapKit
 
 @MainActor
 final class LocationManager: NSObject, ObservableObject {
-    @Published private(set) var mapView = MKMapView()
     @Published var region = MKCoordinateRegion.defaultRegion
-    @Published private(set) var mapType: MKMapType = .standard
     @Published private(set) var location: CLLocation?
     @Published private(set) var locationStatus: CLAuthorizationStatus = .notDetermined
     @Published private(set) var currentPlacemark: CLPlacemark?
+    @Published private(set) var isFollowingLocation = true
 
     private let manager = CLLocationManager()
     private let geocoder = CLGeocoder()
@@ -30,11 +29,6 @@ final class LocationManager: NSObject, ObservableObject {
         requestLocation()
     }
 
-    func updateMapType() {
-        let newType: MKMapType = (mapType == .standard) ? .hybrid : .standard
-        mapType = newType
-        mapView.mapType = newType
-    }
 
     var statusString: String {
         switch locationStatus {
@@ -63,6 +57,7 @@ final class LocationManager: NSObject, ObservableObject {
     }
 
     func focusLocation() {
+        isFollowingLocation = true
         guard let location else { return }
         updateRegion(with: location)
     }
@@ -97,10 +92,20 @@ final class LocationManager: NSObject, ObservableObject {
         manager.stopUpdatingLocation()
     }
 
-    func stopFollowingLocation() {
+    func pauseFollowingLocation() {
+        isFollowingLocation = false
         stopUpdating()
-        mapView.userTrackingMode = .none
-        region = mapView.region
+    }
+
+    func resumeFollowingLocation() {
+        isFollowingLocation = true
+        focusLocation()
+        startUpdating()
+        requestLocation()
+    }
+
+    func stopFollowingLocation() {
+        pauseFollowingLocation()
     }
 
     private func configureLocationManager() {
@@ -143,8 +148,6 @@ final class LocationManager: NSObject, ObservableObject {
     private func updateRegion(with location: CLLocation) {
         let newRegion = makeRegion(for: location)
         region = newRegion
-        mapView.setRegion(newRegion, animated: true)
-        mapView.setVisibleMapRect(mapView.visibleMapRect, animated: true)
     }
 }
 
@@ -161,7 +164,9 @@ extension LocationManager: @preconcurrency CLLocationManagerDelegate {
         guard let latestLocation = locations.last else { return }
 
         location = latestLocation
-        updateRegion(with: latestLocation)
+        if isFollowingLocation {
+            updateRegion(with: latestLocation)
+        }
         reverseGeocode(location: latestLocation)
     }
 

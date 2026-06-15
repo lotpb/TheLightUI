@@ -9,9 +9,8 @@ import MapKit
 
 struct MapButtonView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.openURL) private var openURL
     @ObservedObject var manager: LocationManager
-    @StateObject private var viewModel = MainMessagesViewModel()
+    let profileImageURL: String?
 
     @Binding var directions: [String]
     @Binding var mapType: MKMapType
@@ -42,10 +41,9 @@ struct MapButtonView: View {
             isPresented: $showLocationPermissionExplanation,
             titleVisibility: .visible
         ) {
-            Button("Continue") { manager.requestLocation() }
+            Button("Continue") { manager.resumeFollowingLocation() }
             Button("Cancel", role: .cancel) { }
         }
-        .task { await viewModel.fetchCurrentUser() }
     }
 
     private var leadingControls: some View {
@@ -73,7 +71,7 @@ struct MapButtonView: View {
         Button {
             dismiss()
         } label: {
-            ProfileAvatarImage(urlString: viewModel.chatUser?.profileImageUrl)
+            ProfileAvatarImage(urlString: profileImageURL)
                 .frame(width: 50, height: 50)
                 .clipShape(Circle())
                 .overlay(Circle().stroke(Color.white, lineWidth: 2))
@@ -95,7 +93,7 @@ struct MapButtonView: View {
 
     private var mapTypeButton: some View {
         Button {
-            manager.stopFollowingLocation()
+            manager.pauseFollowingLocation()
             // Toggle between standard and satellite; remember last non-3D type
             if mapType == .hybridFlyover {
                 // If currently 3D, switch to last non-3D selection
@@ -113,7 +111,7 @@ struct MapButtonView: View {
 
     private var threeDButton: some View {
         Button {
-            manager.stopFollowingLocation()
+            manager.pauseFollowingLocation()
             if mapType == .hybridFlyover {
                 // Return to the last remembered non-3D map type
                 mapType = lastNon3DMapType
@@ -134,7 +132,7 @@ struct MapButtonView: View {
             if manager.locationStatus == .notDetermined {
                 showLocationPermissionExplanation = true
             } else {
-                manager.requestLocation()
+                manager.resumeFollowingLocation()
             }
         } label: {
             circularIcon("location.fill")

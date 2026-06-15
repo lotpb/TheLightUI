@@ -12,20 +12,19 @@ struct RouteMapView: UIViewRepresentable {
     @Binding var travelTime: Double
     @Binding var distance: Double
     @Binding var directions: [String]
-    @Binding var mapstreet: String
-    @Binding var mapcity: String
-    @Binding var mapstate: String
-    @Binding var mapzip: String
+    @Binding var routeStatus: RouteStatus
+    let mode: MapMode
     @Binding var region: MKCoordinateRegion
 
     @Binding var mapType: MKMapType
+    let onUserInteraction: () -> Void
 
     func makeCoordinator() -> Coordinator {
-        Coordinator()
+        Coordinator(onUserInteraction: onUserInteraction)
     }
 
     func makeUIView(context: Context) -> MKMapView {
-        let mapView = manager.mapView
+        let mapView = context.coordinator.mapView
         mapView.delegate = context.coordinator
         configure(mapView)
         updateRoute(on: mapView, context: context)
@@ -33,28 +32,14 @@ struct RouteMapView: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: MKMapView, context: Context) {
+        context.coordinator.onUserInteraction = onUserInteraction
+        context.coordinator.onVisibleRegionChanged = { region = $0 }
         uiView.mapType = mapType
+        uiView.userTrackingMode = manager.isFollowingLocation ? .follow : .none
 
-        if mapType == .hybridFlyover {
-            let center = uiView.centerCoordinate
-            let camera = MKMapCamera(
-                lookingAtCenter: center,
-                fromDistance: 1200, // adjust as needed for your region
-                pitch: 60,
-                heading: uiView.camera.heading
-            )
-            uiView.setCamera(camera, animated: true)
-            uiView.showsBuildings = true
-        } else {
-            let center = uiView.centerCoordinate
-            let camera = MKMapCamera(
-                lookingAtCenter: center,
-                fromDistance: 2000,
-                pitch: 0,
-                heading: uiView.camera.heading
-            )
-            uiView.setCamera(camera, animated: true)
-            uiView.showsBuildings = false
+        if context.coordinator.appliedMapType != mapType {
+            context.coordinator.appliedMapType = mapType
+            updateCameraForMapType(on: uiView)
         }
 
         updateRegionIfNeeded(on: uiView)
@@ -70,57 +55,116 @@ struct RouteMapView: UIViewRepresentable {
         mapView.showsTraffic = false
         mapView.isZoomEnabled = true
         mapView.isScrollEnabled = true
-        mapView.userTrackingMode = .follow
+        mapView.userTrackingMode = manager.isFollowingLocation ? .follow : .none
         mapView.isUserInteractionEnabled = true
         mapView.showsUserLocation = true
     }
 
+    private func updateCameraForMapType(on mapView: MKMapView) {
+        let center = mapView.centerCoordinate
+        let isFlyover = mapType == .hybridFlyover || mapType == .satelliteFlyover
+        let camera = MKMapCamera(
+            lookingAtCenter: center,
+            fromDistance: isFlyover ? 1200 : 2000,
+            pitch: isFlyover ? 60 : 0,
+            heading: mapView.camera.heading
+        )
+        mapView.setCamera(camera, animated: true)
+        mapView.showsBuildings = isFlyover
+    }
+
     private func updateRegionIfNeeded(on mapView: MKMapView) {
+        guard manager.isFollowingLocation else { return }
         guard CLLocationCoordinate2DIsValid(region.center) else { return }
         guard mapView.region.center.latitude != region.center.latitude || mapView.region.center.longitude != region.center.longitude else { return }
         mapView.setRegion(region, animated: true)
     }
 
     private func updateRoute(on mapView: MKMapView, context: Context) {
-        guard let userLocation = manager.location else { return }
+        guard case .route(let destination) = mode else {
+            clearRoute(on: mapView, context: context)
+            return
+        }
+        guard let userLocation = manager.location else {
+            routeStatus = .loading
+            return
+        }
 
-        let address = "\(mapstreet) \(mapcity), \(mapstate) \(mapzip)"
-        let routeKey = "\(address)-\(userLocation.coordinate.latitude)-\(userLocation.coordinate.longitude)"
-        guard context.coordinator.routeKey != routeKey else { return }
+        guard context.coordinator.shouldRecalculateRoute(
+            to: destination,
+            from: userLocation,
+            routeStatus: routeStatus
+        ) else { return }
+
+        let routeKey = context.coordinator.routeRequestKey(for: destination, from: userLocation)
         context.coordinator.routeKey = routeKey
+        context.coordinator.markRouteRequest(to: destination, from: userLocation)
 
-        context.coordinator.geocoder.cancelGeocode()
-        context.coordinator.currentDirections?.cancel()
+        context.coordinator.routeTask?.cancel()
+        context.coordinator.routeService.cancel()
+        routeStatus = .loading
 
-        let endPoint = "\(mapstreet), \(mapcity)"
+        let endPoint = destination.displayName
 
-        context.coordinator.geocoder.geocodeAddressString(address) { placemarks, _ in
-            guard context.coordinator.routeKey == routeKey else { return }
-            guard let location = placemarks?.first?.location else { return }
+        context.coordinator.routeTask = Task { @MainActor in
+            do {
+                let result = try await context.coordinator.routeService.calculateRoute(
+                    from: userLocation.coordinate,
+                    to: destination
+                )
+                guard context.coordinator.routeKey == routeKey else { return }
 
-            DispatchQueue.main.async {
-                let sourceCoordinate = MKPlacemark(coordinate: userLocation.coordinate)
-                let destinationCoordinate = MKPlacemark(coordinate: location.coordinate)
-                let sourcePin = makeAnnotation(coordinate: sourceCoordinate.coordinate, title: "Start", subtitle: "Current Location")
-                let destPin = makeAnnotation(coordinate: destinationCoordinate.coordinate, title: "Destination", subtitle: endPoint)
-                let request = makeDirectionsRequest(source: sourceCoordinate, destination: destinationCoordinate)
+                let sourcePin = makeAnnotation(
+                    coordinate: userLocation.coordinate,
+                    title: "Start",
+                    subtitle: "Current Location"
+                )
+                let destPin = makeAnnotation(
+                    coordinate: result.destinationCoordinate,
+                    title: "Destination",
+                    subtitle: endPoint
+                )
 
-                let mkDirections = MKDirections(request: request)
-                context.coordinator.currentDirections = mkDirections
-
-                mkDirections.calculate { response, _ in
-                    guard context.coordinator.routeKey == routeKey else { return }
-                    guard let route = response?.routes.first else { return }
-
-                    DispatchQueue.main.async {
-                        travelTime = route.expectedTravelTime
-                        distance = route.distance
-                        directions = route.steps.map(\.instructions).filter { !$0.isEmpty }
-                        draw(route: route, sourcePin: sourcePin, destPin: destPin, on: mapView)
-                    }
-                }
+                routeStatus = .ready
+                travelTime = result.route.expectedTravelTime
+                distance = result.route.distance
+                directions = result.directions
+                draw(
+                    route: result.route,
+                    sourcePin: sourcePin,
+                    destPin: destPin,
+                    on: mapView,
+                    shouldFrameRoute: manager.isFollowingLocation
+                )
+            } catch {
+                guard context.coordinator.routeKey == routeKey else { return }
+                routeStatus = .failed(routeFailureMessage(for: error))
             }
         }
+    }
+
+    private func clearRoute(on mapView: MKMapView, context: Context) {
+        let routeKey = "currentLocation"
+        guard context.coordinator.routeKey != routeKey else { return }
+        context.coordinator.routeKey = routeKey
+        context.coordinator.lastRouteOrigin = nil
+        context.coordinator.lastRouteDestinationAddress = nil
+        context.coordinator.routeTask?.cancel()
+        context.coordinator.routeTask = nil
+        context.coordinator.routeService.cancel()
+        directions = []
+        routeStatus = .idle
+        travelTime = 0
+        distance = 0
+        mapView.removeOverlays(mapView.overlays)
+        mapView.removeAnnotations(mapView.annotations.filter { !($0 is MKUserLocation) })
+    }
+
+    private func routeFailureMessage(for error: Error) -> String {
+        if let localizedError = error as? LocalizedError, let description = localizedError.errorDescription {
+            return description
+        }
+        return "Could not calculate a route"
     }
 
     private func makeAnnotation(coordinate: CLLocationCoordinate2D, title: String, subtitle: String) -> MKPointAnnotation {
@@ -131,19 +175,19 @@ struct RouteMapView: UIViewRepresentable {
         return annotation
     }
 
-    private func makeDirectionsRequest(source: MKPlacemark, destination: MKPlacemark) -> MKDirections.Request {
-        let request = MKDirections.Request()
-        request.source = MKMapItem(placemark: source)
-        request.destination = MKMapItem(placemark: destination)
-        request.transportType = .automobile
-        return request
-    }
-
-    private func draw(route: MKRoute, sourcePin: MKPointAnnotation, destPin: MKPointAnnotation, on mapView: MKMapView) {
+    private func draw(
+        route: MKRoute,
+        sourcePin: MKPointAnnotation,
+        destPin: MKPointAnnotation,
+        on mapView: MKMapView,
+        shouldFrameRoute: Bool
+    ) {
         mapView.removeAnnotations(mapView.annotations)
         mapView.removeOverlays(mapView.overlays)
         mapView.addAnnotations([sourcePin, destPin])
         mapView.addOverlay(route.polyline)
+
+        guard shouldFrameRoute else { return }
         mapView.setVisibleMapRect(
             route.polyline.boundingMapRect,
             edgePadding: UIEdgeInsets(top: 25, left: 25, bottom: 25, right: 25),
@@ -152,9 +196,51 @@ struct RouteMapView: UIViewRepresentable {
     }
 
     final class Coordinator: NSObject, MKMapViewDelegate {
+        let mapView = MKMapView()
         var routeKey: String?
-        let geocoder = CLGeocoder()
-        var currentDirections: MKDirections?
+        let routeService = MapRouteService()
+        var routeTask: Task<Void, Never>?
+        var appliedMapType: MKMapType?
+        var lastRouteOrigin: CLLocation?
+        var lastRouteDestinationAddress: String?
+        var onUserInteraction: () -> Void
+        var onVisibleRegionChanged: (MKCoordinateRegion) -> Void = { _ in }
+
+        private let routeRecalculationDistance: CLLocationDistance = 100
+
+        init(onUserInteraction: @escaping () -> Void) {
+            self.onUserInteraction = onUserInteraction
+        }
+
+        func shouldRecalculateRoute(
+            to destination: MapDestination,
+            from userLocation: CLLocation,
+            routeStatus: RouteStatus
+        ) -> Bool {
+            guard lastRouteDestinationAddress == destination.address else { return true }
+            guard let lastRouteOrigin else { return true }
+            guard routeStatus != .loading else { return false }
+            return userLocation.distance(from: lastRouteOrigin) >= routeRecalculationDistance
+        }
+
+        func markRouteRequest(to destination: MapDestination, from userLocation: CLLocation) {
+            lastRouteDestinationAddress = destination.address
+            lastRouteOrigin = userLocation
+        }
+
+        func routeRequestKey(for destination: MapDestination, from userLocation: CLLocation) -> String {
+            "\(destination.address)-\(userLocation.coordinate.latitude)-\(userLocation.coordinate.longitude)"
+        }
+
+        func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) {
+            guard regionChangeWasUserDriven(mapView) else { return }
+            onVisibleRegionChanged(mapView.region)
+            onUserInteraction()
+        }
+
+        func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+            onVisibleRegionChanged(mapView.region)
+        }
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             let renderer = MKPolylineRenderer(overlay: overlay)
@@ -162,6 +248,15 @@ struct RouteMapView: UIViewRepresentable {
             renderer.lineWidth = 6
             renderer.lineCap = .round
             return renderer
+        }
+
+        private func regionChangeWasUserDriven(_ mapView: MKMapView) -> Bool {
+            mapView.subviews
+                .compactMap(\.gestureRecognizers)
+                .flatMap { $0 }
+                .contains { gestureRecognizer in
+                    gestureRecognizer.state == .began || gestureRecognizer.state == .changed
+                }
         }
     }
 }
