@@ -226,7 +226,6 @@ struct MainMessagesView: View {
                     self.shouldNavigateToChatLogView.toggle()
                     self.chatUser = user
                     self.chatLogViewModel.chatUser = user
-                    self.chatLogViewModel.fetchMessages()
                 },
                 repository: makeChatRepository()
             )
@@ -263,7 +262,6 @@ struct MainMessagesView: View {
     private func openChat(for recentMessage: RecentMessage) {
         chatUser = vm.chatUser(for: recentMessage)
         chatLogViewModel.chatUser = chatUser
-        chatLogViewModel.fetchMessages()
         shouldNavigateToChatLogView.toggle()
     }
 

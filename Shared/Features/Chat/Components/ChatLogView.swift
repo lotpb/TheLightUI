@@ -45,8 +45,8 @@ struct ChatLogView: View {
     static let emptyScrollToString = "Empty"
     
     private var messagesView: some View {
-        ScrollView {
-            ScrollViewReader { scrollViewProxy in
+        ScrollViewReader { scrollViewProxy in
+            ScrollView {
                 LazyVStack(spacing: 8) {
                     if vm.chatMessages.isEmpty {
                         EmptyChatView()
@@ -63,22 +63,36 @@ struct ChatLogView: View {
                 }
                 .padding(.horizontal, 12)
                 .padding(.top, 12)
-                .onReceive(vm.$count) { _ in
-                    withAnimation(.easeOut(duration: 0.35)) {
-                        scrollViewProxy.scrollTo(Self.emptyScrollToString, anchor: .bottom)
-                    }
-                }
             }
-        }
-        .scrollDismissesKeyboard(.interactively)
-        .safeAreaInset(edge: .bottom) {
-            chatBottomBar
-                .padding(.bottom, messageBarBottomPadding)
+            .id(vm.chatUser?.uid ?? "empty-chat")
+            .scrollDismissesKeyboard(.interactively)
+            .safeAreaInset(edge: .bottom) {
+                chatBottomBar
+                    .padding(.bottom, messageBarBottomPadding)
+            }
+            .onAppear {
+                scrollToBottom(using: scrollViewProxy, animated: false)
+            }
+            .onChange(of: vm.chatMessages.count) { _ in
+                scrollToBottom(using: scrollViewProxy, animated: true)
+            }
         }
     }
     
     private var messageBarBottomPadding: CGFloat {
         isMessageFieldFocused ? 0 : Layout.messageBarBottomPadding
+    }
+
+    private func scrollToBottom(using scrollViewProxy: ScrollViewProxy, animated: Bool) {
+        DispatchQueue.main.async {
+            if animated {
+                withAnimation(.easeOut(duration: 0.35)) {
+                    scrollViewProxy.scrollTo(Self.emptyScrollToString, anchor: .bottom)
+                }
+            } else {
+                scrollViewProxy.scrollTo(Self.emptyScrollToString, anchor: .bottom)
+            }
+        }
     }
     
     private var chatBottomBar: some View {

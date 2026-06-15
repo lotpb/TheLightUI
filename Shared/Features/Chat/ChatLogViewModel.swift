@@ -11,7 +11,6 @@ final class ChatLogViewModel: ObservableObject {
     @Published var errorMessage = ""
     @Published var chatMessages = [ChatMessage]()
     @Published var isUploadingImage = false
-    @Published var count = 0
 
     var chatUser: UserModel?
 
@@ -54,7 +53,6 @@ final class ChatLogViewModel: ObservableObject {
                 Task { @MainActor [weak self] in
                     guard let self, self.listenerGeneration == generation else { return }
                     chatMessages.append(contentsOf: newMessages)
-                    count += 1
                 }
             },
             onError: { [weak self] error in
@@ -75,7 +73,6 @@ final class ChatLogViewModel: ObservableObject {
 
             do {
                 try await repository.sendImageMessage(imageData, to: chatUser)
-                count += 1
             } catch {
                 errorMessage = "Failed to upload image: \(error.localizedDescription)"
             }
@@ -93,7 +90,6 @@ final class ChatLogViewModel: ObservableObject {
         Task {
             do {
                 try await repository.sendTextMessage(messageText, to: chatUser)
-                count += 1
             } catch {
                 if chatText.isEmpty {
                     chatText = draftText
