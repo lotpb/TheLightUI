@@ -1,0 +1,411 @@
+//
+//  CustomerUI.swift
+//  TheLightUI (iOS)
+//
+//  Created by Peter Balsamo on 12/22/21.
+//
+
+// Customer list screen with search, filtering, sorting, and quick actions.
+
+import SwiftUI
+
+// CustomerUI
+// Displays a list of customers with search, Active-only filter, and multiple sort modes.
+// Provides navigation to detail, swipe/context actions, and a sheet to add new customers.
+struct CustomerUI: View {
+    // Persisted theme color choice.
+    @AppStorage("color") private var color: Int?
+    // State-backed models: data source, list presentation state, and picklist values.
+    @StateObject private var viewModel: CustomerData
+    @StateObject private var listViewModel: CustomerListViewModel
+    @StateObject private var pickerviewModel: PickerDataModel
+    // Helper to open tel: and other URLs.
+    @Environment(\.openURL) private var openURL
+    
+    // Singleton used to schedule/cancel local notifications.
+    private let notificationManager = NotificationManager.shared
+    // Injected services for customer forms and app badge state.
+    private let formService: CustomerFormServicing
+    private let appBadgeManager: AppBadgeManaging
+    
+    // UI state: add-sheet visibility and scroll refresh throttling.
+    @State private var isAddingCustomer = false
+    @State private var lastScrollRefreshDate = Date.distantPast
+    
+    // Primary initializer for production: creates its own data sources.
+    @MainActor
+    init(
+        customerService: CustomerServicing = FirebaseCustomerService(),
+        formService: CustomerFormServicing = FirebaseCustomerFormService(),
+        appBadgeManager: AppBadgeManaging = LiveAppBadgeManager(),
+        pickerviewModel: PickerDataModel = PickerDataModel()
+    ) {
+        self.formService = formService
+        self.appBadgeManager = appBadgeManager
+        _viewModel = StateObject(wrappedValue: CustomerData(customerService: customerService))
+        _listViewModel = StateObject(wrappedValue: CustomerListViewModel())
+        _pickerviewModel = StateObject(wrappedValue: pickerviewModel)
+    }
+
+    // Convenience initializer for previews/tests: accepts an existing view model.
+    @MainActor
+    init(
+        viewModel: CustomerData,
+        formService: CustomerFormServicing = FirebaseCustomerFormService(),
+        appBadgeManager: AppBadgeManaging = LiveAppBadgeManager(),
+        pickerviewModel: PickerDataModel = PickerDataModel()
+    ) {
+        self.formService = formService
+        self.appBadgeManager = appBadgeManager
+        _viewModel = StateObject(wrappedValue: viewModel)
+        _listViewModel = StateObject(wrappedValue: CustomerListViewModel())
+        _pickerviewModel = StateObject(wrappedValue: pickerviewModel)
+    }
+    
+    // Derive theme color from AppStorage.
+    private var themeColor: Color {
+        AppTheme.accentColor(for: color)
+    }
+
+    private var displayedItems: [CustomerItem] {
+        listViewModel.displayedItems(from: viewModel.items)
+    }
+    
+    var body: some View {
+        // Main list content (loading/empty/states and rows).
+        customerList
+            .listStyle(.plain)
+            .navigationTitle("Customers")
+            .navigationBarTitleDisplayMode(.inline)
+            .foregroundColor(themeColor)
+            .toolbar { toolbarContent }
+            // Built-in search field with sample completions.
+            .searchable(text: $listViewModel.searchText, placement: .navigationBarDrawer(displayMode: .always)) {
+                Text("Balsamo").searchCompletion("Balsamo")
+                Text("Rosch").searchCompletion("Rosch")
+            }
+            // Pull-to-refresh to re-fetch customer data.
+            .refreshable {
+                viewModel.fetchData()
+            }
+            // Present the add-customer form.
+            .sheet(isPresented: $isAddingCustomer) {
+                addCustomerForm
+            }
+            // Clear app badge when entering the list.
+            .onAppear {
+                appBadgeManager.clearBadge()
+            }
+            // Inject shared models into subtree.
+            .environmentObject(viewModel)
+            .environmentObject(pickerviewModel)
+    }
+
+    // Top-level list container that handles loading/empty states and shows content.
+    private var customerList: some View {
+        let items = displayedItems
+        let lastItemID = items.last?.id
+
+        return List {
+            // Loading state.
+            if viewModel.isLoading {
+                ProgressView("Loading Customers...")
+            // Empty state.
+            } else if viewModel.items.isEmpty {
+                Text("No Customers")
+            // Content state.
+            } else {
+                activeOnlyToggle(count: items.count)
+                customerRows(items: items, lastItemID: lastItemID)
+            }
+        }
+    }
+    
+    // Toggle to filter the list to only active customers.
+    private func activeOnlyToggle(count: Int) -> some View {
+        Toggle(isOn: $listViewModel.isActiveOnly) {
+            Text("\(count) Active Only")
+        }
+        .toggleStyle(SwitchToggleStyle(tint: themeColor))
+    }
+    
+    // Rows: navigation to detail, context menu, and swipe actions.
+    private func customerRows(items: [CustomerItem], lastItemID: CustomerItem.ID?) -> some View {
+        ForEach(items) { item in
+            // Navigate to detailed profile for the selected customer.
+            NavigationLink {
+                LeadDetailUI(detail: item, formService: formService)
+                    .environmentObject(pickerviewModel)
+                    .navigationBarBackButtonHidden(true)
+            } label: {
+                CellView(data: item, showsComments: !item.comments.isEmpty, color: color)
+                    .equatable()
+            }
+            .contextMenu { rowContextMenu(for: item) }
+            // Long-press context menu.
+            // Leading swipe: quick actions.
+            .swipeActions(edge: .leading) { leadingSwipeActions(for: item) }
+            // Trailing swipe: destructive delete.
+            .swipeActions(edge: .trailing) { trailingSwipeActions(for: item) }
+            .onAppear {
+                refreshCustomersIfNeeded(isLastItem: item.id == lastItemID)
+            }
+        }
+        // Support delete via standard list editing.
+        .onDelete { offsets in
+            deleteItems(offsets.map { items[$0] })
+        }
+        // Allow manual reordering in edit mode.
+        .onMove { offsets, newOffset in
+            viewModel.items.move(fromOffsets: offsets, toOffset: newOffset)
+        }
+    }
+    
+    // Context menu actions for a row (call and schedule reminder).
+    @ViewBuilder
+    private func rowContextMenu(for item: CustomerItem) -> some View {
+        Button {
+            openURL.callPhoneNumber(item.phone)
+        } label: {
+            Label("Call", systemImage: "phone")
+        }
+        Button {
+            scheduleReminder(for: item)
+        } label: {
+            Label("Remind", systemImage: "bell")
+        }
+    }
+    
+    // Leading swipe actions: mark contacted (clears notifications) and schedule a reminder.
+    @ViewBuilder
+    private func leadingSwipeActions(for item: CustomerItem) -> some View {
+        Button {
+            notificationManager.deleteNotifications()
+        } label: {
+            Label("Mark Contacted", systemImage: "person.crop.circle.fill.badge.checkmark")
+        }
+        .tint(.green)
+
+        Button {
+            scheduleReminder(for: item)
+        } label: {
+            Label("Remind Me", systemImage: "bell")
+        }
+        .tint(.orange)
+    }
+
+    // Trailing swipe action: delete the item.
+    @ViewBuilder
+    private func trailingSwipeActions(for item: CustomerItem) -> some View {
+        Button(role: .destructive) {
+            deleteItems([item])
+        } label: {
+            Label("Delete", systemImage: "trash")
+        }
+    }
+    
+    // Sort menu anchored in the toolbar with a Picker over all SortType cases.
+    private var sortMenu: some View {
+        Menu {
+            Picker("Sorting options", selection: $listViewModel.selectedSort) {
+                ForEach(CustomerListViewModel.SortType.allCases) { sort in
+                    Label(sort.rawValue, systemImage: sort.systemImage)
+                        .tag(sort)
+                }
+            }
+        } label: {
+            Label("Sort", systemImage: "line.3.horizontal.decrease.circle")
+        }
+    }
+
+    // Sheet content for adding a new customer using the shared form.
+    private var addCustomerForm: some View {
+        FormUI(
+            detail: .emptyCustomer,
+            createDate: Date(),
+            startDate: Date(),
+            completeDate: Date(),
+            mode: .new,
+            formService: formService
+        )
+        .environmentObject(viewModel)
+        .environmentObject(pickerviewModel)
+    }
+
+    // Toolbar: edit mode toggle, add new customer, and sort menu.
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        // Enable list editing (delete/reorder).
+        ToolbarItem(placement: .topBarLeading) {
+            EditButton()
+        }
+
+        // Actions: add new customer and open sort menu.
+        ToolbarItemGroup(placement: .topBarTrailing) {
+            Button(action: { isAddingCustomer = true }) {
+                Label("New", systemImage: "plus")
+            }
+
+            sortMenu
+        }
+    }
+
+    // Schedule a repeating 8:30 AM reminder to contact the customer.
+    private func scheduleReminder(for item: CustomerItem) {
+        var dateComponents = DateComponents()
+        dateComponents.hour = 8
+        dateComponents.minute = 30
+        notificationManager.scheduleNotification(
+            title: "Contact \(item.lastname)",
+            body: "Email \(item.email)",
+            categoryIdentifier: "reminder",
+            dateComponents: dateComponents,
+            repeats: true
+        )
+    }
+    
+    // Refresh Firebase data when the user scrolls down to the bottom of the current list.
+    private func refreshCustomersIfNeeded(isLastItem: Bool) {
+        guard isLastItem else { return }
+        guard Date().timeIntervalSince(lastScrollRefreshDate) > 5 else { return }
+
+        lastScrollRefreshDate = Date()
+        viewModel.fetchData(showsLoadingIndicator: false)
+    }
+
+    // Delegate deletion to the view model.
+    private func deleteItems(_ items: [CustomerItem]) {
+        viewModel.deleteItems(items)
+    }
+}
+
+// MARK: - Customer Cell
+
+// Layout constants for sizes used in the cell.
+struct CellView: View, Equatable {
+    fileprivate enum Layout {
+        static let avatarSize: CGFloat = 60
+        static let actionIconSize: CGFloat = 20
+        static let summaryWidth: CGFloat = 90
+        static let summaryHeight: CGFloat = 25
+        static let textMinimumScaleFactor = 0.5
+    }
+
+    // Customer data to render.
+    let data: CustomerItem
+    // Whether to enable the comments action.
+    let showsComments: Bool
+    // Persisted theme color choice passed down from the parent list.
+    let color: Int?
+    
+    // Cell-local theme color convenience.
+    private var themeColor: Color {
+        AppTheme.accentColor(for: color)
+    }
+    
+    // Row layout: avatar, summary, spacer, and amount/date summary.
+    var body: some View {
+        HStack(alignment: .top) {
+            avatar
+            customerSummary
+            Spacer()
+            amountSummary
+        }
+    }
+
+    // Static placeholder avatar with circular mask.
+    private var avatar: some View {
+        Image("taylor_swift_profile")
+            .resizable()
+            .frame(width: Layout.avatarSize, height: Layout.avatarSize, alignment: .topLeading)
+            .clipShape(Circle())
+            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+            .padding(.top, 5)
+    }
+
+    // Name, address, and row-level actions.
+    private var customerSummary: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(data.lastname)
+                .font(.title3)
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
+                .customerCellScaledText()
+                .padding(.top, 3)
+
+            Text(data.address)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .customerCellSingleLineText()
+
+            rowActions
+        }
+        .padding(.leading, 10)
+    }
+
+    // Inline action icons (message-like and like).
+    private var rowActions: some View {
+        HStack(spacing: 20) {
+            // Only enabled when there are comments to show.
+            Button(action: {}) {
+                actionIcon("text.bubble.fill")
+            }
+            .disabled(!showsComments)
+
+            Button(action: {}) {
+                actionIcon("hand.thumbsup.fill")
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    // Right-aligned date and amount summary.
+    private var amountSummary: some View {
+        VStack(alignment: .trailing, spacing: 6) {
+            Text(data.formattedCreationDate)
+                .frame(width: Layout.summaryWidth, height: Layout.summaryHeight)
+                .font(.caption2)
+                .foregroundColor(themeColor)
+                .customerCellScaledText()
+                .padding(.top, 3)
+
+            Text(data.formattedAmount)
+                .frame(width: Layout.summaryWidth, height: Layout.summaryHeight)
+                .customerCellSingleLineText()
+                .foregroundColor(.primary)
+                .font(.headline)
+        }
+    }
+
+    // Helper to render a consistent action icon.
+    private func actionIcon(_ systemName: String) -> some View {
+        Image(systemName: systemName)
+            .resizable()
+            .frame(width: Layout.actionIconSize, height: Layout.actionIconSize)
+            .foregroundColor(themeColor)
+    }
+}
+
+private extension View {
+    func customerCellScaledText() -> some View {
+        minimumScaleFactor(CellView.Layout.textMinimumScaleFactor)
+    }
+
+    func customerCellSingleLineText() -> some View {
+        lineLimit(1)
+            .customerCellScaledText()
+    }
+}
+
+// Preview: customers list in dark mode.
+#Preview("Customers - Dark") {
+    NavigationStack {
+        CustomerUI(
+            viewModel: CustomerData(customerService: PreviewCustomerService()),
+            formService: PreviewCustomerFormService(),
+            appBadgeManager: PreviewAppBadgeManager()
+        )
+    }
+    .preferredColorScheme(.dark)
+}
+

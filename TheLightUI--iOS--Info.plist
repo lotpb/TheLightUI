@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSCalendarsUsageDescription</key>
+	<string>TheLight uses Calendar to let you add customer appointment events when you choose.</string>
+	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+	<string>TheLight uses Calendar to create customer appointment events when you choose.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>TheLight uses Contacts to let you add customer contact cards when you choose.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>TheLight uses your location to show maps and share your current location when you choose.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.753463338762-glr4sci3atcfr827f2pslmqqsd36pevc</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>
