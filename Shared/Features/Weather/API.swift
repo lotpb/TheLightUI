@@ -62,6 +62,20 @@ enum API {
                 var speed: Double
                 var deg: Double
             }
+
+            init(
+                coord: CoordinatesResponse,
+                weather: [WeatherResponse],
+                main: MainResponse,
+                name: String,
+                wind: WindResponse
+            ) {
+                self.coord = coord
+                self.weather = weather
+                self.main = main
+                self.name = name
+                self.wind = wind
+            }
         }
     }
 }

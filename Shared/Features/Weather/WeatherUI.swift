@@ -117,6 +117,9 @@ extension WeatherUI {
 @available(iOS 15.0, *)
 struct WeatherUI_Previews: PreviewProvider {
     static var previews: some View {
-        WeatherUI()
+        WeatherUI(
+            apiManager: PreviewWeatherManager(),
+            locationManager: PreviewWeatherLocationProvider()
+        )
     }
 }

@@ -15,6 +15,8 @@ struct LoginUserSettings {
 protocol LoginServicing {
     func signIn(email: String, password: String) async throws -> String
     func createUser(email: String, password: String) async throws -> String
+    func sendPasswordReset(email: String) async throws
+    func sendEmailVerification() async throws
     func fetchUserSettings(userId: String) async throws -> LoginUserSettings
     func uploadProfileImage(_ imageData: Data, userId: String) async throws -> URL
     func storeUserInformation(
@@ -48,6 +50,18 @@ final class FirebaseLoginService: LoginServicing {
             password: password,
             missingUserIdError: LoginServiceError.missingUserId
         )
+    }
+
+    func sendPasswordReset(email: String) async throws {
+        try await manager.auth.sendPasswordResetAsync(email: email)
+    }
+
+    func sendEmailVerification() async throws {
+        guard let user = manager.auth.currentUser else {
+            throw LoginServiceError.missingCurrentUser
+        }
+
+        try await user.sendEmailVerificationAsync()
     }
 
     func fetchUserSettings(userId: String) async throws -> LoginUserSettings {
@@ -95,12 +109,13 @@ final class FirebaseLoginService: LoginServicing {
 
 enum LoginServiceError: LocalizedError {
     case missingUserId
+    case missingCurrentUser
     case missingProfileImageURL
 
     var errorDescription: String? {
         switch self {
-        case .missingUserId:
-            return "Could not find the authenticated user ID."
+        case .missingUserId, .missingCurrentUser:
+            return "Could not find the authenticated user."
         case .missingProfileImageURL:
             return "Could not create a URL for the selected profile image."
         }

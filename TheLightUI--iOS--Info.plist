@@ -6,10 +6,18 @@
 	<string>TheLight uses Calendar to let you add customer appointment events when you choose.</string>
 	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
 	<string>TheLight uses Calendar to create customer appointment events when you choose.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>TheLight uses the camera to scan membership QR codes when you choose.</string>
 	<key>NSContactsUsageDescription</key>
 	<string>TheLight uses Contacts to let you add customer contact cards when you choose.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>TheLight uses Face ID to unlock your existing signed-in session when you choose biometric sign-in.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>TheLight uses your location to show maps and share your current location when you choose.</string>
+	<string>TheLight uses your location to show maps, get weather, and share your current location when you choose.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>TheLight saves generated QR codes to your photo library when you choose Save to Photos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>TheLight uses your photo library to let you select profile and chat images when you choose.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

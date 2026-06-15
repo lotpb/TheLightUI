@@ -16,6 +16,7 @@ struct MapButtonView: View {
     @Binding var directions: [String]
     @Binding var mapType: MKMapType
     @State private var showDirections = false
+    @State private var showLocationPermissionExplanation = false
     @State private var lastNon3DMapType: MKMapType = .standard
 
     private var speedText: String {
@@ -35,6 +36,14 @@ struct MapButtonView: View {
         .padding()
         .sheet(isPresented: $showDirections) {
             directionsSheet
+        }
+        .confirmationDialog(
+            "Use your current location to center the map and calculate nearby directions.",
+            isPresented: $showLocationPermissionExplanation,
+            titleVisibility: .visible
+        ) {
+            Button("Continue") { manager.requestLocation() }
+            Button("Cancel", role: .cancel) { }
         }
         .task { await viewModel.fetchCurrentUser() }
     }
@@ -122,7 +131,11 @@ struct MapButtonView: View {
     
     private var locationButton: some View {
         Button {
-            manager.requestLocation()
+            if manager.locationStatus == .notDetermined {
+                showLocationPermissionExplanation = true
+            } else {
+                manager.requestLocation()
+            }
         } label: {
             circularIcon("location.fill")
         }

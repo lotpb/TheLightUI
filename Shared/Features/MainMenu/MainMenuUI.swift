@@ -15,6 +15,8 @@ struct MainMenuUI: View {
     let onSignOut: () -> Void
     private let makeCustomerService: () -> CustomerServicing
     private let makeCustomerFormService: () -> CustomerFormServicing
+    private let makeWeatherManager: () -> WeatherManaging
+    private let makeWeatherLocationProvider: () -> WeatherLocationProviding
     private let appBadgeManager: AppBadgeManaging
     @State private var showingLogOut = false
     @State private var isShowingActionDialog = false
@@ -26,11 +28,15 @@ struct MainMenuUI: View {
         onSignOut: @escaping () -> Void,
         makeCustomerService: @escaping () -> CustomerServicing = { FirebaseCustomerService() },
         makeCustomerFormService: @escaping () -> CustomerFormServicing = { FirebaseCustomerFormService() },
+        makeWeatherManager: @escaping () -> WeatherManaging = { WeatherManager() },
+        makeWeatherLocationProvider: @escaping () -> WeatherLocationProviding = { LocationWeatherManager() },
         appBadgeManager: AppBadgeManaging = LiveAppBadgeManager()
     ) {
         self.onSignOut = onSignOut
         self.makeCustomerService = makeCustomerService
         self.makeCustomerFormService = makeCustomerFormService
+        self.makeWeatherManager = makeWeatherManager
+        self.makeWeatherLocationProvider = makeWeatherLocationProvider
         self.appBadgeManager = appBadgeManager
     }
 
@@ -42,6 +48,8 @@ struct MainMenuUI: View {
         MainMenuCoordinator(
             makeCustomerService: makeCustomerService,
             makeCustomerFormService: makeCustomerFormService,
+            makeWeatherManager: makeWeatherManager,
+            makeWeatherLocationProvider: makeWeatherLocationProvider,
             appBadgeManager: appBadgeManager,
             dismissSheet: { activeSheet = nil }
         )
@@ -79,7 +87,9 @@ struct MainMenuUI: View {
                 Text("What do you want to do?")
             }
             .confirmationDialog("Pick a menu item", isPresented: $isShowingActionDialog, titleVisibility: .visible) {
+                #if DEBUG
                 Button("About") { showModal(.about) }
+                #endif
                 Button("Email Support") { activeSheet = .email }
                 Button("Settings") { showModal(.settings) }
                 Button("Directions") { showModal(.directions) }
@@ -96,7 +106,9 @@ struct MainMenuUI: View {
 
     private var menuList: some View {
         List {
+            #if DEBUG
             IncomingSection(themeColor: themeColor)
+            #endif
             DataSection(themeColor: themeColor) { route in
                 path.append(route)
             }
@@ -181,6 +193,7 @@ private struct DataSection: View {
                 tint: themeColor
             ) { onSelect(.customers) }
 
+            #if DEBUG
             MenuRouteButton(
                 title: "Vendors",
                 subtitle: "Suppliers",
@@ -194,6 +207,16 @@ private struct DataSection: View {
                 systemImage: "person.text.rectangle",
                 tint: themeColor
             ) { onSelect(.employee) }
+            #endif
+
+            if #available(iOS 17.0, *) {
+                MenuRouteButton(
+                    title: "Expenses",
+                    subtitle: "Track spending",
+                    systemImage: "creditcard.fill",
+                    tint: themeColor
+                ) { onSelect(.expenses) }
+            }
         }
     }
 }
@@ -204,12 +227,14 @@ private struct OutgoingSection: View {
 
     var body: some View {
         Section(header: Text("Outgoing").foregroundColor(themeColor)) {
+            #if DEBUG
             MenuRouteButton(
                 title: "Chart",
                 subtitle: "Analytics",
                 systemImage: "chart.bar.fill",
                 tint: themeColor
             ) { onSelectRoute(.chart) }
+            #endif
             
             MenuRouteButton(
                 title: "Geotify",
@@ -231,6 +256,7 @@ private struct OutgoingSection: View {
                 tint: themeColor
             ) { onSelectRoute(.weather) }
 
+            #if DEBUG
             MenuRouteButton(
                 title: "Stacks",
                 subtitle: "Layout demos",
@@ -244,6 +270,7 @@ private struct OutgoingSection: View {
                 systemImage: "camera.circle.fill",
                 tint: themeColor
             ) { onSelectRoute(.instagram) }
+            #endif
         }
         .foregroundColor(.primary)
     }
@@ -297,6 +324,8 @@ struct MainMenuUI_Previews: PreviewProvider {
             onSignOut: { },
             makeCustomerService: { PreviewCustomerService() },
             makeCustomerFormService: { PreviewCustomerFormService() },
+            makeWeatherManager: { PreviewWeatherManager() },
+            makeWeatherLocationProvider: { PreviewWeatherLocationProvider() },
             appBadgeManager: PreviewAppBadgeManager()
         )
         .preferredColorScheme(.dark)
