@@ -53,8 +53,14 @@ struct ChatLogView: View {
                             .padding(.top, 120)
                     }
 
-                    ForEach(vm.chatMessages) { message in
-                        MessageView(message: message, currentUserId: vm.currentUserId)
+                    ForEach(vm.chatMessages.indices, id: \.self) { index in
+                        let message = vm.chatMessages[index]
+
+                        MessageView(
+                            message: message,
+                            currentUserId: vm.currentUserId,
+                            showsTimestamp: shouldShowTimestamp(at: index)
+                        )
                     }
 
                     Color.clear
@@ -81,6 +87,14 @@ struct ChatLogView: View {
     
     private var messageBarBottomPadding: CGFloat {
         isMessageFieldFocused ? 0 : Layout.messageBarBottomPadding
+    }
+
+    private func shouldShowTimestamp(at index: Int) -> Bool {
+        guard index > 0 else { return true }
+
+        let previousMessage = vm.chatMessages[index - 1]
+        let currentMessage = vm.chatMessages[index]
+        return !Calendar.current.isDate(previousMessage.timestamp, inSameDayAs: currentMessage.timestamp)
     }
 
     private func scrollToBottom(using scrollViewProxy: ScrollViewProxy, animated: Bool) {
@@ -257,6 +271,7 @@ private struct EmptyChatView: View {
 struct MessageView: View {
     let message: ChatMessage
     let currentUserId: String?
+    let showsTimestamp: Bool
 
     private var isCurrentUserMessage: Bool {
         message.fromId == currentUserId
@@ -277,10 +292,13 @@ struct MessageView: View {
                 if !isCurrentUserMessage { Spacer(minLength: 48) }
             }
 
-            Text(message.sentDateText)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 8)
+            if showsTimestamp {
+                Text(message.sentDateText)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.horizontal, 8)
+            }
         }
     }
 
