@@ -25,6 +25,7 @@ struct TheLightUIApp: App {
         WindowGroup {
             ZStack {
                 ContentView(dependencies: dependencies)
+                    .expenseModelContainer()
                     .opacity(showLaunch ? 0 : 1)
                     .animation(.easeInOut(duration: 0.35), value: showLaunch)
 

@@ -3,6 +3,7 @@
 //  TheLightUI
 //
 
+import CoreLocation
 import Foundation
 
 struct AppDependencies {
@@ -13,6 +14,9 @@ struct AppDependencies {
     let makeChatRepository: () -> ChatRepositoryProtocol
     let makeCustomerService: () -> CustomerServicing
     let makeCustomerFormService: () -> CustomerFormServicing
+    let makeWeatherManager: () -> WeatherManaging
+    let makeWeatherLocationProvider: () -> WeatherLocationProviding
+    let makeLocationCaptureManager: () -> LocationCaptureManaging
 
     static let live = AppDependencies(
         sessionService: FirebaseSessionService(),
@@ -21,7 +25,10 @@ struct AppDependencies {
         appBadgeManager: LiveAppBadgeManager(),
         makeChatRepository: { FirebaseChatRepository() },
         makeCustomerService: { FirebaseCustomerService() },
-        makeCustomerFormService: { FirebaseCustomerFormService() }
+        makeCustomerFormService: { FirebaseCustomerFormService() },
+        makeWeatherManager: { WeatherManager() },
+        makeWeatherLocationProvider: { LocationWeatherManager() },
+        makeLocationCaptureManager: { LocationCaptureManager() }
     )
 
     static let preview = AppDependencies(
@@ -31,7 +38,10 @@ struct AppDependencies {
         appBadgeManager: PreviewAppBadgeManager(),
         makeChatRepository: { PreviewChatRepository() },
         makeCustomerService: { PreviewCustomerService() },
-        makeCustomerFormService: { PreviewCustomerFormService() }
+        makeCustomerFormService: { PreviewCustomerFormService() },
+        makeWeatherManager: { PreviewWeatherManager() },
+        makeWeatherLocationProvider: { PreviewWeatherLocationProvider() },
+        makeLocationCaptureManager: { PreviewLocationCaptureManager() }
     )
 }
 
@@ -49,6 +59,10 @@ struct PreviewLoginService: LoginServicing {
     func createUser(email: String, password: String) async throws -> String {
         "preview-user"
     }
+
+    func sendPasswordReset(email: String) async throws { }
+
+    func sendEmailVerification() async throws { }
 
     func fetchUserSettings(userId: String) async throws -> LoginUserSettings {
         LoginUserSettings(
@@ -131,6 +145,30 @@ struct PreviewChatRepository: ChatRepositoryProtocol {
     func sendTextMessage(_ text: String, to chatUser: UserModel) async throws { }
 
     func sendImageMessage(_ imageData: Data, to chatUser: UserModel) async throws { }
+}
+
+struct PreviewWeatherManager: WeatherManaging {
+    func getCurrentWeather(latitude: Double, longitude: Double) async throws -> API.CurrentWeather.Response {
+        API.CurrentWeather.Response(
+            coord: .init(lon: longitude, lat: latitude),
+            weather: [.init(id: 800, main: "Clear", description: "clear sky", icon: "01d")],
+            main: .init(temp: 72, feels_like: 73, temp_min: 68, temp_max: 76, pressure: 1012, humidity: 48),
+            name: "Preview City",
+            wind: .init(speed: 7, deg: 180)
+        )
+    }
+}
+
+struct PreviewWeatherLocationProvider: WeatherLocationProviding {
+    func requestLocation() async throws -> CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: 25.7617, longitude: -80.1918)
+    }
+}
+
+struct PreviewLocationCaptureManager: LocationCaptureManaging {
+    func requestSingleLocation(completion: @escaping (CLLocationCoordinate2D?) -> Void) {
+        completion(CLLocationCoordinate2D(latitude: 25.7617, longitude: -80.1918))
+    }
 }
 
 private struct PreviewCustomerListener: CustomerListener {

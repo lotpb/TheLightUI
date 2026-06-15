@@ -41,6 +41,7 @@ enum MainMenuDataRoute: Hashable {
     case customers
     case vendors
     case employee
+    case expenses
     case chart
 }
 
@@ -48,6 +49,8 @@ enum MainMenuDataRoute: Hashable {
 struct MainMenuCoordinator {
     let makeCustomerService: () -> CustomerServicing
     let makeCustomerFormService: () -> CustomerFormServicing
+    let makeWeatherManager: () -> WeatherManaging
+    let makeWeatherLocationProvider: () -> WeatherLocationProviding
     let appBadgeManager: AppBadgeManaging
     let dismissSheet: () -> Void
 
@@ -93,6 +96,12 @@ struct MainMenuCoordinator {
             SpotifyUI()
         case .employee:
             GradientTextUI()
+        case .expenses:
+            if #available(iOS 17.0, *) {
+                ExpenseTrackerView()
+            } else {
+                Text("Expenses require iOS 17 or later.")
+            }
         case .chart:
             ChartView()
         }
@@ -106,7 +115,10 @@ struct MainMenuCoordinator {
         case .places:
             PlaceSearch(index: 1)
         case .weather:
-            WeatherUI()
+            WeatherUI(
+                apiManager: makeWeatherManager(),
+                locationManager: makeWeatherLocationProvider()
+            )
         case .stacks:
             StacksView()
         case .instagram:

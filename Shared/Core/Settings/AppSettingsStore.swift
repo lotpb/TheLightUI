@@ -11,7 +11,7 @@ enum SettingsUI {
     static let lastNameKey = "lastName"
     static let emailKey = "email"
     static let phoneKey = "phone"
-    static let passwordKey = "password"
+    static let legacyPasswordKey = "password"
     static let usernameKey = "username"
     static let websiteKey = "website"
 
@@ -45,7 +45,6 @@ final class AppSettingsStore: ObservableObject {
     @Published var phone: String { didSet { defaults.set(phone, forKey: SettingsUI.phoneKey) } }
     @Published var username: String { didSet { defaults.set(username, forKey: SettingsUI.usernameKey) } }
     @Published var website: String { didSet { defaults.set(website, forKey: SettingsUI.websiteKey) } }
-    @Published var password: String { didSet { passwordStore.savePassword(password, for: SettingsUI.passwordKey) } }
 
     @Published var companyName: String { didSet { defaults.set(companyName, forKey: SettingsUI.isCompanyNameKey) } }
     @Published var isSubscriber: Bool { didSet { defaults.set(isSubscriber, forKey: SettingsUI.isSubscribedKey) } }
@@ -104,12 +103,8 @@ final class AppSettingsStore: ObservableObject {
         emailMessage = defaults.string(forKey: SettingsUI.emailMessageKey) ?? ""
         version = defaults.string(forKey: SettingsUI.versionKey) ?? "1.0"
 
-        if let legacyPassword = defaults.string(forKey: SettingsUI.passwordKey), !legacyPassword.isEmpty {
-            passwordStore.savePassword(legacyPassword, for: SettingsUI.passwordKey)
-            defaults.removeObject(forKey: SettingsUI.passwordKey)
-        }
-
-        password = passwordStore.loadPassword(for: SettingsUI.passwordKey)
+        defaults.removeObject(forKey: SettingsUI.legacyPasswordKey)
+        passwordStore.deletePassword(for: SettingsUI.legacyPasswordKey)
     }
 }
 

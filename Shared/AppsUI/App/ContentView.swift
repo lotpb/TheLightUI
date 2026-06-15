@@ -32,6 +32,7 @@ struct ContentView: View {
             LoginView(
                 loginService: dependencies.makeLoginService(),
                 authenticationService: dependencies.makeAuthenticationService(),
+                locationCaptureManager: dependencies.makeLocationCaptureManager(),
                 didCompleteLoginProcess: session.handleLoginCompleted
             )
         }
@@ -51,6 +52,8 @@ struct ContentView: View {
                 onSignOut: session.signOut,
                 makeCustomerService: dependencies.makeCustomerService,
                 makeCustomerFormService: dependencies.makeCustomerFormService,
+                makeWeatherManager: dependencies.makeWeatherManager,
+                makeWeatherLocationProvider: dependencies.makeWeatherLocationProvider,
                 appBadgeManager: dependencies.appBadgeManager
             )
         case .chat:
@@ -81,6 +84,14 @@ private enum RootTab: CaseIterable, Identifiable {
     case furniture
     case web
     case twitter
+
+    static var visibleTabs: [RootTab] {
+        #if DEBUG
+        return allCases
+        #else
+        return [.home, .chat, .ToDo]
+        #endif
+    }
 
     var id: Self { self }
 
@@ -114,7 +125,7 @@ private struct TabBarView: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(RootTab.allCases) { tab in
+            ForEach(RootTab.visibleTabs) { tab in
                 TabBarItem(
                     tab: tab,
                     isSelected: selection == tab,

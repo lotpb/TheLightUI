@@ -43,6 +43,16 @@
 		AF3AC45D268FF5E400562D20 /* ReelsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF3AC45B268FF5E400562D20 /* ReelsView.swift */; };
 		AF48266B2FC72514005A8C42 /* PhoneNumber.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF48266A2FC72514005A8C42 /* PhoneNumber.swift */; };
 		AF48266D2FC72B35005A8C42 /* CustomCorners.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF48266C2FC72B35005A8C42 /* CustomCorners.swift */; };
+		AF488F7F2FE02FAF00E5F294 /* ExpenseModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF488F7E2FE02FAF00E5F294 /* ExpenseModels.swift */; };
+		AF488F802FE02FAF00E5F294 /* ExpenseModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF488F7E2FE02FAF00E5F294 /* ExpenseModels.swift */; };
+		AF488F822FE02FC100E5F294 /* ExpenseTrackerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF488F812FE02FC100E5F294 /* ExpenseTrackerViewModel.swift */; };
+		AF488F832FE02FC100E5F294 /* ExpenseTrackerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF488F812FE02FC100E5F294 /* ExpenseTrackerViewModel.swift */; };
+		AF488F852FE02FF400E5F294 /* ExpenseTrackerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF488F842FE02FF400E5F294 /* ExpenseTrackerView.swift */; };
+		AF488F862FE02FF400E5F294 /* ExpenseTrackerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF488F842FE02FF400E5F294 /* ExpenseTrackerView.swift */; };
+		AF488F882FE0300200E5F294 /* ExpenseModelContainerModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF488F872FE0300200E5F294 /* ExpenseModelContainerModifier.swift */; };
+		AF488F892FE0300200E5F294 /* ExpenseModelContainerModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF488F872FE0300200E5F294 /* ExpenseModelContainerModifier.swift */; };
+		AF488F8B2FE0358700E5F294 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AF488F8A2FE0358700E5F294 /* PrivacyInfo.xcprivacy */; };
+		AF488F8C2FE0358700E5F294 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AF488F8A2FE0358700E5F294 /* PrivacyInfo.xcprivacy */; };
 		AF4A670727565F40005D1D8B /* AuthenticationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4A670627565F40005D1D8B /* AuthenticationService.swift */; };
 		AF4A670827565F40005D1D8B /* AuthenticationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4A670627565F40005D1D8B /* AuthenticationService.swift */; };
 		AF4F5DC02FC742E40003B277 /* ChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4F5DBF2FC742E40003B277 /* ChatRepository.swift */; };
@@ -252,6 +262,11 @@
 		AF3AC45B268FF5E400562D20 /* ReelsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReelsView.swift; sourceTree = "<group>"; };
 		AF48266A2FC72514005A8C42 /* PhoneNumber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneNumber.swift; sourceTree = "<group>"; };
 		AF48266C2FC72B35005A8C42 /* CustomCorners.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCorners.swift; sourceTree = "<group>"; };
+		AF488F7E2FE02FAF00E5F294 /* ExpenseModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseModels.swift; sourceTree = "<group>"; };
+		AF488F812FE02FC100E5F294 /* ExpenseTrackerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseTrackerViewModel.swift; sourceTree = "<group>"; };
+		AF488F842FE02FF400E5F294 /* ExpenseTrackerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseTrackerView.swift; sourceTree = "<group>"; };
+		AF488F872FE0300200E5F294 /* ExpenseModelContainerModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseModelContainerModifier.swift; sourceTree = "<group>"; };
+		AF488F8A2FE0358700E5F294 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AF4A670627565F40005D1D8B /* AuthenticationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationService.swift; sourceTree = "<group>"; };
 		AF4F5DBF2FC742E40003B277 /* ChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRepository.swift; sourceTree = "<group>"; };
 		AF4F5DC22FC742F30003B277 /* MainMessagesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMessagesViewModel.swift; sourceTree = "<group>"; };
@@ -421,6 +436,17 @@
 			path = Instagram;
 			sourceTree = "<group>";
 		};
+		AF488F7D2FE02FA200E5F294 /* Expenses */ = {
+			isa = PBXGroup;
+			children = (
+				AF488F7E2FE02FAF00E5F294 /* ExpenseModels.swift */,
+				AF488F812FE02FC100E5F294 /* ExpenseTrackerViewModel.swift */,
+				AF488F842FE02FF400E5F294 /* ExpenseTrackerView.swift */,
+				AF488F872FE0300200E5F294 /* ExpenseModelContainerModifier.swift */,
+			);
+			path = Expenses;
+			sourceTree = "<group>";
+		};
 		AF4F5DCB2FC746870003B277 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -466,6 +492,7 @@
 				AFDF37BC2FCA04FB007A8C8F /* Weather */,
 				AF9CC6F1279B2C120087E9FC /* ToDo */,
 				AF4F5DDA2FC74EAB0003B277 /* Auth */,
+				AF488F7D2FE02FA200E5F294 /* Expenses */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -671,6 +698,7 @@
 				AF0E0D97267BB63C00E6CC7D /* GoogleService-Info.plist */,
 				AF92B859267812A100729208 /* Shared */,
 				AF92B862267812A300729208 /* Products */,
+				AF488F8A2FE0358700E5F294 /* PrivacyInfo.xcprivacy */,
 			);
 			sourceTree = "<group>";
 		};
@@ -945,6 +973,7 @@
 				AF697E892778D1EC00219026 /* weatherData.json in Resources */,
 				AF92B880267812A400729208 /* Assets.xcassets in Resources */,
 				AF0E0D98267BB63C00E6CC7D /* GoogleService-Info.plist in Resources */,
+				AF488F8B2FE0358700E5F294 /* PrivacyInfo.xcprivacy in Resources */,
 				AFF9FE06279E4536006DB401 /* Launch Screen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -955,6 +984,7 @@
 			files = (
 				AF92B881267812A400729208 /* Assets.xcassets in Resources */,
 				AF0E0D99267BB63C00E6CC7D /* GoogleService-Info.plist in Resources */,
+				AF488F8C2FE0358700E5F294 /* PrivacyInfo.xcprivacy in Resources */,
 				AFA953202FDF340C0003ADD1 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1000,6 +1030,7 @@
 				AF792F47269009250011D787 /* CustomVideoPlayer.swift in Sources */,
 				AF4F5DEC2FC751950003B277 /* CustomerFormService.swift in Sources */,
 				AF4F5E052FC75D860003B277 /* RouteMapView.swift in Sources */,
+				AF488F7F2FE02FAF00E5F294 /* ExpenseModels.swift in Sources */,
 				AF03D36C27886D720021493A /* ColorOptions.swift in Sources */,
 				AFDE91D52793364D00302CF2 /* LandMarkListView.swift in Sources */,
 				AF2B3D84278FA7DF007767F0 /* WebUI.swift in Sources */,
@@ -1012,6 +1043,7 @@
 				AF53738C2778C643001F40B6 /* LoadingView.swift in Sources */,
 				AF68CADD2687FFAC009DCEF9 /* CarouselBodyView.swift in Sources */,
 				AF77D64D2FC79827008D456A /* ProfileAvatarImage.swift in Sources */,
+				AF488F882FE0300200E5F294 /* ExpenseModelContainerModifier.swift in Sources */,
 				AF3AC45C268FF5E400562D20 /* ReelsView.swift in Sources */,
 				AF86C0642FDF1B3B00F450F9 /* CustomerListViewModel.swift in Sources */,
 				AF53737E2778BF36001F40B6 /* WeatherUI.swift in Sources */,
@@ -1033,6 +1065,7 @@
 				AF5373822778C060001F40B6 /* API.swift in Sources */,
 				AFA7D2BB27971D00001DAF7B /* StacksView.swift in Sources */,
 				AF0A2349274C33E700B18BBF /* CreateNewMessageView.swift in Sources */,
+				AF488F862FE02FF400E5F294 /* ExpenseTrackerView.swift in Sources */,
 				AF4F5DFD2FC75C350003B277 /* LeadDetailCommentsView.swift in Sources */,
 				AF92B8982678150400729208 /* GradientUI.swift in Sources */,
 				AF1B37AB27935EAB00374C0F /* NotificationManager.swift in Sources */,
@@ -1047,6 +1080,7 @@
 				AF262C0A2699C30E00728B53 /* HalfSheet.swift in Sources */,
 				AFDEAF9C2692A73500B99B15 /* MacbookPro.swift in Sources */,
 				AF54E4D727739EAD0062B1F4 /* HapticManager.swift in Sources */,
+				AF488F832FE02FC100E5F294 /* ExpenseTrackerViewModel.swift in Sources */,
 				AF108C0D2762681200084752 /* ChatMessage.swift in Sources */,
 				AF92B8B5267816A600729208 /* SideTabViewUI.swift in Sources */,
 				AFCE46EE2FC1EECF00B3B208 /* LaunchScreenView.swift in Sources */,
@@ -1125,6 +1159,7 @@
 				AFE4AE092FC8678B00F86B2E /* FirebaseAsyncExtensions.swift in Sources */,
 				AF92B90826781A5500729208 /* UserFormUI.swift in Sources */,
 				AF77D64F2FC7A3FA008D456A /* CustomerFormViewModel.swift in Sources */,
+				AF488F892FE0300200E5F294 /* ExpenseModelContainerModifier.swift in Sources */,
 				AF4F5DC02FC742E40003B277 /* ChatRepository.swift in Sources */,
 				AF4A670827565F40005D1D8B /* AuthenticationService.swift in Sources */,
 				AF745F1127513D4F00E9DB74 /* ChatLogView.swift in Sources */,
@@ -1144,6 +1179,7 @@
 				AF86C0692FDF1E3A00F450F9 /* MainMenuCoordinator.swift in Sources */,
 				AF4F5DFA2FC75C340003B277 /* LeadDetailFieldRow.swift in Sources */,
 				AF4F5DFF2FC75C3E0003B277 /* MessageComposeView.swift in Sources */,
+				AF488F822FE02FC100E5F294 /* ExpenseTrackerViewModel.swift in Sources */,
 				AF86C0632FDF1B3B00F450F9 /* CustomerListViewModel.swift in Sources */,
 				AF92B8992678150400729208 /* GradientUI.swift in Sources */,
 				AF4F5DEA2FC750B60003B277 /* CustomerData.swift in Sources */,
@@ -1151,6 +1187,7 @@
 				AF92B89F2678154F00729208 /* BottomActionSheetUI.swift in Sources */,
 				AF92B8B6267816A600729208 /* SideTabViewUI.swift in Sources */,
 				AFC0BAA62FCC56A100A64782 /* ContactAddView.swift in Sources */,
+				AF488F802FE02FAF00E5F294 /* ExpenseModels.swift in Sources */,
 				AF92B87D267812A400729208 /* TheLightUIApp.swift in Sources */,
 				AF3AC45A268FF39500562D20 /* InstagramHome.swift in Sources */,
 				AF92B8B2267816A600729208 /* SpotifyUI.swift in Sources */,
@@ -1174,6 +1211,7 @@
 				AF792F452690047C0011D787 /* Reel.swift in Sources */,
 				AF4F5DC32FC742F30003B277 /* MainMessagesViewModel.swift in Sources */,
 				AF4F5DEF2FC758540003B277 /* CustomerFirestoreDTO.swift in Sources */,
+				AF488F852FE02FF400E5F294 /* ExpenseTrackerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

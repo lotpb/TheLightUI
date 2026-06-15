@@ -1,7 +1,11 @@
 import Foundation
 import CoreLocation
 
-final class LocationCaptureManager: NSObject {
+protocol LocationCaptureManaging {
+    func requestSingleLocation(completion: @escaping (CLLocationCoordinate2D?) -> Void)
+}
+
+final class LocationCaptureManager: NSObject, LocationCaptureManaging {
     private let locationManager = CLLocationManager()
     private var completion: ((CLLocationCoordinate2D?) -> Void)?
     private var timeoutTimer: Timer?

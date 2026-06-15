@@ -62,6 +62,27 @@ final class LoginViewModel: ObservableObject {
         }
     }
 
+    func sendPasswordReset() {
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedEmail.isEmpty else {
+            loginStatusMessage = "Enter your email address before resetting your password."
+            return
+        }
+        guard !isProcessing else { return }
+
+        Task {
+            isProcessing = true
+            defer { isProcessing = false }
+
+            do {
+                try await loginService.sendPasswordReset(email: trimmedEmail)
+                loginStatusMessage = "Password reset email sent to \(trimmedEmail)."
+            } catch {
+                loginStatusMessage = "Failed to send password reset: \(error.localizedDescription)"
+            }
+        }
+    }
+
     func formatPhoneNumber(_ value: String) {
         let digits = value.filter { $0.isNumber }.prefix(10)
         let formattedPhoneNumber: String
@@ -90,14 +111,14 @@ final class LoginViewModel: ObservableObject {
         firstName: String,
         lastName: String,
         email: String,
-        phoneNumber: String,
-        password: String
+        phoneNumber: String
     ) {
         defaults.set(firstName, forKey: SettingsUI.firstNameKey)
         defaults.set(lastName, forKey: SettingsUI.lastNameKey)
         defaults.set(email, forKey: SettingsUI.emailKey)
         defaults.set(phoneNumber, forKey: SettingsUI.phoneKey)
-        passwordStore.savePassword(password, for: SettingsUI.passwordKey)
+        defaults.removeObject(forKey: SettingsUI.legacyPasswordKey)
+        passwordStore.deletePassword(for: SettingsUI.legacyPasswordKey)
     }
 
     func loginUsingTouchId() {
@@ -127,8 +148,7 @@ final class LoginViewModel: ObservableObject {
                 firstName: settings.firstName,
                 lastName: settings.lastName,
                 email: settings.email.isEmpty ? email : settings.email,
-                phoneNumber: settings.phoneNumber,
-                password: password
+                phoneNumber: settings.phoneNumber
             )
             loginStatusMessage = "Successfully logged in user: \(uid)"
             didCompleteLoginProcess()
@@ -162,9 +182,10 @@ final class LoginViewModel: ObservableObject {
                 firstName: firstName,
                 lastName: lastName,
                 email: email,
-                phoneNumber: phoneNumber,
-                password: password
+                phoneNumber: phoneNumber
             )
+            try await loginService.sendEmailVerification()
+            loginStatusMessage = "Successfully created account. Check your email to verify your address."
             didCompleteLoginProcess()
         } catch {
             loginStatusMessage = "Failed to create account: \(error.localizedDescription)"

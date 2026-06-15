@@ -24,11 +24,10 @@ final class LocationManager: NSObject, ObservableObject {
     override init() {
         super.init()
         configureLocationManager()
-        requestLocateInfo()
     }
 
     func requestLocateInfo() {
-        handleAuthorizationStatus(manager.authorizationStatus)
+        requestLocation()
     }
 
     func updateMapType() {
@@ -82,7 +81,16 @@ final class LocationManager: NSObject, ObservableObject {
     }
 
     func startUpdating() {
-        manager.startUpdatingLocation()
+        switch manager.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            manager.startUpdatingLocation()
+        case .notDetermined:
+            updateAuthorizationStatus(.notDetermined)
+        case .denied, .restricted:
+            stopUpdating()
+        @unknown default:
+            stopUpdating()
+        }
     }
 
     func stopUpdating() {

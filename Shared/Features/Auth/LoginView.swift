@@ -13,8 +13,9 @@ import CoreLocation
 struct LoginView: View {
     @StateObject private var viewModel: LoginViewModel
     @State private var selectedPhotoItem: PhotosPickerItem?
+    @State private var isShowingLocationCaptureExplanation = false
     @FocusState private var focusedField: LoginField?
-    private let locationCaptureManager = LocationCaptureManager()
+    private let locationCaptureManager: LocationCaptureManaging
 
     fileprivate enum Layout {
         static let maxContentWidth: CGFloat = 520
@@ -30,8 +31,10 @@ struct LoginView: View {
     init(
         loginService: LoginServicing = FirebaseLoginService(),
         authenticationService: AuthenticationService = AuthenticationService(),
+        locationCaptureManager: LocationCaptureManaging = LocationCaptureManager(),
         didCompleteLoginProcess: @escaping () -> Void
     ) {
+        self.locationCaptureManager = locationCaptureManager
         _viewModel = StateObject(
             wrappedValue: LoginViewModel(
                 loginService: loginService,
@@ -55,14 +58,16 @@ struct LoginView: View {
             }
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
             .onChange(of: viewModel.loginStatusMessage) { newValue in
-                // Capture location after any successful login or account creation
                 guard newValue.localizedCaseInsensitiveContains("success") else { return }
-                locationCaptureManager.requestSingleLocation { coordinate in
-                    guard let coordinate else { return }
-                    let defaults = UserDefaults.standard
-                    defaults.set(String(coordinate.latitude), forKey: SettingsUI.latitudeKey)
-                    defaults.set(String(coordinate.longitude), forKey: SettingsUI.longtitudeKey)
-                }
+                isShowingLocationCaptureExplanation = true
+            }
+            .confirmationDialog(
+                "Save your current location to prefill map coordinates in settings.",
+                isPresented: $isShowingLocationCaptureExplanation,
+                titleVisibility: .visible
+            ) {
+                Button("Continue") { captureLoginLocation() }
+                Button("Not Now", role: .cancel) { }
             }
             .navigationTitle(viewModel.navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
@@ -255,6 +260,17 @@ struct LoginView: View {
             .buttonBorderShape(.roundedRectangle(radius: Layout.cornerRadius))
             .disabled(viewModel.isProcessing)
 
+            if viewModel.isLoginMode {
+                Button(action: viewModel.sendPasswordReset) {
+                    Label("Reset Password", systemImage: "envelope.badge")
+                        .font(.system(size: 16, weight: .semibold))
+                        .frame(maxWidth: .infinity, minHeight: Layout.buttonHeight)
+                }
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.roundedRectangle(radius: Layout.cornerRadius))
+                .disabled(viewModel.isProcessing)
+            }
+
             Button(action: viewModel.loginUsingTouchId) {
                 Label("Sign in with Face ID", systemImage: "faceid")
                     .font(.system(size: 16, weight: .semibold))
@@ -313,6 +329,15 @@ struct LoginView: View {
             viewModel.loginStatusMessage = ""
         } catch {
             viewModel.loginStatusMessage = "Could not load the selected photo: \(error.localizedDescription)"
+        }
+    }
+
+    private func captureLoginLocation() {
+        locationCaptureManager.requestSingleLocation { coordinate in
+            guard let coordinate else { return }
+            let defaults = UserDefaults.standard
+            defaults.set(String(coordinate.latitude), forKey: SettingsUI.latitudeKey)
+            defaults.set(String(coordinate.longitude), forKey: SettingsUI.longtitudeKey)
         }
     }
 }

@@ -63,7 +63,6 @@ struct SettingView: View {
             settingsTextField("Last Name", text: $settings.lastName)
             settingsTextField("Email", text: $settings.email, keyboardType: .emailAddress, textInputAutocapitalization: .never)
             settingsTextField("Phone", text: $settings.phone, keyboardType: .phonePad)
-            passwordField
             settingsTextField("Username", text: $settings.username, textInputAutocapitalization: .never)
             //settingsTextField("Website", text: $settings.website, keyboardType: .URL, textInputAutocapitalization: .never)
         }
@@ -136,15 +135,6 @@ struct SettingView: View {
         DisclosureGroup("Show Terms") {
             Text("By using our Services (website, app, or software), you agree to these Terms. If you don’t agree, stop using them.")
                 .foregroundColor(.secondary)
-        }
-    }
-
-    private var passwordField: some View {
-        HStack {
-            Text("Password")
-            Spacer()
-            SecureField("Password", text: $settings.password)
-                .settingsFieldStyle()
         }
     }
 
