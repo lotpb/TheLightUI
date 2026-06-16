@@ -25,6 +25,7 @@ final class CustomerFormViewModel: ObservableObject {
     @Published private(set) var shouldFocusFirstName = false
 
     private let formService: CustomerFormServicing
+    private var saveTask: Task<Void, Never>?
 
     var isButtonDisabled: Bool {
         detail.first.isEmpty
@@ -48,6 +49,10 @@ final class CustomerFormViewModel: ObservableObject {
         self.pickCompleteDate = completeDate
         self.mode = mode
         self.formService = formService
+    }
+
+    deinit {
+        saveTask?.cancel()
     }
 
     func loadFormState() {
@@ -130,13 +135,18 @@ final class CustomerFormViewModel: ObservableObject {
 
         let payload = makePayload(userId: uid)
 
-        Task {
+        saveTask?.cancel()
+        saveTask = Task { [weak self] in
+            guard let self else { return }
             do {
                 let documentID = try await formService.addCustomer(payload)
+                guard !Task.isCancelled else { return }
                 resetTextFields()
                 showAlertUpdate = true
                 errorMessage = ""
                 print("Document added with ID: \(documentID)")
+            } catch is CancellationError {
+                return
             } catch {
                 errorMessage = error.localizedDescription
                 print("Error adding document: \(error)")
@@ -152,12 +162,17 @@ final class CustomerFormViewModel: ObservableObject {
 
         let payload = makePayload()
 
-        Task {
+        saveTask?.cancel()
+        saveTask = Task { [weak self] in
+            guard let self else { return }
             do {
                 try await formService.updateCustomer(id: detail.id, payload: payload)
+                guard !Task.isCancelled else { return }
                 resetTextFields()
                 showAlertUpdate = true
                 errorMessage = ""
+            } catch is CancellationError {
+                return
             } catch {
                 errorMessage = error.localizedDescription
                 print(error.localizedDescription)

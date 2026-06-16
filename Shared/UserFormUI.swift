@@ -12,12 +12,11 @@ import SDWebImageSwiftUI
 struct UserFormUI: View {
     @StateObject private var viewModel = MainMessagesViewModel()
 
-    // Read persisted coordinates from SettingsView/AppSettingsStore
-    @AppStorage(SettingsUI.latitudeKey) private var storedLatitude: String = ""
-    @AppStorage(SettingsUI.longtitudeKey) private var storedLongitude: String = ""
-    @AppStorage(SettingsUI.firstNameKey) private var storedFirstName: String = ""
-    @AppStorage(SettingsUI.lastNameKey) private var storedLastName: String = ""
-    @AppStorage(SettingsUI.phoneKey) private var storedPhone: String = ""
+    @State private var storedLatitude = ""
+    @State private var storedLongitude = ""
+    @State private var storedFirstName = ""
+    @State private var storedLastName = ""
+    @State private var storedPhone = ""
 
     // Parse stored latitude/longitude with sensible defaults.
     private var latitudeValue: Double {
@@ -52,6 +51,14 @@ struct UserFormUI: View {
 
     private let profileDescription = "I am a happy user of TheLight."
 
+    private func loadSecureSettings() {
+        storedLatitude = SecureSettingsStore.loadString(forKey: SettingsUI.latitudeKey)
+        storedLongitude = SecureSettingsStore.loadString(forKey: SettingsUI.longtitudeKey)
+        storedFirstName = SecureSettingsStore.loadString(forKey: SettingsUI.firstNameKey)
+        storedLastName = SecureSettingsStore.loadString(forKey: SettingsUI.lastNameKey)
+        storedPhone = SecureSettingsStore.loadString(forKey: SettingsUI.phoneKey)
+    }
+
     private func updateRegionFromSettings() {
         let center = CLLocationCoordinate2D(latitude: latitudeValue, longitude: longitudeValue)
         coordinateRegion.center = center
@@ -63,7 +70,10 @@ struct UserFormUI: View {
             profileImage
             profileDetails
         }
-        .onAppear { updateRegionFromSettings() }
+        .onAppear {
+            loadSecureSettings()
+            updateRegionFromSettings()
+        }
         .task { await viewModel.fetchCurrentUser() }
         .onChange(of: storedLatitude) { _ in updateRegionFromSettings() }
         .onChange(of: storedLongitude) { _ in updateRegionFromSettings() }

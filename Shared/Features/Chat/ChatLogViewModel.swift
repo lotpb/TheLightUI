@@ -17,6 +17,8 @@ final class ChatLogViewModel: ObservableObject {
     private let repository: ChatRepositoryProtocol
     private var chatListener: ChatListener?
     private var listenerGeneration = UUID()
+    private var sendTask: Task<Void, Never>?
+    private var uploadTask: Task<Void, Never>?
 
     var currentUserId: String? {
         repository.currentUserId
@@ -28,6 +30,8 @@ final class ChatLogViewModel: ObservableObject {
     }
 
     deinit {
+        sendTask?.cancel()
+        uploadTask?.cancel()
         chatListener?.remove()
     }
 
@@ -67,12 +71,16 @@ final class ChatLogViewModel: ObservableObject {
     func handleSendImage(_ imageData: Data) {
         guard let chatUser else { return }
 
-        Task {
+        uploadTask?.cancel()
+        uploadTask = Task { [weak self] in
+            guard let self else { return }
             isUploadingImage = true
             defer { isUploadingImage = false }
 
             do {
                 try await repository.sendImageMessage(imageData, to: chatUser)
+            } catch is CancellationError {
+                return
             } catch {
                 errorMessage = "Failed to upload image: \(error.localizedDescription)"
             }
@@ -87,9 +95,13 @@ final class ChatLogViewModel: ObservableObject {
 
         chatText = ""
 
-        Task {
+        sendTask?.cancel()
+        sendTask = Task { [weak self] in
+            guard let self else { return }
             do {
                 try await repository.sendTextMessage(messageText, to: chatUser)
+            } catch is CancellationError {
+                return
             } catch {
                 if chatText.isEmpty {
                     chatText = draftText

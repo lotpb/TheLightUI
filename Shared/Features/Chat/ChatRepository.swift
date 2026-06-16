@@ -145,7 +145,13 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
             throw ChatRepositoryError.missingCurrentUser
         }
 
-        try await sendMessage(text: text, recentMessageText: text, fromId: fromId, to: chatUser)
+        try await sendMessage(
+            text: text,
+            recentMessageText: text,
+            messageType: .text,
+            fromId: fromId,
+            to: chatUser
+        )
     }
 
     func sendImageMessage(_ imageData: Data, to chatUser: UserModel) async throws {
@@ -166,6 +172,7 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
         try await sendMessage(
             text: imageURL,
             recentMessageText: "Photo",
+            messageType: .image,
             fromId: fromId,
             to: chatUser
         )
@@ -174,6 +181,7 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
     private func sendMessage(
         text: String,
         recentMessageText: String,
+        messageType: ChatMessageType,
         fromId: String,
         to chatUser: UserModel
     ) async throws {
@@ -183,6 +191,7 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
             FirebaseConstants.fromId: fromId,
             FirebaseConstants.toId: chatUser.uid,
             FirebaseConstants.text: text,
+            FirebaseConstants.messageType: messageType.rawValue,
             FirebaseConstants.timestamp: timestamp
         ]
 

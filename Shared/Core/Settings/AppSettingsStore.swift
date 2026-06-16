@@ -38,11 +38,47 @@ enum SettingsUI {
     static let versionKey = "version"
 }
 
+enum SecureSettingsStore {
+    static func loadString(
+        forKey key: String,
+        defaultValue: String = "",
+        defaults: UserDefaults = .standard,
+        passwordStore: PasswordStoring = KeychainPasswordStore()
+    ) -> String {
+        if let defaultsValue = defaults.string(forKey: key) {
+            saveString(defaultsValue, forKey: key, defaults: defaults, passwordStore: passwordStore)
+            return defaultsValue
+        }
+
+        let keychainValue = passwordStore.loadPassword(for: key)
+        return keychainValue.isEmpty ? defaultValue : keychainValue
+    }
+
+    static func saveString(
+        _ value: String,
+        forKey key: String,
+        defaults: UserDefaults = .standard,
+        passwordStore: PasswordStoring = KeychainPasswordStore()
+    ) {
+        defaults.removeObject(forKey: key)
+        passwordStore.savePassword(value, for: key)
+    }
+
+    static func removeString(
+        forKey key: String,
+        defaults: UserDefaults = .standard,
+        passwordStore: PasswordStoring = KeychainPasswordStore()
+    ) {
+        defaults.removeObject(forKey: key)
+        passwordStore.deletePassword(for: key)
+    }
+}
+
 final class AppSettingsStore: ObservableObject {
-    @Published var firstName: String { didSet { defaults.set(firstName, forKey: SettingsUI.firstNameKey) } }
-    @Published var lastName: String { didSet { defaults.set(lastName, forKey: SettingsUI.lastNameKey) } }
-    @Published var email: String { didSet { defaults.set(email, forKey: SettingsUI.emailKey) } }
-    @Published var phone: String { didSet { defaults.set(phone, forKey: SettingsUI.phoneKey) } }
+    @Published var firstName: String { didSet { saveSecureString(firstName, forKey: SettingsUI.firstNameKey) } }
+    @Published var lastName: String { didSet { saveSecureString(lastName, forKey: SettingsUI.lastNameKey) } }
+    @Published var email: String { didSet { saveSecureString(email, forKey: SettingsUI.emailKey) } }
+    @Published var phone: String { didSet { saveSecureString(phone, forKey: SettingsUI.phoneKey) } }
     @Published var username: String { didSet { defaults.set(username, forKey: SettingsUI.usernameKey) } }
     @Published var website: String { didSet { defaults.set(website, forKey: SettingsUI.websiteKey) } }
 
@@ -57,8 +93,8 @@ final class AppSettingsStore: ObservableObject {
     @Published var isSpeak: Bool { didSet { defaults.set(isSpeak, forKey: SettingsUI.isSpeakKey) } }
     @Published var isMusic: Bool { didSet { defaults.set(isMusic, forKey: SettingsUI.isMusicKey) } }
 
-    @Published var latitude: String { didSet { defaults.set(latitude, forKey: SettingsUI.latitudeKey) } }
-    @Published var longitude: String { didSet { defaults.set(longitude, forKey: SettingsUI.longtitudeKey) } }
+    @Published var latitude: String { didSet { saveSecureString(latitude, forKey: SettingsUI.latitudeKey) } }
+    @Published var longitude: String { didSet { saveSecureString(longitude, forKey: SettingsUI.longtitudeKey) } }
     @Published var event: String { didSet { defaults.set(event, forKey: SettingsUI.eventKey) } }
     @Published var duration: String { didSet { defaults.set(duration, forKey: SettingsUI.durationKey) } }
     @Published var areaCode: String { didSet { defaults.set(areaCode, forKey: SettingsUI.areacodeKey) } }
@@ -76,10 +112,10 @@ final class AppSettingsStore: ObservableObject {
         self.defaults = defaults
         self.passwordStore = passwordStore
 
-        firstName = defaults.string(forKey: SettingsUI.firstNameKey) ?? ""
-        lastName = defaults.string(forKey: SettingsUI.lastNameKey) ?? ""
-        email = defaults.string(forKey: SettingsUI.emailKey) ?? ""
-        phone = defaults.string(forKey: SettingsUI.phoneKey) ?? ""
+        firstName = Self.loadSecureString(forKey: SettingsUI.firstNameKey, defaults: defaults, passwordStore: passwordStore)
+        lastName = Self.loadSecureString(forKey: SettingsUI.lastNameKey, defaults: defaults, passwordStore: passwordStore)
+        email = Self.loadSecureString(forKey: SettingsUI.emailKey, defaults: defaults, passwordStore: passwordStore)
+        phone = Self.loadSecureString(forKey: SettingsUI.phoneKey, defaults: defaults, passwordStore: passwordStore)
         username = defaults.string(forKey: SettingsUI.usernameKey) ?? ""
         website = defaults.string(forKey: SettingsUI.websiteKey) ?? ""
 
@@ -94,8 +130,13 @@ final class AppSettingsStore: ObservableObject {
         isSpeak = defaults.bool(forKey: SettingsUI.isSpeakKey)
         isMusic = defaults.bool(forKey: SettingsUI.isMusicKey)
 
-        latitude = defaults.string(forKey: SettingsUI.latitudeKey) ?? ""
-        longitude = defaults.string(forKey: SettingsUI.longtitudeKey) ?? "-80.124528"
+        latitude = Self.loadSecureString(forKey: SettingsUI.latitudeKey, defaults: defaults, passwordStore: passwordStore)
+        longitude = Self.loadSecureString(
+            forKey: SettingsUI.longtitudeKey,
+            defaultValue: "-80.124528",
+            defaults: defaults,
+            passwordStore: passwordStore
+        )
         event = defaults.string(forKey: SettingsUI.eventKey) ?? ""
         duration = defaults.string(forKey: SettingsUI.durationKey) ?? ""
         areaCode = defaults.string(forKey: SettingsUI.areacodeKey) ?? ""
@@ -103,8 +144,34 @@ final class AppSettingsStore: ObservableObject {
         emailMessage = defaults.string(forKey: SettingsUI.emailMessageKey) ?? ""
         version = defaults.string(forKey: SettingsUI.versionKey) ?? "1.0"
 
-        defaults.removeObject(forKey: SettingsUI.legacyPasswordKey)
-        passwordStore.deletePassword(for: SettingsUI.legacyPasswordKey)
+        SecureSettingsStore.removeString(
+            forKey: SettingsUI.legacyPasswordKey,
+            defaults: defaults,
+            passwordStore: passwordStore
+        )
+    }
+
+    private static func loadSecureString(
+        forKey key: String,
+        defaultValue: String = "",
+        defaults: UserDefaults,
+        passwordStore: PasswordStoring
+    ) -> String {
+        SecureSettingsStore.loadString(
+            forKey: key,
+            defaultValue: defaultValue,
+            defaults: defaults,
+            passwordStore: passwordStore
+        )
+    }
+
+    private func saveSecureString(_ value: String, forKey key: String) {
+        SecureSettingsStore.saveString(
+            value,
+            forKey: key,
+            defaults: defaults,
+            passwordStore: passwordStore
+        )
     }
 }
 
