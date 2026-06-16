@@ -15,6 +15,47 @@ import SwiftUI
 import MessageUI
 #endif
 
+// Layout constants for spacing and corner radius
+private enum LeadDetailLayout {
+    static let containerSpacing: CGFloat = 16
+    static let rowHorizontalPadding: CGFloat = 16
+    static let rowVerticalPadding: CGFloat = 12
+    static let containerCornerRadius: CGFloat = 14
+    static let maxWidthForIpad: CGFloat = 700
+}
+
+// A reusable rounded list container with automatic bottom dividers between rows.
+private struct RoundedContainerList<RowData, RowContent: View>: View {
+    let rows: [RowData]
+    let rowContent: (RowData) -> RowContent
+
+    init(_ rows: [RowData], @ViewBuilder rowContent: @escaping (RowData) -> RowContent) {
+        self.rows = rows
+        self.rowContent = rowContent
+    }
+
+    var body: some View {
+        LazyVStack(spacing: 0) {
+            ForEach(Array(rows.enumerated()), id: \.offset) { index, data in
+                rowContent(data)
+                    .padding(.horizontal, LeadDetailLayout.rowHorizontalPadding)
+                    .padding(.vertical, LeadDetailLayout.rowVerticalPadding)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .overlay(alignment: .bottom) {
+                        if index < rows.count - 1 {
+                            Divider().padding(.leading, LeadDetailLayout.rowHorizontalPadding)
+                        }
+                    }
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: LeadDetailLayout.containerCornerRadius, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: LeadDetailLayout.containerCornerRadius, style: .continuous)
+                .strokeBorder(Color(.separator).opacity(0.2))
+        )
+    }
+}
+
 // LeadDetailUI
 // Displays a customer's detail profile with a header, a list of fields, comments, and an action toolbar.
 // Coordinates system sheets (edit form, email, message, add contact, add calendar event)
@@ -32,8 +73,6 @@ struct LeadDetailUI: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
 
-    // Constrain max width for a centered, readable layout on iPad.
-    private let maxWidthForIpad: CGFloat = 700
     // Service used to load/save customer forms (DI for testability).
     private let formService: CustomerFormServicing
     // Abstraction that provides current location for sharing.
@@ -86,7 +125,7 @@ struct LeadDetailUI: View {
 
     // Default SMS body, personalized if a first name is available.
     private var defaultMessageBody: String {
-        let firstName = detail.first.trimmingCharacters(in: .whitespacesAndNewlines)
+        let firstName = trimmed(detail.first)
         return firstName.isEmpty
             ? "Hi, following up on your inquiry."
             : "Hi \(firstName), following up on your inquiry."
@@ -100,7 +139,7 @@ struct LeadDetailUI: View {
 
             // Scrollable content with header, fields, and comments.
             ScrollView(.vertical, showsIndicators: true) {
-                VStack(spacing: 16) {
+                VStack(spacing: LeadDetailLayout.containerSpacing) {
                     // Photo/name header with fullscreen photo support.
                     LeadDetailHeaderView(detail: $detail, showFullscreen: $coordinator.showFullscreen)
                         .padding(.horizontal)
@@ -119,50 +158,26 @@ struct LeadDetailUI: View {
         .navigationTitle("Profile")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbarContent }
-        .sheet(item: $coordinator.activeSheet, content: sheetContent)
-        // Present different system sheets based on coordinator state.
-        .alert("Location Unavailable", isPresented: locationAlertIsPresented) {
-            // Alert surfaced when location can't be obtained for sharing.
-            Button("OK", role: .cancel) { coordinator.locationAlertMessage = nil }
-        } message: {
-            Text(coordinator.locationAlertMessage ?? "")
-        }
+        .applySheets(item: $coordinator.activeSheet, content: sheetContent)
+        .applyLocationAlert(using: locationAlertIsPresented, message: coordinator.locationAlertMessage ?? "", onDismiss: { coordinator.locationAlertMessage = nil })
         // Apply theme color to foreground and accent (tint).
         .foregroundColor(themeColor)
         .tint(themeColor)
         .background(Color(.systemGroupedBackground))
         // Keep content comfortably narrow on large screens.
-        .frame(maxWidth: maxWidthForIpad)
+        .frame(maxWidth: LeadDetailLayout.maxWidthForIpad)
     }
 
     // Reusable list of labeled customer fields with separators and rounded container.
     private var detailFieldList: some View {
         let fields = detailFields
 
-        return LazyVStack(spacing: 0) {
-            // Enumerate with indices so we can draw dividers between rows.
-            ForEach(Array(fields.enumerated()), id: \.offset) { index, customer in
-                LeadDetailFieldRow(formData: customer)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(Color(.secondarySystemGroupedBackground))
-                    .overlay(alignment: .bottom) {
-                        if index < fields.count - 1 {
-                            Divider().padding(.leading, 16)
-                        }
-                    }
-            }
+        return RoundedContainerList(fields) { customer in
+            LeadDetailFieldRow(formData: customer)
         }
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(Color(.separator).opacity(0.2))
-        )
         .padding(.horizontal)
         .onAppear(perform: syncActiveColor)
-        // Sync the isActive flag to AppStorage so other screens can react.
         .onChange(of: detail.isActive) { _ in
-            // Keep AppStorage in sync when the record's active status changes.
             syncActiveColor()
         }
     }
@@ -248,7 +263,8 @@ struct LeadDetailUI: View {
             #if canImport(MessageUI)
             if MFMessageComposeViewController.canSendText() {
                 let recipients = parsedRecipients(from: detail.phone)
-                MessageComposeView(recipients: recipients.isEmpty ? nil : recipients, body: coordinator.messageBodyOverride ?? defaultMessageBody) { _ in
+                let body = coordinator.messageBodyOverride ?? defaultMessageBody
+                MessageComposeView(recipients: recipients.isEmpty ? nil : recipients, body: body) { _ in
                     coordinator.dismissSheet()
                 }
             } else {
@@ -298,6 +314,7 @@ struct LeadDetailUI: View {
             Text(text)
                 .font(.headline)
             Button("Close") { coordinator.dismissSheet() }
+                .accessibilityLabel("Close")
         }
         .padding()
     }
@@ -308,20 +325,26 @@ struct LeadDetailUI: View {
         return values[index]
     }
 
+    // MARK: - String helpers
+    private func trimmed(_ value: String) -> String { value.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private func nonEmpty(_ parts: [String], separator: String = ", ") -> String {
+        parts.map { trimmed($0) }.filter { !$0.isEmpty }.joined(separator: separator)
+    }
+
     // Build a CNMutableContact from the current customer fields.
     private func makeContact() -> CNMutableContact {
         let contact = CNMutableContact()
-        contact.givenName = detail.first.trimmingCharacters(in: .whitespacesAndNewlines)
-        contact.familyName = detail.lastname.trimmingCharacters(in: .whitespacesAndNewlines)
+        contact.givenName = trimmed(detail.first)
+        contact.familyName = trimmed(detail.lastname)
 
         // Phone number (if provided).
-        let phone = detail.phone.trimmingCharacters(in: .whitespacesAndNewlines)
+        let phone = trimmed(detail.phone)
         if !phone.isEmpty {
             contact.phoneNumbers = [CNLabeledValue(label: CNLabelPhoneNumberMobile, value: CNPhoneNumber(stringValue: phone))]
         }
 
         // Email address (if provided).
-        let email = detail.email.trimmingCharacters(in: .whitespacesAndNewlines)
+        let email = trimmed(detail.email)
         if !email.isEmpty {
             contact.emailAddresses = [CNLabeledValue(label: CNLabelHome, value: email as NSString)]
         }
@@ -329,15 +352,15 @@ struct LeadDetailUI: View {
         // Postal address (if any address fields are present).
         if !fullAddress.isEmpty {
             let postalAddress = CNMutablePostalAddress()
-            postalAddress.street = detail.street.trimmingCharacters(in: .whitespacesAndNewlines)
-            postalAddress.city = detail.city.trimmingCharacters(in: .whitespacesAndNewlines)
-            postalAddress.state = detail.state.trimmingCharacters(in: .whitespacesAndNewlines)
-            postalAddress.postalCode = detail.zip.trimmingCharacters(in: .whitespacesAndNewlines)
+            postalAddress.street = trimmed(detail.street)
+            postalAddress.city = trimmed(detail.city)
+            postalAddress.state = trimmed(detail.state)
+            postalAddress.postalCode = trimmed(detail.zip)
             contact.postalAddresses = [CNLabeledValue(label: CNLabelHome, value: postalAddress)]
         }
 
         // Related contact: spouse (if provided).
-        let spouse = detail.spouse.trimmingCharacters(in: .whitespacesAndNewlines)
+        let spouse = trimmed(detail.spouse)
         if !spouse.isEmpty {
             contact.contactRelations = [CNLabeledValue(label: CNLabelContactRelationSpouse, value: CNContactRelation(name: spouse))]
         }
@@ -359,28 +382,22 @@ struct LeadDetailUI: View {
 
     // Title for the calendar event; uses AppStorage override or falls back to customer name.
     private var calendarEventSummary: String {
-        let configuredTitle = calendarEventTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        let configuredTitle = trimmed(calendarEventTitle)
         if !configuredTitle.isEmpty { return configuredTitle }
 
-        let customerName = [detail.first, detail.lastname]
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-            .joined(separator: " ")
+        let customerName = nonEmpty([detail.first, detail.lastname], separator: " ")
         return customerName.isEmpty ? "Appointment" : "Appt. with \(customerName)"
     }
 
     // Duration for the event in seconds, parsed from minutes (default 60).
     private var calendarEventDurationSeconds: TimeInterval {
-        let minutes = Double(calendarEventDuration.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 60
+        let minutes = Double(trimmed(calendarEventDuration)) ?? 60
         return max(minutes, 1) * 60
     }
 
     // Full mailing address composed from non-empty parts.
     private var fullAddress: String {
-        [detail.street, detail.city, detail.state, detail.zip]
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-            .joined(separator: ", ")
+        nonEmpty([detail.street, detail.city, detail.state, detail.zip])
     }
 
     // Notes to include in the event (phone, email, comments).
@@ -412,6 +429,21 @@ struct LeadDetailUI: View {
     // Mirror the customer's active state into AppStorage to drive theme accents.
     private func syncActiveColor() {
         activeColor = detail.isActive ? 1 : 0
+    }
+}
+
+// Convenience modifiers to apply sheets and the location alert as standard view modifiers
+private extension View {
+    func applyLocationAlert(using binder: Binding<Bool>, message: @autoclosure @escaping () -> String, onDismiss: @escaping () -> Void) -> some View {
+        self.alert("Location Unavailable", isPresented: binder) {
+            Button("OK", role: .cancel) { onDismiss() }
+        } message: {
+            Text(message())
+        }
+    }
+
+    func applySheets<Item: Identifiable>(item: Binding<Item?>, @ViewBuilder content: @escaping (Item) -> some View) -> some View {
+        self.sheet(item: item, content: content)
     }
 }
 

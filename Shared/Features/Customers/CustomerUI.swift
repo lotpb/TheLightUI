@@ -32,6 +32,10 @@ struct CustomerUI: View {
     @State private var isAddingCustomer = false
     @State private var lastScrollRefreshDate = Date.distantPast
     
+    // Throttle for bottom-of-list refreshes and overlap guard.
+    private let refreshThrottle: TimeInterval = 5
+    @State private var isFetchingMore = false
+    
     // Primary initializer for production: creates its own data sources.
     @MainActor
     init(
@@ -98,7 +102,6 @@ struct CustomerUI: View {
             }
             // Inject shared models into subtree.
             .environmentObject(viewModel)
-            .environmentObject(pickerviewModel)
     }
 
     // Top-level list container that handles loading/empty states and shows content.
@@ -267,10 +270,16 @@ struct CustomerUI: View {
     // Refresh Firebase data when the user scrolls down to the bottom of the current list.
     private func refreshCustomersIfNeeded(isLastItem: Bool) {
         guard isLastItem else { return }
-        guard Date().timeIntervalSince(lastScrollRefreshDate) > 5 else { return }
+        guard !isFetchingMore else { return }
+        guard Date().timeIntervalSince(lastScrollRefreshDate) > refreshThrottle else { return }
 
+        isFetchingMore = true
         lastScrollRefreshDate = Date()
         viewModel.fetchData(showsLoadingIndicator: false)
+        // Best-effort: clear the flag after a short delay to avoid overlap; ideally tie this to viewModel completion.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            isFetchingMore = false
+        }
     }
 
     // Delegate deletion to the view model.
@@ -321,6 +330,7 @@ struct CellView: View, Equatable {
             .clipShape(Circle())
             .overlay(Circle().stroke(Color.white, lineWidth: 2))
             .padding(.top, 5)
+            .accessibilityLabel(Text("Profile image for \(data.lastname)"))
     }
 
     // Name, address, and row-level actions.
@@ -332,11 +342,13 @@ struct CellView: View, Equatable {
                 .foregroundColor(.primary)
                 .customerCellScaledText()
                 .padding(.top, 3)
+                .accessibilityLabel(Text("Customer name \(data.lastname)"))
 
             Text(data.address)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .customerCellSingleLineText()
+                .accessibilityLabel(Text("Address \(data.address)"))
 
             rowActions
         }
@@ -368,12 +380,14 @@ struct CellView: View, Equatable {
                 .foregroundColor(themeColor)
                 .customerCellScaledText()
                 .padding(.top, 3)
+                .accessibilityLabel(Text("Created on \(data.formattedCreationDate)"))
 
             Text(data.formattedAmount)
                 .frame(width: Layout.summaryWidth, height: Layout.summaryHeight)
                 .customerCellSingleLineText()
                 .foregroundColor(.primary)
                 .font(.headline)
+                .accessibilityLabel(Text("Amount \(data.formattedAmount)"))
         }
     }
 

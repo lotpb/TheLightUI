@@ -8,6 +8,15 @@
 import SwiftUI
 import MapKit
 
+// Layout & styling constants
+private enum MapLayout {
+    static let bannerTopPadding: CGFloat = 82
+    static let bannerHorizontalPadding: CGFloat = 16
+    static let bannerHorizontalContentPadding: CGFloat = 14
+    static let bannerVerticalContentPadding: CGFloat = 10
+    static let bannerStrokeOpacity: CGFloat = 0.06
+}
+
 struct MapDestination: Equatable {
     let street: String
     let city: String
@@ -35,6 +44,7 @@ enum RouteStatus: Equatable {
     case failed(String)
 }
 
+@MainActor
 struct MapUI: View {
     @StateObject private var manager = LocationManager()
     @StateObject private var userViewModel = MainMessagesViewModel()
@@ -81,7 +91,9 @@ struct MapUI: View {
 
     var body: some View {
         ZStack(alignment: .top) {
+            // Base map
             mapLayer
+            // Map controls
             MapButtonView(
                 manager: manager,
                 profileImageURL: userViewModel.chatUser?.profileImageUrl,
@@ -89,8 +101,10 @@ struct MapUI: View {
                 mapType: $mapType
             )
             .zIndex(1)
+            // Route status banner
             routeStatusBanner
                 .zIndex(2)
+            // Bottom sheet with travel details
             bottomSheetLayer
                 .zIndex(3)
         }
@@ -108,18 +122,43 @@ struct MapUI: View {
     @ViewBuilder
     private var mapLayer: some View {
         if #available(iOS 17.0, *) {
-            SwiftUIRouteMapView(
-                manager: manager,
-                travelTime: $travelTime,
-                distance: $distance,
-                directions: $directions,
-                routeStatus: $routeStatus,
-                mode: mode,
-                region: $manager.region,
-                mapType: $mapType,
-                onUserInteraction: manager.pauseFollowingLocation
-            )
-            .ignoresSafeArea(.all, edges: .all)
+            makeRouteMapView(usingSwiftUIMap: true)
+                .ignoresSafeArea(.all, edges: .all)
+        } else {
+            makeRouteMapView(usingSwiftUIMap: false)
+                .ignoresSafeArea(.all, edges: .all)
+        }
+    }
+
+    // Builds either SwiftUIRouteMapView (iOS 17+) or RouteMapView with the same parameters.
+    @ViewBuilder
+    private func makeRouteMapView(usingSwiftUIMap: Bool) -> some View {
+        if usingSwiftUIMap {
+            if #available(iOS 17.0, *) {
+                SwiftUIRouteMapView(
+                    manager: manager,
+                    travelTime: $travelTime,
+                    distance: $distance,
+                    directions: $directions,
+                    routeStatus: $routeStatus,
+                    mode: mode,
+                    region: $manager.region,
+                    mapType: $mapType,
+                    onUserInteraction: manager.pauseFollowingLocation
+                )
+            } else {
+                RouteMapView(
+                    manager: manager,
+                    travelTime: $travelTime,
+                    distance: $distance,
+                    directions: $directions,
+                    routeStatus: $routeStatus,
+                    mode: mode,
+                    region: $manager.region,
+                    mapType: $mapType,
+                    onUserInteraction: manager.pauseFollowingLocation
+                )
+            }
         } else {
             RouteMapView(
                 manager: manager,
@@ -132,7 +171,6 @@ struct MapUI: View {
                 mapType: $mapType,
                 onUserInteraction: manager.pauseFollowingLocation
             )
-            .ignoresSafeArea(.all, edges: .all)
         }
     }
 
@@ -164,12 +202,12 @@ struct MapUI: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.85)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, MapLayout.bannerHorizontalContentPadding)
+        .padding(.vertical, MapLayout.bannerVerticalContentPadding)
         .background(.thinMaterial, in: Capsule())
-        .overlay(Capsule().strokeBorder(Color.black.opacity(0.06), lineWidth: 1))
-        .padding(.top, 82)
-        .padding(.horizontal)
+        .overlay(Capsule().strokeBorder(Color.black.opacity(MapLayout.bannerStrokeOpacity), lineWidth: 1))
+        .padding(.top, MapLayout.bannerTopPadding)
+        .padding(.horizontal, MapLayout.bannerHorizontalPadding)
         .transition(.move(edge: .top).combined(with: .opacity))
         .animation(.spring(response: 0.28, dampingFraction: 0.86), value: routeStatus)
     }

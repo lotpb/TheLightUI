@@ -76,7 +76,17 @@ struct RouteMapView: UIViewRepresentable {
     private func updateRegionIfNeeded(on mapView: MKMapView) {
         guard manager.isFollowingLocation else { return }
         guard CLLocationCoordinate2DIsValid(region.center) else { return }
-        guard mapView.region.center.latitude != region.center.latitude || mapView.region.center.longitude != region.center.longitude else { return }
+
+        let currentCenter = mapView.region.center
+        let desiredCenter = region.center
+
+        // Compute approximate distance between centers using CoreLocation
+        let current = CLLocation(latitude: currentCenter.latitude, longitude: currentCenter.longitude)
+        let desired = CLLocation(latitude: desiredCenter.latitude, longitude: desiredCenter.longitude)
+        let distanceMeters = current.distance(from: desired)
+
+        // Only update if the center moved more than 50 meters
+        guard distanceMeters > 50 else { return }
         mapView.setRegion(region, animated: true)
     }
 
@@ -128,13 +138,16 @@ struct RouteMapView: UIViewRepresentable {
                 routeStatus = .ready
                 travelTime = result.route.expectedTravelTime
                 distance = result.route.distance
+
                 directions = result.directions
+
                 draw(
                     route: result.route,
                     sourcePin: sourcePin,
                     destPin: destPin,
                     on: mapView,
-                    shouldFrameRoute: manager.isFollowingLocation
+                    shouldFrameRoute: manager.isFollowingLocation,
+                    context: context
                 )
             } catch {
                 guard context.coordinator.routeKey == routeKey else { return }
@@ -156,8 +169,15 @@ struct RouteMapView: UIViewRepresentable {
         routeStatus = .idle
         travelTime = 0
         distance = 0
-        mapView.removeOverlays(mapView.overlays)
-        mapView.removeAnnotations(mapView.annotations.filter { !($0 is MKUserLocation) })
+
+        // Remove only our overlays and annotations (keep user location)
+        if let existingOverlay = context.coordinator.currentRouteOverlay {
+            mapView.removeOverlay(existingOverlay)
+            context.coordinator.currentRouteOverlay = nil
+        }
+        let toRemove = context.coordinator.currentAnnotations.filter { !($0 is MKUserLocation) }
+        mapView.removeAnnotations(toRemove)
+        context.coordinator.currentAnnotations = []
     }
 
     private func routeFailureMessage(for error: Error) -> String {
@@ -180,12 +200,23 @@ struct RouteMapView: UIViewRepresentable {
         sourcePin: MKPointAnnotation,
         destPin: MKPointAnnotation,
         on mapView: MKMapView,
-        shouldFrameRoute: Bool
+        shouldFrameRoute: Bool,
+        context: Context
     ) {
-        mapView.removeAnnotations(mapView.annotations)
-        mapView.removeOverlays(mapView.overlays)
+        // Remove only our previous overlay and annotations (keep user location)
+        if let existing = context.coordinator.currentRouteOverlay {
+            mapView.removeOverlay(existing)
+        }
+        let toRemove = context.coordinator.currentAnnotations.filter { !($0 is MKUserLocation) }
+        mapView.removeAnnotations(toRemove)
+
+        // Add new annotations and overlay
         mapView.addAnnotations([sourcePin, destPin])
         mapView.addOverlay(route.polyline)
+
+        // Track what we added
+        context.coordinator.currentAnnotations = [sourcePin, destPin]
+        context.coordinator.currentRouteOverlay = route.polyline
 
         guard shouldFrameRoute else { return }
         mapView.setVisibleMapRect(
@@ -205,6 +236,10 @@ struct RouteMapView: UIViewRepresentable {
         var lastRouteDestinationAddress: String?
         var onUserInteraction: () -> Void
         var onVisibleRegionChanged: (MKCoordinateRegion) -> Void = { _ in }
+
+        var currentRouteOverlay: MKOverlay?
+        var currentAnnotations: [MKAnnotation] = []
+        private var isUserDrivenRegionChange = false
 
         private let routeRecalculationDistance: CLLocationDistance = 100
 
@@ -233,13 +268,18 @@ struct RouteMapView: UIViewRepresentable {
         }
 
         func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) {
-            guard regionChangeWasUserDriven(mapView) else { return }
+            let userDriven = regionChangeWasUserDriven(mapView)
+            isUserDrivenRegionChange = userDriven
+            guard userDriven else { return }
             onVisibleRegionChanged(mapView.region)
             onUserInteraction()
         }
 
         func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-            onVisibleRegionChanged(mapView.region)
+            if isUserDrivenRegionChange {
+                onVisibleRegionChanged(mapView.region)
+            }
+            isUserDrivenRegionChange = false
         }
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
@@ -257,6 +297,11 @@ struct RouteMapView: UIViewRepresentable {
                 .contains { gestureRecognizer in
                     gestureRecognizer.state == .began || gestureRecognizer.state == .changed
                 }
+        }
+
+        deinit {
+            routeTask?.cancel()
+            mapView.delegate = nil
         }
     }
 }

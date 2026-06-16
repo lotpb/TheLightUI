@@ -8,7 +8,6 @@
 import SwiftUI
 
 // MARK: - Main Menu
-@available(iOS 16.0, *)
 @MainActor
 struct MainMenuUI: View {
     @AppStorage("color") private var color: Int?
@@ -56,53 +55,107 @@ struct MainMenuUI: View {
     }
 
     var body: some View {
-        NavigationStack(path: $path) {
-            VStack {
-                MainTopView(
-                    makeWeatherManager: makeWeatherManager,
-                    makeWeatherLocationProvider: makeWeatherLocationProvider
-                )
-                .padding(.top, 25)
-                menuList
-            }
-            .navigationTitle("Main Menu")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        showingLogOut.toggle()
-                    } label: {
-                        Image(systemName: "gearshape.fill")
+        Group {
+            if #available(iOS 16.0, *) {
+                NavigationStack(path: $path) {
+                    VStack {
+                        MainTopView(
+                            makeWeatherManager: makeWeatherManager,
+                            makeWeatherLocationProvider: makeWeatherLocationProvider
+                        )
+                        .padding(.top, 25)
+                        menuList
                     }
-                    .font(.footnote).fontWeight(.bold)
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        isShowingActionDialog.toggle()
-                    } label: {
-                        Label("Action", systemImage: "square.and.arrow.up")
+                    .navigationTitle("Main Menu")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button {
+                                showingLogOut.toggle()
+                            } label: {
+                                Image(systemName: "gearshape.fill")
+                            }
+                            .font(.footnote).fontWeight(.bold)
+                        }
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button {
+                                isShowingActionDialog.toggle()
+                            } label: {
+                                Label("Action", systemImage: "square.and.arrow.up")
+                            }
+                        }
+                    }
+                    .confirmationDialog("Settings", isPresented: $showingLogOut, titleVisibility: .visible) {
+                        Button("Sign Out", role: .destructive) { handleSignOut() }
+                        Button("Cancel", role: .cancel) { }
+                    } message: {
+                        Text("What do you want to do?")
+                    }
+                    .confirmationDialog("Pick a menu item", isPresented: $isShowingActionDialog, titleVisibility: .visible) {
+                        #if DEBUG
+                        Button("About") { showModal(.about) }
+                        #endif
+                        Button("Email Support") { activeSheet = .email }
+                        Button("Settings") { showModal(.settings) }
+                        Button("Directions") { showModal(.directions) }
+                        Button("Users") { showModal(.users) }
+                        Button("Membership Card") { showModal(.membership) }
+                        Button("Cancel", role: .cancel) { }
+                    }
+                    .sheet(item: $activeSheet) { sheet in
+                        coordinator.sheetContent(sheet)
                     }
                 }
-            }
-            .confirmationDialog("Settings", isPresented: $showingLogOut, titleVisibility: .visible) {
-                Button("Sign Out", role: .destructive) { handleSignOut() }
-                Button("Cancel", role: .cancel) { }
-            } message: {
-                Text("What do you want to do?")
-            }
-            .confirmationDialog("Pick a menu item", isPresented: $isShowingActionDialog, titleVisibility: .visible) {
-                #if DEBUG
-                Button("About") { showModal(.about) }
-                #endif
-                Button("Email Support") { activeSheet = .email }
-                Button("Settings") { showModal(.settings) }
-                Button("Directions") { showModal(.directions) }
-                Button("Users") { showModal(.users) }
-                Button("Membership Card") { showModal(.membership) }
-                Button("Cancel", role: .cancel) { }
-            }
-            .sheet(item: $activeSheet) { sheet in
-                coordinator.sheetContent(sheet)
+            } else {
+                NavigationView {
+                    VStack {
+                        MainTopView(
+                            makeWeatherManager: makeWeatherManager,
+                            makeWeatherLocationProvider: makeWeatherLocationProvider
+                        )
+                        .padding(.top, 25)
+                        menuList
+                    }
+                    .navigationTitle("Main Menu")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button {
+                                showingLogOut.toggle()
+                            } label: {
+                                Image(systemName: "gearshape.fill")
+                            }
+                            .font(.footnote).fontWeight(.bold)
+                        }
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button {
+                                isShowingActionDialog.toggle()
+                            } label: {
+                                Label("Action", systemImage: "square.and.arrow.up")
+                            }
+                        }
+                    }
+                    .confirmationDialog("Settings", isPresented: $showingLogOut, titleVisibility: .visible) {
+                        Button("Sign Out", role: .destructive) { handleSignOut() }
+                        Button("Cancel", role: .cancel) { }
+                    } message: {
+                        Text("What do you want to do?")
+                    }
+                    .confirmationDialog("Pick a menu item", isPresented: $isShowingActionDialog, titleVisibility: .visible) {
+                        #if DEBUG
+                        Button("About") { showModal(.about) }
+                        #endif
+                        Button("Email Support") { activeSheet = .email }
+                        Button("Settings") { showModal(.settings) }
+                        Button("Directions") { showModal(.directions) }
+                        Button("Users") { showModal(.users) }
+                        Button("Membership Card") { showModal(.membership) }
+                        Button("Cancel", role: .cancel) { }
+                    }
+                    .sheet(item: $activeSheet) { sheet in
+                        coordinator.sheetContent(sheet)
+                    }
+                }
             }
         }
         .accentColor(themeColor)
@@ -369,6 +422,7 @@ struct MainTopView: View {
     @AppStorage(SettingsUI.isCompanyNameKey) private var companyName: String = "Main Menu"
     @AppStorage(SettingsUI.backend) private var backEnd: String = "None"
     @State private var currentTemperatureText = "--°F"
+    @State private var isActive = true
 
     private let makeWeatherManager: () -> WeatherManaging
     private let makeWeatherLocationProvider: () -> WeatherLocationProviding
@@ -380,30 +434,11 @@ struct MainTopView: View {
         self.makeWeatherManager = makeWeatherManager
         self.makeWeatherLocationProvider = makeWeatherLocationProvider
     }
-
+    
     private var themeColor: Color {
         AppTheme.accentColor(for: color)
     }
-
-    var body: some View {
-        VStack(alignment: .leading) {
-            titleRow
-            Divider()
-            backendRow
-            Spacer()
-            weatherRow
-        }
-        .symbolRenderingMode(.multicolor)
-        .foregroundColor(.white)
-        .background(themeColor)
-        .cornerRadius(Layout.cornerRadius)
-        .frame(height: Layout.height, alignment: .leading)
-        .padding()
-        .task {
-            await loadCurrentTemperature()
-        }
-    }
-
+    
     private var titleRow: some View {
         HStack {
             Text(companyName)
@@ -424,8 +459,34 @@ struct MainTopView: View {
             .padding(.bottom, 15)
     }
 
+    var body: some View {
+        VStack(alignment: .leading) {
+            titleRow
+            Divider()
+            backendRow
+            Spacer()
+            weatherRow
+        }
+        .symbolRenderingMode(.multicolor)
+        .foregroundColor(.white)
+        .background(themeColor)
+        .cornerRadius(Layout.cornerRadius)
+        .frame(height: Layout.height, alignment: .leading)
+        .padding()
+        .task {
+            #if DEBUG
+            if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" { return }
+            #endif
+            await loadCurrentTemperature()
+        }
+        .onDisappear {
+            isActive = false
+        }
+    }
+
     @MainActor
     private func loadCurrentTemperature() async {
+        guard isActive else { return }
         do {
             let coordinates = try await makeWeatherLocationProvider().requestLocation()
             let weather = try await makeWeatherManager().getCurrentWeather(
