@@ -30,7 +30,6 @@
 		AF20C90627A10F47009292D5 /* Prospects.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF20C90527A10F47009292D5 /* Prospects.swift */; };
 		AF2519202729AF660077B00D /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF25191F2729AF660077B00D /* ImagePicker.swift */; };
 		AF2519212729AF660077B00D /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF25191F2729AF660077B00D /* ImagePicker.swift */; };
-		AF262C0A2699C30E00728B53 /* HalfSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF262C092699C30E00728B53 /* HalfSheet.swift */; };
 		AF2B3D84278FA7DF007767F0 /* WebUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2B3D83278FA7DF007767F0 /* WebUI.swift */; };
 		AF34848A274568BE0091BA5A /* FirebaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF348489274568BE0091BA5A /* FirebaseManager.swift */; };
 		AF34848B274568BE0091BA5A /* FirebaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF348489274568BE0091BA5A /* FirebaseManager.swift */; };
@@ -159,17 +158,12 @@
 		AF92B8932678148B00729208 /* WaveUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8912678148B00729208 /* WaveUI.swift */; };
 		AF92B8982678150400729208 /* GradientUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8972678150400729208 /* GradientUI.swift */; };
 		AF92B8992678150400729208 /* GradientUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8972678150400729208 /* GradientUI.swift */; };
-		AF92B89B2678151700729208 /* InstagramUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B89A2678151700729208 /* InstagramUI.swift */; };
-		AF92B89C2678151700729208 /* InstagramUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B89A2678151700729208 /* InstagramUI.swift */; };
-		AF92B89E2678154F00729208 /* BottomActionSheetUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B89D2678154E00729208 /* BottomActionSheetUI.swift */; };
-		AF92B89F2678154F00729208 /* BottomActionSheetUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B89D2678154E00729208 /* BottomActionSheetUI.swift */; };
 		AF92B8A42678157100729208 /* BlurViewUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8A12678157100729208 /* BlurViewUI.swift */; };
 		AF92B8A52678157100729208 /* BlurViewUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8A12678157100729208 /* BlurViewUI.swift */; };
 		AF92B8A62678157100729208 /* ExtensionUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8A22678157100729208 /* ExtensionUI.swift */; };
 		AF92B8A72678157100729208 /* ExtensionUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8A22678157100729208 /* ExtensionUI.swift */; };
 		AF92B8A82678157100729208 /* Loader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8A32678157100729208 /* Loader.swift */; };
 		AF92B8A92678157100729208 /* Loader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8A32678157100729208 /* Loader.swift */; };
-		AF92B8AB2678160400729208 /* TabBarUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8AA2678160400729208 /* TabBarUI.swift */; };
 		AF92B8B1267816A600729208 /* SpotifyUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8AE267816A600729208 /* SpotifyUI.swift */; };
 		AF92B8B2267816A600729208 /* SpotifyUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8AE267816A600729208 /* SpotifyUI.swift */; };
 		AF92B8B3267816A600729208 /* Song.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8AF267816A600729208 /* Song.swift */; };
@@ -182,8 +176,6 @@
 		AF92B8D02678178B00729208 /* GradientTextUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8CE2678178B00729208 /* GradientTextUI.swift */; };
 		AF92B8D2267817AC00729208 /* CarouselSliderUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8D1267817AC00729208 /* CarouselSliderUI.swift */; };
 		AF92B8D3267817AC00729208 /* CarouselSliderUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8D1267817AC00729208 /* CarouselSliderUI.swift */; };
-		AF92B8D52678181900729208 /* VideoUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8D42678181900729208 /* VideoUI.swift */; };
-		AF92B8D62678181900729208 /* VideoUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8D42678181900729208 /* VideoUI.swift */; };
 		AF92B8F22678198900729208 /* MapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8EC2678198900729208 /* MapViewModel.swift */; };
 		AF92B90726781A5500729208 /* UserFormUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B90626781A5500729208 /* UserFormUI.swift */; };
 		AF92B90826781A5500729208 /* UserFormUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B90626781A5500729208 /* UserFormUI.swift */; };
@@ -257,7 +249,6 @@
 		AF1B37AA27935EAB00374C0F /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		AF20C90527A10F47009292D5 /* Prospects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Prospects.swift; sourceTree = "<group>"; };
 		AF25191F2729AF660077B00D /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
-		AF262C092699C30E00728B53 /* HalfSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HalfSheet.swift; sourceTree = "<group>"; };
 		AF2B3D83278FA7DF007767F0 /* WebUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebUI.swift; sourceTree = "<group>"; };
 		AF348489274568BE0091BA5A /* FirebaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseManager.swift; sourceTree = "<group>"; };
 		AF3AC455268FF1FD00562D20 /* MediaFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaFile.swift; sourceTree = "<group>"; };
@@ -339,19 +330,15 @@
 		AF92B8902678130800729208 /* TheLightUI--iOS--Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "TheLightUI--iOS--Info.plist"; sourceTree = "<group>"; };
 		AF92B8912678148B00729208 /* WaveUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WaveUI.swift; sourceTree = "<group>"; };
 		AF92B8972678150400729208 /* GradientUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GradientUI.swift; sourceTree = "<group>"; };
-		AF92B89A2678151700729208 /* InstagramUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstagramUI.swift; sourceTree = "<group>"; };
-		AF92B89D2678154E00729208 /* BottomActionSheetUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BottomActionSheetUI.swift; sourceTree = "<group>"; };
 		AF92B8A12678157100729208 /* BlurViewUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlurViewUI.swift; sourceTree = "<group>"; };
 		AF92B8A22678157100729208 /* ExtensionUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExtensionUI.swift; sourceTree = "<group>"; };
 		AF92B8A32678157100729208 /* Loader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Loader.swift; sourceTree = "<group>"; };
-		AF92B8AA2678160400729208 /* TabBarUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TabBarUI.swift; sourceTree = "<group>"; };
 		AF92B8AE267816A600729208 /* SpotifyUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyUI.swift; sourceTree = "<group>"; };
 		AF92B8AF267816A600729208 /* Song.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Song.swift; sourceTree = "<group>"; };
 		AF92B8B0267816A600729208 /* SideTabViewUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SideTabViewUI.swift; sourceTree = "<group>"; };
 		AF92B8CB2678170700729208 /* GlassMorphism.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlassMorphism.swift; sourceTree = "<group>"; };
 		AF92B8CE2678178B00729208 /* GradientTextUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GradientTextUI.swift; sourceTree = "<group>"; };
 		AF92B8D1267817AC00729208 /* CarouselSliderUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarouselSliderUI.swift; sourceTree = "<group>"; };
-		AF92B8D42678181900729208 /* VideoUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoUI.swift; sourceTree = "<group>"; };
 		AF92B8EC2678198900729208 /* MapViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewModel.swift; sourceTree = "<group>"; };
 		AF92B90626781A5500729208 /* UserFormUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserFormUI.swift; sourceTree = "<group>"; };
 		AF9CC6F2279B2C440087E9FC /* ItemModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemModel.swift; sourceTree = "<group>"; };
@@ -678,14 +665,9 @@
 			isa = PBXGroup;
 			children = (
 				AF4F5DCB2FC746870003B277 /* App */,
-				AF92B8AA2678160400729208 /* TabBarUI.swift */,
-				AF92B8D42678181900729208 /* VideoUI.swift */,
-				AF92B89A2678151700729208 /* InstagramUI.swift */,
 				AF92B8D1267817AC00729208 /* CarouselSliderUI.swift */,
 				AFDEAF9B2692A73500B99B15 /* MacbookPro.swift */,
 				AF61C02D269E2C5900E1B78D /* iMacUI.swift */,
-				AF92B89D2678154E00729208 /* BottomActionSheetUI.swift */,
-				AF262C092699C30E00728B53 /* HalfSheet.swift */,
 			);
 			path = AppsUI;
 			sourceTree = "<group>";
@@ -1003,7 +985,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AF92B89B2678151700729208 /* InstagramUI.swift in Sources */,
 				AF4F5DCA2FC7430B0003B277 /* CreateNewMessageViewModel.swift in Sources */,
 				AF15AA2D275C5B2C0098CB04 /* ChatBubble.swift in Sources */,
 				AFA9531D2FDF33150003ADD1 /* LocationCaptureManager.swift in Sources */,
@@ -1043,7 +1024,6 @@
 				AF03D36C27886D720021493A /* ColorOptions.swift in Sources */,
 				AFDE91D52793364D00302CF2 /* LandMarkListView.swift in Sources */,
 				AF2B3D84278FA7DF007767F0 /* WebUI.swift in Sources */,
-				AF92B8AB2678160400729208 /* TabBarUI.swift in Sources */,
 				AF86C06F2FDF24A300F450F9 /* AppTheme.swift in Sources */,
 				AFC519532FC89A98003A4AEA /* MessageDateFormatting.swift in Sources */,
 				AF92B90726781A5500729208 /* UserFormUI.swift in Sources */,
@@ -1078,7 +1058,6 @@
 				AF4F5DFD2FC75C350003B277 /* LeadDetailCommentsView.swift in Sources */,
 				AF92B8982678150400729208 /* GradientUI.swift in Sources */,
 				AF1B37AB27935EAB00374C0F /* NotificationManager.swift in Sources */,
-				AF92B89E2678154F00729208 /* BottomActionSheetUI.swift in Sources */,
 				AF9CC6F9279B2CC50087E9FC /* AddView.swift in Sources */,
 				AF77D6502FC7A3FA008D456A /* CustomerFormViewModel.swift in Sources */,
 				AF4F5DE72FC750A80003B277 /* CustomerService.swift in Sources */,
@@ -1086,7 +1065,6 @@
 				AFDE91CA2793341D00302CF2 /* PlaceSearch.swift in Sources */,
 				AFDF37BA2FCA0495007A8C8F /* SFSafariViewWrapper.swift in Sources */,
 				AF3AC456268FF1FD00562D20 /* MediaFile.swift in Sources */,
-				AF262C0A2699C30E00728B53 /* HalfSheet.swift in Sources */,
 				AFDEAF9C2692A73500B99B15 /* MacbookPro.swift in Sources */,
 				AF54E4D727739EAD0062B1F4 /* HapticManager.swift in Sources */,
 				AF488F832FE02FC100E5F294 /* ExpenseTrackerViewModel.swift in Sources */,
@@ -1133,7 +1111,6 @@
 				AF54E4DF2773B22E0062B1F4 /* LeadDetailUI.swift in Sources */,
 				AF4F5DC42FC742F30003B277 /* MainMessagesViewModel.swift in Sources */,
 				AF5373862778C143001F40B6 /* DispatchQueue.swift in Sources */,
-				AF92B8D52678181900729208 /* VideoUI.swift in Sources */,
 				AF48266B2FC72514005A8C42 /* PhoneNumber.swift in Sources */,
 				AFEE000A27285BB900D75C7C /* LoginView.swift in Sources */,
 				AF8CA0A6277618EC00142D38 /* DirectionsUI.swift in Sources */,
@@ -1153,7 +1130,6 @@
 			files = (
 				AF4F5DDF2FC74EDA0003B277 /* LoginViewModel.swift in Sources */,
 				AF77D6522FC7A661008D456A /* SessionViewModel.swift in Sources */,
-				AF92B89C2678151700729208 /* InstagramUI.swift in Sources */,
 				AFA9531C2FDF33150003ADD1 /* LocationCaptureManager.swift in Sources */,
 				AF86C06C2FDF1EF100F450F9 /* CustomerPresentation.swift in Sources */,
 				AFE2C80D2FE08CA80086C5C8 /* SwiftUIRouteMapView.swift in Sources */,
@@ -1194,7 +1170,6 @@
 				AF92B8992678150400729208 /* GradientUI.swift in Sources */,
 				AF4F5DEA2FC750B60003B277 /* CustomerData.swift in Sources */,
 				AF4F5DDD2FC74EDA0003B277 /* LoginService.swift in Sources */,
-				AF92B89F2678154F00729208 /* BottomActionSheetUI.swift in Sources */,
 				AF92B8B6267816A600729208 /* SideTabViewUI.swift in Sources */,
 				AFC0BAA62FCC56A100A64782 /* ContactAddView.swift in Sources */,
 				AF488F802FE02FAF00E5F294 /* ExpenseModels.swift in Sources */,
@@ -1211,7 +1186,6 @@
 				AF845E43267832BA000F5501 /* TwitterUI.swift in Sources */,
 				AFC0BAA32FCC532E00A64782 /* CalendarEventEditView.swift in Sources */,
 				AF34848B274568BE0091BA5A /* FirebaseManager.swift in Sources */,
-				AF92B8D62678181900729208 /* VideoUI.swift in Sources */,
 				AF92B8932678148B00729208 /* WaveUI.swift in Sources */,
 				AF0A234A274C33E700B18BBF /* CreateNewMessageView.swift in Sources */,
 				AF108C0E2762681200084752 /* ChatMessage.swift in Sources */,
