@@ -190,7 +190,8 @@ final class LoginViewModel: ObservableObject {
     }
 
     private func createNewAccount() async {
-        guard let imageData = image?.jpegData(compressionQuality: 0.5) else {
+        let imageData = image.flatMap { ImagePreprocessor.prepareForUpload($0, maxDimension: 1024, targetMaxBytes: 200_000, initialQuality: 0.75) }
+        guard let imageData else {
             loginStatusMessage = "You must select an avatar image"
             return
         }
@@ -230,3 +231,4 @@ final class LoginViewModel: ObservableObject {
         }
     }
 }
+
