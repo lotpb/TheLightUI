@@ -121,6 +121,8 @@
 		AF697E872778D1AE00219026 /* URL+.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF697E862778D1AE00219026 /* URL+.swift */; };
 		AF697E892778D1EC00219026 /* weatherData.json in Resources */ = {isa = PBXBuildFile; fileRef = AF697E882778D1EC00219026 /* weatherData.json */; };
 		AF697E8B277909D100219026 /* MapAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF697E8A277909D100219026 /* MapAnnotationView.swift */; };
+		AF743B7C2FE1DE97003F5E7B /* ImagePreparation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF743B7B2FE1DE97003F5E7B /* ImagePreparation.swift */; };
+		AF743B7D2FE1DE97003F5E7B /* ImagePreparation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF743B7B2FE1DE97003F5E7B /* ImagePreparation.swift */; };
 		AF745F1027513D4F00E9DB74 /* ChatLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF745F0F27513D4F00E9DB74 /* ChatLogView.swift */; };
 		AF745F1127513D4F00E9DB74 /* ChatLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF745F0F27513D4F00E9DB74 /* ChatLogView.swift */; };
 		AF77D64D2FC79827008D456A /* ProfileAvatarImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF77D64C2FC79827008D456A /* ProfileAvatarImage.swift */; };
@@ -190,6 +192,8 @@
 		AFA953202FDF340C0003ADD1 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AFA9531E2FDF340C0003ADD1 /* Info.plist */; };
 		AFB1A464267B702800E298D5 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB1A463267B702800E298D5 /* SplashView.swift */; };
 		AFB1A465267B702800E298D5 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB1A463267B702800E298D5 /* SplashView.swift */; };
+		AFB7609F2FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB7609E2FE1F16B002D1A83 /* ImagePreprocessor.swift */; };
+		AFB760A02FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB7609E2FE1F16B002D1A83 /* ImagePreprocessor.swift */; };
 		AFBCC5DF27645EB800F0B0A8 /* MainMenuUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFBCC5DE27645EB800F0B0A8 /* MainMenuUI.swift */; };
 		AFBCC5E027645EB800F0B0A8 /* MainMenuUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFBCC5DE27645EB800F0B0A8 /* MainMenuUI.swift */; };
 		AFBCC5E22765671E00F0B0A8 /* FirebaseConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFBCC5E12765671E00F0B0A8 /* FirebaseConstants.swift */; };
@@ -306,6 +310,7 @@
 		AF697E862778D1AE00219026 /* URL+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+.swift"; sourceTree = "<group>"; };
 		AF697E882778D1EC00219026 /* weatherData.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = weatherData.json; sourceTree = "<group>"; };
 		AF697E8A277909D100219026 /* MapAnnotationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapAnnotationView.swift; sourceTree = "<group>"; };
+		AF743B7B2FE1DE97003F5E7B /* ImagePreparation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePreparation.swift; sourceTree = "<group>"; };
 		AF745F0F27513D4F00E9DB74 /* ChatLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatLogView.swift; sourceTree = "<group>"; };
 		AF77D64C2FC79827008D456A /* ProfileAvatarImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileAvatarImage.swift; sourceTree = "<group>"; };
 		AF77D64E2FC7A3FA008D456A /* CustomerFormViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerFormViewModel.swift; sourceTree = "<group>"; };
@@ -350,6 +355,7 @@
 		AFA9531B2FDF33150003ADD1 /* LocationCaptureManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationCaptureManager.swift; sourceTree = "<group>"; };
 		AFA9531E2FDF340C0003ADD1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AFB1A463267B702800E298D5 /* SplashView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
+		AFB7609E2FE1F16B002D1A83 /* ImagePreprocessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePreprocessor.swift; sourceTree = "<group>"; };
 		AFBCC5DE27645EB800F0B0A8 /* MainMenuUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuUI.swift; sourceTree = "<group>"; };
 		AFBCC5E12765671E00F0B0A8 /* FirebaseConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseConstants.swift; sourceTree = "<group>"; };
 		AFC0BAA22FCC532E00A64782 /* CalendarEventEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEventEditView.swift; sourceTree = "<group>"; };
@@ -525,6 +531,7 @@
 				AF4F5DD92FC746E30003B277 /* Modifiers */,
 				AFDF37B82FCA048B007A8C8F /* UIKitAdapters */,
 				AF86C06D2FDF24A300F450F9 /* AppTheme.swift */,
+				AF743B7B2FE1DE97003F5E7B /* ImagePreparation.swift */,
 			);
 			path = SharedUI;
 			sourceTree = "<group>";
@@ -599,6 +606,7 @@
 				AF4A670627565F40005D1D8B /* AuthenticationService.swift */,
 				AFA9531B2FDF33150003ADD1 /* LocationCaptureManager.swift */,
 				AFA9531E2FDF340C0003ADD1 /* Info.plist */,
+				AFB7609E2FE1F16B002D1A83 /* ImagePreprocessor.swift */,
 			);
 			path = Auth;
 			sourceTree = "<group>";
@@ -1023,6 +1031,7 @@
 				AF488F7F2FE02FAF00E5F294 /* ExpenseModels.swift in Sources */,
 				AF03D36C27886D720021493A /* ColorOptions.swift in Sources */,
 				AFDE91D52793364D00302CF2 /* LandMarkListView.swift in Sources */,
+				AFB7609F2FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */,
 				AF2B3D84278FA7DF007767F0 /* WebUI.swift in Sources */,
 				AF86C06F2FDF24A300F450F9 /* AppTheme.swift in Sources */,
 				AFC519532FC89A98003A4AEA /* MessageDateFormatting.swift in Sources */,
@@ -1078,6 +1087,7 @@
 				AF5373882778C1EA001F40B6 /* WeatherRow.swift in Sources */,
 				AF48266D2FC72B35005A8C42 /* CustomCorners.swift in Sources */,
 				AFC0BAA42FCC532E00A64782 /* CalendarEventEditView.swift in Sources */,
+				AF743B7C2FE1DE97003F5E7B /* ImagePreparation.swift in Sources */,
 				AFD27C18275BFA5900ED1CD9 /* Date+Helpers.swift in Sources */,
 				AFE4AE0D2FC8698F00F86B2E /* AppDependencies.swift in Sources */,
 				AF86C0682FDF1E3A00F450F9 /* MainMenuCoordinator.swift in Sources */,
@@ -1136,6 +1146,7 @@
 				AF4F5E072FC75D870003B277 /* MapButtonView.swift in Sources */,
 				AF4F5DC92FC7430B0003B277 /* CreateNewMessageViewModel.swift in Sources */,
 				AF4F5DE62FC750A80003B277 /* CustomerService.swift in Sources */,
+				AF743B7D2FE1DE97003F5E7B /* ImagePreparation.swift in Sources */,
 				AFB1A465267B702800E298D5 /* SplashView.swift in Sources */,
 				AF92B8CD2678170700729208 /* GlassMorphism.swift in Sources */,
 				AFBCC5E027645EB800F0B0A8 /* MainMenuUI.swift in Sources */,
@@ -1175,6 +1186,7 @@
 				AF488F802FE02FAF00E5F294 /* ExpenseModels.swift in Sources */,
 				AF92B87D267812A400729208 /* TheLightUIApp.swift in Sources */,
 				AF3AC45A268FF39500562D20 /* InstagramHome.swift in Sources */,
+				AFB760A02FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */,
 				AF92B8B2267816A600729208 /* SpotifyUI.swift in Sources */,
 				AF4F5DED2FC751950003B277 /* CustomerFormService.swift in Sources */,
 				AF4F5E042FC75D860003B277 /* RouteMapView.swift in Sources */,

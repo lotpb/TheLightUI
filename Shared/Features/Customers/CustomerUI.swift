@@ -28,13 +28,13 @@ struct CustomerUI: View {
     private let formService: CustomerFormServicing
     private let appBadgeManager: AppBadgeManaging
     
-    // UI state: add-sheet visibility and scroll refresh throttling.
+    // UI state: add-sheet visibility.
     @State private var isAddingCustomer = false
-    @State private var lastScrollRefreshDate = Date.distantPast
-    
-    // Throttle for bottom-of-list refreshes and overlap guard.
-    private let refreshThrottle: TimeInterval = 5
-    @State private var isFetchingMore = false
+    // Cache for displayed items to avoid recomputation every render.
+    @State private var displayedItemsCache: [CustomerItem] = []
+    // Confirmation dialog state for destructive/side-effectful actions.
+    @State private var confirmMarkContacted = false
+    @State private var pendingContactItem: CustomerItem? = nil
     
     // Primary initializer for production: creates its own data sources.
     @MainActor
@@ -70,18 +70,22 @@ struct CustomerUI: View {
     private var themeColor: Color {
         AppTheme.accentColor(for: color)
     }
-
-    private var displayedItems: [CustomerItem] {
-        listViewModel.displayedItems(from: viewModel.items)
-    }
     
+    // Basic phone validation/sanitization to ensure a safe tel: URL.
+    private func sanitizedPhone(_ raw: String) -> String? {
+        let allowed = CharacterSet(charactersIn: "+0123456789 -().")
+        guard raw.unicodeScalars.allSatisfy({ allowed.contains($0) }) else { return nil }
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
     var body: some View {
         // Main list content (loading/empty/states and rows).
         customerList
             .listStyle(.plain)
             .navigationTitle("Customers")
             .navigationBarTitleDisplayMode(.inline)
-            .foregroundColor(themeColor)
+            .tint(themeColor)
             .toolbar { toolbarContent }
             // Built-in search field with sample completions.
             .searchable(text: $listViewModel.searchText, placement: .navigationBarDrawer(displayMode: .always)) {
@@ -96,9 +100,35 @@ struct CustomerUI: View {
             .sheet(isPresented: $isAddingCustomer) {
                 addCustomerForm
             }
-            // Clear app badge when entering the list.
+            // Clear app badge when entering the list and initialize cache.
             .onAppear {
                 appBadgeManager.clearBadge()
+                displayedItemsCache = listViewModel.displayedItems(from: viewModel.items)
+            }
+            .onChange(of: viewModel.items) { _ in
+                displayedItemsCache = listViewModel.displayedItems(from: viewModel.items)
+            }
+            .onChange(of: listViewModel.searchText) { _ in
+                displayedItemsCache = listViewModel.displayedItems(from: viewModel.items)
+            }
+            .onChange(of: listViewModel.isActiveOnly) { _ in
+                displayedItemsCache = listViewModel.displayedItems(from: viewModel.items)
+            }
+            .onChange(of: listViewModel.selectedSort) { _ in
+                displayedItemsCache = listViewModel.displayedItems(from: viewModel.items)
+            }
+            .confirmationDialog(
+                "Mark as contacted?",
+                isPresented: $confirmMarkContacted,
+                titleVisibility: .visible
+            ) {
+                Button("Confirm", role: .destructive) {
+                    // TODO: Ideally cancel notifications scoped to this customer only.
+                    notificationManager.deleteNotifications()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This will remove any pending reminders for \(pendingContactItem?.lastname ?? "this customer").")
             }
             // Inject shared models into subtree.
             .environmentObject(viewModel)
@@ -106,8 +136,7 @@ struct CustomerUI: View {
 
     // Top-level list container that handles loading/empty states and shows content.
     private var customerList: some View {
-        let items = displayedItems
-        let lastItemID = items.last?.id
+        let items = displayedItemsCache
 
         return List {
             // Loading state.
@@ -119,7 +148,7 @@ struct CustomerUI: View {
             // Content state.
             } else {
                 activeOnlyToggle(count: items.count)
-                customerRows(items: items, lastItemID: lastItemID)
+                customerRows(items: items)
             }
         }
         .safeAreaInset(edge: .bottom) {
@@ -136,7 +165,7 @@ struct CustomerUI: View {
     }
     
     // Rows: navigation to detail, context menu, and swipe actions.
-    private func customerRows(items: [CustomerItem], lastItemID: CustomerItem.ID?) -> some View {
+    private func customerRows(items: [CustomerItem]) -> some View {
         ForEach(items) { item in
             // Navigate to detailed profile for the selected customer.
             NavigationLink {
@@ -153,9 +182,6 @@ struct CustomerUI: View {
             .swipeActions(edge: .leading) { leadingSwipeActions(for: item) }
             // Trailing swipe: destructive delete.
             .swipeActions(edge: .trailing) { trailingSwipeActions(for: item) }
-            .onAppear {
-                refreshCustomersIfNeeded(isLastItem: item.id == lastItemID)
-            }
         }
         // Support delete via standard list editing.
         .onDelete { offsets in
@@ -171,7 +197,9 @@ struct CustomerUI: View {
     @ViewBuilder
     private func rowContextMenu(for item: CustomerItem) -> some View {
         Button {
-            openURL.callPhoneNumber(item.phone)
+            if let phone = sanitizedPhone(item.phone) {
+                openURL.callPhoneNumber(phone)
+            }
         } label: {
             Label("Call", systemImage: "phone")
         }
@@ -186,7 +214,8 @@ struct CustomerUI: View {
     @ViewBuilder
     private func leadingSwipeActions(for item: CustomerItem) -> some View {
         Button {
-            notificationManager.deleteNotifications()
+            pendingContactItem = item
+            confirmMarkContacted = true
         } label: {
             Label("Mark Contacted", systemImage: "person.crop.circle.fill.badge.checkmark")
         }
@@ -269,21 +298,6 @@ struct CustomerUI: View {
             repeats: true
         )
     }
-    
-    // Refresh Firebase data when the user scrolls down to the bottom of the current list.
-    private func refreshCustomersIfNeeded(isLastItem: Bool) {
-        guard isLastItem else { return }
-        guard !isFetchingMore else { return }
-        guard Date().timeIntervalSince(lastScrollRefreshDate) > refreshThrottle else { return }
-
-        isFetchingMore = true
-        lastScrollRefreshDate = Date()
-        viewModel.fetchData(showsLoadingIndicator: false)
-        // Best-effort: clear the flag after a short delay to avoid overlap; ideally tie this to viewModel completion.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            isFetchingMore = false
-        }
-    }
 
     // Delegate deletion to the view model.
     private func deleteItems(_ items: [CustomerItem]) {
@@ -333,7 +347,7 @@ struct CellView: View, Equatable {
             .clipShape(Circle())
             .overlay(Circle().stroke(Color.white, lineWidth: 2))
             .padding(.top, 5)
-            .accessibilityLabel(Text("Profile image for \(data.lastname)"))
+            .accessibilityHidden(true)
     }
 
     // Name, address, and row-level actions.

@@ -150,12 +150,16 @@ struct ChatLogView: View {
         }
         .disabled(isUploadingImage)
         .onChange(of: selectedPhoto) { newValue in
-            guard let newValue = newValue else { return }
+            guard let newValue else { return }
             Task {
-                if let data = try? await newValue.loadTransferable(type: Data.self) {
-                    vm.handleSendImage(data)
-                    await MainActor.run { selectedPhoto = nil }
+                do {
+                    guard let data = try await newValue.loadTransferable(type: Data.self) else { return }
+                    let preparedData = try await ImagePreparation.preparedChatImageData(from: data)
+                    vm.handleSendImage(preparedData)
+                } catch {
+                    vm.errorMessage = "Could not prepare image: \(error.localizedDescription)"
                 }
+                await MainActor.run { selectedPhoto = nil }
             }
         }
     }
