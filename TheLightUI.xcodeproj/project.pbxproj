@@ -605,8 +605,8 @@
 				AF77D6512FC7A661008D456A /* SessionViewModel.swift */,
 				AF4A670627565F40005D1D8B /* AuthenticationService.swift */,
 				AFA9531B2FDF33150003ADD1 /* LocationCaptureManager.swift */,
-				AFA9531E2FDF340C0003ADD1 /* Info.plist */,
 				AFB7609E2FE1F16B002D1A83 /* ImagePreprocessor.swift */,
+				AFA9531E2FDF340C0003ADD1 /* Info.plist */,
 			);
 			path = Auth;
 			sourceTree = "<group>";
@@ -673,9 +673,6 @@
 			isa = PBXGroup;
 			children = (
 				AF4F5DCB2FC746870003B277 /* App */,
-				AF92B8D1267817AC00729208 /* CarouselSliderUI.swift */,
-				AFDEAF9B2692A73500B99B15 /* MacbookPro.swift */,
-				AF61C02D269E2C5900E1B78D /* iMacUI.swift */,
 			);
 			path = AppsUI;
 			sourceTree = "<group>";
@@ -715,6 +712,9 @@
 				AFC2EBEB2795AE7200ACE275 /* Side Menu */,
 				AF92B85C267812A300729208 /* Assets.xcassets */,
 				AFF9FE05279E4536006DB401 /* Launch Screen.storyboard */,
+				AF92B8D1267817AC00729208 /* CarouselSliderUI.swift */,
+				AF61C02D269E2C5900E1B78D /* iMacUI.swift */,
+				AFDEAF9B2692A73500B99B15 /* MacbookPro.swift */,
 				AFCE46ED2FC1EECF00B3B208 /* LaunchScreenView.swift */,
 				AF92B90626781A5500729208 /* UserFormUI.swift */,
 				AF92B8912678148B00729208 /* WaveUI.swift */,
