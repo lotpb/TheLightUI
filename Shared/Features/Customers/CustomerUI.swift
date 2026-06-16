@@ -122,6 +122,9 @@ struct CustomerUI: View {
                 customerRows(items: items, lastItemID: lastItemID)
             }
         }
+        .safeAreaInset(edge: .bottom) {
+            Color.clear.frame(height: 72)
+        }
     }
     
     // Toggle to filter the list to only active customers.
