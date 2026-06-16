@@ -61,14 +61,6 @@ struct LoginView: View {
                 guard newValue.localizedCaseInsensitiveContains("success") else { return }
                 isShowingLocationCaptureExplanation = true
             }
-            .confirmationDialog(
-                "Save your current location to prefill map coordinates in settings.",
-                isPresented: $isShowingLocationCaptureExplanation,
-                titleVisibility: .visible
-            ) {
-                Button("Continue") { captureLoginLocation() }
-                Button("Not Now", role: .cancel) { }
-            }
             .navigationTitle(viewModel.navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

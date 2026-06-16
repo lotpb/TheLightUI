@@ -14,10 +14,10 @@
             filePath = "Shared/Features/Auth/LoginView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "385"
-            endingLineNumber = "385"
-            landmarkName = "LoginTextField"
-            landmarkType = "14">
+            startingLineNumber = "377"
+            endingLineNumber = "377"
+            landmarkName = "body"
+            landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -30,8 +30,8 @@
             filePath = "Shared/Features/Auth/LoginView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "336"
-            endingLineNumber = "336"
+            startingLineNumber = "328"
+            endingLineNumber = "328"
             landmarkName = "loadSelectedProfilePhoto()"
             landmarkType = "7">
          </BreakpointContent>
