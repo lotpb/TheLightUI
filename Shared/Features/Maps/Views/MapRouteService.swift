@@ -64,7 +64,31 @@ final class MapRouteService {
         return MapRouteResult(
             route: route,
             destinationCoordinate: location.coordinate,
-            directions: route.steps.map(\.instructions).filter { !$0.isEmpty }
+            directions: route.steps.compactMap { step in
+                guard !step.instructions.isEmpty else { return nil }
+
+                let distanceText = Self.formatDistance(step.distance)
+                return "\(step.instructions) (\(distanceText))"
+            }
         )
+    }
+
+    private static func formatDistance(_ meters: CLLocationDistance) -> String {
+        let measurement = Measurement(value: meters, unit: UnitLength.meters)
+        let formatter = MeasurementFormatter()
+        formatter.unitStyle = .short
+        formatter.unitOptions = [.providedUnit]
+
+        let measurementSystem = Locale.current.measurementSystem
+        let isMetric = (measurementSystem == .metric || measurementSystem == .uk)
+        let targetUnit: UnitLength = isMetric ? .kilometers : .miles
+        let converted = measurement.converted(to: targetUnit)
+
+        let numberFormatter = NumberFormatter()
+        numberFormatter.maximumFractionDigits = 1
+        numberFormatter.minimumFractionDigits = 0
+        formatter.numberFormatter = numberFormatter
+
+        return formatter.string(from: converted)
     }
 }

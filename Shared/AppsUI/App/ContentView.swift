@@ -66,8 +66,12 @@ struct ContentView: View {
             )
         case .ToDo:
             ListView()
-        case .furniture:
-            FurnitureUI()
+        case .Expense:
+            if #available(iOS 17.0, *) {
+                ExpenseTrackerView()
+            } else {
+                Text("Requires iOS 17")
+            }
         case .web:
             WebUI()
         case .twitter:
@@ -81,7 +85,7 @@ private enum RootTab: CaseIterable, Identifiable {
     case home
     case chat
     case ToDo
-    case furniture
+    case Expense
     case web
     case twitter
 
@@ -100,7 +104,7 @@ private enum RootTab: CaseIterable, Identifiable {
         case .home: return "house.fill"
         case .chat: return "message.fill"
         case .ToDo: return "wave.3.left"
-        case .furniture: return "cart"
+        case .Expense: return "dollarsign.circle"
         case .web: return "network"
         case .twitter: return "brain.head.profile"
         }
@@ -111,7 +115,7 @@ private enum RootTab: CaseIterable, Identifiable {
         case .home: return "Home"
         case .chat: return "Chat"
         case .ToDo: return "To Do"
-        case .furniture: return "Furn"
+        case .Expense: return "Expen"
         case .web: return "Web"
         case .twitter: return "Tweet"
         }

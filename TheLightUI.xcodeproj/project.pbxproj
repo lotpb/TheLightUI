@@ -444,9 +444,9 @@
 		AF488F7D2FE02FA200E5F294 /* Expenses */ = {
 			isa = PBXGroup;
 			children = (
-				AF488F7E2FE02FAF00E5F294 /* ExpenseModels.swift */,
-				AF488F812FE02FC100E5F294 /* ExpenseTrackerViewModel.swift */,
 				AF488F842FE02FF400E5F294 /* ExpenseTrackerView.swift */,
+				AF488F812FE02FC100E5F294 /* ExpenseTrackerViewModel.swift */,
+				AF488F7E2FE02FAF00E5F294 /* ExpenseModels.swift */,
 				AF488F872FE0300200E5F294 /* ExpenseModelContainerModifier.swift */,
 			);
 			path = Expenses;
@@ -657,7 +657,6 @@
 			isa = PBXGroup;
 			children = (
 				AF105A0C27741204001F3F74 /* MapUI.swift */,
-				AFE2C80E2FE0906B0086C5C8 /* MapRouteService.swift */,
 				AF4F5E022FC75D570003B277 /* Views */,
 			);
 			path = Maps;
@@ -666,9 +665,10 @@
 		AF4F5E022FC75D570003B277 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				AF4F5E032FC75D860003B277 /* RouteMapView.swift */,
 				AF4F5E062FC75D870003B277 /* MapButtonView.swift */,
 				AF4F5E092FC75DC40003B277 /* BottomSheetUI.swift */,
+				AF4F5E032FC75D860003B277 /* RouteMapView.swift */,
+				AFE2C80E2FE0906B0086C5C8 /* MapRouteService.swift */,
 				AFE2C80B2FE08CA80086C5C8 /* SwiftUIRouteMapView.swift */,
 			);
 			path = Views;
