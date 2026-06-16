@@ -16,8 +16,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "377"
             endingLineNumber = "377"
-            landmarkName = "body"
-            landmarkType = "24">
+            landmarkName = "LoginSecureField"
+            landmarkType = "14">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -32,7 +32,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "328"
             endingLineNumber = "328"
-            landmarkName = "loadSelectedProfilePhoto()"
+            landmarkName = "captureLoginLocation()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
