@@ -11,17 +11,31 @@ final class CreateNewMessageViewModel: ObservableObject {
     @Published var errorMessage = ""
 
     private let repository: ChatRepositoryProtocol
+    private var fetchUsersTask: Task<Void, Never>?
 
     init(repository: ChatRepositoryProtocol = FirebaseChatRepository()) {
         self.repository = repository
-        Task {
-            await fetchAllUsers()
+        refreshUsers()
+    }
+
+    deinit {
+        fetchUsersTask?.cancel()
+    }
+
+    func refreshUsers() {
+        fetchUsersTask?.cancel()
+        fetchUsersTask = Task { [weak self] in
+            await self?.fetchAllUsers()
         }
     }
 
     func fetchAllUsers() async {
         do {
-            users = try await repository.fetchAvailableUsers()
+            let availableUsers = try await repository.fetchAvailableUsers()
+            guard !Task.isCancelled else { return }
+            users = availableUsers
+        } catch is CancellationError {
+            return
         } catch {
             errorMessage = "Failed to fetch users: \(error.localizedDescription)"
         }

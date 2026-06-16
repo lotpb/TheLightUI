@@ -295,9 +295,8 @@ struct LoginView: View {
                 .background(statusColor.opacity(0.12), in: RoundedRectangle(cornerRadius: Layout.cornerRadius, style: .continuous))
                 .accessibilityIdentifier("loginStatusMessage")
 
-            let defaults = UserDefaults.standard
-            let savedLat = defaults.string(forKey: SettingsUI.latitudeKey) ?? ""
-            let savedLon = defaults.string(forKey: SettingsUI.longtitudeKey) ?? ""
+            let savedLat = SecureSettingsStore.loadString(forKey: SettingsUI.latitudeKey)
+            let savedLon = SecureSettingsStore.loadString(forKey: SettingsUI.longtitudeKey)
             if !savedLat.isEmpty || !savedLon.isEmpty {
                 Text("Lat: \(savedLat)  Lon: \(savedLon)")
                     .font(.caption2)
@@ -335,9 +334,8 @@ struct LoginView: View {
     private func captureLoginLocation() {
         locationCaptureManager.requestSingleLocation { coordinate in
             guard let coordinate else { return }
-            let defaults = UserDefaults.standard
-            defaults.set(String(coordinate.latitude), forKey: SettingsUI.latitudeKey)
-            defaults.set(String(coordinate.longitude), forKey: SettingsUI.longtitudeKey)
+            SecureSettingsStore.saveString(String(coordinate.latitude), forKey: SettingsUI.latitudeKey)
+            SecureSettingsStore.saveString(String(coordinate.longitude), forKey: SettingsUI.longtitudeKey)
         }
     }
 }

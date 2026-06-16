@@ -13,6 +13,8 @@ struct LoginUserSettings {
 }
 
 protocol LoginServicing {
+    var currentUserId: String? { get }
+
     func signIn(email: String, password: String) async throws -> String
     func createUser(email: String, password: String) async throws -> String
     func sendPasswordReset(email: String) async throws
@@ -34,6 +36,10 @@ final class FirebaseLoginService: LoginServicing {
 
     init(manager: FirebaseManager = .shared) {
         self.manager = manager
+    }
+
+    var currentUserId: String? {
+        manager.auth.currentUser?.uid
     }
 
     func signIn(email: String, password: String) async throws -> String {

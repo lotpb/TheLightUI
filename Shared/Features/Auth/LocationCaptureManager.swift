@@ -9,6 +9,7 @@ final class LocationCaptureManager: NSObject, LocationCaptureManaging {
     private let locationManager = CLLocationManager()
     private var completion: ((CLLocationCoordinate2D?) -> Void)?
     private var timeoutTimer: Timer?
+    private var isUpdatingLocation = false
 
     override init() {
         super.init()
@@ -24,17 +25,22 @@ final class LocationCaptureManager: NSObject, LocationCaptureManaging {
 
         let authorizationStatus = locationManager.authorizationStatus
 
-        if authorizationStatus == .notDetermined {
+        switch authorizationStatus {
+        case .notDetermined:
             locationManager.requestWhenInUseAuthorization()
-        } else if authorizationStatus == .denied || authorizationStatus == .restricted {
+        case .authorizedAlways, .authorizedWhenInUse:
+            startLocationUpdates()
+        case .denied, .restricted:
             complete(with: nil)
-            return
+        @unknown default:
+            complete(with: nil)
         }
-
-        startLocationUpdates()
     }
 
     private func startLocationUpdates() {
+        guard !isUpdatingLocation else { return }
+
+        isUpdatingLocation = true
         locationManager.startUpdatingLocation()
         timeoutTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { [weak self] _ in
             self?.complete(with: nil)
@@ -44,6 +50,7 @@ final class LocationCaptureManager: NSObject, LocationCaptureManaging {
     private func complete(with coordinate: CLLocationCoordinate2D?) {
         timeoutTimer?.invalidate()
         timeoutTimer = nil
+        isUpdatingLocation = false
         locationManager.stopUpdatingLocation()
         if let completion = self.completion {
             self.completion = nil

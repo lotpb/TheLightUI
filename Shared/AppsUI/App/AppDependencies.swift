@@ -52,6 +52,8 @@ struct PreviewSessionService: SessionServicing {
 }
 
 struct PreviewLoginService: LoginServicing {
+    var currentUserId: String? { "preview-user" }
+
     func signIn(email: String, password: String) async throws -> String {
         "preview-user"
     }

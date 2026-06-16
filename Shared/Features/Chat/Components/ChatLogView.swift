@@ -278,8 +278,15 @@ struct MessageView: View {
     }
 
     private var imageURL: URL? {
-        guard let url = URL(string: message.text), url.scheme?.hasPrefix("http") == true else { return nil }
+        guard message.messageType == .image || isLegacyFirebaseStorageImageMessage else { return nil }
+        guard let url = URL(string: message.text), url.scheme == "https" else { return nil }
         return url
+    }
+
+    private var isLegacyFirebaseStorageImageMessage: Bool {
+        guard let url = URL(string: message.text), url.scheme == "https" else { return false }
+        guard url.host?.contains("firebasestorage.googleapis.com") == true else { return false }
+        return url.absoluteString.contains("chat_images")
     }
 
     var body: some View {

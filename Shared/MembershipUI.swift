@@ -18,10 +18,9 @@ struct MembershipUI: View {
         static let topPadding: CGFloat = 15
     }
 
-    @AppStorage(SettingsUI.firstNameKey) private var first = ""
-    @AppStorage(SettingsUI.lastNameKey) private var last = ""
-    @AppStorage(SettingsUI.emailKey) private var emailAddress = ""
-
+    @State private var first = ""
+    @State private var last = ""
+    @State private var emailAddress = ""
     @State private var fullName = ""
     @State private var qrCode = UIImage()
     @State private var isShowingScanner = false
@@ -48,11 +47,23 @@ struct MembershipUI: View {
                 .sheet(isPresented: $isShowingScanner) {
                     scannerView
                 }
-                .onAppear(perform: syncFullNameFromStorage)
+                .onAppear {
+                    loadSecureSettings()
+                    syncFullNameFromStorage()
+                }
                 .onChange(of: fullName) { newValue in updateNameStorage(from: newValue) }
-                .onChange(of: first) { _ in updateCode() }
-                .onChange(of: last) { _ in updateCode() }
-                .onChange(of: emailAddress) { _ in updateCode() }
+                .onChange(of: first) { newValue in
+                    SecureSettingsStore.saveString(newValue, forKey: SettingsUI.firstNameKey)
+                    updateCode()
+                }
+                .onChange(of: last) { newValue in
+                    SecureSettingsStore.saveString(newValue, forKey: SettingsUI.lastNameKey)
+                    updateCode()
+                }
+                .onChange(of: emailAddress) { newValue in
+                    SecureSettingsStore.saveString(newValue, forKey: SettingsUI.emailKey)
+                    updateCode()
+                }
         }
     }
 
@@ -130,6 +141,12 @@ struct MembershipUI: View {
     private func saveQRCode() {
         let imageSaver = ImageSaver()
         imageSaver.writeToPhotoAlbum(image: qrCode)
+    }
+
+    private func loadSecureSettings() {
+        first = SecureSettingsStore.loadString(forKey: SettingsUI.firstNameKey)
+        last = SecureSettingsStore.loadString(forKey: SettingsUI.lastNameKey)
+        emailAddress = SecureSettingsStore.loadString(forKey: SettingsUI.emailKey)
     }
 
     private func syncFullNameFromStorage() {
