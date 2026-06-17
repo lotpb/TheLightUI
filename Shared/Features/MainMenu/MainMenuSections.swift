@@ -75,6 +75,21 @@ struct DataSection: View {
         ])
         #endif
 
+        items.append(contentsOf: [
+            DataMenuItem(
+                route: .tip,
+                title: "Tip Calculator",
+                subtitle: "Split a bill",
+                systemImage: "receipt.fill"
+            ),
+            DataMenuItem(
+                route: .steps,
+                title: "Steps Today",
+                subtitle: "Count today's steps",
+                systemImage: "figure.walk.circle.fill"
+            )
+        ])
+
         if #available(iOS 17.0, *) {
             items.append(
                 DataMenuItem(

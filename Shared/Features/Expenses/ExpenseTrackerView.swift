@@ -8,6 +8,7 @@ import SwiftData
 
 @available(iOS 17.0, *)
 struct ExpenseTrackerView: View {
+    @AppStorage("color") private var color: Int?
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
     @StateObject private var viewModel = ExpenseTrackerViewModel()
@@ -15,6 +16,10 @@ struct ExpenseTrackerView: View {
 
     private var visibleExpenses: [Expense] {
         viewModel.visibleExpenses(from: expenses)
+    }
+
+    private var themeColor: Color {
+        AppTheme.accentColor(for: color)
     }
 
     var body: some View {
@@ -25,6 +30,8 @@ struct ExpenseTrackerView: View {
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Expenses")
+        .tint(themeColor)
+        .accentColor(themeColor)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
@@ -62,19 +69,21 @@ struct ExpenseTrackerView: View {
                     Spacer()
                     Image(systemName: "creditcard.fill")
                         .font(.title2)
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(themeColor)
                 }
 
                 HStack(spacing: 12) {
                     SummaryMetricView(
                         title: "Entries",
                         value: "\(visibleExpenses.count)",
-                        systemImage: "list.bullet.rectangle"
+                        systemImage: "list.bullet.rectangle",
+                        accentColor: themeColor
                     )
                     SummaryMetricView(
                         title: "Reimburse",
                         value: viewModel.reimbursableTotal(for: expenses).formatted(.currency(code: Locale.current.currency?.identifier ?? "USD")),
-                        systemImage: "arrow.triangle.2.circlepath"
+                        systemImage: "arrow.triangle.2.circlepath",
+                        accentColor: themeColor
                     )
                 }
             }
@@ -109,7 +118,7 @@ struct ExpenseTrackerView: View {
                     NavigationLink {
                         ExpenseDetailView(expense: expense)
                     } label: {
-                        ExpenseRowView(expense: expense)
+                        ExpenseRowView(expense: expense, accentColor: themeColor)
                     }
                     .swipeActions(edge: .leading) {
                         Button {
@@ -118,7 +127,7 @@ struct ExpenseTrackerView: View {
                         } label: {
                             Label("Edit", systemImage: "pencil")
                         }
-                        .tint(.blue)
+                        .tint(themeColor)
                     }
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
@@ -151,15 +160,16 @@ struct ExpenseTrackerView: View {
 @available(iOS 17.0, *)
 private struct ExpenseRowView: View {
     let expense: Expense
+    let accentColor: Color
 
     var body: some View {
         HStack(spacing: 12) {
             ZStack {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(.orange.opacity(0.14))
+                    .fill(accentColor.opacity(0.14))
                     .frame(width: 42, height: 42)
                 Image(systemName: expense.category.systemImage)
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(accentColor)
             }
 
             VStack(alignment: .leading, spacing: 3) {
@@ -264,11 +274,12 @@ private struct SummaryMetricView: View {
     let title: String
     let value: String
     let systemImage: String
+    let accentColor: Color
 
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: systemImage)
-                .foregroundStyle(.orange)
+                .foregroundStyle(accentColor)
                 .frame(width: 22)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
