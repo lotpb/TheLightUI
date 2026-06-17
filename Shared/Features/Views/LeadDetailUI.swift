@@ -465,7 +465,7 @@ struct LeadDetailUI_Previews: PreviewProvider {
             zip: "33484",
             amount: 5000,
             creationDate: Date(),
-            rate: "5",
+            rate: "",
             phone: "516-241-4786",
             comments: "Hello",
             spouse: "Janet",
