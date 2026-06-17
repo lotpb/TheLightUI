@@ -5,6 +5,7 @@
 
 import MessageUI
 import SwiftUI
+import UniformTypeIdentifiers
 
 // Simple content model to make call-sites cleaner
 public struct MailContent {
@@ -33,12 +34,33 @@ public struct MailContent {
         self.bcc = bcc
         self.attachments = attachments
     }
+
+    public func withAttachments(_ attachments: [MailView.Attachment]) -> MailContent {
+        MailContent(
+            subject: subject,
+            message: message,
+            isHTML: isHTML,
+            recipients: recipients,
+            cc: cc,
+            bcc: bcc,
+            attachments: self.attachments + attachments
+        )
+    }
 }
 
 public extension MailContent {
-    static let theLightSupportSubject = "Email support"
-    static let theLightSupportMessage = """
-    Thank you for using TheLight. We appreciate your support and hope the app helps make your experience simpler, smoother, and more enjoyable.
+    static var theLightSupportSubject: String {
+        let emailTitle = AppSettingsStore().emailTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        return emailTitle.isEmpty ? "Email support" : emailTitle
+    }
+
+    static var theLightSupportMessage: String {
+        let emailMessage = AppSettingsStore().emailMessage.trimmingCharacters(in: .whitespacesAndNewlines)
+        return emailMessage.isEmpty ? defaultSupportMessage : "\(emailMessage)\n\(defaultSupportMessage)"
+    }
+
+    static let defaultSupportMessage = """
+    We appreciate your support and hope the app helps make your experience simpler, smoother, and more enjoyable.
 
     If you have any feedback, questions, or suggestions, we would be glad to hear from you.
 
@@ -72,6 +94,85 @@ public struct MailUnavailableView: View {
     }
 }
 
+public struct MailComposerButton<ButtonLabel: View>: View {
+    private let content: MailContent
+    private let allowedContentTypes: [UTType]
+    private let allowsMultipleSelection: Bool
+    private let label: ButtonLabel
+    private let onResult: (Result<MFMailComposeResult, Error>) -> Void
+    private let onAttachmentError: (Error) -> Void
+
+    @State private var isFileImporterPresented = false
+    @State private var isMailSheetPresented = false
+    @State private var selectedAttachments: [MailView.Attachment] = []
+
+    public init(
+        content: MailContent,
+        allowedContentTypes: [UTType] = [.item],
+        allowsMultipleSelection: Bool = true,
+        onResult: @escaping (Result<MFMailComposeResult, Error>) -> Void = { _ in },
+        onAttachmentError: @escaping (Error) -> Void = { _ in },
+        @ViewBuilder label: () -> ButtonLabel
+    ) {
+        self.content = content
+        self.allowedContentTypes = allowedContentTypes
+        self.allowsMultipleSelection = allowsMultipleSelection
+        self.label = label()
+        self.onResult = onResult
+        self.onAttachmentError = onAttachmentError
+    }
+
+    public var body: some View {
+        Button {
+            isFileImporterPresented = true
+        } label: {
+            label
+        }
+        .fileImporter(
+            isPresented: $isFileImporterPresented,
+            allowedContentTypes: allowedContentTypes,
+            allowsMultipleSelection: allowsMultipleSelection
+        ) { result in
+            handleFileImport(result)
+        }
+        .sheet(isPresented: $isMailSheetPresented) {
+            MailSheet(content: content.withAttachments(selectedAttachments), onResult: onResult)
+        }
+    }
+
+    private func handleFileImport(_ result: Result<[URL], Error>) {
+        do {
+            let urls = try result.get()
+            selectedAttachments = try urls.map(MailView.Attachment.init(fileURL:))
+            isMailSheetPresented = true
+        } catch {
+            onAttachmentError(error)
+        }
+    }
+}
+
+public extension MailComposerButton where ButtonLabel == SwiftUI.Label<Text, Image> {
+    init(
+        _ titleKey: LocalizedStringKey,
+        systemImage: String,
+        content: MailContent,
+        allowedContentTypes: [UTType] = [.item],
+        allowsMultipleSelection: Bool = true,
+        onResult: @escaping (Result<MFMailComposeResult, Error>) -> Void = { _ in },
+        onAttachmentError: @escaping (Error) -> Void = { _ in }
+    ) {
+        self.init(
+            content: content,
+            allowedContentTypes: allowedContentTypes,
+            allowsMultipleSelection: allowsMultipleSelection,
+            onResult: onResult,
+            onAttachmentError: onAttachmentError
+        ) {
+            Label(titleKey, systemImage: systemImage)
+        }
+    }
+}
+
 /// A convenience wrapper that chooses between the real composer and a fallback view.
 public struct MailSheet: View {
     private let content: MailContent
@@ -102,6 +203,13 @@ public struct MailSheet: View {
     }
 }
 
+private extension URL {
+    var mailAttachmentMIMEType: String {
+        let contentType = UTType(filenameExtension: pathExtension)
+        return contentType?.preferredMIMEType ?? "application/octet-stream"
+    }
+}
+
 public struct MailView: UIViewControllerRepresentable {
     public typealias UIViewControllerType = MFMailComposeViewController
 
@@ -114,6 +222,19 @@ public struct MailView: UIViewControllerRepresentable {
             self.data = data
             self.mimeType = mimeType
             self.filename = filename
+        }
+
+        public init(fileURL: URL) throws {
+            let hasSecurityScope = fileURL.startAccessingSecurityScopedResource()
+            defer {
+                if hasSecurityScope {
+                    fileURL.stopAccessingSecurityScopedResource()
+                }
+            }
+
+            self.data = try Data(contentsOf: fileURL)
+            self.mimeType = fileURL.mailAttachmentMIMEType
+            self.filename = fileURL.lastPathComponent
         }
     }
     
