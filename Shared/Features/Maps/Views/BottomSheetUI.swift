@@ -54,6 +54,18 @@ struct BottomSheetUI: View {
         return String(format: "Course: %.0f", course)
     }
 
+    private var travelTimeText: String {
+        let totalMinutes = max(Int((travelTime / 60).rounded()), 0)
+        let hours = totalMinutes / 60
+        let minutes = totalMinutes % 60
+
+        if hours > 0 {
+            return "\(hours) hr \(minutes) min"
+        }
+
+        return "\(minutes) min"
+    }
+
     private var locationRows: [LocationInfoRow] {
         let coordinate = locationManager.location?.coordinate
 
@@ -121,18 +133,26 @@ struct BottomSheetUI: View {
     }
 
     private func sheetBody(reader: GeometryProxy) -> some View {
-        VStack {
+        VStack(spacing: 10) {
             dragHandle(reader: reader)
             routeSummary
             sheetContent
         }
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .strokeBorder(Color.black.opacity(0.08), lineWidth: 1)
-        )
-        .shadow(color: Color.black.opacity(0.15), radius: 20, x: 0, y: 10)
+        .padding(.top, 2)
+        .background(sheetBackgroundColor(reader: reader))
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay(alignment: .top) {
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .strokeBorder(Color(.separator).opacity(0.2), lineWidth: 1)
+        }
+        .shadow(color: Color.black.opacity(0.16), radius: 18, x: 0, y: -2)
+        .animation(.easeInOut(duration: 0.2), value: isCollapsed(reader: reader))
+    }
+
+    private func sheetBackgroundColor(reader: GeometryProxy) -> Color {
+        isCollapsed(reader: reader)
+            ? Color(.systemGray5)
+            : Color(.secondarySystemGroupedBackground)
     }
 
     private func dragHandle(reader: GeometryProxy) -> some View {
@@ -179,6 +199,10 @@ struct BottomSheetUI: View {
         offset <= expandedOffset(for: reader) + 2
     }
 
+    private func isCollapsed(reader: GeometryProxy) -> Bool {
+        offset >= collapsedOffset - 2
+    }
+
     private func nearestOffset(to proposedOffset: CGFloat, reader: GeometryProxy) -> CGFloat {
         snapOffsets(for: reader)
             .min { abs($0 - proposedOffset) < abs($1 - proposedOffset) } ?? 0
@@ -218,37 +242,33 @@ struct BottomSheetUI: View {
         HStack(spacing: 12) {
             ZStack {
                 Circle()
-                    .fill(.ultraThinMaterial)
-                    .overlay(Circle().stroke(Color.white.opacity(0.2), lineWidth: 1))
-                Image(systemName: "bolt.car.fill")
+                    .fill(Color.blue.opacity(0.14))
+                Image(systemName: "car.fill")
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.blue)
             }
-            .frame(width: 36, height: 36)
+            .frame(width: 34, height: 34)
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text("Trip Summary")
-                    .font(.headline.weight(.bold))
-                    .foregroundStyle(.secondary)
-                HStack(spacing: 8) {
-                    Label(String(format: "%0.0f min", travelTime / 60), systemImage: "clock")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.secondary)
+
+                HStack(spacing: 14) {
+                    Label(travelTimeText, systemImage: "clock")
                     Label(String(format: "%0.1f mi", distance / metersPerMile), systemImage: "map")
-                        
                 }
-                .font(.caption)
-                .foregroundColor(.primary)
+                .font(.headline.monospacedDigit())
+                .foregroundStyle(Color.primary)
+                .labelStyle(.titleAndIcon)
             }
 
             Spacer()
             profileImage
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(.thinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(Color.black.opacity(0.06), lineWidth: 1)
-        )
+        .padding(.vertical, 12)
+        .background(Color(.tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .padding(.horizontal)
     }
 
@@ -271,7 +291,7 @@ struct BottomSheetUI: View {
             .padding(.horizontal)
 
             ScrollView(.vertical, showsIndicators: false) {
-                LazyVStack(alignment: .leading, spacing: 0) {
+                LazyVStack(alignment: .leading, spacing: 12) {
                     if selection == 0 {
                         favoritesSection
                         locationSummaryCard
@@ -279,17 +299,9 @@ struct BottomSheetUI: View {
                         locationSection
                     }
                 }
-                .padding(.top, 6)
+                .padding(.top, 4)
+                .padding(.bottom, 12)
                 .foregroundColor(.primary)
-            }
-            .overlay(alignment: .top) {
-                LinearGradient(
-                    colors: [Color.black.opacity(0.18), Color.black.opacity(0.0)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: 10)
-                .allowsHitTesting(false)
             }
         }
     }
@@ -313,14 +325,12 @@ struct BottomSheetUI: View {
             .foregroundStyle(.secondary)
         }
         .padding(14)
-        .background(.thinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(Color(.tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(Color.black.opacity(0.06), lineWidth: 1)
+                .strokeBorder(Color(.separator).opacity(0.18), lineWidth: 1)
         )
         .padding(.horizontal)
-        .padding(.top, 8)
     }
 
     private var locationSummaryHeader: some View {
@@ -343,9 +353,9 @@ struct BottomSheetUI: View {
                 ShareLink(item: mapsURL) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.headline)
-                        .padding(8)
-                        .background(.thinMaterial)
-                        .clipShape(Circle())
+                        .foregroundStyle(.blue)
+                        .frame(width: 32, height: 32)
+                        .background(Color(.tertiarySystemBackground), in: Circle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Share your location")
@@ -356,9 +366,9 @@ struct BottomSheetUI: View {
                 } label: {
                     Image(systemName: "doc.on.doc")
                         .font(.headline)
-                        .padding(8)
-                        .background(.thinMaterial)
-                        .clipShape(Circle())
+                        .foregroundStyle(.blue)
+                        .frame(width: 32, height: 32)
+                        .background(Color(.tertiarySystemBackground), in: Circle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Copy your location")
@@ -373,29 +383,29 @@ struct BottomSheetUI: View {
         } label: {
             Image(systemName: "phone.fill")
                 .font(.headline)
-                .padding(8)
-                .background(.thinMaterial)
-                .clipShape(Circle())
+                .foregroundStyle(.blue)
+                .frame(width: 32, height: 32)
+                .background(Color(.tertiarySystemBackground), in: Circle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Call destination")
     }
 
     private var favoritesSection: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 10) {
             Text("Favorites")
-                .font(.headline.bold())
-                .foregroundColor(Color("AccentColor"))
-                .padding()
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.secondary)
+                .padding(.horizontal)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack {
+                HStack(spacing: 18) {
                     ForEach(favorites) { favorite in
                         favoriteButton(favorite)
                     }
                 }
+                .padding(.horizontal)
             }
-            .background(Color(UIColor.tertiarySystemGroupedBackground))
         }
     }
 
@@ -408,13 +418,13 @@ struct BottomSheetUI: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color(.secondarySystemBackground))
+                        .fill(Color(.tertiarySystemGroupedBackground))
                 )
                 .padding(.horizontal)
 
             Text("Location Data")
-                .font(.headline.bold())
-                .foregroundColor(Color("AccentColor"))
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.secondary)
                 .padding(.horizontal)
                 .padding(.top, 8)
 
@@ -448,8 +458,7 @@ struct BottomSheetUI: View {
             Button { } label: {
                 ZStack {
                     Circle()
-                        .fill(.thinMaterial)
-                        .overlay(Circle().stroke(Color.black.opacity(0.06), lineWidth: 1))
+                        .fill(Color(.tertiarySystemGroupedBackground))
                     Image(systemName: favorite.systemImage)
                         .resizable()
                         .scaledToFit()
