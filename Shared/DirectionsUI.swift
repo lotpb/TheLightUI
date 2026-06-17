@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Foundation
 import CoreLocation
 import MapKit
 
@@ -28,6 +29,7 @@ struct DirectionsUI: View {
         Form {
             routeSection
             errorSection
+            routeDistanceSection
             stepsSection
         }
     }
@@ -66,16 +68,50 @@ struct DirectionsUI: View {
         }
     }
 
+    @ViewBuilder
+    private var routeDistanceSection: some View {
+        if viewModel.routeDistance != nil {
+            Section("Distance") {
+                HStack(spacing: 12) {
+                    Image(systemName: "map")
+                        .frame(width: 24)
+
+                    Text(viewModel.routeDistanceText)
+
+                    Spacer(minLength: 12)
+
+                    Text(viewModel.routeTravelTimeText)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.trailing)
+                }
+            }
+        }
+    }
+
     private var stepsSection: some View {
         Section("Steps") {
             if viewModel.steps.isEmpty && !viewModel.isLoading {
                 emptyStepsMessage
             } else {
-                ForEach(viewModel.steps, id: \.self) { step in
-                    HStack(alignment: .top) {
+                ForEach(viewModel.steps) { step in
+                    HStack(alignment: .top, spacing: 12) {
                         Image(systemName: DirectionIcon.systemName(for: step.instructions))
                             .frame(width: 24)
-                        Text(step.instructions)
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(step.instructions)
+                            Text(step.distanceText)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        Spacer(minLength: 12)
+
+                        Text(step.travelTimeText)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.trailing)
                     }
                 }
             }
@@ -110,12 +146,42 @@ private enum DirectionIcon {
     }
 }
 
+private struct DirectionStepDisplay: Identifiable {
+    let id = UUID()
+    let instructions: String
+    let distanceText: String
+    let travelTimeText: String
+}
+
+private extension Double {
+    var formattedDistance: String {
+        let measurement = Measurement(value: self, unit: UnitLength.meters)
+        let formatter = MeasurementFormatter()
+        formatter.unitOptions = .naturalScale
+        formatter.unitStyle = .medium
+        formatter.numberFormatter.maximumFractionDigits = 1
+        return formatter.string(from: measurement)
+    }
+}
+
 // MARK: - View Model
 @MainActor
-class DirectionsViewModel: ObservableObject {
-    @Published var steps: [MKRoute.Step] = []
+private class DirectionsViewModel: ObservableObject {
+    @Published var steps: [DirectionStepDisplay] = []
+    @Published var routeDistance: CLLocationDistance?
+    @Published var routeTravelTime: TimeInterval?
     @Published var isLoading = false
     @Published var errorMessage: String?
+
+    var routeDistanceText: String {
+        guard let routeDistance else { return "" }
+        return Self.formatDistance(routeDistance)
+    }
+
+    var routeTravelTimeText: String {
+        guard let routeTravelTime else { return "" }
+        return Self.formatTravelTime(routeTravelTime)
+    }
 
     func calculateDirections(from: String, to: String) async {
         guard !from.isEmpty, !to.isEmpty else { return }
@@ -123,6 +189,8 @@ class DirectionsViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         steps = []
+        routeDistance = nil
+        routeTravelTime = nil
         defer { isLoading = false }
 
         do {
@@ -138,10 +206,39 @@ class DirectionsViewModel: ObservableObject {
                 return
             }
 
-            steps = route.steps.filter { !$0.instructions.isEmpty }
+            routeDistance = route.distance
+            routeTravelTime = route.expectedTravelTime
+            steps = route.steps.compactMap { step in
+                guard !step.instructions.isEmpty else { return nil }
+
+                let distanceText = Self.formatDistance(step.distance)
+                let travelTimeText = Self.formatTravelTime(Self.estimatedTravelTime(for: step, in: route))
+                return DirectionStepDisplay(
+                    instructions: step.instructions,
+                    distanceText: distanceText,
+                    travelTimeText: travelTimeText
+                )
+            }
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    private static func formatDistance(_ distance: CLLocationDistance) -> String {
+        distance.formattedDistance
+    }
+
+    private static func formatTravelTime(_ travelTime: TimeInterval) -> String {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = travelTime >= 3600 ? [.hour, .minute] : [.minute]
+        formatter.unitsStyle = .abbreviated
+        formatter.maximumUnitCount = 2
+        return formatter.string(from: max(travelTime, 60)) ?? "1 min"
+    }
+
+    private static func estimatedTravelTime(for step: MKRoute.Step, in route: MKRoute) -> TimeInterval {
+        guard route.distance > 0 else { return 0 }
+        return route.expectedTravelTime * (step.distance / route.distance)
     }
 
     private func placemark(for address: String) async throws -> CLPlacemark? {

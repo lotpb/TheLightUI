@@ -12,7 +12,9 @@ struct MapButtonView: View {
     @ObservedObject var manager: LocationManager
     let profileImageURL: String?
 
-    @Binding var directions: [String]
+    @Binding var directions: [MapRouteStep]
+    @Binding var travelTime: Double
+    @Binding var distance: Double
     @Binding var mapType: MKMapType
     @State private var showDirections = false
     @State private var showLocationPermissionExplanation = false
@@ -171,14 +173,90 @@ struct MapButtonView: View {
             Divider()
                 .background(Color.secondary)
 
-            List(directions, id: \.self) { instruction in
-                HStack {
-                    Image(systemName: directionsIcon(instruction))
-                    Text(instruction)
-                        .padding()
-                }
+            routeSummaryTable
+
+            routeStepsTable
+        }
+    }
+
+    private var routeSummaryTable: some View {
+        List {
+            Section {
+                routeDistanceCell
+            } header: {
+                Text("Distance")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.trailing)
             }
-            .foregroundColor(Color.white)
+        }
+        .frame(height: 96)
+        .scrollDisabled(true)
+        .foregroundColor(Color.white)
+    }
+
+    private var routeStepsTable: some View {
+        List {
+            Section {
+                ForEach(directions) { step in
+                    directionStepRow(step)
+                }
+            } header: {
+                Text("Steps")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.trailing)
+            }
+        }
+        .foregroundColor(Color.white)
+        
+    }
+
+    private func directionStepRow(_ step: MapRouteStep) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: directionsIcon(step.instructions))
+                .frame(width: 24)
+                .font(.title3)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(step.instructions)
+                    .font(.headline.weight(.semibold))
+                    .lineLimit(nil)
+
+                Text(step.distanceText)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer(minLength: 12)
+
+            Text(step.travelTimeText)
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+                .multilineTextAlignment(.trailing)
+        }
+        .padding(.vertical, 8)
+    }
+
+    private var routeDistanceCell: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "map")
+                .frame(width: 24)
+
+            Text(formattedDistance(distance))
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+
+            Spacer(minLength: 12)
+
+            Text(formattedTravelTime(travelTime))
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+                .multilineTextAlignment(.trailing)
         }
     }
 
@@ -201,12 +279,41 @@ struct MapButtonView: View {
         .frame(width: 50, height: 50)
     }
 
+    private func formattedDistance(_ meters: CLLocationDistance) -> String {
+        let measurement = Measurement(value: meters, unit: UnitLength.meters)
+        let formatter = MeasurementFormatter()
+        formatter.unitStyle = .short
+        formatter.unitOptions = [.providedUnit]
+
+        let measurementSystem = Locale.current.measurementSystem
+        let isMetric = measurementSystem == .metric || measurementSystem == .uk
+        let targetUnit: UnitLength = isMetric ? .kilometers : .miles
+        let converted = measurement.converted(to: targetUnit)
+
+        let numberFormatter = NumberFormatter()
+        numberFormatter.maximumFractionDigits = 1
+        numberFormatter.minimumFractionDigits = 0
+        formatter.numberFormatter = numberFormatter
+
+        return formatter.string(from: converted)
+    }
+
+    private func formattedTravelTime(_ travelTime: TimeInterval) -> String {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = travelTime >= 3600 ? [.hour, .minute] : [.minute]
+        formatter.unitsStyle = .abbreviated
+        formatter.maximumUnitCount = 2
+        return formatter.string(from: max(travelTime, 60)) ?? "1 min"
+    }
+
     private func directionsIcon(_ instruction: String) -> String {
-        if instruction.contains("destination") {
+        let lowercasedInstruction = instruction.lowercased()
+
+        if lowercasedInstruction.contains("destination") {
             return "mappin.circle.fill"
-        } else if instruction.contains("right") {
+        } else if lowercasedInstruction.contains("right") {
             return "arrow.turn.up.right"
-        } else if instruction.contains("left") {
+        } else if lowercasedInstruction.contains("left") {
             return "arrow.turn.up.left"
         } else {
             return "arrow.up"

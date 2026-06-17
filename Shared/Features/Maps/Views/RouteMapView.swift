@@ -11,7 +11,7 @@ struct RouteMapView: UIViewRepresentable {
     @ObservedObject var manager: LocationManager
     @Binding var travelTime: Double
     @Binding var distance: Double
-    @Binding var directions: [String]
+    @Binding var directions: [MapRouteStep]
     @Binding var routeStatus: RouteStatus
     let mode: MapMode
     @Binding var region: MKCoordinateRegion
