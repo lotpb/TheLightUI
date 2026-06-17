@@ -194,6 +194,12 @@
 		AFB1A465267B702800E298D5 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB1A463267B702800E298D5 /* SplashView.swift */; };
 		AFB7609F2FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB7609E2FE1F16B002D1A83 /* ImagePreprocessor.swift */; };
 		AFB760A02FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB7609E2FE1F16B002D1A83 /* ImagePreprocessor.swift */; };
+		AFB760A22FE22C78002D1A83 /* MainTopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB760A12FE22C78002D1A83 /* MainTopView.swift */; };
+		AFB760A32FE22C78002D1A83 /* MainTopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB760A12FE22C78002D1A83 /* MainTopView.swift */; };
+		AFB760A52FE22CA2002D1A83 /* MainMenuSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB760A42FE22CA2002D1A83 /* MainMenuSections.swift */; };
+		AFB760A62FE22CA2002D1A83 /* MainMenuSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB760A42FE22CA2002D1A83 /* MainMenuSections.swift */; };
+		AFB760A82FE22CA2002D1A83 /* MenuRouteButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB760A72FE22CA2002D1A83 /* MenuRouteButton.swift */; };
+		AFB760A92FE22CA2002D1A83 /* MenuRouteButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB760A72FE22CA2002D1A83 /* MenuRouteButton.swift */; };
 		AFBCC5DF27645EB800F0B0A8 /* MainMenuUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFBCC5DE27645EB800F0B0A8 /* MainMenuUI.swift */; };
 		AFBCC5E027645EB800F0B0A8 /* MainMenuUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFBCC5DE27645EB800F0B0A8 /* MainMenuUI.swift */; };
 		AFBCC5E22765671E00F0B0A8 /* FirebaseConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFBCC5E12765671E00F0B0A8 /* FirebaseConstants.swift */; };
@@ -356,6 +362,9 @@
 		AFA9531E2FDF340C0003ADD1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AFB1A463267B702800E298D5 /* SplashView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		AFB7609E2FE1F16B002D1A83 /* ImagePreprocessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePreprocessor.swift; sourceTree = "<group>"; };
+		AFB760A12FE22C78002D1A83 /* MainTopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTopView.swift; sourceTree = "<group>"; };
+		AFB760A42FE22CA2002D1A83 /* MainMenuSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuSections.swift; sourceTree = "<group>"; };
+		AFB760A72FE22CA2002D1A83 /* MenuRouteButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuRouteButton.swift; sourceTree = "<group>"; };
 		AFBCC5DE27645EB800F0B0A8 /* MainMenuUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuUI.swift; sourceTree = "<group>"; };
 		AFBCC5E12765671E00F0B0A8 /* FirebaseConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseConstants.swift; sourceTree = "<group>"; };
 		AFC0BAA22FCC532E00A64782 /* CalendarEventEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEventEditView.swift; sourceTree = "<group>"; };
@@ -541,6 +550,9 @@
 			children = (
 				AFBCC5DE27645EB800F0B0A8 /* MainMenuUI.swift */,
 				AF86C0672FDF1E3A00F450F9 /* MainMenuCoordinator.swift */,
+				AFB760A12FE22C78002D1A83 /* MainTopView.swift */,
+				AFB760A42FE22CA2002D1A83 /* MainMenuSections.swift */,
+				AFB760A72FE22CA2002D1A83 /* MenuRouteButton.swift */,
 			);
 			path = MainMenu;
 			sourceTree = "<group>";
@@ -1046,6 +1058,7 @@
 				AF86C0642FDF1B3B00F450F9 /* CustomerListViewModel.swift in Sources */,
 				AF53737E2778BF36001F40B6 /* WeatherUI.swift in Sources */,
 				AFDE91CC2793348D00302CF2 /* PlaceListViewModel.swift in Sources */,
+				AFB760A92FE22CA2002D1A83 /* MenuRouteButton.swift in Sources */,
 				AF20C90627A10F47009292D5 /* Prospects.swift in Sources */,
 				AF92B8D2267817AC00729208 /* CarouselSliderUI.swift in Sources */,
 				AF0359152853C316002D4117 /* ChartView.swift in Sources */,
@@ -1056,6 +1069,7 @@
 				AFBCC5E22765671E00F0B0A8 /* FirebaseConstants.swift in Sources */,
 				AFC2EBEF2795B87700ACE275 /* Home.swift in Sources */,
 				AF5373842778C099001F40B6 /* WeatherManager.swift in Sources */,
+				AFB760A62FE22CA2002D1A83 /* MainMenuSections.swift in Sources */,
 				AF92B8A82678157100729208 /* Loader.swift in Sources */,
 				AF68CADB2687F94A009DCEF9 /* CarouselView.swift in Sources */,
 				AFF95EF8274816EF00724250 /* UserModel.swift in Sources */,
@@ -1091,6 +1105,7 @@
 				AFD27C18275BFA5900ED1CD9 /* Date+Helpers.swift in Sources */,
 				AFE4AE0D2FC8698F00F86B2E /* AppDependencies.swift in Sources */,
 				AF86C0682FDF1E3A00F450F9 /* MainMenuCoordinator.swift in Sources */,
+				AFB760A32FE22C78002D1A83 /* MainTopView.swift in Sources */,
 				AF85283E2787930700E7F8D8 /* ImageSaver.swift in Sources */,
 				AF697E872778D1AE00219026 /* URL+.swift in Sources */,
 				AF54E4E32773B2B80062B1F4 /* FormUI.swift in Sources */,
@@ -1161,9 +1176,12 @@
 				AF4A670827565F40005D1D8B /* AuthenticationService.swift in Sources */,
 				AF745F1127513D4F00E9DB74 /* ChatLogView.swift in Sources */,
 				AF92B8D3267817AC00729208 /* CarouselSliderUI.swift in Sources */,
+				AFB760A22FE22C78002D1A83 /* MainTopView.swift in Sources */,
 				AFE4AE0C2FC8698F00F86B2E /* AppDependencies.swift in Sources */,
 				AF3AC45D268FF5E400562D20 /* ReelsView.swift in Sources */,
 				AFC519522FC89A98003A4AEA /* MessageDateFormatting.swift in Sources */,
+				AFB760A52FE22CA2002D1A83 /* MainMenuSections.swift in Sources */,
+				AFB760A82FE22CA2002D1A83 /* MenuRouteButton.swift in Sources */,
 				AF92B8A72678157100729208 /* ExtensionUI.swift in Sources */,
 				AF92B8A92678157100729208 /* Loader.swift in Sources */,
 				AF4F5DFC2FC75C350003B277 /* LeadDetailCommentsView.swift in Sources */,
