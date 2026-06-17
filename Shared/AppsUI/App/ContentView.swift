@@ -69,6 +69,7 @@ struct ContentView: View {
         case .Expense:
             if #available(iOS 17.0, *) {
                 ExpenseTrackerView()
+                    .expenseModelContainer()
             } else {
                 Text("Requires iOS 17")
             }
