@@ -10,7 +10,7 @@ extension View {
     @ViewBuilder
     func expenseModelContainer() -> some View {
         if #available(iOS 17.0, *) {
-            self.modelContainer(ExpenseModelContainerFactory.shared)
+            ExpenseModelContainerView(content: self)
         } else {
             self
         }
@@ -18,12 +18,27 @@ extension View {
 }
 
 @available(iOS 17.0, *)
+private struct ExpenseModelContainerView<Content: View>: View {
+    let content: Content
+    @State private var container = ExpenseModelContainerFactory.makeContainer()
+
+    var body: some View {
+        if let container {
+            content.modelContainer(container)
+        } else {
+            ContentUnavailableView(
+                "Expenses Unavailable",
+                systemImage: "exclamationmark.triangle",
+                description: Text("The expense store could not be opened.")
+            )
+        }
+    }
+}
+
+@available(iOS 17.0, *)
 private enum ExpenseModelContainerFactory {
     @MainActor
-    static let shared: ModelContainer = makeContainer()
-
-    @MainActor
-    private static func makeContainer() -> ModelContainer {
+    static func makeContainer() -> ModelContainer? {
         let schema = Schema([Expense.self])
         let persistentConfiguration = ModelConfiguration(schema: schema)
 
@@ -37,7 +52,8 @@ private enum ExpenseModelContainerFactory {
             let memoryConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
             return try ModelContainer(for: schema, configurations: [memoryConfiguration])
         } catch {
-            preconditionFailure("Failed to load fallback in-memory Expense SwiftData store: \(error)")
+            assertionFailure("Failed to load fallback in-memory Expense SwiftData store: \(error)")
+            return nil
         }
     }
 }
