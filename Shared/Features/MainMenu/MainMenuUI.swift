@@ -425,6 +425,7 @@ struct MainTopView: View {
     @AppStorage(SettingsUI.isCompanyNameKey) private var companyName: String = "Main Menu"
     @AppStorage(SettingsUI.backend) private var backEnd: String = "None"
     @State private var currentTemperatureText = "--°F"
+    @State private var currentWeatherSystemImage = "cloud.sun.fill"
     @State private var isActive = true
 
     private let makeWeatherManager: () -> WeatherManaging
@@ -458,7 +459,7 @@ struct MainTopView: View {
     }
 
     private var weatherRow: some View {
-        statusRow(title: "Temp:", value: currentTemperatureText, systemImage: "thermometer.sun.fill")
+        statusRow(title: "Temp:", value: currentTemperatureText, systemImage: currentWeatherSystemImage)
             .padding(.bottom, 15)
     }
 
@@ -497,8 +498,31 @@ struct MainTopView: View {
                 longitude: coordinates.longitude
             )
             currentTemperatureText = "\(Int(weather.main.temp.rounded()))°F"
+            currentWeatherSystemImage = systemImage(for: weather.weather.first)
         } catch {
             currentTemperatureText = "Unavailable"
+            currentWeatherSystemImage = "cloud.sun.fill"
+        }
+    }
+
+    private func systemImage(for weather: API.CurrentWeather.Response.WeatherResponse?) -> String {
+        guard let weather else { return "cloud.sun.fill" }
+
+        switch weather.main.lowercased() {
+        case "clear":
+            return weather.icon.hasSuffix("n") ? "moon.stars.fill" : "sun.max.fill"
+        case "clouds":
+            return "cloud.fill"
+        case "rain", "drizzle":
+            return "cloud.rain.fill"
+        case "thunderstorm":
+            return "cloud.bolt.rain.fill"
+        case "snow":
+            return "cloud.snow.fill"
+        case "mist", "smoke", "haze", "dust", "fog", "sand", "ash", "squall", "tornado":
+            return "cloud.fog.fill"
+        default:
+            return "cloud.sun.fill"
         }
     }
 
