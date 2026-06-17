@@ -42,6 +42,8 @@ enum MainMenuDataRoute: Hashable {
     case vendors
     case employee
     case expenses
+    case tip
+    case steps
     case chart
 }
 
@@ -99,9 +101,14 @@ struct MainMenuCoordinator {
         case .expenses:
             if #available(iOS 17.0, *) {
                 ExpenseTrackerView()
+                    .expenseModelContainer()
             } else {
                 Text("Expenses require iOS 17 or later.")
             }
+        case .tip:
+            TipUI()
+        case .steps:
+            StepsTodayView()
         case .chart:
             ChartView()
         }

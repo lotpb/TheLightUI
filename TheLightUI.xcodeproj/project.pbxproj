@@ -181,6 +181,10 @@
 		AF92B8F22678198900729208 /* MapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B8EC2678198900729208 /* MapViewModel.swift */; };
 		AF92B90726781A5500729208 /* UserFormUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B90626781A5500729208 /* UserFormUI.swift */; };
 		AF92B90826781A5500729208 /* UserFormUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B90626781A5500729208 /* UserFormUI.swift */; };
+		AF997FB22FE3244900797FD5 /* TipUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF997FB12FE3244900797FD5 /* TipUI.swift */; };
+		AF997FB32FE3244900797FD5 /* TipUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF997FB12FE3244900797FD5 /* TipUI.swift */; };
+		AF997FB62FE32ABD00797FD5 /* StepsTodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF997FB52FE32ABD00797FD5 /* StepsTodayView.swift */; };
+		AF997FB72FE32ABD00797FD5 /* StepsTodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF997FB52FE32ABD00797FD5 /* StepsTodayView.swift */; };
 		AF9CC6F3279B2C440087E9FC /* ItemModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF9CC6F2279B2C440087E9FC /* ItemModel.swift */; };
 		AF9CC6F5279B2C6B0087E9FC /* ListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF9CC6F4279B2C6B0087E9FC /* ListViewModel.swift */; };
 		AF9CC6F7279B2C9A0087E9FC /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF9CC6F6279B2C9A0087E9FC /* ListView.swift */; };
@@ -352,6 +356,8 @@
 		AF92B8D1267817AC00729208 /* CarouselSliderUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarouselSliderUI.swift; sourceTree = "<group>"; };
 		AF92B8EC2678198900729208 /* MapViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewModel.swift; sourceTree = "<group>"; };
 		AF92B90626781A5500729208 /* UserFormUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserFormUI.swift; sourceTree = "<group>"; };
+		AF997FB12FE3244900797FD5 /* TipUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipUI.swift; sourceTree = "<group>"; };
+		AF997FB52FE32ABD00797FD5 /* StepsTodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepsTodayView.swift; sourceTree = "<group>"; };
 		AF9CC6F2279B2C440087E9FC /* ItemModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemModel.swift; sourceTree = "<group>"; };
 		AF9CC6F4279B2C6B0087E9FC /* ListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewModel.swift; sourceTree = "<group>"; };
 		AF9CC6F6279B2C9A0087E9FC /* ListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
@@ -500,6 +506,8 @@
 				AF9CC6F1279B2C120087E9FC /* ToDo */,
 				AF4F5DDA2FC74EAB0003B277 /* Auth */,
 				AF488F7D2FE02FA200E5F294 /* Expenses */,
+				AF997FB02FE3242A00797FD5 /* Tip */,
+				AF997FB42FE32A9900797FD5 /* Steps */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -777,6 +785,22 @@
 				AF92B8B0267816A600729208 /* SideTabViewUI.swift */,
 			);
 			path = SpotifyUI;
+			sourceTree = "<group>";
+		};
+		AF997FB02FE3242A00797FD5 /* Tip */ = {
+			isa = PBXGroup;
+			children = (
+				AF997FB12FE3244900797FD5 /* TipUI.swift */,
+			);
+			path = Tip;
+			sourceTree = "<group>";
+		};
+		AF997FB42FE32A9900797FD5 /* Steps */ = {
+			isa = PBXGroup;
+			children = (
+				AF997FB52FE32ABD00797FD5 /* StepsTodayView.swift */,
+			);
+			path = Steps;
 			sourceTree = "<group>";
 		};
 		AF9CC6F1279B2C120087E9FC /* ToDo */ = {
@@ -1105,6 +1129,7 @@
 				AFD27C18275BFA5900ED1CD9 /* Date+Helpers.swift in Sources */,
 				AFE4AE0D2FC8698F00F86B2E /* AppDependencies.swift in Sources */,
 				AF86C0682FDF1E3A00F450F9 /* MainMenuCoordinator.swift in Sources */,
+				AF997FB72FE32ABD00797FD5 /* StepsTodayView.swift in Sources */,
 				AFB760A32FE22C78002D1A83 /* MainTopView.swift in Sources */,
 				AF85283E2787930700E7F8D8 /* ImageSaver.swift in Sources */,
 				AF697E872778D1AE00219026 /* URL+.swift in Sources */,
@@ -1126,6 +1151,7 @@
 				AF92B8B3267816A600729208 /* Song.swift in Sources */,
 				AFC2EBED2795AED300ACE275 /* SideMenuBTN.swift in Sources */,
 				AF9CC6FB279B2CF10087E9FC /* NoItemsView.swift in Sources */,
+				AF997FB22FE3244900797FD5 /* TipUI.swift in Sources */,
 				AF4F5E0B2FC75DC40003B277 /* BottomSheetUI.swift in Sources */,
 				AF86C0662FDF1D7400F450F9 /* AppBadgeManager.swift in Sources */,
 				AFDE91D9279337C300302CF2 /* LocationManager.swift in Sources */,
@@ -1170,6 +1196,7 @@
 				AF3AC457268FF1FD00562D20 /* MediaFile.swift in Sources */,
 				AFE4AE092FC8678B00F86B2E /* FirebaseAsyncExtensions.swift in Sources */,
 				AF92B90826781A5500729208 /* UserFormUI.swift in Sources */,
+				AF997FB62FE32ABD00797FD5 /* StepsTodayView.swift in Sources */,
 				AF77D64F2FC7A3FA008D456A /* CustomerFormViewModel.swift in Sources */,
 				AF488F892FE0300200E5F294 /* ExpenseModelContainerModifier.swift in Sources */,
 				AF4F5DC02FC742E40003B277 /* ChatRepository.swift in Sources */,
@@ -1194,6 +1221,7 @@
 				AF86C0692FDF1E3A00F450F9 /* MainMenuCoordinator.swift in Sources */,
 				AF4F5DFA2FC75C340003B277 /* LeadDetailFieldRow.swift in Sources */,
 				AF4F5DFF2FC75C3E0003B277 /* MessageComposeView.swift in Sources */,
+				AF997FB32FE3244900797FD5 /* TipUI.swift in Sources */,
 				AF488F822FE02FC100E5F294 /* ExpenseTrackerViewModel.swift in Sources */,
 				AF86C0632FDF1B3B00F450F9 /* CustomerListViewModel.swift in Sources */,
 				AF92B8992678150400729208 /* GradientUI.swift in Sources */,

@@ -14,6 +14,8 @@
 	<string>TheLight uses Face ID to unlock your existing signed-in session when you choose biometric sign-in.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>TheLight uses your location to show maps, get weather, and share your current location when you choose.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>TheLight uses motion data to show your step count for today.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>TheLight saves generated QR codes to your photo library when you choose Save to Photos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

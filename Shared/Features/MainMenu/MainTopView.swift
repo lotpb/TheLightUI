@@ -3,12 +3,13 @@
 //  TheLightUI
 //
 
+import CoreMotion
 import SwiftUI
 
 // MARK: - Header
 struct MainTopView: View {
     private enum Layout {
-        static let height: CGFloat = 115
+        static let height: CGFloat = 145
         static let cornerRadius: CGFloat = 20
         static let titleSize: CGFloat = 32
     }
@@ -18,8 +19,10 @@ struct MainTopView: View {
     @AppStorage(SettingsUI.backend) private var backEnd: String = "None"
     @State private var currentTemperatureText = "--°F"
     @State private var currentWeatherSystemImage = "cloud.sun.fill"
+    @State private var currentStepsText = "--"
     @State private var isActive = true
 
+    private let pedometer = CMPedometer()
     private let makeWeatherManager: () -> WeatherManaging
     private let makeWeatherLocationProvider: () -> WeatherLocationProviding
 
@@ -50,6 +53,10 @@ struct MainTopView: View {
         statusRow(title: "Backend:", value: backEnd, systemImage: "circle.hexagongrid.fill")
     }
 
+    private var stepsRow: some View {
+        statusRow(title: "Steps:", value: currentStepsText, systemImage: "figure.walk")
+    }
+
     private var weatherRow: some View {
         statusRow(title: "Temp:", value: currentTemperatureText, systemImage: currentWeatherSystemImage)
             .padding(.bottom, 15)
@@ -60,6 +67,8 @@ struct MainTopView: View {
             titleRow
             Divider()
             backendRow
+            Spacer()
+            stepsRow
             Spacer()
             weatherRow
         }
@@ -73,10 +82,13 @@ struct MainTopView: View {
             #if DEBUG
             if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" { return }
             #endif
+            isActive = true
             await loadCurrentTemperature()
+            loadTodaySteps()
         }
         .onDisappear {
             isActive = false
+            pedometer.stopUpdates()
         }
     }
 
@@ -95,6 +107,39 @@ struct MainTopView: View {
             currentTemperatureText = "Unavailable"
             currentWeatherSystemImage = "cloud.sun.fill"
         }
+    }
+
+    @MainActor
+    private func loadTodaySteps() {
+        guard isActive else { return }
+        guard CMPedometer.isStepCountingAvailable() else {
+            currentStepsText = "Unavailable"
+            return
+        }
+
+        let startOfDay = Calendar.current.startOfDay(for: .now)
+        pedometer.queryPedometerData(from: startOfDay, to: .now) { data, error in
+            Task { @MainActor in
+                updateSteps(data: data, error: error)
+            }
+        }
+
+        pedometer.startUpdates(from: startOfDay) { data, error in
+            Task { @MainActor in
+                updateSteps(data: data, error: error)
+            }
+        }
+    }
+
+    @MainActor
+    private func updateSteps(data: CMPedometerData?, error: Error?) {
+        guard isActive else { return }
+        guard error == nil, let data else {
+            currentStepsText = "Unavailable"
+            return
+        }
+
+        currentStepsText = data.numberOfSteps.intValue.formatted(.number)
     }
 
     private func systemImage(for weather: API.CurrentWeather.Response.WeatherResponse?) -> String {
