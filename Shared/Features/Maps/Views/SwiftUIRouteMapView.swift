@@ -12,7 +12,7 @@ struct SwiftUIRouteMapView: View {
     @ObservedObject var manager: LocationManager
     @Binding var travelTime: Double
     @Binding var distance: Double
-    @Binding var directions: [String]
+    @Binding var directions: [MapRouteStep]
     @Binding var routeStatus: RouteStatus
     let mode: MapMode
     @Binding var region: MKCoordinateRegion
@@ -33,7 +33,7 @@ struct SwiftUIRouteMapView: View {
         manager: LocationManager,
         travelTime: Binding<Double>,
         distance: Binding<Double>,
-        directions: Binding<[String]>,
+        directions: Binding<[MapRouteStep]>,
         routeStatus: Binding<RouteStatus>,
         mode: MapMode,
         region: Binding<MKCoordinateRegion>,
