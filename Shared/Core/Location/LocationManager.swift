@@ -8,12 +8,21 @@
 import CoreLocation
 import MapKit
 
+/// A modern, Swift-concurrency-friendly location manager for MapKit.
+/// - Publishes region updates for map camera.
+/// - Tracks authorization status and current placemark.
+/// - Provides follow/pause controls to conserve power.
 @MainActor
 final class LocationManager: NSObject, ObservableObject {
+    /// The visible region used by Map views.
     @Published var region = MKCoordinateRegion.defaultRegion
+    /// The most recently reported location from Core Location.
     @Published private(set) var location: CLLocation?
+    /// The current authorization status.
     @Published private(set) var locationStatus: CLAuthorizationStatus = .notDetermined
+    /// The reverse-geocoded placemark for the latest location.
     @Published private(set) var currentPlacemark: CLPlacemark?
+    /// Whether the map should follow the user's location.
     @Published private(set) var isFollowingLocation = true
 
     private let manager = CLLocationManager()
@@ -43,19 +52,20 @@ final class LocationManager: NSObject, ObservableObject {
 
     func reverseGeocode(location: CLLocation?) {
         guard let location else { return }
-
         geocoder.cancelGeocode()
-        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
-            if let error {
+        Task { @MainActor in
+            do {
+                let placemarks = try await geocoder.reverseGeocodeLocation(location)
+                self.currentPlacemark = placemarks.first
+            } catch is CancellationError {
+                // Ignored: a newer geocode request superseded this one
+            } catch {
                 print("Error reverse geocoding location: \(error.localizedDescription)")
-            }
-
-            Task { @MainActor in
-                self?.currentPlacemark = placemarks?.first
             }
         }
     }
 
+    /// Centers the map on the latest known location and resumes following.
     func focusLocation() {
         isFollowingLocation = true
         guard let location else { return }
@@ -80,7 +90,7 @@ final class LocationManager: NSObject, ObservableObject {
         case .authorizedAlways, .authorizedWhenInUse:
             manager.startUpdatingLocation()
         case .notDetermined:
-            updateAuthorizationStatus(.notDetermined)
+            manager.requestWhenInUseAuthorization()
         case .denied, .restricted:
             stopUpdating()
         @unknown default:
@@ -92,18 +102,20 @@ final class LocationManager: NSObject, ObservableObject {
         manager.stopUpdatingLocation()
     }
 
+    /// Temporarily stops following the user's location to conserve power.
     func pauseFollowingLocation() {
         isFollowingLocation = false
         stopUpdating()
     }
 
+    /// Centers the map on the latest known location and resumes following.
     func resumeFollowingLocation() {
         isFollowingLocation = true
         focusLocation()
         startUpdating()
-        requestLocation()
     }
 
+    /// Permanently stop following until explicitly resumed.
     func stopFollowingLocation() {
         pauseFollowingLocation()
     }
@@ -111,10 +123,11 @@ final class LocationManager: NSObject, ObservableObject {
     private func configureLocationManager() {
         locationStatus = manager.authorizationStatus
         manager.delegate = self
-        manager.activityType = .automotiveNavigation
-        manager.desiredAccuracy = kCLLocationAccuracyBest
-        manager.distanceFilter = kCLDistanceFilterNone
+        manager.activityType = .otherNavigation
+        manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+        manager.distanceFilter = 5
         manager.pausesLocationUpdatesAutomatically = true
+        manager.allowsBackgroundLocationUpdates = false
     }
 
     private func handleAuthorizationStatus(_ status: CLAuthorizationStatus) {
@@ -156,12 +169,10 @@ extension LocationManager: @preconcurrency CLLocationManagerDelegate {
         handleAuthorizationStatus(manager.authorizationStatus)
     }
 
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        handleAuthorizationStatus(status)
-    }
-
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let latestLocation = locations.last else { return }
+        // Discard invalid or stale readings
+        guard latestLocation.horizontalAccuracy >= 0, abs(latestLocation.timestamp.timeIntervalSinceNow) < 10 else { return }
 
         location = latestLocation
         if isFollowingLocation {
@@ -174,3 +185,4 @@ extension LocationManager: @preconcurrency CLLocationManagerDelegate {
         print("Error getting location: \(error.localizedDescription)")
     }
 }
+

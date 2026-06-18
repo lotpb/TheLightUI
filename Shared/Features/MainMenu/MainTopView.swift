@@ -54,7 +54,7 @@ struct MainTopView: View {
     }
 
     private var stepsRow: some View {
-        statusRow(title: "Steps:", value: currentStepsText, systemImage: "figure.walk", iconColor: .mint)
+        statusRow(title: "Steps:", value: currentStepsText, systemImage: "figure.walk", iconColor: .blue)
     }
 
     private var weatherRow: some View {

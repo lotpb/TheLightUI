@@ -288,7 +288,7 @@ struct LoginView: View {
                 .accessibilityIdentifier("loginStatusMessage")
 
             let savedLat = SecureSettingsStore.loadString(forKey: SettingsUI.latitudeKey)
-            let savedLon = SecureSettingsStore.loadString(forKey: SettingsUI.longtitudeKey)
+            let savedLon = SecureSettingsStore.loadString(forKey: SettingsUI.longitudeKey)
             if !savedLat.isEmpty || !savedLon.isEmpty {
                 Text("Lat: \(savedLat)  Lon: \(savedLon)")
                     .font(.caption2)
@@ -327,7 +327,7 @@ struct LoginView: View {
         locationCaptureManager.requestSingleLocation { coordinate in
             guard let coordinate else { return }
             SecureSettingsStore.saveString(String(coordinate.latitude), forKey: SettingsUI.latitudeKey)
-            SecureSettingsStore.saveString(String(coordinate.longitude), forKey: SettingsUI.longtitudeKey)
+            SecureSettingsStore.saveString(String(coordinate.longitude), forKey: SettingsUI.longitudeKey)
         }
     }
 }

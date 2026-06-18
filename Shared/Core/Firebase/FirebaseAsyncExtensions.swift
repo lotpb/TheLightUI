@@ -37,21 +37,10 @@ extension Auth {
         password: String,
         missingUserIdError: Error = FirebaseAsyncError.missingUserId
     ) async throws -> String {
-        try await withCheckedThrowingContinuation { continuation in
-            signIn(withEmail: email, password: password) { result, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-
-                guard let uid = result?.user.uid, !uid.isEmpty else {
-                    continuation.resume(throwing: missingUserIdError)
-                    return
-                }
-
-                continuation.resume(returning: uid)
-            }
-        }
+        let result = try await signIn(withEmail: email, password: password)
+        let uid = result.user.uid
+        guard !uid.isEmpty else { throw missingUserIdError }
+        return uid
     }
 
     func createUserIdAsync(
@@ -59,47 +48,20 @@ extension Auth {
         password: String,
         missingUserIdError: Error = FirebaseAsyncError.missingUserId
     ) async throws -> String {
-        try await withCheckedThrowingContinuation { continuation in
-            createUser(withEmail: email, password: password) { result, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-
-                guard let uid = result?.user.uid, !uid.isEmpty else {
-                    continuation.resume(throwing: missingUserIdError)
-                    return
-                }
-
-                continuation.resume(returning: uid)
-            }
-        }
+        let result = try await createUser(withEmail: email, password: password)
+        let uid = result.user.uid
+        guard !uid.isEmpty else { throw missingUserIdError }
+        return uid
     }
 
     func sendPasswordResetAsync(email: String) async throws {
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            sendPasswordReset(withEmail: email) { error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume()
-                }
-            }
-        }
+        try await sendPasswordReset(withEmail: email)
     }
 }
 
 extension User {
     func sendEmailVerificationAsync() async throws {
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            sendEmailVerification { error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume()
-                }
-            }
-        }
+        try await sendEmailVerification()
     }
 }
 
@@ -125,17 +87,8 @@ extension CollectionReference {
     func getDocumentsAsync(
         missingSnapshotError: Error = FirebaseAsyncError.missingQuerySnapshot
     ) async throws -> QuerySnapshot {
-        try await withCheckedThrowingContinuation { continuation in
-            getDocuments { snapshot, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else if let snapshot {
-                    continuation.resume(returning: snapshot)
-                } else {
-                    continuation.resume(throwing: missingSnapshotError)
-                }
-            }
-        }
+        let snapshot = try await getDocuments()
+        return snapshot
     }
 }
 
@@ -143,55 +96,22 @@ extension DocumentReference {
     func getDocumentAsync(
         missingSnapshotError: Error = FirebaseAsyncError.missingDocumentSnapshot
     ) async throws -> DocumentSnapshot {
-        try await withCheckedThrowingContinuation { continuation in
-            getDocument { snapshot, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else if let snapshot {
-                    continuation.resume(returning: snapshot)
-                } else {
-                    continuation.resume(throwing: missingSnapshotError)
-                }
-            }
-        }
+        let snapshot = try await getDocument()
+        return snapshot
     }
 
     func setDataAsync(_ data: [String: Any]) async throws {
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            setData(data) { error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume()
-                }
-            }
-        }
+        try await setData(data)
     }
 
     func deleteAsync() async throws {
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            delete { error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume()
-                }
-            }
-        }
+        try await delete()
     }
 }
 
 extension WriteBatch {
     func commitAsync() async throws {
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            commit { error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume()
-                }
-            }
-        }
+        try await commit()
     }
 }
 
@@ -202,7 +122,7 @@ extension StorageReference {
                 if let error {
                     continuation.resume(throwing: error)
                 } else {
-                    continuation.resume()
+                    continuation.resume(returning: ())
                 }
             }
         }
@@ -224,3 +144,4 @@ extension StorageReference {
         }
     }
 }
+
