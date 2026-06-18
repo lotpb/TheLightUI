@@ -38,6 +38,9 @@ struct TipUI: View {
             breakdownSection
         }
         .listStyle(.insetGrouped)
+        .safeAreaInset(edge: .bottom) {
+            Color.clear.frame(height: 72)
+        }
         .navigationTitle("Tip Calculator")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

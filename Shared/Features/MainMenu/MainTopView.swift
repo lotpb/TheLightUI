@@ -54,7 +54,7 @@ struct MainTopView: View {
     }
 
     private var stepsRow: some View {
-        statusRow(title: "Steps:", value: currentStepsText, systemImage: "figure.walk")
+        statusRow(title: "Steps:", value: currentStepsText, systemImage: "figure.walk", iconColor: .mint)
     }
 
     private var weatherRow: some View {
@@ -163,16 +163,29 @@ struct MainTopView: View {
         }
     }
 
-    private func statusRow(title: String, value: String, systemImage: String) -> some View {
+    private func statusRow(title: String, value: String, systemImage: String, iconColor: Color? = nil) -> some View {
         HStack {
             Text(title)
             Spacer()
             Text(value)
+            statusIcon(systemImage: systemImage, iconColor: iconColor)
+        }
+        .font(.callout.bold())
+        .padding(.horizontal)
+    }
+
+    @ViewBuilder
+    private func statusIcon(systemImage: String, iconColor: Color?) -> some View {
+        if let iconColor {
+            Image(systemName: systemImage)
+                .symbolRenderingMode(.monochrome)
+                .foregroundStyle(iconColor)
+                .font(.callout)
+                .imageScale(.large)
+        } else {
             Image(systemName: systemImage)
                 .font(.callout)
                 .imageScale(.large)
         }
-        .font(.callout.bold())
-        .padding(.horizontal)
     }
 }
