@@ -6,9 +6,9 @@
 import SwiftUI
 
 struct TipUI: View {
-    @State private var billAmount = 82.50
+    @State private var billAmount = 0.00
     @State private var tipPercent = 0.20
-    @State private var splitCount = 2
+    @State private var splitCount = 1
     @FocusState private var isBillAmountFocused: Bool
 
     private let presetTipPercents = [0.15, 0.18, 0.20, 0.25]
