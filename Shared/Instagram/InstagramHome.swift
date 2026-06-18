@@ -344,7 +344,7 @@ private struct InstagramProfileSummaryView: View {
                     .accessibilityLabel("Profile photo")
 
                 VStack(spacing: 6) {
-                    Text("Kavsoft Studio")
+                    Text("TheLight Studio")
                         .font(.title2.weight(.bold))
 
                     Text("Building SwiftUI interface studies and practical Apple platform patterns.")
@@ -397,18 +397,11 @@ private struct InstagramHomeTabBar: View {
     var body: some View {
         HStack(spacing: 0) {
             ForEach(InstagramHomeTab.allCases) { tab in
-                Button {
-                    withAnimation(.snappy) {
-                        currentTab = tab
-                    }
-                } label: {
-                    Image(systemName: currentTab == tab ? tab.selectedSystemImage : tab.systemImage)
-                        .font(.title3)
-                        .frame(maxWidth: .infinity, minHeight: 46)
-                        .foregroundStyle(currentTab == tab ? tab.selectedColor : .secondary)
-                }
-                .accessibilityLabel(tab.accessibilityLabel)
-                .accessibilityAddTraits(currentTab == tab ? .isSelected : [])
+                InstagramHomeTabButton(
+                    tab: tab,
+                    isSelected: currentTab == tab,
+                    select: { select(tab) }
+                )
             }
         }
         .padding(.horizontal, 8)
@@ -416,6 +409,29 @@ private struct InstagramHomeTabBar: View {
         .padding(.bottom, 8)
         .background(currentTab.tabBarBackground)
         .overlay(Divider(), alignment: .top)
+    }
+
+    private func select(_ tab: InstagramHomeTab) {
+        withAnimation(.snappy) {
+            currentTab = tab
+        }
+    }
+}
+
+private struct InstagramHomeTabButton: View {
+    let tab: InstagramHomeTab
+    let isSelected: Bool
+    let select: () -> Void
+
+    var body: some View {
+        Button(action: select) {
+            Image(systemName: isSelected ? tab.selectedSystemImage : tab.systemImage)
+                .font(.title3)
+                .frame(maxWidth: .infinity, minHeight: 46)
+                .foregroundStyle(isSelected ? tab.selectedColor : .secondary)
+        }
+        .accessibilityLabel(tab.accessibilityLabel)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 
@@ -469,15 +485,23 @@ private enum InstagramHomeTab: String, CaseIterable, Identifiable {
     }
 
     var selectedColor: Color {
-        self == .reels ? .white : .primary
+        isImmersive ? .white : .primary
     }
 
     var backgroundColor: Color {
-        self == .reels ? .black : Color(.systemBackground)
+        surfaceColor
     }
 
     var tabBarBackground: Color {
-        self == .reels ? .black : Color(.systemBackground)
+        surfaceColor
+    }
+
+    private var surfaceColor: Color {
+        isImmersive ? .black : Color(.systemBackground)
+    }
+
+    private var isImmersive: Bool {
+        self == .reels
     }
 }
 
@@ -517,12 +541,12 @@ private struct InstagramFeedPost: Identifiable {
 
     static let samplePosts = [
         InstagramFeedPost(
-            author: "Kavsoft Studio",
+            author: "TheLight Studio",
             location: "Cupertino, California",
             avatarImageName: "taylor_swift_profile",
             imageName: "post1",
             likesText: "1,248 likes",
-            caption: "Kavsoft Studio New SwiftUI interaction study with cleaner motion and a tighter content layout.",
+            caption: "TheLight Studio New SwiftUI interaction study with cleaner motion and a tighter content layout.",
             timeAgo: "12 minutes ago"
         ),
         InstagramFeedPost(
@@ -574,25 +598,24 @@ private struct InstagramActivity: Identifiable {
     static let sampleActivities = [
         InstagramActivity(title: "New follower", subtitle: "Design Notes started following you.", systemImage: "person.badge.plus", color: .blue),
         InstagramActivity(title: "Post liked", subtitle: "Swift Daily liked your latest post.", systemImage: "heart.fill", color: .pink),
-        InstagramActivity(title: "Comment", subtitle: "Kavsoft Studio commented on your reel.", systemImage: "bubble.right.fill", color: .green),
+        InstagramActivity(title: "Comment", subtitle: "TheLight Studio commented on your reel.", systemImage: "bubble.right.fill", color: .green),
         InstagramActivity(title: "Mention", subtitle: "You were mentioned in a story.", systemImage: "at", color: .orange)
     ]
 }
 
-@available(iOS 16.0, *)
-struct InstagramHome_Previews: PreviewProvider {
-    static var previews: some View {
-        Group {
-            InstagramHome()
-                .previewDisplayName("Instagram Home - Light")
+@available(iOS 17.0, *)
+#Preview("Instagram Home - Light") {
+    InstagramHome()
+}
 
-            InstagramHome()
-                .preferredColorScheme(.dark)
-                .previewDisplayName("Instagram Home - Dark")
+@available(iOS 17.0, *)
+#Preview("Instagram Home - Dark") {
+    InstagramHome()
+        .preferredColorScheme(.dark)
+}
 
-            InstagramHome()
-                .environment(\.sizeCategory, .accessibilityExtraExtraExtraLarge)
-                .previewDisplayName("Instagram Home - Dynamic Type")
-        }
-    }
+@available(iOS 17.0, *)
+#Preview("Instagram Home - Dynamic Type") {
+    InstagramHome()
+        .environment(\.sizeCategory, .accessibilityExtraExtraExtraLarge)
 }

@@ -53,7 +53,7 @@ struct UserFormUI: View {
 
     private func loadSecureSettings() {
         storedLatitude = SecureSettingsStore.loadString(forKey: SettingsUI.latitudeKey)
-        storedLongitude = SecureSettingsStore.loadString(forKey: SettingsUI.longtitudeKey)
+        storedLongitude = SecureSettingsStore.loadString(forKey: SettingsUI.longitudeKey)
         storedFirstName = SecureSettingsStore.loadString(forKey: SettingsUI.firstNameKey)
         storedLastName = SecureSettingsStore.loadString(forKey: SettingsUI.lastNameKey)
         storedPhone = SecureSettingsStore.loadString(forKey: SettingsUI.phoneKey)

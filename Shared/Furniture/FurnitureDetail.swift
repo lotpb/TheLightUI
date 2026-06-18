@@ -18,7 +18,9 @@ struct FurnitureDetailProduct {
     let sizes: [String]
     let treatment: String
     let colors: [Color]
+}
 
+extension FurnitureDetailProduct {
     static let defaultProduct = FurnitureDetailProduct(
         title: "Luxury Swedish Chair",
         imageName: "chair_1",
@@ -34,10 +36,19 @@ struct FurnitureDetailProduct {
 // MARK: - Detail View
 
 struct FurnitureDetail: View {
+    fileprivate enum Layout {
+        static let maxContentWidth: CGFloat = 700
+        static let detailCornerRadius: CGFloat = 30
+        static let bottomBarCornerRadius: CGFloat = 60
+        static let buttonCornerRadius: CGFloat = 10
+        static let toolbarButtonCornerRadius: CGFloat = 8
+        static let colorDotSize: CGFloat = 24
+        static let quantityButtonSize: CGFloat = 30
+    }
+
     @Environment(\.dismiss) private var dismiss
 
     private let product: FurnitureDetailProduct
-    private let maxWidthForIpad: CGFloat = 700
 
     init(product: FurnitureDetailProduct = .defaultProduct) {
         self.product = product
@@ -45,17 +56,22 @@ struct FurnitureDetail: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            CustomColor.linenColor
+            FurnitureDetailStyle.background
                 .ignoresSafeArea()
 
             content
-            bottomBar
+            BottomBar(product: product)
         }
-        .frame(maxWidth: maxWidthForIpad)
+        .frame(maxWidth: Layout.maxContentWidth)
         .navigationBarBackButtonHidden(true)
         .toolbar {
-            leadingToolbarItem
-            trailingToolbarItem
+            ToolbarItem(placement: .navigationBarLeading) {
+                BackButton(action: dismiss.callAsFunction)
+            }
+
+            ToolbarItem(placement: .navigationBarTrailing) {
+                FavoriteButton()
+            }
         }
     }
 
@@ -64,7 +80,7 @@ struct FurnitureDetail: View {
             productImage
             DescriptionView(product: product)
         }
-        .foregroundColor(.black)
+        .foregroundStyle(FurnitureDetailStyle.primaryText)
         .ignoresSafeArea(edges: .top)
     }
 
@@ -73,28 +89,15 @@ struct FurnitureDetail: View {
             .resizable()
             .aspectRatio(1, contentMode: .fit)
             .ignoresSafeArea(edges: .top)
+            .accessibilityLabel(product.title)
     }
+}
 
-    private var bottomBar: some View {
-        BottomBar(product: product)
-    }
-
-    private var leadingToolbarItem: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarLeading) {
-            BackButton {
-                dismiss()
-            }
-        }
-    }
-
-    private var trailingToolbarItem: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarTrailing) {
-            Button(action: {}) {
-                Image(systemName: "star")
-                    .foregroundColor(.black)
-            }
-        }
-    }
+private enum FurnitureDetailStyle {
+    static let background = CustomColor.linenColor
+    static let primaryText = Color.black
+    static let secondaryText = Color.black.opacity(0.6)
+    static let controlBackground = Color.white
 }
 
 // MARK: - Description View
@@ -107,23 +110,18 @@ private struct DescriptionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(product.title)
-                .font(.title)
-                .fontWeight(.bold)
+                .font(.title.weight(.bold))
 
-            ratingView
+            RatingView(rating: product.rating)
             descriptionSection
             infoSection
             colorsAndQuantitySection
         }
         .padding()
         .padding(.top)
-        .background(CustomColor.linenColor)
-        .clipShape(CustomCorners(corners: [.topLeft, .topRight], radius: 30))
+        .background(FurnitureDetailStyle.background)
+        .clipShape(CustomCorners(corners: [.topLeft, .topRight], radius: FurnitureDetail.Layout.detailCornerRadius))
         .offset(y: -30)
-    }
-
-    private var ratingView: some View {
-        RatingView(rating: product.rating)
     }
 
     private var descriptionSection: some View {
@@ -133,34 +131,26 @@ private struct DescriptionView: View {
 
             Text(product.description)
                 .lineSpacing(8)
-                .opacity(0.6)
+                .foregroundStyle(FurnitureDetailStyle.secondaryText)
         }
         .padding(.vertical, 8)
     }
 
     private var infoSection: some View {
         HStack(alignment: .top) {
-            sizeSection
+            ProductInfoColumn(title: "Size", values: product.sizes)
 
             Spacer()
 
-            treatmentSection
+            ProductInfoColumn(title: "Treatment", values: [product.treatment])
         }
         .padding(.vertical)
-    }
-
-    private var sizeSection: some View {
-        ProductInfoColumn(title: "Size", values: product.sizes)
-    }
-
-    private var treatmentSection: some View {
-        ProductInfoColumn(title: "Treatment", values: [product.treatment])
     }
 
     private var colorsAndQuantitySection: some View {
         HStack {
             colorsSection
-            quantityStepper
+            QuantityStepper(quantity: $quantity)
         }
     }
 
@@ -170,16 +160,13 @@ private struct DescriptionView: View {
                 .fontWeight(.semibold)
 
             HStack {
-                ForEach(Array(product.colors.enumerated()), id: \.offset) { _, color in
+                ForEach(Array(product.colors.enumerated()), id: \.offset) { index, color in
                     ColorDotView(color: color)
+                        .accessibilityLabel("Color option \(index + 1)")
                 }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private var quantityStepper: some View {
-        QuantityStepper(quantity: $quantity)
     }
 }
 
@@ -192,25 +179,28 @@ private struct BottomBar: View {
         HStack {
             Text(product.price)
                 .font(.title)
-                .foregroundColor(.black)
+                .foregroundStyle(FurnitureDetailStyle.primaryText)
 
             Spacer()
 
             Button(action: {}) {
                 Text("Add to Cart")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.black)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(FurnitureDetailStyle.primaryText)
                     .padding()
                     .padding(.horizontal, 8)
-                    .background(Color.white)
-                    .cornerRadius(10)
+                    .background(
+                        FurnitureDetailStyle.controlBackground,
+                        in: RoundedRectangle(cornerRadius: FurnitureDetail.Layout.buttonCornerRadius, style: .continuous)
+                    )
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Add \(product.title) to cart")
         }
         .padding()
         .padding(.horizontal)
-        .background(Color.white)
-        .clipShape(CustomCorners(corners: .topLeft, radius: 60))
+        .background(FurnitureDetailStyle.controlBackground)
+        .clipShape(CustomCorners(corners: .topLeft, radius: FurnitureDetail.Layout.bottomBarCornerRadius))
         .ignoresSafeArea(edges: .bottom)
     }
 }
@@ -218,18 +208,24 @@ private struct BottomBar: View {
 private struct RatingView: View {
     let rating: Double
 
+    private var filledStarCount: Int {
+        Int(rating.rounded(.down))
+    }
+
     var body: some View {
         HStack(spacing: 4) {
             ForEach(0..<5, id: \.self) { index in
-                Image(systemName: Double(index) < rating.rounded(.down) ? "star.fill" : "star")
+                Image(systemName: index < filledStarCount ? "star.fill" : "star")
             }
 
             Text("(\(rating, specifier: "%.1f"))")
-                .opacity(0.5)
+                .foregroundStyle(FurnitureDetailStyle.secondaryText)
                 .padding(.leading, 8)
 
             Spacer()
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Rating \(rating, specifier: "%.1f") out of 5")
     }
 }
 
@@ -240,12 +236,11 @@ private struct ProductInfoColumn: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
-                .font(.system(size: 16))
-                .fontWeight(.semibold)
+                .font(.system(size: 16, weight: .semibold))
 
             ForEach(values, id: \.self) { value in
                 Text(value)
-                    .opacity(0.6)
+                    .foregroundStyle(FurnitureDetailStyle.secondaryText)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -258,30 +253,40 @@ private struct QuantityStepper: View {
     var body: some View {
         HStack {
             Button {
-                quantity = max(1, quantity - 1)
+                decrement()
             } label: {
                 Image(systemName: "minus")
-                    .padding(8)
+                    .frame(width: FurnitureDetail.Layout.quantityButtonSize, height: FurnitureDetail.Layout.quantityButtonSize)
+                    .overlay(Circle().stroke(FurnitureDetailStyle.primaryText))
             }
-            .frame(width: 30, height: 30)
-            .overlay(Circle().stroke())
-            .foregroundColor(.black)
+            .disabled(quantity == 1)
+            .foregroundStyle(FurnitureDetailStyle.primaryText)
+            .accessibilityLabel("Decrease quantity")
 
             Text("\(quantity)")
-                .font(.title2)
-                .fontWeight(.semibold)
+                .font(.title2.weight(.semibold))
                 .padding(.horizontal, 8)
+                .monospacedDigit()
+                .accessibilityLabel("Quantity \(quantity)")
 
             Button {
-                quantity += 1
+                increment()
             } label: {
                 Image(systemName: "plus")
-                    .foregroundColor(.black)
-                    .padding(8)
-                    .background(Color.white)
-                    .clipShape(Circle())
+                    .frame(width: FurnitureDetail.Layout.quantityButtonSize, height: FurnitureDetail.Layout.quantityButtonSize)
+                    .foregroundStyle(FurnitureDetailStyle.primaryText)
+                    .background(FurnitureDetailStyle.controlBackground, in: Circle())
             }
+            .accessibilityLabel("Increase quantity")
         }
+    }
+
+    private func decrement() {
+        quantity = max(1, quantity - 1)
+    }
+
+    private func increment() {
+        quantity += 1
     }
 }
 
@@ -290,8 +295,22 @@ private struct ColorDotView: View {
 
     var body: some View {
         color
-            .frame(width: 24, height: 24)
+            .frame(width: FurnitureDetail.Layout.colorDotSize, height: FurnitureDetail.Layout.colorDotSize)
             .clipShape(Circle())
+    }
+}
+
+private struct FavoriteButton: View {
+    @State private var isFavorite = false
+
+    var body: some View {
+        Button {
+            isFavorite.toggle()
+        } label: {
+            Image(systemName: isFavorite ? "star.fill" : "star")
+                .foregroundStyle(FurnitureDetailStyle.primaryText)
+        }
+        .accessibilityLabel(isFavorite ? "Remove from favorites" : "Add to favorites")
     }
 }
 
@@ -301,11 +320,14 @@ private struct BackButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: "chevron.backward")
-                .foregroundColor(.black)
+                .foregroundStyle(FurnitureDetailStyle.primaryText)
                 .padding(12)
-                .background(Color.white)
-                .cornerRadius(8)
+                .background(
+                    FurnitureDetailStyle.controlBackground,
+                    in: RoundedRectangle(cornerRadius: FurnitureDetail.Layout.toolbarButtonCornerRadius, style: .continuous)
+                )
         }
+        .accessibilityLabel("Back")
     }
 }
 

@@ -9,14 +9,43 @@ import SwiftUI
 
 // MARK: - Model
 
+private enum FurnitureCategory: String, CaseIterable, Identifiable {
+    case all = "All"
+    case chair = "Chair"
+    case sofa = "Sofa"
+    case lamp = "Lamp"
+    case kitchen = "Kitchen"
+    case table = "Table"
+
+    var id: String { rawValue }
+}
+
 private struct FurnitureProduct: Identifiable {
-    let id = UUID()
+    let id: String
     let name: String
     let imageName: String
-    let category: String
+    let category: FurnitureCategory
     let price: String
     let rating: Int
     let description: String
+
+    init(
+        id: String = UUID().uuidString,
+        name: String,
+        imageName: String,
+        category: FurnitureCategory,
+        price: String,
+        rating: Int,
+        description: String
+    ) {
+        self.id = id
+        self.name = name
+        self.imageName = imageName
+        self.category = category
+        self.price = price
+        self.rating = rating
+        self.description = description
+    }
 
     var detailProduct: FurnitureDetailProduct {
         FurnitureDetailProduct(
@@ -37,7 +66,7 @@ private extension FurnitureProduct {
         FurnitureProduct(
             name: "Luxury Swedish Chair",
             imageName: "chair_1",
-            category: "Chair",
+            category: .chair,
             price: "$1299",
             rating: 5,
             description: "A contemporary chair based on modern craft, with a simple frame and polished lounge proportions."
@@ -45,7 +74,7 @@ private extension FurnitureProduct {
         FurnitureProduct(
             name: "Linen Lounge Chair",
             imageName: "chair_2",
-            category: "Chair",
+            category: .chair,
             price: "$899",
             rating: 4,
             description: "A soft linen lounge chair designed for calm reading corners and relaxed living rooms."
@@ -53,7 +82,7 @@ private extension FurnitureProduct {
         FurnitureProduct(
             name: "Modern Reading Chair",
             imageName: "chair_3",
-            category: "Chair",
+            category: .chair,
             price: "$1049",
             rating: 5,
             description: "A structured reading chair with generous support and a refined modern profile."
@@ -61,7 +90,7 @@ private extension FurnitureProduct {
         FurnitureProduct(
             name: "Soft Accent Chair",
             imageName: "chair_4",
-            category: "Chair",
+            category: .chair,
             price: "$749",
             rating: 4,
             description: "A compact accent chair with soft edges for bedrooms, offices, and small sitting areas."
@@ -77,9 +106,10 @@ private extension FurnitureProduct {
 
 struct FurnitureUI: View {
     @State private var search = ""
-    @State private var selectedCategory = "All"
+    @State private var selectedCategory = FurnitureCategory.all
+    @State private var selectedNavItem = FurnitureNavItem.home
 
-    private let categories = ["All", "Chair", "Sofa", "Lamp", "Kitchen", "Table"]
+    private let categories = FurnitureCategory.allCases
     private let popularProducts = FurnitureProduct.popular
     private let bestProducts = FurnitureProduct.best
 
@@ -96,7 +126,7 @@ struct FurnitureUI: View {
             ZStack(alignment: .bottom) {
                 FurnitureBackground()
                 content
-                BottomNavBarView()
+                BottomNavBarView(selectedItem: $selectedNavItem)
             }
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -136,7 +166,7 @@ struct FurnitureUI: View {
         let trimmedSearch = search.trimmingCharacters(in: .whitespacesAndNewlines)
 
         return products.filter { product in
-            let matchesCategory = selectedCategory == "All" || product.category == selectedCategory
+            let matchesCategory = selectedCategory == .all || product.category == selectedCategory
             let matchesSearch = trimmedSearch.isEmpty || product.name.localizedCaseInsensitiveContains(trimmedSearch)
             return matchesCategory && matchesSearch
         }
@@ -148,7 +178,6 @@ private enum FurnitureStyle {
     static let secondaryInk = Color(red: 0.42, green: 0.45, blue: 0.50)
     static let accent = Color(red: 0.12, green: 0.55, blue: 0.52)
     static let coral = Color(red: 0.90, green: 0.45, blue: 0.36)
-    static let card = Color.white.opacity(0.82)
     static let control = Color.white.opacity(0.72)
 }
 
@@ -265,6 +294,10 @@ private struct ProductCardView: View {
     let product: FurnitureProduct
     let size: CGFloat
 
+    private var imageHeight: CGFloat {
+        178 * (size / 214)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             productImage
@@ -286,7 +319,7 @@ private struct ProductCardView: View {
             Image(product.imageName)
                 .resizable()
                 .scaledToFill()
-                .frame(width: size - 24, height: 178 * (size / 214))
+                .frame(width: size - 24, height: imageHeight)
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
 
             Image(systemName: "heart")
@@ -300,7 +333,7 @@ private struct ProductCardView: View {
 
     private var productInfo: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(product.category)
+            Text(product.category.rawValue)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(FurnitureStyle.accent)
 
@@ -336,7 +369,7 @@ private struct ProductCardView: View {
 private struct AppBarView: View {
     var body: some View {
         HStack {
-            IconButton(systemImage: "line.3.horizontal") {}
+            IconButton(systemImage: "line.3.horizontal", accessibilityLabel: "Open menu") {}
 
             Spacer()
 
@@ -347,6 +380,7 @@ private struct AppBarView: View {
                 .clipShape(Circle())
                 .overlay(Circle().stroke(.white.opacity(0.9), lineWidth: 2))
                 .shadow(color: .black.opacity(0.08), radius: 10, x: 0, y: 6)
+                .accessibilityLabel("Profile")
         }
         .padding(.horizontal, 20)
     }
@@ -375,7 +409,7 @@ private struct SearchAndScanView: View {
     var body: some View {
         HStack(spacing: 12) {
             searchField
-            IconButton(systemImage: "qrcode.viewfinder") {}
+            IconButton(systemImage: "qrcode.viewfinder", accessibilityLabel: "Scan furniture") {}
         }
         .padding(.horizontal, 20)
     }
@@ -399,6 +433,7 @@ private struct SearchAndScanView: View {
 
 private struct IconButton: View {
     let systemImage: String
+    let accessibilityLabel: String
     let action: () -> Void
 
     var body: some View {
@@ -411,31 +446,37 @@ private struct IconButton: View {
                 .overlay(Circle().stroke(.white.opacity(0.72), lineWidth: 1))
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(accessibilityLabel)
     }
 }
 
 // MARK: - Categories
 
 private struct CategorySelectorView: View {
-    let categories: [String]
+    let categories: [FurnitureCategory]
 
-    @Binding var selectedCategory: String
+    @Binding var selectedCategory: FurnitureCategory
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
-                ForEach(categories, id: \.self) { category in
+                ForEach(categories) { category in
                     Button {
-                        withAnimation(.spring(response: 0.25, dampingFraction: 0.85)) {
-                            selectedCategory = category
-                        }
+                        select(category)
                     } label: {
-                        CategoryView(isActive: selectedCategory == category, text: category)
+                        CategoryView(isActive: selectedCategory == category, text: category.rawValue)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityAddTraits(selectedCategory == category ? .isSelected : [])
                 }
             }
             .padding(.horizontal, 20)
+        }
+    }
+
+    private func select(_ category: FurnitureCategory) {
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.85)) {
+            selectedCategory = category
         }
     }
 }
@@ -460,13 +501,46 @@ private struct CategoryView: View {
 
 // MARK: - Bottom Navigation
 
+private enum FurnitureNavItem: String, CaseIterable, Identifiable {
+    case home
+    case favorites
+    case cart
+    case profile
+
+    var id: String { rawValue }
+
+    var systemImage: String {
+        switch self {
+        case .home: return "house.fill"
+        case .favorites: return "heart"
+        case .cart: return "cart"
+        case .profile: return "person"
+        }
+    }
+
+    var accessibilityLabel: String {
+        switch self {
+        case .home: return "Home"
+        case .favorites: return "Favorites"
+        case .cart: return "Cart"
+        case .profile: return "Profile"
+        }
+    }
+}
+
 private struct BottomNavBarView: View {
-    private let items = ["house.fill", "heart", "cart", "person"]
+    @Binding var selectedItem: FurnitureNavItem
 
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(items, id: \.self) { item in
-                BottomNavBarItem(systemImage: item, isActive: item == items.first) {}
+            ForEach(FurnitureNavItem.allCases) { item in
+                BottomNavBarItem(
+                    systemImage: item.systemImage,
+                    isActive: selectedItem == item,
+                    accessibilityLabel: item.accessibilityLabel
+                ) {
+                    selectedItem = item
+                }
             }
         }
         .padding(8)
@@ -481,6 +555,7 @@ private struct BottomNavBarView: View {
 private struct BottomNavBarItem: View {
     let systemImage: String
     let isActive: Bool
+    let accessibilityLabel: String
     let action: () -> Void
 
     var body: some View {
@@ -493,6 +568,8 @@ private struct BottomNavBarItem: View {
                 .background(isActive ? FurnitureStyle.ink : .clear, in: Capsule())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityAddTraits(isActive ? .isSelected : [])
     }
 }
 
