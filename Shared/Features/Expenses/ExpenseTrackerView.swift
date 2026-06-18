@@ -29,6 +29,9 @@ struct ExpenseTrackerView: View {
             expenseSection
         }
         .listStyle(.insetGrouped)
+        .safeAreaInset(edge: .bottom) {
+            Color.clear.frame(height: 72)
+        }
         .navigationTitle("Expenses")
         .tint(themeColor)
         .accentColor(themeColor)

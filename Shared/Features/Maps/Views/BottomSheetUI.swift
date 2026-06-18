@@ -261,6 +261,9 @@ struct BottomSheetUI: View {
                 .font(.headline.monospacedDigit())
                 .foregroundStyle(Color.primary)
                 .labelStyle(.titleAndIcon)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .allowsTightening(true)
             }
 
             Spacer()
