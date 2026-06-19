@@ -118,7 +118,7 @@ private enum RootTab: CaseIterable, Identifiable {
         case .home: return "Home"
         case .chat: return "Chat"
         case .ToDo: return "To Do"
-        case .Expense: return "Expen"
+        case .Expense: return "Expense"
         case .web: return "Web"
         case .twitter: return "Tweet"
         }

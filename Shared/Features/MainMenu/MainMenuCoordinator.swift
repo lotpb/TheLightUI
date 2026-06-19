@@ -88,7 +88,9 @@ struct MainMenuCoordinator {
     @ViewBuilder
     func dataDestination(_ route: MainMenuDataRoute) -> some View {
         switch route {
-        case .leads, .customers:
+        case .leads:
+            WaveUI()
+        case .customers:
             CustomerUI(
                 customerService: makeCustomerService(),
                 formService: makeCustomerFormService(),
@@ -97,7 +99,7 @@ struct MainMenuCoordinator {
         case .vendors:
             SpotifyUI()
         case .employee:
-            GradientTextUI()
+            GlassMorphism()
         case .expenses:
             if #available(iOS 17.0, *) {
                 ExpenseTrackerView()
