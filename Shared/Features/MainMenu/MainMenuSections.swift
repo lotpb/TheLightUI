@@ -27,7 +27,7 @@ struct IncomingSection: View {
         case "Statistics":
             SpotifyUI()
         default:
-            GlassMorphism()
+            FurnitureUI()
         }
     }
 

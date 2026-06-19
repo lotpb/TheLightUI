@@ -145,7 +145,8 @@ struct FurnitureUI: View {
                     title: "Popular",
                     subtitle: "Curated pieces for calm rooms",
                     products: filteredPopularProducts,
-                    cardSize: 214,
+                    cardSize: 150
+                    ,
                     showsDetailLinks: true
                 )
 
@@ -153,7 +154,7 @@ struct FurnitureUI: View {
                     title: "Best",
                     subtitle: "Designs customers save most",
                     products: filteredBestProducts,
-                    cardSize: 182,
+                    cardSize: 150,
                     showsDetailLinks: false
                 )
             }
@@ -202,7 +203,7 @@ private struct FurnitureBackground: View {
                 Spacer()
 
                 FurnitureStyle.coral.opacity(0.13)
-                    .frame(height: 260)
+                    .frame(height: 150)
                     .blur(radius: 48)
             }
         }
@@ -394,7 +395,7 @@ private struct TagLineView: View {
                 .foregroundStyle(FurnitureStyle.accent)
 
             Text("Find the best furniture for your space")
-                .font(.system(size: 34, weight: .bold, design: .rounded))
+                .font(.system(size: 24, weight: .bold, design: .rounded))
                 .foregroundStyle(FurnitureStyle.ink)
                 .lineLimit(2)
                 .minimumScaleFactor(0.82)
