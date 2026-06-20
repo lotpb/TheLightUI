@@ -78,6 +78,11 @@ struct CustomerUI: View {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? nil : trimmed
     }
+    
+    // New helper method to update the displayed items cache.
+    private func updateDisplayedItemsCache() {
+        displayedItemsCache = listViewModel.displayedItems(from: viewModel.items)
+    }
 
     var body: some View {
         // Main list content (loading/empty/states and rows).
@@ -103,19 +108,19 @@ struct CustomerUI: View {
             // Clear app badge when entering the list and initialize cache.
             .onAppear {
                 appBadgeManager.clearBadge()
-                displayedItemsCache = listViewModel.displayedItems(from: viewModel.items)
+                updateDisplayedItemsCache()
             }
-            .onChange(of: viewModel.items) { _ in
-                displayedItemsCache = listViewModel.displayedItems(from: viewModel.items)
+            .onChange(of: viewModel.items) { _, _ in
+                updateDisplayedItemsCache()
             }
-            .onChange(of: listViewModel.searchText) { _ in
-                displayedItemsCache = listViewModel.displayedItems(from: viewModel.items)
+            .onChange(of: listViewModel.searchText) { _, _ in
+                updateDisplayedItemsCache()
             }
-            .onChange(of: listViewModel.isActiveOnly) { _ in
-                displayedItemsCache = listViewModel.displayedItems(from: viewModel.items)
+            .onChange(of: listViewModel.isActiveOnly) { _, _ in
+                updateDisplayedItemsCache()
             }
-            .onChange(of: listViewModel.selectedSort) { _ in
-                displayedItemsCache = listViewModel.displayedItems(from: viewModel.items)
+            .onChange(of: listViewModel.selectedSort) { _, _ in
+                updateDisplayedItemsCache()
             }
             .confirmationDialog(
                 "Mark as contacted?",

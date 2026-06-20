@@ -544,7 +544,7 @@ private struct InstagramFeedPost: Identifiable {
             author: "TheLight Studio",
             location: "Cupertino, California",
             avatarImageName: "taylor_swift_profile",
-            imageName: "post1",
+            imageName: "ZuckBuddist",
             likesText: "1,248 likes",
             caption: "TheLight Studio New SwiftUI interaction study with cleaner motion and a tighter content layout.",
             timeAgo: "12 minutes ago"
