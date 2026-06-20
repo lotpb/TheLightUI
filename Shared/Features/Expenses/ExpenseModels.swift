@@ -43,6 +43,7 @@ final class Expense {
 
 @available(iOS 17.0, *)
 enum ExpenseCategory: String, CaseIterable, Identifiable, Codable {
+    case food = "Food"
     case meals = "Meals"
     case travel = "Travel"
     case software = "Software"
@@ -54,6 +55,8 @@ enum ExpenseCategory: String, CaseIterable, Identifiable, Codable {
 
     var systemImage: String {
         switch self {
+        case .food:
+            "cart"
         case .meals:
             "fork.knife"
         case .travel:
