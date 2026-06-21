@@ -79,9 +79,12 @@ struct ChatLogView: View {
             .onAppear {
                 scrollToBottom(using: scrollViewProxy, animated: false)
             }
-            .onChange(of: vm.chatMessages.count) { _ in
+            .onChange(of: vm.chatMessages.count) {
                 scrollToBottom(using: scrollViewProxy, animated: true)
             }
+//            .onChange(of: vm.chatMessages.count) { _ in
+//                scrollToBottom(using: scrollViewProxy, animated: true)
+//            }
         }
     }
     
@@ -149,8 +152,8 @@ struct ChatLogView: View {
                 .background(.regularMaterial, in: Circle())
         }
         .disabled(isUploadingImage)
-        .onChange(of: selectedPhoto) { newValue in
-            guard let newValue else { return }
+        .onChange(of: selectedPhoto) {
+            guard let newValue = selectedPhoto else { return }
             Task {
                 do {
                     guard let data = try await newValue.loadTransferable(type: Data.self) else { return }

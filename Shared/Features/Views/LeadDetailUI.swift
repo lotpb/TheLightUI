@@ -181,9 +181,12 @@ struct LeadDetailUI: View {
         }
         .padding(.horizontal)
         .onAppear(perform: syncActiveColor)
-        .onChange(of: detail.isActive) { _ in
+        .onChange(of: detail.isActive) {
             syncActiveColor()
         }
+//        .onChange(of: detail.isActive) { _ in
+//            syncActiveColor()
+//        }
     }
 
     // Toolbar: close, actions menu, and edit entry point.

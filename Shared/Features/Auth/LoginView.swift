@@ -57,7 +57,7 @@ struct LoginView: View {
                 .frame(maxWidth: .infinity)
             }
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
-            .onChange(of: viewModel.loginStatusMessage) { newValue in
+            .onChange(of: viewModel.loginStatusMessage) { oldValue, newValue in
                 guard newValue.localizedCaseInsensitiveContains("success") else { return }
                 isShowingLocationCaptureExplanation = true
             }
@@ -200,7 +200,7 @@ struct LoginView: View {
                 focusedField: $focusedField,
                 field: .phoneNumber
             )
-            .onChange(of: viewModel.phoneNumber) { newValue in
+            .onChange(of: viewModel.phoneNumber) { _, newValue in
                 viewModel.formatPhoneNumber(newValue)
             }
         }

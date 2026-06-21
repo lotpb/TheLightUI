@@ -180,7 +180,7 @@ struct FormUI: View {
                     .formTextStyle()
             }
             // Persist active state to the underlying model.
-            .onChange(of: viewModel.activeIsOn) { _ in
+            .onChange(of: viewModel.activeIsOn) { oldValue, newValue in
                 viewModel.updateActiveStatus()
             }
             .toggleStyle(SwitchToggleStyle(tint: themeColor))
@@ -334,8 +334,8 @@ struct FormUI: View {
                         .padding(.horizontal, horizontalPadding)
                 }
             }
-            .onChange(of: selection.wrappedValue) { tag in
-                onChange(tag)
+            .onChange(of: selection.wrappedValue) { oldValue, newValue in
+                onChange(newValue)
             }
         }
     }
@@ -471,3 +471,4 @@ private extension Text {
     }
     .preferredColorScheme(.dark)
 }
+

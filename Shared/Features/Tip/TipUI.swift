@@ -106,9 +106,12 @@ struct TipUI: View {
                 .keyboardType(.decimalPad)
                 .focused($isBillAmountFocused)
                 .font(.title3.monospacedDigit())
-                .onChange(of: billAmount) { newValue in
+                .onChange(of: billAmount) { _, newValue in
                     billAmount = max(0, newValue)
                 }
+//                .onChange(of: billAmount) { newValue in
+//                    billAmount = max(0, newValue)
+//                }
         }
     }
 

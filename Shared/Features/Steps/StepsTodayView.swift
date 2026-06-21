@@ -31,13 +31,20 @@ struct StepsTodayView: View {
         .onDisappear {
             viewModel.stopTracking()
         }
-        .onChange(of: scenePhase) { phase in
+        .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 viewModel.startTrackingToday()
             } else {
                 viewModel.stopTracking()
             }
         }
+//        .onChange(of: scenePhase) { phase in
+//            if phase == .active {
+//                viewModel.startTrackingToday()
+//            } else {
+//                viewModel.stopTracking()
+//            }
+//        }
     }
 
     private var summarySection: some View {

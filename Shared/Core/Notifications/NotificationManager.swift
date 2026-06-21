@@ -116,7 +116,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         content.categoryIdentifier = categoryIdentifier
         content.sound = .default
         // Increment the app icon badge by one.
-        content.badge = NSNumber(value: UIApplication.shared.applicationIconBadgeNumber + 1)
+        content.badge = 1
         
         // Attach a local image (if available) to enrich the notification.
         if let attachment = imageAttachment(named: "chair_2", fileExtension: "png") {
