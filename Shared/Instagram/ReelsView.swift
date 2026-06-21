@@ -95,9 +95,12 @@ private struct ReelsPlayer: View {
                 .onAppear {
                     updatePlayback(reel.player)
                 }
-                .onChange(of: currentReel) { _ in
+                .onChange(of: currentReel) {
                     updatePlayback(reel.player)
                 }
+//                .onChange(of: currentReel) { _ in
+//                    updatePlayback(reel.player)
+//                }
                 .onDisappear {
                     reel.player.pause()
                     volumeFeedbackTask?.cancel()

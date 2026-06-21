@@ -87,9 +87,12 @@ struct MainMessagesView: View {
         // Refresh or clear inbox based on authentication when the view appears.
         .onAppear(perform: updateForAuthenticationState)
         // React to auth state changes while the view is on-screen.
-        .onChange(of: isAuthenticated) { _ in
+        .onChange(of: isAuthenticated) {
             updateForAuthenticationState()
         }
+//        .onChange(of: isAuthenticated) { _ in
+//            updateForAuthenticationState()
+//        }
     }
     
     // Top bar showing the current user's avatar, name, presence, and settings.

@@ -51,19 +51,36 @@ struct MembershipUI: View {
                     loadSecureSettings()
                     syncFullNameFromStorage()
                 }
-                .onChange(of: fullName) { newValue in updateNameStorage(from: newValue) }
-                .onChange(of: first) { newValue in
-                    SecureSettingsStore.saveString(newValue, forKey: SettingsUI.firstNameKey)
+                .onChange(of: fullName) {
+                    updateNameStorage(from: fullName)
+                }
+            
+                //.onChange(of: fullName) { newValue in updateNameStorage(from: newValue) }
+            
+                .onChange(of: first) {
+                    SecureSettingsStore.saveString(first, forKey: SettingsUI.firstNameKey)
                     updateCode()
                 }
-                .onChange(of: last) { newValue in
-                    SecureSettingsStore.saveString(newValue, forKey: SettingsUI.lastNameKey)
+//                .onChange(of: first) { newValue in
+//                    SecureSettingsStore.saveString(newValue, forKey: SettingsUI.firstNameKey)
+//                    updateCode()
+//                }
+                .onChange(of: last) {
+                    SecureSettingsStore.saveString(last, forKey: SettingsUI.lastNameKey)
                     updateCode()
                 }
-                .onChange(of: emailAddress) { newValue in
-                    SecureSettingsStore.saveString(newValue, forKey: SettingsUI.emailKey)
+//                .onChange(of: last) { newValue in
+//                    SecureSettingsStore.saveString(newValue, forKey: SettingsUI.lastNameKey)
+//                    updateCode()
+//                }
+                .onChange(of: emailAddress) {
+                    SecureSettingsStore.saveString(last, forKey: SettingsUI.emailKey)
                     updateCode()
                 }
+//                .onChange(of: ) { newValue in
+//                    SecureSettingsStore.saveString(newValue, forKey: SettingsUI.emailKey)
+//                    updateCode()
+//                }
         }
     }
 
