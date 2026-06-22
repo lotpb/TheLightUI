@@ -75,8 +75,8 @@ struct UserFormUI: View {
             updateRegionFromSettings()
         }
         .task { await viewModel.fetchCurrentUser() }
-        .onChange(of: storedLatitude) { _ in updateRegionFromSettings() }
-        .onChange(of: storedLongitude) { _ in updateRegionFromSettings() }
+        .onChange(of: storedLatitude) { updateRegionFromSettings() }
+        .onChange(of: storedLongitude) { updateRegionFromSettings() }
         .navigationTitle("Profile")
         .navigationBarTitleDisplayMode(.inline)
     }

@@ -19,6 +19,8 @@ struct SettingView: View {
     private enum ThemeOption: Int, CaseIterable, Identifiable {
         case purple = 0
         case orange = 1
+        case blue = 2
+        case indigo = 3
 
         var id: Self { self }
 
@@ -26,6 +28,8 @@ struct SettingView: View {
             switch self {
             case .purple: return "Purple"
             case .orange: return "Orange"
+            case .blue: return "Blue"
+            case .indigo: return "Indigo"
             }
         }
     }
