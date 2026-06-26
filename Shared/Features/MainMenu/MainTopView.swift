@@ -51,6 +51,12 @@ struct MainTopView: View {
 
     private var backendRow: some View {
         statusRow(title: "Backend:", value: backEnd, systemImage: "circle.hexagongrid.fill")
+            //.symbolRenderingMode(.multicolor)
+            .symbolEffect(
+                .variableColor
+                .iterative
+                .reversing
+            )
     }
 
     private var stepsRow: some View {

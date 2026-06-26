@@ -130,8 +130,6 @@ class PickerDataModel: ObservableObject {
         pickContractor.append(contentsOf: [
             "", "A & S Home Improvement", "Islandwide Gutters", "Ashland Home Improvement", "John Kat Windows", "Jose Rosa", "Peter Balsamo"
         ])
-        pickRate.append(contentsOf: [
-            "5", "4", "1"
-        ])
+        pickRate.append(contentsOf: ["5", "4", "3", "2", "1"])
     }
 }

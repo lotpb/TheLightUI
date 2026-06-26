@@ -84,9 +84,6 @@ struct TwitterUI: View {
             .onChange(of: minY) { _, newValue in
                 offset = newValue
             }
-//            .onChange(of: minY) { newValue in
-//                offset = newValue
-//            }
         }
         .frame(height: Layout.headerHeight)
         .zIndex(1)
@@ -179,9 +176,6 @@ struct TwitterUI: View {
                     .onChange(of: minY) {
                         tabBarOffset = minY
                     }
-//                    .onChange(of: minY) { newValue in
-//                        tabBarOffset = newValue
-//                    }
             }
             .frame(width: 0, height: 0)
         }

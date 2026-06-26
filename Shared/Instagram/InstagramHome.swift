@@ -138,7 +138,7 @@ private struct StoryButton: View {
 
                 Text(story.handle)
                     .font(.caption)
-                    .foregroundStyle(.primary)
+                    .foregroundColor(.primary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
                     .frame(width: 74)
@@ -157,7 +157,7 @@ private struct FeedPostCard: View {
 
             Image(post.imageName)
                 .resizable()
-                .scaledToFill()
+                .scaledToFit()
                 .frame(maxWidth: .infinity)
                 .aspectRatio(1, contentMode: .fill)
                 .clipped()
@@ -516,12 +516,12 @@ private struct InstagramStory: Identifiable {
     }
 
     static let sampleStories = [
-        InstagramStory(handle: "Your story", imageName: "taylor_swift_profile", isLive: false),
-        InstagramStory(handle: "design", imageName: "post1", isLive: true),
-        InstagramStory(handle: "swiftui", imageName: "post2", isLive: false),
-        InstagramStory(handle: "travel", imageName: "post3", isLive: false),
-        InstagramStory(handle: "coffee", imageName: "post4", isLive: false),
-        InstagramStory(handle: "launch", imageName: "post5", isLive: true)
+        InstagramStory(handle: "Your story", imageName: "taylor_swift_profile", isLive: true),
+        InstagramStory(handle: "design", imageName: "profile-rabbit-toy", isLive: true),
+        InstagramStory(handle: "swiftui", imageName: "taylor_swift_profile", isLive: false),
+        InstagramStory(handle: "travel", imageName: "profile-rabbit-toy", isLive: false),
+        InstagramStory(handle: "coffee", imageName: "taylor_swift_profile", isLive: false),
+        InstagramStory(handle: "launch", imageName: "profile-rabbit-toy", isLive: true)
     ]
 }
 
@@ -552,8 +552,8 @@ private struct InstagramFeedPost: Identifiable {
         InstagramFeedPost(
             author: "Swift Daily",
             location: "San Francisco, California",
-            avatarImageName: "post2",
-            imageName: "post6",
+            avatarImageName: "profile-rabbit-toy",
+            imageName: "ZuckBuddist",
             likesText: "842 likes",
             caption: "Swift Daily A compact feed card that scales cleanly across content sizes.",
             timeAgo: "1 hour ago"
@@ -561,8 +561,8 @@ private struct InstagramFeedPost: Identifiable {
         InstagramFeedPost(
             author: "Design Notes",
             location: "New York, New York",
-            avatarImageName: "post3",
-            imageName: "post9",
+            avatarImageName: "profile-rabbit-toy",
+            imageName: "ZuckBuddist",
             likesText: "2,419 likes",
             caption: "Design Notes Balancing dense controls with generous reading space for everyday app surfaces.",
             timeAgo: "3 hours ago"
@@ -576,8 +576,8 @@ private struct InstagramSuggestion: Identifiable {
     let imageName: String
 
     static let sampleSuggestions = [
-        InstagramSuggestion(title: "SwiftUI", imageName: "post1"),
-        InstagramSuggestion(title: "Design", imageName: "post2"),
+        InstagramSuggestion(title: "SwiftUI", imageName: "taylor_swift_profile"),
+        InstagramSuggestion(title: "Design", imageName: "taylor_swift_profile"),
         InstagramSuggestion(title: "Travel", imageName: "post3"),
         InstagramSuggestion(title: "Coffee", imageName: "post4"),
         InstagramSuggestion(title: "Apps", imageName: "post5"),

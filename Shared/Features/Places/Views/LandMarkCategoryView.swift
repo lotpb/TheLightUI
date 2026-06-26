@@ -19,6 +19,7 @@ struct LandMarkCategoryView: View {
         "Pharmacies",
         "Burger",
         "ATM",
+        "Ice Cream",
         "Auto Repair",
         "EV Charging",
         "Hardware",

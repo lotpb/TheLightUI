@@ -19,10 +19,9 @@ struct PlaceSearch: View {
     @StateObject private var viewModel: PlaceListViewModel
     @StateObject private var locationManager = LocationManager()
     
-    @State private var userTrackingMode: MapUserTrackingMode = .follow
     @State private var searchText: String = ""
     @State private var displayType: DisplayType = .map
-    @State private var mapRegion: MKCoordinateRegion = .defaultRegion
+    @State private var cameraPosition: MapCameraPosition = .region(.defaultRegion)
     @State private var isDragged: Bool = false
     let index: Int
 
@@ -46,11 +45,11 @@ struct PlaceSearch: View {
     }
     
     private func centerMap(on landMark: LandMark) {
-        mapRegion = MKCoordinateRegion(
+        let region = MKCoordinateRegion(
             center: landMark.coordinate,
             span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
         )
-        userTrackingMode = .none
+        cameraPosition = .region(region)
         locationManager.stopUpdating()
         isDragged = false
         displayType = .map
@@ -85,6 +84,7 @@ struct PlaceSearch: View {
             .onChange(of: searchText) {
                 viewModel.searchLandmarks(searchText)
             }
+            
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -109,10 +109,6 @@ struct PlaceSearch: View {
             Text("Search Places")
                 .font(.system(size: 34, weight: .bold, design: .rounded))
                 .foregroundStyle(.primary)
-
-            //Text("Find nearby spots and switch between map and list views.")
-            //    .font(.subheadline)
-             //   .foregroundStyle(.secondary)
         }
         .padding(.horizontal, 4)
     }
@@ -152,19 +148,16 @@ struct PlaceSearch: View {
     }
 
     private var mapView: some View {
-        Map(
-            coordinateRegion: $mapRegion,
-            interactionModes: .all,
-            showsUserLocation: true,
-            userTrackingMode: $userTrackingMode,
-            annotationItems: numberedLandMarks,
-            annotationContent: { item in
-                MapAnnotation(coordinate: item.landMark.coordinate) {
+        Map(position: $cameraPosition) {
+            UserAnnotation()
+
+            ForEach(numberedLandMarks) { item in
+                Annotation("", coordinate: item.landMark.coordinate) {
                     MapAnnotationView(number: item.number)
                         .scaleEffect(0.7)
                 }
             }
-        )
+        }
         .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 26, style: .continuous)
@@ -175,15 +168,20 @@ struct PlaceSearch: View {
             DragGesture()
                 .onChanged { _ in
                     isDragged = true
-                    userTrackingMode = .none
                     locationManager.stopUpdating()
                 }
         )
         .overlay(alignment: .bottom) {
             if isDragged {
                 RecenterButton {
-                    userTrackingMode = .follow
                     locationManager.requestLocation()
+                    if let userLocation = locationManager.location?.coordinate {
+                        let region = MKCoordinateRegion(
+                            center: userLocation,
+                            span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
+                        )
+                        cameraPosition = .region(region)
+                    }
                     isDragged = false
                 }
                 .padding(.bottom, 18)
@@ -215,3 +213,4 @@ private struct PlaceSearchBackground: View {
 #Preview("Place Search") {
     PlaceSearch(index: 1)
 }
+
