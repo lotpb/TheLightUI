@@ -82,8 +82,8 @@ struct PlaceSearch: View {
                 locationManager.stopUpdating()
             }
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search places")
-            .onChange(of: searchText) { newSearch in
-                viewModel.searchLandmarks(newSearch)
+            .onChange(of: searchText) {
+                viewModel.searchLandmarks(searchText)
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
