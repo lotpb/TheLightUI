@@ -75,7 +75,7 @@ struct MKLocalPlaceSearchService: PlaceSearchServicing {
 extension MKCoordinateRegion {
     static var defaultRegion: MKCoordinateRegion {
         MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 40.71, longitude: -74),
+            center: CLLocationCoordinate2D(latitude: 26.4649, longitude: -80.124), //Delray Beach
             span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
         )
     }

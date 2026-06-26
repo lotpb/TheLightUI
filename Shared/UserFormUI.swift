@@ -30,7 +30,8 @@ struct UserFormUI: View {
         center: CLLocationCoordinate2D(latitude: 26.465019, longitude: -80.124528),
         span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
     )
-    @State private var trackingMode: MapUserTrackingMode = .follow
+    
+    
 
     private var profileName: String {
         let fullName = [storedFirstName, storedLastName]
@@ -83,8 +84,7 @@ struct UserFormUI: View {
 
     private var profileMap: some View {
         ProfileLocationMap(
-            coordinateRegion: $coordinateRegion,
-            trackingMode: $trackingMode
+            coordinateRegion: $coordinateRegion
         )
         .ignoresSafeArea(edges: .top)
         .frame(height: 300)
@@ -127,7 +127,6 @@ struct UserFormUI: View {
 
 private struct ProfileLocationMap: View {
     @Binding var coordinateRegion: MKCoordinateRegion
-    @Binding var trackingMode: MapUserTrackingMode
 
     var body: some View {
         if #available(iOS 17.0, *) {
@@ -136,8 +135,7 @@ private struct ProfileLocationMap: View {
             Map(
                 coordinateRegion: $coordinateRegion,
                 interactionModes: .all,
-                showsUserLocation: true,
-                userTrackingMode: $trackingMode
+                showsUserLocation: true
             )
         }
     }

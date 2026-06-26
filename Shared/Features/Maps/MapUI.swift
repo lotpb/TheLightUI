@@ -224,10 +224,9 @@ struct MapUI: View {
     }
 }
 
-struct MapUI_Previews: PreviewProvider {
-    static var previews: some View {
-        MapUI(mode: .currentLocation, travelTime: 0.00, distance: 0.00)
-            .preferredColorScheme(.dark)
-    }
+#Preview("Customers - Dark") {
+    MapUI(mode: .currentLocation, travelTime: 0.00, distance: 0.00)
+        .preferredColorScheme(.dark)
 }
+
 

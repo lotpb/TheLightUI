@@ -266,6 +266,7 @@ struct FormUI: View {
                 .formTextStyle()
                 .imageScale(.small)
                 .symbolVariant(.fill)
+                .foregroundStyle(.yellow)
 
             Picker("Pick rating here", selection: $viewModel.selectedRate) {
                 ForEach(pickerviewModel.pickRate, id: \.self) {
