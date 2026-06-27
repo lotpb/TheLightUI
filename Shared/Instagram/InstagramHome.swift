@@ -12,9 +12,9 @@ struct InstagramHome: View {
     @State private var currentTab = InstagramHomeTab.home
     @Environment(\.dismiss) private var dismiss
 
-    private let stories = InstagramStory.sampleStories
-    private let posts = InstagramFeedPost.samplePosts
-    private let suggestions = InstagramSuggestion.sampleSuggestions
+    private let stories = IGStory.sampleStories
+    private let posts = IGFeedPost.samplePosts
+    private let suggestions = IGSuggestion.sampleSuggestions
 
     var body: some View {
         NavigationStack {
@@ -59,7 +59,7 @@ struct InstagramHome: View {
 
         ToolbarItemGroup(placement: .navigationBarTrailing) {
             Button { } label: {
-                Image(systemName: "plus.app")
+                Image(systemName: "plus")
             }
             .accessibilityLabel("Create new post")
 
@@ -72,8 +72,8 @@ struct InstagramHome: View {
 }
 
 private struct InstagramFeedView: View {
-    let stories: [InstagramStory]
-    let posts: [InstagramFeedPost]
+    let stories: [IGStory]
+    let posts: [IGFeedPost]
 
     var body: some View {
         ScrollView {
@@ -91,7 +91,7 @@ private struct InstagramFeedView: View {
 }
 
 private struct StoryCarousel: View {
-    let stories: [InstagramStory]
+    let stories: [IGStory]
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -107,7 +107,7 @@ private struct StoryCarousel: View {
 }
 
 private struct StoryButton: View {
-    let story: InstagramStory
+    let story: IGStory
 
     var body: some View {
         Button { } label: {
@@ -149,7 +149,7 @@ private struct StoryButton: View {
 }
 
 private struct FeedPostCard: View {
-    let post: InstagramFeedPost
+    let post: IGFeedPost
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -187,7 +187,7 @@ private struct FeedPostCard: View {
 }
 
 private struct FeedPostHeader: View {
-    let post: InstagramFeedPost
+    let post: IGFeedPost
 
     var body: some View {
         HStack(spacing: 10) {
@@ -222,7 +222,7 @@ private struct FeedPostHeader: View {
 }
 
 private struct FeedPostActions: View {
-    let post: InstagramFeedPost
+    let post: IGFeedPost
 
     var body: some View {
         HStack(spacing: 18) {
@@ -254,7 +254,7 @@ private struct ActionIconButton: View {
 }
 
 private struct InstagramSearchView: View {
-    let suggestions: [InstagramSuggestion]
+    let suggestions: [IGSuggestion]
     private let columns = [GridItem(.adaptive(minimum: 110), spacing: 2)]
 
     var body: some View {
@@ -278,7 +278,7 @@ private struct InstagramSearchView: View {
 }
 
 private struct SuggestionTile: View {
-    let suggestion: InstagramSuggestion
+    let suggestion: IGSuggestion
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
@@ -302,7 +302,7 @@ private struct SuggestionTile: View {
 }
 
 private struct InstagramActivityView: View {
-    private let activities = InstagramActivity.sampleActivities
+    private let activities = IGActivity.sampleActivities
 
     var body: some View {
         List(activities) { activity in
@@ -505,7 +505,7 @@ private enum InstagramHomeTab: String, CaseIterable, Identifiable {
     }
 }
 
-private struct InstagramStory: Identifiable {
+private struct IGStory: Identifiable {
     let id = UUID()
     let handle: String
     let imageName: String
@@ -516,16 +516,16 @@ private struct InstagramStory: Identifiable {
     }
 
     static let sampleStories = [
-        InstagramStory(handle: "Your story", imageName: "taylor_swift_profile", isLive: true),
-        InstagramStory(handle: "design", imageName: "profile-rabbit-toy", isLive: true),
-        InstagramStory(handle: "swiftui", imageName: "taylor_swift_profile", isLive: false),
-        InstagramStory(handle: "travel", imageName: "profile-rabbit-toy", isLive: false),
-        InstagramStory(handle: "coffee", imageName: "taylor_swift_profile", isLive: false),
-        InstagramStory(handle: "launch", imageName: "profile-rabbit-toy", isLive: true)
+        IGStory(handle: "Your story", imageName: "taylor_swift_profile", isLive: true),
+        IGStory(handle: "design", imageName: "profile-rabbit-toy", isLive: true),
+        IGStory(handle: "swiftui", imageName: "taylor_swift_profile", isLive: false),
+        IGStory(handle: "travel", imageName: "profile-rabbit-toy", isLive: false),
+        IGStory(handle: "coffee", imageName: "taylor_swift_profile", isLive: false),
+        IGStory(handle: "launch", imageName: "profile-rabbit-toy", isLive: true)
     ]
 }
 
-private struct InstagramFeedPost: Identifiable {
+private struct IGFeedPost: Identifiable {
     let id = UUID()
     let author: String
     let location: String
@@ -540,7 +540,7 @@ private struct InstagramFeedPost: Identifiable {
     }
 
     static let samplePosts = [
-        InstagramFeedPost(
+        IGFeedPost(
             author: "TheLight Studio",
             location: "Cupertino, California",
             avatarImageName: "taylor_swift_profile",
@@ -549,7 +549,7 @@ private struct InstagramFeedPost: Identifiable {
             caption: "TheLight Studio New SwiftUI interaction study with cleaner motion and a tighter content layout.",
             timeAgo: "12 minutes ago"
         ),
-        InstagramFeedPost(
+        IGFeedPost(
             author: "Swift Daily",
             location: "San Francisco, California",
             avatarImageName: "profile-rabbit-toy",
@@ -558,7 +558,7 @@ private struct InstagramFeedPost: Identifiable {
             caption: "Swift Daily A compact feed card that scales cleanly across content sizes.",
             timeAgo: "1 hour ago"
         ),
-        InstagramFeedPost(
+        IGFeedPost(
             author: "Design Notes",
             location: "New York, New York",
             avatarImageName: "profile-rabbit-toy",
@@ -570,25 +570,25 @@ private struct InstagramFeedPost: Identifiable {
     ]
 }
 
-private struct InstagramSuggestion: Identifiable {
+private struct IGSuggestion: Identifiable {
     let id = UUID()
     let title: String
     let imageName: String
 
     static let sampleSuggestions = [
-        InstagramSuggestion(title: "SwiftUI", imageName: "taylor_swift_profile"),
-        InstagramSuggestion(title: "Design", imageName: "taylor_swift_profile"),
-        InstagramSuggestion(title: "Travel", imageName: "post3"),
-        InstagramSuggestion(title: "Coffee", imageName: "post4"),
-        InstagramSuggestion(title: "Apps", imageName: "post5"),
-        InstagramSuggestion(title: "Motion", imageName: "post6"),
-        InstagramSuggestion(title: "Studio", imageName: "post7"),
-        InstagramSuggestion(title: "Tools", imageName: "post8"),
-        InstagramSuggestion(title: "Launch", imageName: "post9")
+        IGSuggestion(title: "SwiftUI", imageName: "taylor_swift_profile"),
+        IGSuggestion(title: "Design", imageName: "taylor_swift_profile"),
+        IGSuggestion(title: "Travel", imageName: "post3"),
+        IGSuggestion(title: "Coffee", imageName: "post4"),
+        IGSuggestion(title: "Apps", imageName: "post5"),
+        IGSuggestion(title: "Motion", imageName: "post6"),
+        IGSuggestion(title: "Studio", imageName: "post7"),
+        IGSuggestion(title: "Tools", imageName: "post8"),
+        IGSuggestion(title: "Launch", imageName: "post9")
     ]
 }
 
-private struct InstagramActivity: Identifiable {
+private struct IGActivity: Identifiable {
     let id = UUID()
     let title: String
     let subtitle: String
@@ -596,10 +596,10 @@ private struct InstagramActivity: Identifiable {
     let color: Color
 
     static let sampleActivities = [
-        InstagramActivity(title: "New follower", subtitle: "Design Notes started following you.", systemImage: "person.badge.plus", color: .blue),
-        InstagramActivity(title: "Post liked", subtitle: "Swift Daily liked your latest post.", systemImage: "heart.fill", color: .pink),
-        InstagramActivity(title: "Comment", subtitle: "TheLight Studio commented on your reel.", systemImage: "bubble.right.fill", color: .green),
-        InstagramActivity(title: "Mention", subtitle: "You were mentioned in a story.", systemImage: "at", color: .orange)
+        IGActivity(title: "New follower", subtitle: "Design Notes started following you.", systemImage: "person.badge.plus", color: .blue),
+        IGActivity(title: "Post liked", subtitle: "Swift Daily liked your latest post.", systemImage: "heart.fill", color: .pink),
+        IGActivity(title: "Comment", subtitle: "TheLight Studio commented on your reel.", systemImage: "bubble.right.fill", color: .green),
+        IGActivity(title: "Mention", subtitle: "You were mentioned in a story.", systemImage: "at", color: .orange)
     ]
 }
 
