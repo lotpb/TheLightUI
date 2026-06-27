@@ -249,16 +249,16 @@ struct BottomSheetUI: View {
             }
             .frame(width: 34, height: 34)
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 5) {
                 Text("Trip Summary")
-                    .font(.subheadline.weight(.semibold))
+                    .font(.subheadline.weight(.bold))
                     .foregroundStyle(Color.secondary)
 
                 HStack(spacing: 14) {
                     Label(travelTimeText, systemImage: "clock")
                     Label(String(format: "%0.1f mi", distance / metersPerMile), systemImage: "map")
                 }
-                .font(.headline.monospacedDigit())
+                .font(.subheadline.monospacedDigit())
                 .foregroundStyle(Color.primary)
                 .labelStyle(.titleAndIcon)
                 .lineLimit(1)
@@ -417,41 +417,54 @@ struct BottomSheetUI: View {
             Text(addressText)
                 .padding()
                 .font(.callout)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
                         .fill(Color(.tertiarySystemGroupedBackground))
                 )
                 .padding(.horizontal)
 
             Text("Location Data")
-                .font(.subheadline.weight(.semibold))
+                .font(.subheadline.weight(.bold))
                 .foregroundStyle(Color.secondary)
                 .padding(.horizontal)
                 .padding(.top, 8)
 
-            ForEach(locationRows) { row in
-                HStack(spacing: 12) {
-                    Image(systemName: row.systemImage)
-                        .foregroundStyle(.blue)
-                        .frame(width: 22)
+            let columns = [
+                GridItem(.flexible()),
+                GridItem(.flexible())
+            ]
+            LazyVGrid(columns: columns, spacing: 8) {
+                ForEach(locationRows) { row in
+                    HStack(spacing: 12) {
+                        Image(systemName: row.systemImage)
+                            .foregroundStyle(.blue)
+                            .frame(width: 30)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(row.title)
+                                .font(.callout)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.85)
+                            
+                            Text(row.value)
+                                .font(.callout.monospacedDigit())
+                                .foregroundStyle(.primary)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.85)
+                        }
 
-                    Text(row.title)
-                        .font(.callout)
-
-                    Spacer(minLength: 8)
-
-                    Text(row.value)
-                        .font(.callout.monospacedDigit())
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.85)
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .fill(Color(.tertiarySystemGroupedBackground))
+                    )
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 8)
             }
-
             Spacer(minLength: 8)
         }
     }
