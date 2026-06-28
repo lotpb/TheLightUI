@@ -9,10 +9,11 @@ import SwiftUI
 import Foundation
 import CoreLocation
 import MapKit
+import Observation
 
 // MARK: - Directions
 struct DirectionsUI: View {
-    @StateObject private var viewModel = DirectionsViewModel()
+    @State private var viewModel = DirectionsViewModel()
     @State private var from = "5121 Lakefront Blvd Apt D, Delray Beach, FL, 33484"
     @State private var to = "Santa Monica, CA"
 
@@ -166,12 +167,13 @@ private extension Double {
 
 // MARK: - View Model
 @MainActor
-private class DirectionsViewModel: ObservableObject {
-    @Published var steps: [DirectionStepDisplay] = []
-    @Published var routeDistance: CLLocationDistance?
-    @Published var routeTravelTime: TimeInterval?
-    @Published var isLoading = false
-    @Published var errorMessage: String?
+@Observable
+private class DirectionsViewModel {
+    var steps: [DirectionStepDisplay] = []
+    var routeDistance: CLLocationDistance?
+    var routeTravelTime: TimeInterval?
+    var isLoading = false
+    var errorMessage: String?
 
     var routeDistanceText: String {
         guard let routeDistance else { return "" }

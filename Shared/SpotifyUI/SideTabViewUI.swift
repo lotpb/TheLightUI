@@ -10,7 +10,7 @@ import SwiftUI
 
 struct SideTabViewUI: View {
     @Binding var showSideBar: Bool
-    @StateObject private var viewModel = MainMessagesViewModel()
+    @State private var viewModel = MainMessagesViewModel()
     @State private var selectedTab = "house.fill"
     @State private var volume: CGFloat = 0.4
     

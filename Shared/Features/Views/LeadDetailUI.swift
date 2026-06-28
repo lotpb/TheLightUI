@@ -64,7 +64,7 @@ private struct RoundedContainerList<RowData, RowContent: View>: View {
 
 struct LeadDetailUI: View {
     // Shared picklist data used to resolve indices into human-readable values.
-    @EnvironmentObject private var pickerviewModel: PickerDataModel
+    @Environment(PickerDataModel.self) private var pickerviewModel
     // User-configurable settings stored in AppStorage (theme color and default calendar settings).
     @AppStorage("color") private var color: Int?
     @AppStorage("activeColor") private var activeColor: Int?
@@ -82,7 +82,7 @@ struct LeadDetailUI: View {
     // Mutable customer model being displayed/edited.
     @State var detail: CustomerItem
     // Orchestrates sheets, alerts, and side-effects for this screen.
-    @StateObject private var coordinator: LeadDetailCoordinator
+    @State private var coordinator: LeadDetailCoordinator
     // EventKit store used when creating/editing calendar events.
     @State private var calendarEventStore = EKEventStore()
 
@@ -95,7 +95,7 @@ struct LeadDetailUI: View {
         self._detail = State(initialValue: detail)
         self.formService = formService
         self.locationProvider = locationProvider
-        self._coordinator = StateObject(wrappedValue: LeadDetailCoordinator(formService: formService, locationProvider: locationProvider))
+        self._coordinator = State(initialValue: LeadDetailCoordinator(formService: formService, locationProvider: locationProvider))
     }
 
     // Derive the active theme color from persisted setting.
@@ -485,8 +485,8 @@ struct LeadDetailUI_Previews: PreviewProvider {
             status: .edit,
             formController: "Customer"
         ))
-        .environmentObject(CustomerData())
-        .environmentObject(PickerDataModel())
+        .environment(CustomerData())
+        .environment(PickerDataModel())
         .preferredColorScheme(.dark)
     }
 }

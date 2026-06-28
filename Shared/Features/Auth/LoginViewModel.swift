@@ -4,27 +4,29 @@
 //
 
 import Foundation
+import Observation
 import UIKit
 
 @MainActor
-final class LoginViewModel: ObservableObject {
-    @Published var isLoginMode = true
-    @Published var firstName = ""
-    @Published var lastName = ""
-    @Published var phoneNumber = ""
-    @Published var email = ""
-    @Published var password = ""
-    @Published var image: UIImage?
-    @Published private(set) var isAuthenticated = false
-    @Published private(set) var isProcessing = false
-    @Published var loginStatusMessage = ""
+@Observable
+final class LoginViewModel {
+    var isLoginMode = true
+    var firstName = ""
+    var lastName = ""
+    var phoneNumber = ""
+    var email = ""
+    var password = ""
+    var image: UIImage?
+    private(set) var isAuthenticated = false
+    private(set) var isProcessing = false
+    var loginStatusMessage = ""
 
-    private let loginService: LoginServicing
-    private let authenticationService: AuthenticationService
-    private let didCompleteLoginProcess: () -> Void
-    private let defaults: UserDefaults
-    private let passwordStore: PasswordStoring
-    private var authTask: Task<Void, Never>?
+    @ObservationIgnored private let loginService: LoginServicing
+    @ObservationIgnored private let authenticationService: AuthenticationService
+    @ObservationIgnored private let didCompleteLoginProcess: () -> Void
+    @ObservationIgnored private let defaults: UserDefaults
+    @ObservationIgnored private let passwordStore: PasswordStoring
+    @ObservationIgnored private var authTask: Task<Void, Never>?
 
     var navigationTitle: String {
         isLoginMode ? "Log In" : "Create Account"

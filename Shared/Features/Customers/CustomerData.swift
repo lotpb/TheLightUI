@@ -4,15 +4,17 @@
 //
 
 import Foundation
+import Observation
 
 @MainActor
-final class CustomerData: ObservableObject {
-    @Published var items = [CustomerItem]()
-    @Published var isLoading = false
-    @Published var errorMessage = ""
+@Observable
+final class CustomerData {
+    var items = [CustomerItem]()
+    var isLoading = false
+    var errorMessage = ""
 
-    private let customerService: CustomerServicing
-    private var listener: CustomerListener?
+    @ObservationIgnored private let customerService: CustomerServicing
+    @ObservationIgnored private var listener: CustomerListener?
 
     init(customerService: CustomerServicing = FirebaseCustomerService()) {
         self.customerService = customerService

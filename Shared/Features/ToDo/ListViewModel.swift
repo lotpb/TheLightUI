@@ -6,17 +6,19 @@
 //
 
 import Foundation
+import Observation
 
 
-class ListViewModel: ObservableObject {
+@Observable
+class ListViewModel {
     
-    @Published var items: [ItemModel] = [] {
+    var items: [ItemModel] = [] {
         didSet {
             saveItems()
         }
     }
     
-    private let itemStore: ItemStoring
+    @ObservationIgnored private let itemStore: ItemStoring
     
     init(itemStore: ItemStoring) {
         self.itemStore = itemStore

@@ -10,7 +10,7 @@ import MapKit
 import SDWebImageSwiftUI
 
 struct UserFormUI: View {
-    @StateObject private var viewModel = MainMessagesViewModel()
+    @State private var viewModel = MainMessagesViewModel()
 
     @State private var storedLatitude = ""
     @State private var storedLongitude = ""

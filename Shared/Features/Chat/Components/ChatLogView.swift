@@ -16,7 +16,7 @@ struct ChatLogView: View {
         static let messageBarBottomPadding = tabBarHeight
     }
 
-    @ObservedObject var vm: ChatLogViewModel
+    @Bindable var vm: ChatLogViewModel
     @State private var selectedPhoto: PhotosPickerItem? = nil
     @State private var isPickingPhoto = false
     @FocusState private var isMessageFieldFocused: Bool
@@ -101,7 +101,7 @@ struct ChatLogView: View {
     }
 
     private func scrollToBottom(using scrollViewProxy: ScrollViewProxy, animated: Bool) {
-        DispatchQueue.main.async {
+        Task { @MainActor in
             if animated {
                 withAnimation(.easeOut(duration: 0.35)) {
                     scrollViewProxy.scrollTo(Self.emptyScrollToString, anchor: .bottom)
@@ -349,12 +349,12 @@ struct ChatLogView_Previews: PreviewProvider {
         let mockUser = UserModel(uid: "6787g8fghctrdcrt6", email: "arp1@gmail.com", profileImageUrl: "profile-rabbit-toy.png")
         let vm = ChatLogViewModel(chatUser: mockUser)
         return Group {
-            NavigationView {
+            NavigationStack {
                 ChatLogView(vm: vm)
             }
             //.preferredColorScheme(.light)
 
-            NavigationView {
+            NavigationStack {
                 ChatLogView(vm: vm)
             }
             .preferredColorScheme(.dark)

@@ -39,12 +39,12 @@ enum ToDoFilter: String, CaseIterable, Identifiable {
 
 struct ListView: View {
     
-    @StateObject private var listViewModel: ListViewModel
+    @State private var listViewModel: ListViewModel
     @State private var selectedFilter: ToDoFilter = .notCompleted
     @State private var showingAddSheet = false
 
     init(listViewModel: ListViewModel = ListViewModel(itemStore: UserDefaultsItemStore())) {
-        _listViewModel = StateObject(wrappedValue: listViewModel)
+        _listViewModel = State(initialValue: listViewModel)
     }
 
     var body: some View {
@@ -151,7 +151,7 @@ struct ListView: View {
         }
         .sheet(isPresented: $showingAddSheet) {
             AddView()
-                .environmentObject(listViewModel)
+                .environment(listViewModel)
         }
     }
     

@@ -4,19 +4,21 @@
 //
 
 import Foundation
+import Observation
 import SwiftData
 
 @MainActor
-final class ExpenseTrackerViewModel: ObservableObject {
-    @Published var selectedFilter: ExpenseFilter = .all
-    @Published var title = ""
-    @Published var amountText = ""
-    @Published var category: ExpenseCategory = .meals
-    @Published var date = Date()
-    @Published var notes = ""
-    @Published var isReimbursable = false
+@Observable
+final class ExpenseTrackerViewModel {
+    var selectedFilter: ExpenseFilter = .all
+    var title = ""
+    var amountText = ""
+    var category: ExpenseCategory = .meals
+    var date = Date()
+    var notes = ""
+    var isReimbursable = false
 
-    private var editingExpense: Expense?
+    @ObservationIgnored private var editingExpense: Expense?
 
     var canSave: Bool {
         !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && parsedAmount != nil

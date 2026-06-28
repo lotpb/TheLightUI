@@ -4,28 +4,30 @@
 //
 
 import Foundation
+import Observation
 
 @MainActor
-final class CustomerFormViewModel: ObservableObject {
-    @Published var detail: CustomerItem
-    @Published var showAlertUpdate = false
-    @Published var activeIsOn = true
-    @Published var pickDate: Date
-    @Published var pickStartDate: Date
-    @Published var pickCompleteDate: Date
-    @Published var mode: CustomerFormMode
-    @Published var selectedRate = ""
-    @Published var selectContractor = 0
-    @Published var selectSalesman = 0
-    @Published var selectJob = 0
-    @Published var selectProduct = 0
-    @Published var amount = 0
-    @Published var quantity = 0
-    @Published var errorMessage = ""
-    @Published private(set) var shouldFocusFirstName = false
+@Observable
+final class CustomerFormViewModel {
+    var detail: CustomerItem
+    var showAlertUpdate = false
+    var activeIsOn = true
+    var pickDate: Date
+    var pickStartDate: Date
+    var pickCompleteDate: Date
+    var mode: CustomerFormMode
+    var selectedRate = ""
+    var selectContractor = 0
+    var selectSalesman = 0
+    var selectJob = 0
+    var selectProduct = 0
+    var amount = 0
+    var quantity = 0
+    var errorMessage = ""
+    private(set) var shouldFocusFirstName = false
 
-    private let formService: CustomerFormServicing
-    private var saveTask: Task<Void, Never>?
+    @ObservationIgnored private let formService: CustomerFormServicing
+    @ObservationIgnored private var saveTask: Task<Void, Never>?
 
     var isButtonDisabled: Bool {
         detail.first.isEmpty

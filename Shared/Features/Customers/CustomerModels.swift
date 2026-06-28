@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import Observation
 
 // MARK: - Configuration
 enum CustomerConfiguration {
@@ -106,12 +107,13 @@ struct CustomerItem: Identifiable, Equatable {
     }
 }
 // MARK: - Picker Data
-class PickerDataModel: ObservableObject {
-    @Published var pickSalesman = [String]()
-    @Published var pickJob = [String]()
-    @Published var pickProduct = [String]()
-    @Published var pickContractor = [String]()
-    @Published var pickRate = [String]()
+@Observable
+class PickerDataModel {
+    var pickSalesman = [String]()
+    var pickJob = [String]()
+    var pickProduct = [String]()
+    var pickContractor = [String]()
+    var pickRate = [String]()
 
     init() {
         getData()

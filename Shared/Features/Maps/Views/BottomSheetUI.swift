@@ -21,7 +21,7 @@ struct BottomSheetUI: View {
         let systemImage: String
     }
 
-    @ObservedObject var locationManager: LocationManager
+    var locationManager: LocationManager
     let profileImageURL: String?
     @Binding var travelTime: Double
     @Binding var distance: Double
@@ -432,17 +432,17 @@ struct BottomSheetUI: View {
                 .padding(.top, 8)
 
             let columns = [
-                GridItem(.flexible()),
-                GridItem(.flexible())
+                GridItem(.flexible(), spacing: 10),
+                GridItem(.flexible(), spacing: 10)
             ]
-            LazyVGrid(columns: columns, spacing: 8) {
+            LazyVGrid(columns: columns, spacing: 10) {
                 ForEach(locationRows) { row in
                     HStack(spacing: 12) {
                         Image(systemName: row.systemImage)
                             .foregroundStyle(.blue)
                             .frame(width: 30)
                         
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 10) {
                             Text(row.title)
                                 .font(.callout)
                                 .lineLimit(1)
@@ -457,17 +457,19 @@ struct BottomSheetUI: View {
 
                         Spacer()
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 5)
                     .padding(.vertical, 8)
                     .background(
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        RoundedRectangle(cornerRadius: 15, style: .continuous)
                             .fill(Color(.tertiarySystemGroupedBackground))
                     )
                     .overlay {
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        RoundedRectangle(cornerRadius: 15, style: .continuous)
                             .stroke(.white.opacity(0.52), lineWidth: 1)
                     }
                 }
+                .padding(.horizontal, 15)
+                .padding(.vertical, 4)
             }
             Spacer(minLength: 8)
         }

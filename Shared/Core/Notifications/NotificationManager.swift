@@ -37,7 +37,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
                 print("Notification authorization failed: \(error.localizedDescription)")
             }
             
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 completion?(granted)
             }
         }

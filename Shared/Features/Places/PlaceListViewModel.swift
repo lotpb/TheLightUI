@@ -7,13 +7,15 @@
 
 import Foundation
 import MapKit
+import Observation
 
 @MainActor
-class PlaceListViewModel: ObservableObject {
-    private let placeSearchService: PlaceSearchServicing
+@Observable
+class PlaceListViewModel {
+    @ObservationIgnored private let placeSearchService: PlaceSearchServicing
 
-    @Published var landMarks: [LandMark] = []
-    @Published private(set) var errorMessage = ""
+    var landMarks: [LandMark] = []
+    private(set) var errorMessage = ""
 
     init(placeSearchService: PlaceSearchServicing) {
         self.placeSearchService = placeSearchService

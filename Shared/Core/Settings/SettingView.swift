@@ -34,10 +34,10 @@ struct SettingView: View {
         }
     }
 
-    @StateObject private var settings: AppSettingsStore
+    @State private var settings: AppSettingsStore
 
     init(settings: AppSettingsStore = AppSettingsStore()) {
-        _settings = StateObject(wrappedValue: settings)
+        _settings = State(initialValue: settings)
     }
 
     var body: some View {

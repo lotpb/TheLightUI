@@ -9,7 +9,7 @@ import MapKit
 
 struct MapButtonView: View {
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject var manager: LocationManager
+    var manager: LocationManager
     let profileImageURL: String?
 
     @Binding var directions: [MapRouteStep]

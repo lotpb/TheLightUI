@@ -9,15 +9,15 @@ import SwiftUI
 
 // MARK: - Root Content
 struct ContentView: View {
-    @StateObject private var session: SessionViewModel
+    @State private var session: SessionViewModel
     @State private var selection: RootTab = .home
 
     private let dependencies: AppDependencies
 
     init(dependencies: AppDependencies = .live) {
         self.dependencies = dependencies
-        _session = StateObject(
-            wrappedValue: SessionViewModel(sessionService: dependencies.sessionService)
+        _session = State(
+            initialValue: SessionViewModel(sessionService: dependencies.sessionService)
         )
     }
     

@@ -49,7 +49,8 @@ struct NoItemsView: View {
     
     private func addAnimation() {
         guard !animate else { return }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+        Task {
+            try? await Task.sleep(for: .seconds(1.5))
             withAnimation(
                 Animation
                     .easeInOut(duration: 2.0)

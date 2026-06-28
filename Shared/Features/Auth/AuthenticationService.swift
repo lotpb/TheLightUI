@@ -13,7 +13,7 @@ final class AuthenticationService {
         var error: NSError?
         
         guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 completion(false, error)
             }
             return
@@ -23,7 +23,7 @@ final class AuthenticationService {
             .deviceOwnerAuthenticationWithBiometrics,
             localizedReason: localizedReason(for: context.biometryType)
         ) { success, error in
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 completion(success, error)
             }
         }

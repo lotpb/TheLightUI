@@ -10,7 +10,7 @@ import SwiftUI
 
 struct SpotifyUI: View {
     
-    @StateObject private var viewModel = MainMessagesViewModel()
+    @State private var viewModel = MainMessagesViewModel()
     @State private var searchText = ""
     @State private var showSideBar = true
     
