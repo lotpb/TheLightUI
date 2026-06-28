@@ -186,7 +186,7 @@ private struct GlassMetricView: View {
     }
 }
 
-@available(iOS 17.0, *)
+@available(iOS 18.0, *)
 #Preview("Glass Morphism") {
     GlassMorphism()
 }

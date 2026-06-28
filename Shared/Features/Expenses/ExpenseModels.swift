@@ -6,7 +6,6 @@
 import Foundation
 import SwiftData
 
-@available(iOS 17.0, *)
 @Model
 final class Expense {
     @Attribute(.unique) var id: UUID
@@ -41,11 +40,11 @@ final class Expense {
     }
 }
 
-@available(iOS 17.0, *)
 enum ExpenseCategory: String, CaseIterable, Identifiable, Codable {
     case food = "Food"
     case meals = "Meals"
     case travel = "Travel"
+    case entertainment = "Entertainment"
     case software = "Software"
     case supplies = "Supplies"
     case utilities = "Utilities"
@@ -61,6 +60,8 @@ enum ExpenseCategory: String, CaseIterable, Identifiable, Codable {
             "fork.knife"
         case .travel:
             "car.fill"
+        case .entertainment:
+            "tv.fill"
         case .software:
             "desktopcomputer"
         case .supplies:
@@ -73,7 +74,6 @@ enum ExpenseCategory: String, CaseIterable, Identifiable, Codable {
     }
 }
 
-@available(iOS 17.0, *)
 enum ExpenseFilter: String, CaseIterable, Identifiable {
     case all = "All"
     case reimbursable = "Reimbursable"

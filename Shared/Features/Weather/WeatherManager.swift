@@ -16,7 +16,6 @@ class WeatherManager: WeatherManaging {
     
 }
 
-@available(iOS 15.0, *)
 extension WeatherManager {
     // MARK: Public interface
     public func getCurrentWeather(latitude: CLLocationDegrees, longitude: CLLocationDegrees) async throws -> API.CurrentWeather.Response {

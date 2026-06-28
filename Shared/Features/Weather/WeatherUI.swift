@@ -7,22 +7,22 @@
 
 import SwiftUI
 import CoreLocation
+import Observation
 
-@available(iOS 15.0, *)
 struct WeatherUI: View {
-    @Environment(\.presentationMode) var presentationMode
-    @StateObject private var viewModel: ViewModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var viewModel: ViewModel
 
     @MainActor
     init(
         apiManager: WeatherManaging = WeatherManager(),
         locationManager: WeatherLocationProviding = LocationWeatherManager()
     ) {
-        _viewModel = StateObject(wrappedValue: ViewModel(apiManager: apiManager, locationManager: locationManager))
+        _viewModel = State(initialValue: ViewModel(apiManager: apiManager, locationManager: locationManager))
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 switch viewModel.viewState {
                 case .welcome:
@@ -48,12 +48,10 @@ struct WeatherUI: View {
             .background(Color.background)
             .preferredColorScheme(.dark)
             .navigationBarTitleDisplayMode(.inline)
-            .navigationViewStyle(StackNavigationViewStyle())
-            .navigationBarHidden(false)
             .toolbar {
-                ToolbarItemGroup(placement: .navigationBarLeading) {
+                ToolbarItemGroup(placement: .topBarLeading) {
                     Button {
-                        presentationMode.wrappedValue.dismiss()
+                        dismiss()
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                     }
@@ -66,15 +64,15 @@ struct WeatherUI: View {
     }
 }
 
-@available(iOS 15.0, *)
 extension WeatherUI {
+    @Observable
     @MainActor
-    class ViewModel: ObservableObject {
+    class ViewModel {
         // MARK: Private variables
         private let apiManager: WeatherManaging
         private let locationManager: WeatherLocationProviding
         // MARK: Public variables
-        @Published public var viewState: ViewState = .welcome
+        public var viewState: ViewState = .welcome
         // MARK: Nested objects
         enum ViewState {
             case welcome
@@ -114,7 +112,6 @@ extension WeatherUI {
     }
 }
 
-@available(iOS 15.0, *)
 struct WeatherUI_Previews: PreviewProvider {
     static var previews: some View {
         WeatherUI(

@@ -93,6 +93,8 @@ struct StacksView: View {
     @ViewBuilder
     private func destinationView(for destination: StackDestination) -> some View {
         switch destination {
+        case .furniture:
+            FurnitureUI()
         case .chart:
             ChartView()
         }
@@ -126,6 +128,7 @@ struct StacksView: View {
 
 // MARK: - Models
 private enum StackDestination {
+    case furniture
     case chart
 }
 
@@ -136,7 +139,7 @@ private struct StackSection: Identifiable {
 
     static let sampleSections = [
         StackSection(title: "Your top genres", cards: [
-            StackCard(title: "Furniture", imageName: "chair_1", color: .brown, destination: .chart),
+            StackCard(title: "Furniture", imageName: "chair_1", color: .brown, destination: .furniture),
             StackCard(title: "Freaks", imageName: "ZuckBuddist", color: .purple, destination: .chart)
         ]),
         StackSection(title: "Featured podcast categories", cards: [

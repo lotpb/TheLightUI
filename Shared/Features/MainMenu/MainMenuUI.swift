@@ -173,7 +173,7 @@ struct MainMenuUI: View {
 }
 
 // MARK: - Preview
-@available(iOS 16.0, *)
+@available(iOS 18.0, *)
 struct MainMenuUI_Previews: PreviewProvider {
     static var previews: some View {
         MainMenuUI(

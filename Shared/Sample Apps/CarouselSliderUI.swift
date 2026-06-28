@@ -9,12 +9,12 @@
 import SwiftUI
 
 struct CarouselSliderUI: View {
+
     var body: some View {
         CarouselSliderHomeView()
     }
 }
 
-@available(iOS 17.0, *)
 #Preview("Carousel Slider") {
     CarouselSliderUI()
 }

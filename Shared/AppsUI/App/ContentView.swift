@@ -67,7 +67,7 @@ struct ContentView: View {
         case .ToDo:
             ListView()
         case .Expense:
-            if #available(iOS 17.0, *) {
+            if #available(iOS 18.0, *) {
                 NavigationStack {
                     ExpenseTrackerView()
                 }
@@ -198,7 +198,7 @@ private struct TabBarItem: View {
         .preferredColorScheme(.dark)
 }
 
-@available(iOS 17.0, *)
+@available(iOS 18.0, *)
 #Preview("Tab Bar - Dark", traits: .sizeThatFitsLayout) {
     TabBarView(selection: .constant(.home))
         .preferredColorScheme(.dark)

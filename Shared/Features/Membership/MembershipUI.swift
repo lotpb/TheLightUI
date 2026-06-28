@@ -24,7 +24,6 @@ struct MembershipUI: View {
     @State private var fullName = ""
     @State private var qrCode = UIImage()
     @State private var isShowingScanner = false
-    @StateObject private var prospects = Prospects()
 
     private let context = CIContext()
     private let filter = CIFilter.qrCodeGenerator()
@@ -207,10 +206,8 @@ struct MembershipUI: View {
         let details = scannedValue.components(separatedBy: "\n")
         guard details.count == 2 else { return }
 
-        let person = Prospect()
-        person.name = details[0]
-        person.email = details[1]
-        prospects.add(person)
+        fullName = details[0]
+        emailAddress = details[1]
     }
 }
 

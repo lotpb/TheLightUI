@@ -9,7 +9,7 @@ import SwiftData
 extension View {
     @ViewBuilder
     func expenseModelContainer() -> some View {
-        if #available(iOS 17.0, *) {
+        if #available(iOS 27.0, *) {
             ExpenseModelContainerView(content: self)
         } else {
             self
@@ -17,7 +17,7 @@ extension View {
     }
 }
 
-@available(iOS 17.0, *)
+@available(iOS 27.0, *)
 private struct ExpenseModelContainerView<Content: View>: View {
     let content: Content
     @State private var container = ExpenseModelContainerFactory.makeContainer()
@@ -35,7 +35,7 @@ private struct ExpenseModelContainerView<Content: View>: View {
     }
 }
 
-@available(iOS 17.0, *)
+@available(iOS 27.0, *)
 private enum ExpenseModelContainerFactory {
     @MainActor
     static func makeContainer() -> ModelContainer? {

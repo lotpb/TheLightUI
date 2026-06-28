@@ -8,7 +8,7 @@
 import SwiftUI
 import Firebase
 
-@available(iOS 16.0, *)
+@available(iOS 18.0, *)
 @main
 struct TheLightUIApp: App {
     @State private var showLaunch = true
