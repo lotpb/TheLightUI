@@ -77,7 +77,8 @@ struct SplashScreen<Content: View, Title: View, Logo: View, NavButton: View>: Vi
     }
     
     private func startAnimation() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+        Task {
+            try? await Task.sleep(for: .seconds(0.4))
             withAnimation(.spring()) {
                 textAnimation = true
             }
@@ -86,10 +87,9 @@ struct SplashScreen<Content: View, Title: View, Logo: View, NavButton: View>: Vi
                 endAnimation = true
             }
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                withAnimation {
-                    showNavButtons = true
-                }
+            try? await Task.sleep(for: .seconds(0.35))
+            withAnimation {
+                showNavButtons = true
             }
         }
     }

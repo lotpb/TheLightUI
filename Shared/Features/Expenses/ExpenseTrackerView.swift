@@ -10,7 +10,7 @@ struct ExpenseTrackerView: View {
     @AppStorage("color") private var color: Int?
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
-    @StateObject private var viewModel = ExpenseTrackerViewModel()
+    @State private var viewModel = ExpenseTrackerViewModel()
     @State private var isShowingEditor = false
 
     private var visibleExpenses: [Expense] {
@@ -230,7 +230,7 @@ private struct ExpenseDetailView: View {
 
 private struct ExpenseEditorView: View {
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject var viewModel: ExpenseTrackerViewModel
+    @Bindable var viewModel: ExpenseTrackerViewModel
     let onSave: () -> Void
 
     var body: some View {

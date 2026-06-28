@@ -1,23 +1,25 @@
 import Foundation
 import CoreLocation
+import Observation
 import SwiftUI
 #if canImport(MessageUI)
 import MessageUI
 #endif
 
 @MainActor
-final class LeadDetailCoordinator: ObservableObject {
+@Observable
+final class LeadDetailCoordinator {
     // Inputs
-    private let formService: CustomerFormServicing
-    private let locationProvider: WeatherLocationProviding
+    @ObservationIgnored private let formService: CustomerFormServicing
+    @ObservationIgnored private let locationProvider: WeatherLocationProviding
 
     // Exposed state to drive UI
-    @Published var activeSheet: LeadDetailCoordinator.ActiveSheet?
-    @Published var messageBodyOverride: String?
-    @Published var isRequestingLocationShare: Bool = false
-    @Published var locationAlertMessage: String?
-    @Published var showFullscreen: Bool = false
-    @Published var showPopover: Bool = false
+    var activeSheet: LeadDetailCoordinator.ActiveSheet?
+    var messageBodyOverride: String?
+    var isRequestingLocationShare: Bool = false
+    var locationAlertMessage: String?
+    var showFullscreen: Bool = false
+    var showPopover: Bool = false
 
     enum ActiveSheet: Identifiable {
         case edit

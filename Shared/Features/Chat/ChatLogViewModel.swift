@@ -4,21 +4,23 @@
 //
 
 import Foundation
+import Observation
 
 @MainActor
-final class ChatLogViewModel: ObservableObject {
-    @Published var chatText = ""
-    @Published var errorMessage = ""
-    @Published var chatMessages = [ChatMessage]()
-    @Published var isUploadingImage = false
+@Observable
+final class ChatLogViewModel {
+    var chatText = ""
+    var errorMessage = ""
+    var chatMessages = [ChatMessage]()
+    var isUploadingImage = false
 
     var chatUser: UserModel?
 
-    private let repository: ChatRepositoryProtocol
-    private var chatListener: ChatListener?
-    private var listenerGeneration = UUID()
-    private var sendTask: Task<Void, Never>?
-    private var uploadTask: Task<Void, Never>?
+    @ObservationIgnored private let repository: ChatRepositoryProtocol
+    @ObservationIgnored private var chatListener: ChatListener?
+    @ObservationIgnored private var listenerGeneration = UUID()
+    @ObservationIgnored private var sendTask: Task<Void, Never>?
+    @ObservationIgnored private var uploadTask: Task<Void, Never>?
 
     var currentUserId: String? {
         repository.currentUserId

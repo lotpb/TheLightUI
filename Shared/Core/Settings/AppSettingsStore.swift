@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import Observation
 
 // MARK: - Settings Keys
 enum SettingsUI {
@@ -75,36 +76,37 @@ enum SecureSettingsStore {
     }
 }
 
-final class AppSettingsStore: ObservableObject {
-    @Published var firstName: String = "" { didSet { saveSecureString(firstName, forKey: SettingsUI.firstNameKey) } }
-    @Published var lastName: String = "" { didSet { saveSecureString(lastName, forKey: SettingsUI.lastNameKey) } }
-    @Published var email: String = "" { didSet { saveSecureString(email, forKey: SettingsUI.emailKey) } }
-    @Published var phone: String = "" { didSet { saveSecureString(phone, forKey: SettingsUI.phoneKey) } }
-    @Published var username: String = "" { didSet { defaults.set(username, forKey: SettingsUI.usernameKey) } }
-    @Published var website: String = "" { didSet { defaults.set(website, forKey: SettingsUI.websiteKey) } }
+@Observable
+final class AppSettingsStore {
+    var firstName: String = "" { didSet { saveSecureString(firstName, forKey: SettingsUI.firstNameKey) } }
+    var lastName: String = "" { didSet { saveSecureString(lastName, forKey: SettingsUI.lastNameKey) } }
+    var email: String = "" { didSet { saveSecureString(email, forKey: SettingsUI.emailKey) } }
+    var phone: String = "" { didSet { saveSecureString(phone, forKey: SettingsUI.phoneKey) } }
+    var username: String = "" { didSet { defaults.set(username, forKey: SettingsUI.usernameKey) } }
+    var website: String = "" { didSet { defaults.set(website, forKey: SettingsUI.websiteKey) } }
 
-    @Published var companyName: String = "TheLight Software" { didSet { defaults.set(companyName, forKey: SettingsUI.isCompanyNameKey) } }
-    @Published var isSubscriber: Bool = false { didSet { defaults.set(isSubscriber, forKey: SettingsUI.isSubscribedKey) } }
-    @Published var backend: String = "Firebase" { didSet { defaults.set(backend, forKey: SettingsUI.backend) } }
-    @Published var isBackfetch: Bool = false { didSet { defaults.set(isBackfetch, forKey: SettingsUI.isBackfetch) } }
-    @Published var isAutoLockDisabled: Bool = false { didSet { defaults.set(isAutoLockDisabled, forKey: SettingsUI.isAutolockKey) } }
+    var companyName: String = "TheLight Software" { didSet { defaults.set(companyName, forKey: SettingsUI.isCompanyNameKey) } }
+    var isSubscriber: Bool = false { didSet { defaults.set(isSubscriber, forKey: SettingsUI.isSubscribedKey) } }
+    var backend: String = "Firebase" { didSet { defaults.set(backend, forKey: SettingsUI.backend) } }
+    var isBackfetch: Bool = false { didSet { defaults.set(isBackfetch, forKey: SettingsUI.isBackfetch) } }
+    var isAutoLockDisabled: Bool = false { didSet { defaults.set(isAutoLockDisabled, forKey: SettingsUI.isAutolockKey) } }
 
-    @Published var color: Int = 0 { didSet { defaults.set(color, forKey: SettingsUI.color) } }
+    var color: Int = 0 { didSet { defaults.set(color, forKey: SettingsUI.color) } }
 
-    @Published var isSpeak: Bool = false { didSet { defaults.set(isSpeak, forKey: SettingsUI.isSpeakKey) } }
-    @Published var isMusic: Bool = false { didSet { defaults.set(isMusic, forKey: SettingsUI.isMusicKey) } }
+    var isSpeak: Bool = false { didSet { defaults.set(isSpeak, forKey: SettingsUI.isSpeakKey) } }
+    var isMusic: Bool = false { didSet { defaults.set(isMusic, forKey: SettingsUI.isMusicKey) } }
 
-    @Published var latitude: String = "" { didSet { saveSecureString(latitude, forKey: SettingsUI.latitudeKey) } }
-    @Published var longitude: String = "" { didSet { saveSecureString(longitude, forKey: SettingsUI.longitudeKey) } }
-    @Published var event: String = "" { didSet { defaults.set(event, forKey: SettingsUI.eventKey) } }
-    @Published var duration: String = "" { didSet { defaults.set(duration, forKey: SettingsUI.durationKey) } }
-    @Published var areaCode: String = "" { didSet { defaults.set(areaCode, forKey: SettingsUI.areacodeKey) } }
-    @Published var emailTitle: String = "" { didSet { defaults.set(emailTitle, forKey: SettingsUI.emailTitleKey) } }
-    @Published var emailMessage: String = "" { didSet { defaults.set(emailMessage, forKey: SettingsUI.emailMessageKey) } }
-    @Published var version: String = "1.0" { didSet { defaults.set(version, forKey: SettingsUI.versionKey) } }
+    var latitude: String = "" { didSet { saveSecureString(latitude, forKey: SettingsUI.latitudeKey) } }
+    var longitude: String = "" { didSet { saveSecureString(longitude, forKey: SettingsUI.longitudeKey) } }
+    var event: String = "" { didSet { defaults.set(event, forKey: SettingsUI.eventKey) } }
+    var duration: String = "" { didSet { defaults.set(duration, forKey: SettingsUI.durationKey) } }
+    var areaCode: String = "" { didSet { defaults.set(areaCode, forKey: SettingsUI.areacodeKey) } }
+    var emailTitle: String = "" { didSet { defaults.set(emailTitle, forKey: SettingsUI.emailTitleKey) } }
+    var emailMessage: String = "" { didSet { defaults.set(emailMessage, forKey: SettingsUI.emailMessageKey) } }
+    var version: String = "1.0" { didSet { defaults.set(version, forKey: SettingsUI.versionKey) } }
 
-    private let defaults: UserDefaults
-    private let passwordStore: PasswordStoring
+    @ObservationIgnored private let defaults: UserDefaults
+    @ObservationIgnored private let passwordStore: PasswordStoring
 
     init(
         defaults: UserDefaults = .standard,

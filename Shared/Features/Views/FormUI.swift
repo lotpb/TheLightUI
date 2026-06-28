@@ -29,14 +29,14 @@ struct FormUI: View {
     // Persisted theme color choice.
     @AppStorage("color") private var color: Int?
     // Shared picklist values used by multiple pickers.
-    @EnvironmentObject private var pickerviewModel: PickerDataModel
+    @Environment(PickerDataModel.self) private var pickerviewModel
     // Dismiss action from the environment.
     @Environment(\.dismiss) private var dismiss
     // Controls initial focus to the first name field.
     @FocusState private var firstNameInFocus: Bool
 
     // View model that holds all form data and business logic.
-    @StateObject private var viewModel: CustomerFormViewModel
+    @State private var viewModel: CustomerFormViewModel
 
     // Derive the active theme color from settings.
     private var themeColor: Color {
@@ -52,8 +52,8 @@ struct FormUI: View {
         mode: CustomerFormMode,
         formService: CustomerFormServicing = FirebaseCustomerFormService()
     ) {
-        _viewModel = StateObject(
-            wrappedValue: CustomerFormViewModel(
+        _viewModel = State(
+            initialValue: CustomerFormViewModel(
                 detail: detail,
                 createDate: createDate,
                 startDate: startDate,
@@ -467,8 +467,8 @@ private extension Text {
             mode: .new,
             formService: PreviewCustomerFormService()
         )
-        .environmentObject(CustomerData(customerService: PreviewCustomerService()))
-            .environmentObject(PickerDataModel())
+        .environment(CustomerData(customerService: PreviewCustomerService()))
+            .environment(PickerDataModel())
     }
     .preferredColorScheme(.dark)
 }

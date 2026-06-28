@@ -46,8 +46,8 @@ enum RouteStatus: Equatable {
 
 @MainActor
 struct MapUI: View {
-    @StateObject private var manager = LocationManager()
-    @StateObject private var userViewModel = MainMessagesViewModel()
+    @State private var manager = LocationManager()
+    @State private var userViewModel = MainMessagesViewModel()
     @State private var directions: [MapRouteStep] = []
     @State private var mapType: MKMapType = .standard
     @State private var routeStatus: RouteStatus = .idle

@@ -7,26 +7,28 @@
 
 import CoreLocation
 import MapKit
+import Observation
 
 /// A modern, Swift-concurrency-friendly location manager for MapKit.
 /// - Publishes region updates for map camera.
 /// - Tracks authorization status and current placemark.
 /// - Provides follow/pause controls to conserve power.
 @MainActor
-final class LocationManager: NSObject, ObservableObject {
+@Observable
+final class LocationManager: NSObject {
     /// The visible region used by Map views.
-    @Published var region = MKCoordinateRegion.defaultRegion
+    var region = MKCoordinateRegion.defaultRegion
     /// The most recently reported location from Core Location.
-    @Published private(set) var location: CLLocation?
+    private(set) var location: CLLocation?
     /// The current authorization status.
-    @Published private(set) var locationStatus: CLAuthorizationStatus = .notDetermined
+    private(set) var locationStatus: CLAuthorizationStatus = .notDetermined
     /// The reverse-geocoded placemark for the latest location.
-    @Published private(set) var currentPlacemark: CLPlacemark?
+    private(set) var currentPlacemark: CLPlacemark?
     /// Whether the map should follow the user's location.
-    @Published private(set) var isFollowingLocation = true
+    private(set) var isFollowingLocation = true
 
-    private let manager = CLLocationManager()
-    private let geocoder = CLGeocoder()
+    @ObservationIgnored private let manager = CLLocationManager()
+    @ObservationIgnored private let geocoder = CLGeocoder()
     private static let defaultRegionDistance: CLLocationDistance = 10_000
 
     override init() {

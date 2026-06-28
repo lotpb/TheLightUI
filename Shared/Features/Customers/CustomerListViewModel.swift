@@ -4,9 +4,11 @@
 //
 
 import Foundation
+import Observation
 
 @MainActor
-final class CustomerListViewModel: ObservableObject {
+@Observable
+final class CustomerListViewModel {
     enum SortType: String, CaseIterable, Identifiable {
         case date = "Date"
         case name = "Name"
@@ -25,9 +27,9 @@ final class CustomerListViewModel: ObservableObject {
         }
     }
 
-    @Published var searchText = ""
-    @Published var isActiveOnly = false
-    @Published var selectedSort: SortType = .date
+    var searchText = ""
+    var isActiveOnly = false
+    var selectedSort: SortType = .date
 
     func displayedItems(from items: [CustomerItem]) -> [CustomerItem] {
         let filteredItems = filteredItems(from: items)

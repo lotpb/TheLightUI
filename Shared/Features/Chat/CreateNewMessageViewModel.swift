@@ -4,14 +4,16 @@
 //
 
 import Foundation
+import Observation
 
 @MainActor
-final class CreateNewMessageViewModel: ObservableObject {
-    @Published var users = [UserModel]()
-    @Published var errorMessage = ""
+@Observable
+final class CreateNewMessageViewModel {
+    var users = [UserModel]()
+    var errorMessage = ""
 
-    private let repository: ChatRepositoryProtocol
-    private var fetchUsersTask: Task<Void, Never>?
+    @ObservationIgnored private let repository: ChatRepositoryProtocol
+    @ObservationIgnored private var fetchUsersTask: Task<Void, Never>?
 
     init(repository: ChatRepositoryProtocol = FirebaseChatRepository()) {
         self.repository = repository

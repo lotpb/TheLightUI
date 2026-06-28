@@ -16,8 +16,8 @@ enum DisplayType {
 struct PlaceSearch: View {
     
     @Environment(\.dismiss) var dismiss
-    @StateObject private var viewModel: PlaceListViewModel
-    @StateObject private var locationManager = LocationManager()
+    @State private var viewModel: PlaceListViewModel
+    @State private var locationManager = LocationManager()
     
     @State private var searchText: String = ""
     @State private var displayType: DisplayType = .map
@@ -37,8 +37,8 @@ struct PlaceSearch: View {
         viewModel: PlaceListViewModel? = nil
     ) {
         self.index = index
-        _viewModel = StateObject(
-            wrappedValue: viewModel ?? PlaceListViewModel(
+        _viewModel = State(
+            initialValue: viewModel ?? PlaceListViewModel(
                 placeSearchService: MKLocalPlaceSearchService()
             )
         )

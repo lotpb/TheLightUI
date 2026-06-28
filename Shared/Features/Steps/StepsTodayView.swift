@@ -4,11 +4,12 @@
 //
 
 import CoreMotion
+import Observation
 import SwiftUI
 
 struct StepsTodayView: View {
     @AppStorage("color") private var color: Int?
-    @StateObject private var viewModel = StepsTodayViewModel()
+    @State private var viewModel = StepsTodayViewModel()
     @Environment(\.scenePhase) private var scenePhase
 
     private var themeColor: Color {
@@ -119,16 +120,17 @@ struct StepsTodayView: View {
 }
 
 @MainActor
-private final class StepsTodayViewModel: ObservableObject {
-    @Published private(set) var steps = 0
-    @Published private(set) var distanceMeters: Double?
-    @Published private(set) var statusText = "Loading"
-    @Published private(set) var statusColor: Color = .secondary
+@Observable
+private final class StepsTodayViewModel {
+    private(set) var steps = 0
+    private(set) var distanceMeters: Double?
+    private(set) var statusText = "Loading"
+    private(set) var statusColor: Color = .secondary
 
     let dailyGoal = 10_000
 
-    private let pedometer = CMPedometer()
-    private var isTracking = false
+    @ObservationIgnored private let pedometer = CMPedometer()
+    @ObservationIgnored private var isTracking = false
 
     var startOfDay: Date {
         Calendar.current.startOfDay(for: .now)

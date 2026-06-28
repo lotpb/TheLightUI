@@ -25,7 +25,7 @@ struct TwitterUI: View {
 
     @Environment(\.colorScheme) private var colorScheme
     @AppStorage(SettingsUI.isCompanyNameKey) private var companyName = "Main Menu"
-    @StateObject private var viewModel = MainMessagesViewModel()
+    @State private var viewModel = MainMessagesViewModel()
     @State private var offset: CGFloat = 0
     @State private var currentTab = "Tweets"
     @State private var tabBarOffset: CGFloat = 0

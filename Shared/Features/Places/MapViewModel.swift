@@ -8,25 +8,27 @@
 
 import MapKit
 import CoreLocation
+import Observation
 
 
-class MapViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
+@Observable
+class MapViewModel: NSObject, CLLocationManagerDelegate {
     
-    @Published var mapView: MKMapView
-    private let placeSearchService: PlaceSearchServicing
+    var mapView: MKMapView
+    @ObservationIgnored private let placeSearchService: PlaceSearchServicing
     
     // Region
-    @Published var region = MKCoordinateRegion.defaultRegion
+    var region = MKCoordinateRegion.defaultRegion
     // Based on Location it will set up
     
     // Alert
-    @Published var permissionDenied = false
+    var permissionDenied = false
     
     // SearchText
-    @Published var searchTxt = ""
+    var searchTxt = ""
     
     // Searched Places
-    @Published var places: [LandMark] = []
+    var places: [LandMark] = []
 
     init(mapView: MKMapView, placeSearchService: PlaceSearchServicing) {
         self.mapView = mapView

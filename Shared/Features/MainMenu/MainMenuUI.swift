@@ -59,16 +59,9 @@ struct MainMenuUI: View {
             .accentColor(themeColor)
     }
 
-    @ViewBuilder
     private var navigationContainer: some View {
-        if #available(iOS 16.0, *) {
-            NavigationStack(path: $path) {
-                mainContent
-            }
-        } else {
-            NavigationView {
-                mainContent
-            }
+        NavigationStack(path: $path) {
+            mainContent
         }
     }
 

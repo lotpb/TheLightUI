@@ -11,7 +11,7 @@ import CoreLocation
 
 // MARK: - Login
 struct LoginView: View {
-    @StateObject private var viewModel: LoginViewModel
+    @State private var viewModel: LoginViewModel
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var isShowingLocationCaptureExplanation = false
     @FocusState private var focusedField: LoginField?
@@ -35,8 +35,8 @@ struct LoginView: View {
         didCompleteLoginProcess: @escaping () -> Void
     ) {
         self.locationCaptureManager = locationCaptureManager
-        _viewModel = StateObject(
-            wrappedValue: LoginViewModel(
+        _viewModel = State(
+            initialValue: LoginViewModel(
                 loginService: loginService,
                 authenticationService: authenticationService,
                 didCompleteLoginProcess: didCompleteLoginProcess

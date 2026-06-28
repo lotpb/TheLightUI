@@ -14,7 +14,7 @@ struct CreateNewMessageView: View {
     private let maxWidthForIpad: CGFloat = 700
     
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var vm: CreateNewMessageViewModel
+    @State private var vm: CreateNewMessageViewModel
     @State private var searchText = ""
 
     init(
@@ -22,7 +22,7 @@ struct CreateNewMessageView: View {
         repository: ChatRepositoryProtocol = FirebaseChatRepository()
     ) {
         self.didSelectNewUser = didSelectNewUser
-        _vm = StateObject(wrappedValue: CreateNewMessageViewModel(repository: repository))
+        _vm = State(initialValue: CreateNewMessageViewModel(repository: repository))
     }
 
     private var filteredUsers: [UserModel] {

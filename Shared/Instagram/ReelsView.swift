@@ -18,7 +18,7 @@ struct ReelsView: View {
         static let expandedCaptionHeight: CGFloat = 120
     }
 
-    @StateObject private var viewModel = MainMessagesViewModel()
+    @State private var viewModel = MainMessagesViewModel()
     @State private var currentReel = ""
     @State private var reels = ReelsView.loadReels()
 

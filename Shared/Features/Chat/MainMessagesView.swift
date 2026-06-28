@@ -38,8 +38,8 @@ struct MainMessagesView: View {
     @State private var chatUser: UserModel?
     
     // View models: inbox (vm) and active chat log.
-    @StateObject private var vm: MainMessagesViewModel
-    @StateObject private var chatLogViewModel: ChatLogViewModel
+    @State private var vm: MainMessagesViewModel
+    @State private var chatLogViewModel: ChatLogViewModel
 
     // Inject dependencies and initialize view models.
     init(
@@ -52,9 +52,9 @@ struct MainMessagesView: View {
         self.isAuthenticated = isAuthenticated
         self.onSignOut = onSignOut
         self.makeChatRepository = makeChatRepository
-        _vm = StateObject(wrappedValue: MainMessagesViewModel(repository: repository))
-        _chatLogViewModel = StateObject(
-            wrappedValue: ChatLogViewModel(chatUser: nil, repository: chatLogRepository)
+        _vm = State(initialValue: MainMessagesViewModel(repository: repository))
+        _chatLogViewModel = State(
+            initialValue: ChatLogViewModel(chatUser: nil, repository: chatLogRepository)
         )
     }
     

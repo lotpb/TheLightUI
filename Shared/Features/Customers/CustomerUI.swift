@@ -16,9 +16,9 @@ struct CustomerUI: View {
     // Persisted theme color choice.
     @AppStorage("color") private var color: Int?
     // State-backed models: data source, list presentation state, and picklist values.
-    @StateObject private var viewModel: CustomerData
-    @StateObject private var listViewModel: CustomerListViewModel
-    @StateObject private var pickerviewModel: PickerDataModel
+    @State private var viewModel: CustomerData
+    @State private var listViewModel: CustomerListViewModel
+    @State private var pickerviewModel: PickerDataModel
     // Helper to open tel: and other URLs.
     @Environment(\.openURL) private var openURL
     
@@ -46,9 +46,9 @@ struct CustomerUI: View {
     ) {
         self.formService = formService
         self.appBadgeManager = appBadgeManager
-        _viewModel = StateObject(wrappedValue: CustomerData(customerService: customerService))
-        _listViewModel = StateObject(wrappedValue: CustomerListViewModel())
-        _pickerviewModel = StateObject(wrappedValue: pickerviewModel)
+        _viewModel = State(initialValue: CustomerData(customerService: customerService))
+        _listViewModel = State(initialValue: CustomerListViewModel())
+        _pickerviewModel = State(initialValue: pickerviewModel)
     }
 
     // Convenience initializer for previews/tests: accepts an existing view model.
@@ -61,9 +61,9 @@ struct CustomerUI: View {
     ) {
         self.formService = formService
         self.appBadgeManager = appBadgeManager
-        _viewModel = StateObject(wrappedValue: viewModel)
-        _listViewModel = StateObject(wrappedValue: CustomerListViewModel())
-        _pickerviewModel = StateObject(wrappedValue: pickerviewModel)
+        _viewModel = State(initialValue: viewModel)
+        _listViewModel = State(initialValue: CustomerListViewModel())
+        _pickerviewModel = State(initialValue: pickerviewModel)
     }
     
     // Derive theme color from AppStorage.
@@ -136,7 +136,7 @@ struct CustomerUI: View {
                 Text("This will remove any pending reminders for \(pendingContactItem?.lastname ?? "this customer").")
             }
             // Inject shared models into subtree.
-            .environmentObject(viewModel)
+            .environment(viewModel)
     }
 
     // Top-level list container that handles loading/empty states and shows content.
@@ -175,7 +175,7 @@ struct CustomerUI: View {
             // Navigate to detailed profile for the selected customer.
             NavigationLink {
                 LeadDetailUI(detail: item, formService: formService)
-                    .environmentObject(pickerviewModel)
+                    .environment(pickerviewModel)
                     .navigationBarBackButtonHidden(true)
             } label: {
                 CellView(data: item, showsComments: !item.comments.isEmpty, color: color)
@@ -268,8 +268,8 @@ struct CustomerUI: View {
             mode: .new,
             formService: formService
         )
-        .environmentObject(viewModel)
-        .environmentObject(pickerviewModel)
+        .environment(viewModel)
+        .environment(pickerviewModel)
     }
 
     // Toolbar: edit mode toggle, add new customer, and sort menu.

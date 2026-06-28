@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import Observation
 
 protocol SessionServicing {
     var currentUserId: String? { get }
@@ -28,12 +29,13 @@ struct FirebaseSessionService: SessionServicing {
 }
 
 @MainActor
-final class SessionViewModel: ObservableObject {
-    @Published private(set) var isAuthenticated: Bool
-    @Published var isLoginPresented: Bool
-    @Published var errorMessage = ""
+@Observable
+final class SessionViewModel {
+    private(set) var isAuthenticated: Bool
+    var isLoginPresented: Bool
+    var errorMessage = ""
 
-    private let sessionService: SessionServicing
+    @ObservationIgnored private let sessionService: SessionServicing
 
     init(sessionService: SessionServicing = FirebaseSessionService()) {
         self.sessionService = sessionService

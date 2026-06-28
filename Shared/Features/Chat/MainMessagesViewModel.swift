@@ -4,18 +4,20 @@
 //
 
 import Foundation
+import Observation
 
 @MainActor
-final class MainMessagesViewModel: ObservableObject {
-    @Published var errorMessage = ""
-    @Published var chatUser: UserModel?
-    @Published var recentMessages = [RecentMessage]()
-    @Published var relativeTimeReferenceDate = Date()
+@Observable
+final class MainMessagesViewModel {
+    var errorMessage = ""
+    var chatUser: UserModel?
+    var recentMessages = [RecentMessage]()
+    var relativeTimeReferenceDate = Date()
 
-    private let repository: ChatRepositoryProtocol
-    private var chatListener: ChatListener?
-    private var refreshTask: Task<Void, Never>?
-    private var listenerGeneration = UUID()
+    @ObservationIgnored private let repository: ChatRepositoryProtocol
+    @ObservationIgnored private var chatListener: ChatListener?
+    @ObservationIgnored private var refreshTask: Task<Void, Never>?
+    @ObservationIgnored private var listenerGeneration = UUID()
 
     var currentUserId: String? {
         repository.currentUserId

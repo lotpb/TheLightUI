@@ -10,7 +10,7 @@ import SwiftUI
 struct AddView: View {
     
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var listViewModel: ListViewModel
+    @Environment(ListViewModel.self) private var listViewModel
     @State private var textFieldText = ""
     @State private var alertTitle = ""
     @State private var showAlert = false
@@ -80,6 +80,6 @@ struct AddView_Previews: PreviewProvider {
         NavigationStack {
             AddView()
         }
-        .environmentObject(ListViewModel(itemStore: UserDefaultsItemStore()))
+        .environment(ListViewModel(itemStore: UserDefaultsItemStore()))
     }
 }

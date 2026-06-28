@@ -9,7 +9,7 @@ import SwiftUI
 
 @available(iOS 17.0, *)
 struct SwiftUIRouteMapView: View {
-    @ObservedObject var manager: LocationManager
+    var manager: LocationManager
     @Binding var travelTime: Double
     @Binding var distance: Double
     @Binding var directions: [MapRouteStep]
