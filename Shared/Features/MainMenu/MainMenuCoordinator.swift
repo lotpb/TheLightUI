@@ -101,12 +101,8 @@ struct MainMenuCoordinator {
         case .employee:
             GlassMorphism()
         case .expenses:
-            if #available(iOS 17.0, *) {
-                ExpenseTrackerView()
-                    .expenseModelContainer()
-            } else {
-                Text("Expenses require iOS 17 or later.")
-            }
+            ExpenseTrackerView()
+                .expenseModelContainer()
         case .tip:
             TipUI()
         case .steps:

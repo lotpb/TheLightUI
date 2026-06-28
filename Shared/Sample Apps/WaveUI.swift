@@ -8,7 +8,6 @@
 
 import SwiftUI
 
-@available(iOS 15.0, *)
 struct WaveUI: View {
     @State private var isAlternateColorEnabled = false
 
@@ -50,7 +49,6 @@ struct WaveUI: View {
     }
 }
 
-@available(iOS 15.0, *)
 private struct WaveFormUI: View {
     private let color: Color
     private let amplitude: CGFloat
@@ -105,7 +103,6 @@ private struct WaveFormUI: View {
     }
 }
 
-@available(iOS 15.0, *)
 struct WaveUI_Previews: PreviewProvider {
     static var previews: some View {
         WaveUI()

@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-@available(iOS 15.0, *)
 struct WeatherView: View {
     var weather: API.CurrentWeather.Response
     
@@ -81,18 +80,17 @@ struct WeatherView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
                 .padding(.bottom, 20)
-                .foregroundColor(Color.background)
+                .foregroundStyle(Color.background)
                 .background(.white)
                 .clipShape(CustomCorners(corners: [.topLeft, .topRight], radius: 20))
             }
         }
-        .edgesIgnoringSafeArea(.bottom)
+        .ignoresSafeArea(edges: .bottom)
         .background(Color.background)
         .preferredColorScheme(.dark)
     }
 }
 
-@available(iOS 15.0, *)
 struct WeatherView_Previews: PreviewProvider {
     static var previews: some View {
         WeatherView(weather: try! Bundle.main.url(forResource: "weatherData", withExtension: "json")!.load())

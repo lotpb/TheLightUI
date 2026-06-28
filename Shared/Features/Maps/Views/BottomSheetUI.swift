@@ -463,6 +463,10 @@ struct BottomSheetUI: View {
                         RoundedRectangle(cornerRadius: 20, style: .continuous)
                             .fill(Color(.tertiarySystemGroupedBackground))
                     )
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .stroke(.white.opacity(0.52), lineWidth: 1)
+                    }
                 }
             }
             Spacer(minLength: 8)

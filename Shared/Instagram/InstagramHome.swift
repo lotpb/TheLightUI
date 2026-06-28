@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-@available(iOS 16.0, *)
 struct InstagramHome: View {
     @State private var currentTab = InstagramHomeTab.home
     @Environment(\.dismiss) private var dismiss
@@ -603,18 +602,15 @@ private struct IGActivity: Identifiable {
     ]
 }
 
-@available(iOS 17.0, *)
 #Preview("Instagram Home - Light") {
     InstagramHome()
 }
 
-@available(iOS 17.0, *)
 #Preview("Instagram Home - Dark") {
     InstagramHome()
         .preferredColorScheme(.dark)
 }
 
-@available(iOS 17.0, *)
 #Preview("Instagram Home - Dynamic Type") {
     InstagramHome()
         .environment(\.sizeCategory, .accessibilityExtraExtraExtraLarge)

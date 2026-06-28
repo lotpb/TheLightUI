@@ -24,7 +24,6 @@ struct ChartItem: Identifiable {
 }
 
 // MARK: - Charts
-@available(iOS 16.0, *)
 struct ChartView: View {
     private enum Layout {
         static let maxContentWidth: CGFloat = 700
@@ -103,7 +102,6 @@ struct ChartView: View {
 }
 
 // MARK: - Chart Section
-@available(iOS 16.0, *)
 private struct ChartSection<Content: View>: View {
     private let spacing: CGFloat = 12
     private let chartHeight: CGFloat = 220
@@ -125,7 +123,6 @@ private struct ChartSection<Content: View>: View {
 }
 
 // MARK: - Preview
-@available(iOS 16.0, *)
 #Preview("Charts - Dark") {
     ChartView()
         .preferredColorScheme(.dark)

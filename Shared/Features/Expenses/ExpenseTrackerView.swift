@@ -6,7 +6,6 @@
 import SwiftUI
 import SwiftData
 
-@available(iOS 17.0, *)
 struct ExpenseTrackerView: View {
     @AppStorage("color") private var color: Int?
     @Environment(\.modelContext) private var modelContext
@@ -160,7 +159,6 @@ struct ExpenseTrackerView: View {
     }
 }
 
-@available(iOS 17.0, *)
 private struct ExpenseRowView: View {
     let expense: Expense
     let accentColor: Color
@@ -202,7 +200,6 @@ private struct ExpenseRowView: View {
     }
 }
 
-@available(iOS 17.0, *)
 private struct ExpenseDetailView: View {
     let expense: Expense
 
@@ -231,7 +228,6 @@ private struct ExpenseDetailView: View {
     }
 }
 
-@available(iOS 17.0, *)
 private struct ExpenseEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var viewModel: ExpenseTrackerViewModel
@@ -272,7 +268,6 @@ private struct ExpenseEditorView: View {
     }
 }
 
-@available(iOS 17.0, *)
 private struct SummaryMetricView: View {
     let title: String
     let value: String
@@ -300,7 +295,6 @@ private struct SummaryMetricView: View {
     }
 }
 
-@available(iOS 17.0, *)
 enum ExpensePreviewData {
     @MainActor
     static var container: ModelContainer {
@@ -321,7 +315,6 @@ enum ExpensePreviewData {
     }
 }
 
-@available(iOS 17.0, *)
 #Preview("Expenses") {
     NavigationStack {
         ExpenseTrackerView()

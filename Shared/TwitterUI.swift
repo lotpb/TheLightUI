@@ -237,7 +237,7 @@ struct TwitterUI: View {
     }
 }
 
-@available(iOS 17.0, *)
+@available(iOS 18.0, *)
 #Preview("Twitter UI") {
     TwitterUI()
 }

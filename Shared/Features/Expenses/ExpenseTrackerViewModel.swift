@@ -6,7 +6,6 @@
 import Foundation
 import SwiftData
 
-@available(iOS 17.0, *)
 @MainActor
 final class ExpenseTrackerViewModel: ObservableObject {
     @Published var selectedFilter: ExpenseFilter = .all

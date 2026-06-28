@@ -17,7 +17,7 @@ struct WeatherRow: View {
                 .frame(width: 20, height: 20)
                 .padding()
                 .background(Color.text)
-                .cornerRadius(50)
+                .clipShape(RoundedRectangle(cornerRadius: 50))
             
             VStack(alignment: .leading, spacing: 8) {
                 Text(type.title())

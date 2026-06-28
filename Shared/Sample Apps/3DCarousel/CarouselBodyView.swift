@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-@available(iOS 15.0, *)
+@available(iOS 18.0, *)
 struct CarouselBodyView: View {
     let page: CarouselPage
     @State private var offset: CGFloat = 0
@@ -96,7 +96,7 @@ struct CarouselBodyView: View {
     }
 }
 
-@available(iOS 15.0, *)
+@available(iOS 18.0, *)
 private struct StatView: View {
     let value: String
     let label: String
@@ -113,7 +113,7 @@ private struct StatView: View {
     }
 }
 
-@available(iOS 15.0, *)
+@available(iOS 18.0, *)
 #Preview("Carousel Body - Dark") {
     CarouselBodyView(page: CarouselPage.pages[0])
         .preferredColorScheme(.dark)

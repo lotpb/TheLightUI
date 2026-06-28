@@ -8,7 +8,6 @@
 import AVKit
 import SwiftUI
 
-@available(iOS 15.0, *)
 struct ReelsView: View {
     fileprivate enum Layout {
         static let pagePadding: CGFloat = 16
@@ -77,7 +76,6 @@ struct ReelsView: View {
     }
 }
 
-@available(iOS 15.0, *)
 private struct ReelsPlayer: View {
     let reel: Reel
     let currentReel: String
@@ -191,7 +189,6 @@ private struct ReelsPlayer: View {
     }
 }
 
-@available(iOS 15.0, *)
 private struct ReelCaptionView: View {
     let reel: Reel
     let profileImageUrl: String?
@@ -262,7 +259,6 @@ private struct ReelCaptionView: View {
     private static let expandedCaptionText = " hktftfluyglgihilighi oyggigpi gggpip pggih."
 }
 
-@available(iOS 15.0, *)
 private struct ReelAudioRow: View {
     var body: some View {
         HStack {
@@ -286,7 +282,6 @@ private struct ReelAudioRow: View {
     }
 }
 
-@available(iOS 15.0, *)
 private struct ActionButtons: View {
     let reel: Reel
     @State private var isLiked = false
@@ -327,7 +322,6 @@ private struct ActionButtons: View {
     }
 }
 
-@available(iOS 15.0, *)
 private struct ReelActionLabel: View {
     let systemImage: String
     let text: String?
@@ -350,7 +344,6 @@ private struct ReelActionLabel: View {
     }
 }
 
-@available(iOS 15.0, *)
 private struct ReelsEmptyState: View {
     var body: some View {
         VStack(spacing: 12) {
@@ -371,7 +364,6 @@ private struct ReelsEmptyState: View {
     }
 }
 
-@available(iOS 15.0, *)
 #Preview("Reels") {
     ReelsView()
         .preferredColorScheme(.dark)

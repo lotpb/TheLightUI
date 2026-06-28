@@ -113,7 +113,7 @@ private struct GradientBackground: View {
 }
 
 // MARK: - Preview
-@available(iOS 17.0, *)
+@available(iOS 18.0, *)
 #Preview("Gradient UI", traits: .portrait) {
     GradientUI()
 }

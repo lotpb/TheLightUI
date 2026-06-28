@@ -8,7 +8,6 @@
 import SwiftUI
 import CoreLocationUI
 
-@available(iOS 15.0, *)
 struct WelcomeView: View {
     let requestLocation: () -> Void
     
@@ -26,15 +25,14 @@ struct WelcomeView: View {
             LocationButton(.shareCurrentLocation) {
                 requestLocation()
             }
-            .cornerRadius(30)
+            .clipShape(RoundedRectangle(cornerRadius: 30))
             .symbolVariant(.fill)
-            .foregroundColor(.white)
+            .foregroundStyle(.white)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
-@available(iOS 15.0, *)
 struct WelcomeView_Previews: PreviewProvider {
     static var previews: some View {
         WelcomeView(requestLocation: {})

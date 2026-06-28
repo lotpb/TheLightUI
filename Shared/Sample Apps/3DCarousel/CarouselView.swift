@@ -7,8 +7,9 @@
 
 import SwiftUI
 
-@available(iOS 15.0, *)
+@available(iOS 18.0, *)
 struct CarouselView: View {
+
     @State private var currentTab = CarouselPage.pages.first?.id ?? "p1"
     
     private let pages = CarouselPage.pages
@@ -40,7 +41,7 @@ struct CarouselView: View {
     }
 }
 
-@available(iOS 15.0, *)
+@available(iOS 18.0, *)
 struct CarouselPage: Identifiable {
     let id: String
     let imageName: String
@@ -102,14 +103,14 @@ struct CarouselPage: Identifiable {
     ]
 }
 
-@available(iOS 15.0, *)
+@available(iOS 18.0, *)
 struct CarouselStat: Identifiable {
     let id = UUID()
     let value: String
     let label: String
 }
 
-@available(iOS 15.0, *)
+@available(iOS 18.0, *)
 #Preview("Carousel - Dark") {
     CarouselView()
         .preferredColorScheme(.dark)
