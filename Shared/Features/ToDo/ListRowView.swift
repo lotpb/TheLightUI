@@ -10,18 +10,18 @@ import SwiftUI
 
 struct ListRowView: View {
     let item: ItemModel
-    
+
     var body: some View {
         HStack {
             Image(systemName: item.isCompleted ? "checkmark.circle" : "circle")
-                .foregroundColor(item.isCompleted ? .green : Color.clear)
+                .foregroundStyle(item.isCompleted ? Color.green : .clear)
                 .background(
                     Circle().stroke(
                         AngularGradient(gradient: Gradient(colors: CustomColor.gradColors), center: .center),
                         style: StrokeStyle(lineWidth: 1.0, lineCap: .round, lineJoin: .round)
                     )
                 )
-            
+
             Text(item.title)
             Spacer()
         }
@@ -30,14 +30,9 @@ struct ListRowView: View {
     }
 }
 
-struct ListRowView_Previews: PreviewProvider {
-    static let item1 = ItemModel(title: "first", isCompleted: true)
-    static let item2 = ItemModel(title: "second", isCompleted: false)
-    static var previews: some View {
-        Group {
-            ListRowView(item: item1)
-            ListRowView(item: item2)
-        }
-        .previewLayout(.sizeThatFits)
+#Preview {
+    List {
+        ListRowView(item: ItemModel(title: "first", isCompleted: true))
+        ListRowView(item: ItemModel(title: "second", isCompleted: false))
     }
 }

@@ -2,7 +2,8 @@ import Foundation
 import CoreLocation
 
 protocol LocationCaptureManaging {
-    func requestSingleLocation(completion: @escaping (CLLocationCoordinate2D?) -> Void)
+    /// Request a single location fix, returning `nil` if permission is denied or the request times out.
+    func requestSingleLocation() async -> CLLocationCoordinate2D?
 }
 
 final class LocationCaptureManager: NSObject, LocationCaptureManaging {
@@ -16,9 +17,18 @@ final class LocationCaptureManager: NSObject, LocationCaptureManaging {
         locationManager.delegate = self
     }
 
-    func requestSingleLocation(completion: @escaping (CLLocationCoordinate2D?) -> Void) {
+    func requestSingleLocation() async -> CLLocationCoordinate2D? {
+        await withCheckedContinuation { continuation in
+            requestSingleLocation { coordinate in
+                continuation.resume(returning: coordinate)
+            }
+        }
+    }
+
+    private func requestSingleLocation(completion: @escaping (CLLocationCoordinate2D?) -> Void) {
         guard self.completion == nil else {
-            // A request is already in progress; ignore or handle accordingly
+            // A request is already in progress; report no result for this one.
+            completion(nil)
             return
         }
         self.completion = completion

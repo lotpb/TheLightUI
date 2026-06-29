@@ -7,87 +7,35 @@
 
 import SwiftUI
 
-enum ToDoFilter: String, CaseIterable, Identifiable {
-    case all
-    case completed
-    case notCompleted
-
-    var id: String { rawValue }
-
-    var title: String {
-        switch self {
-        case .all:
-            "All"
-        case .completed:
-            "Completed"
-        case .notCompleted:
-            "Not Completed"
-        }
-    }
-
-    func includes(_ item: ItemModel) -> Bool {
-        switch self {
-        case .all:
-            true
-        case .completed:
-            item.isCompleted
-        case .notCompleted:
-            !item.isCompleted
-        }
-    }
-}
-
 struct ListView: View {
-    
+
     @State private var listViewModel: ListViewModel
-    @State private var selectedFilter: ToDoFilter = .notCompleted
     @State private var showingAddSheet = false
 
-    init(listViewModel: ListViewModel = ListViewModel(itemStore: UserDefaultsItemStore())) {
-        _listViewModel = State(initialValue: listViewModel)
+    @MainActor
+    init(listViewModel: ListViewModel? = nil) {
+        // Construct the default model in the init body: a main-actor-isolated
+        // initializer can't be called from a nonisolated default argument.
+        _listViewModel = State(initialValue: listViewModel ?? ListViewModel(itemStore: UserDefaultsItemStore()))
     }
 
     var body: some View {
+        @Bindable var listViewModel = listViewModel
+
         ZStack {
             Color(.systemGroupedBackground)
                 .ignoresSafeArea()
-            
-            let visibleItems = listViewModel.items.filter { selectedFilter.includes($0) }
 
-            if visibleItems.isEmpty {
-                NoItemsView()
+            if listViewModel.visibleItems.isEmpty {
+                NoItemsView { showingAddSheet = true }
                     .transition(.opacity)
             } else {
                 VStack(spacing: 12) {
-                    // Header card with count and quick add
-                    HStack(alignment: .center) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("To Do's")
-                                .font(.title2.weight(.semibold))
-                            Text("\(visibleItems.count) items")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        Button {
-                            showingAddSheet = true
-                        } label: {
-                            Label("Add", systemImage: "plus.circle.fill")
-                                .font(.headline)
-                        }
-                        .buttonStyle(.borderedProminent)
+                    ToDoHeaderView(count: listViewModel.visibleItems.count) {
+                        showingAddSheet = true
                     }
-                    .padding(16)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .strokeBorder(Color(.separator).opacity(0.15))
-                    )
-                    .padding(.horizontal)
-                    .padding(.top, 8)
 
-                    // Filter control
-                    Picker("Filter", selection: $selectedFilter) {
+                    Picker("Filter", selection: $listViewModel.filter) {
                         ForEach(ToDoFilter.allCases) { filter in
                             Text(filter.title).tag(filter)
                         }
@@ -97,9 +45,9 @@ struct ListView: View {
 
                     List {
                         Section {
-                            ForEach(visibleItems) { item in
+                            ForEach(listViewModel.visibleItems) { item in
                                 ListRowView(item: item)
-                                    .contentShape(Rectangle())
+                                    .contentShape(.rect)
                                     .onTapGesture {
                                         withAnimation(.snappy) {
                                             listViewModel.updateItem(item: item)
@@ -107,18 +55,18 @@ struct ListView: View {
                                     }
                                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                         Button(role: .destructive) {
-                                            if let index = listViewModel.items.firstIndex(where: { $0.id == item.id }) {
-                                                withAnimation(.easeInOut) {
-                                                    listViewModel.deleteItem(at: IndexSet(integer: index))
-                                                }
+                                            withAnimation(.easeInOut) {
+                                                listViewModel.deleteItem(item)
                                             }
-                                        } label: { Label("Delete", systemImage: "trash") }
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
                                     }
                             }
                             .onDelete(perform: listViewModel.deleteItem)
                             .onMove(perform: listViewModel.moveItem)
                         } header: {
-                            Text(selectedFilter.title)
+                            Text(listViewModel.filter.title)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
@@ -130,8 +78,8 @@ struct ListView: View {
         }
         .navigationTitle("To Do List ✍️")
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) { EditButton() }
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .topBarLeading) { EditButton() }
+            ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button { } label: { Label("Share List", systemImage: "square.and.arrow.up") }
                     Button { } label: { Label("Sort By", systemImage: "arrow.up.arrow.down") }
@@ -141,7 +89,7 @@ struct ListView: View {
                     Image(systemName: "ellipsis.circle")
                 }
             }
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     showingAddSheet = true
                 } label: {
@@ -150,19 +98,48 @@ struct ListView: View {
             }
         }
         .sheet(isPresented: $showingAddSheet) {
-            AddView()
-                .environment(listViewModel)
-        }
-    }
-    
-}
-
-
-struct ListView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationStack {
-            ListView()
+            NavigationStack {
+                AddView()
+            }
+            .environment(listViewModel)
         }
     }
 }
 
+/// Header card showing the visible item count with a quick-add action.
+private struct ToDoHeaderView: View {
+    let count: Int
+    var onAdd: () -> Void
+
+    var body: some View {
+        HStack(alignment: .center) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("To Do's")
+                    .font(.title2.weight(.semibold))
+                Text("^[\(count) item](inflect: true)")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Button(action: onAdd) {
+                Label("Add", systemImage: "plus.circle.fill")
+                    .font(.headline)
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding(16)
+        .background(.ultraThinMaterial, in: .rect(cornerRadius: 14))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(Color(.separator).opacity(0.15))
+        )
+        .padding(.horizontal)
+        .padding(.top, 8)
+    }
+}
+
+#Preview {
+    NavigationStack {
+        ListView()
+    }
+}

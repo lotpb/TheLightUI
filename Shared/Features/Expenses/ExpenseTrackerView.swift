@@ -5,6 +5,14 @@
 
 import SwiftUI
 import SwiftData
+import Charts
+
+/// Shared currency format style derived from the user's current locale.
+private enum ExpenseFormat {
+    static var currency: FloatingPointFormatStyle<Double>.Currency {
+        .currency(code: Locale.current.currency?.identifier ?? "USD")
+    }
+}
 
 struct ExpenseTrackerView: View {
     @AppStorage("color") private var color: Int?
@@ -32,10 +40,26 @@ struct ExpenseTrackerView: View {
             Color.clear.frame(height: 72)
         }
         .navigationTitle("Expenses")
+        .searchable(text: $viewModel.searchText, prompt: "Search expenses")
         .tint(themeColor)
-        .accentColor(themeColor)
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Toggle(isOn: $viewModel.currentMonthOnly) {
+                        Label("This Month", systemImage: "calendar")
+                    }
+                    Picker("Sort By", selection: $viewModel.sortOrder) {
+                        ForEach(ExpenseSortOrder.allCases) { order in
+                            Label(order.rawValue, systemImage: order.systemImage)
+                                .tag(order)
+                        }
+                    }
+                } label: {
+                    Image(systemName: viewModel.currentMonthOnly ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+                }
+                .accessibilityLabel("Filter and sort expenses")
+            }
+            ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     viewModel.startAdding()
                     isShowingEditor = true
@@ -63,7 +87,7 @@ struct ExpenseTrackerView: View {
                         Text("Tracked Spend")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
-                        Text(viewModel.totalAmount(for: expenses), format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                        Text(viewModel.totalAmount(for: expenses), format: ExpenseFormat.currency)
                             .font(.system(.largeTitle, design: .rounded, weight: .bold))
                             .lineLimit(1)
                             .minimumScaleFactor(0.75)
@@ -83,7 +107,7 @@ struct ExpenseTrackerView: View {
                     )
                     SummaryMetricView(
                         title: "Reimburse",
-                        value: viewModel.reimbursableTotal(for: expenses).formatted(.currency(code: Locale.current.currency?.identifier ?? "USD")),
+                        value: viewModel.reimbursableTotal(for: expenses).formatted(ExpenseFormat.currency),
                         systemImage: "arrow.triangle.2.circlepath",
                         accentColor: themeColor
                     )
@@ -108,11 +132,15 @@ struct ExpenseTrackerView: View {
     private var expenseSection: some View {
         if visibleExpenses.isEmpty {
             Section {
-                ContentUnavailableView(
-                    "No Expenses",
-                    systemImage: "tray",
-                    description: Text("Add an expense to start tracking spend.")
-                )
+                if viewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    ContentUnavailableView(
+                        "No Expenses",
+                        systemImage: "tray",
+                        description: Text("Add an expense to start tracking spend.")
+                    )
+                } else {
+                    ContentUnavailableView.search(text: viewModel.searchText)
+                }
             }
         } else {
             Section("Recent Expenses") {
@@ -143,19 +171,41 @@ struct ExpenseTrackerView: View {
                 }
             }
 
-            if !viewModel.categoryTotals(for: expenses).isEmpty {
+            let categoryTotals = viewModel.categoryTotals(for: visibleExpenses)
+            if !categoryTotals.isEmpty {
                 Section("By Category") {
-                    ForEach(viewModel.categoryTotals(for: expenses), id: \.category) { item in
+                    CategoryBreakdownChart(categoryTotals: categoryTotals)
+                        .frame(height: 220)
+                        .padding(.vertical, 4)
+
+                    ForEach(categoryTotals, id: \.category) { item in
                         HStack {
                             Label(item.category.rawValue, systemImage: item.category.systemImage)
                             Spacer()
-                            Text(item.total, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                            Text(item.total, format: ExpenseFormat.currency)
                                 .foregroundStyle(.secondary)
                         }
                     }
                 }
             }
         }
+    }
+}
+
+private struct CategoryBreakdownChart: View {
+    let categoryTotals: [(category: ExpenseCategory, total: Double)]
+
+    var body: some View {
+        Chart(categoryTotals, id: \.category) { item in
+            SectorMark(
+                angle: .value("Total", item.total),
+                innerRadius: .ratio(0.6),
+                angularInset: 1.5
+            )
+            .cornerRadius(4)
+            .foregroundStyle(by: .value("Category", item.category.rawValue))
+        }
+        .chartLegend(position: .bottom, alignment: .center)
     }
 }
 
@@ -191,7 +241,7 @@ private struct ExpenseRowView: View {
 
             Spacer()
 
-            Text(expense.amount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+            Text(expense.amount, format: ExpenseFormat.currency)
                 .font(.headline.monospacedDigit())
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
@@ -207,7 +257,7 @@ private struct ExpenseDetailView: View {
         List {
             Section {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(expense.amount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                    Text(expense.amount, format: ExpenseFormat.currency)
                         .font(.system(.largeTitle, design: .rounded, weight: .bold))
                     Label(expense.category.rawValue, systemImage: expense.category.systemImage)
                         .foregroundStyle(.secondary)

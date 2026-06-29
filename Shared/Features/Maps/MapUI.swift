@@ -121,59 +121,19 @@ struct MapUI: View {
         }
     }
 
-    @ViewBuilder
     private var mapLayer: some View {
-        if #available(iOS 17.0, *) {
-            makeRouteMapView(usingSwiftUIMap: true)
-                .ignoresSafeArea(.all, edges: .all)
-        } else {
-            makeRouteMapView(usingSwiftUIMap: false)
-                .ignoresSafeArea(.all, edges: .all)
-        }
-    }
-
-    // Builds either SwiftUIRouteMapView (iOS 17+) or RouteMapView with the same parameters.
-    @ViewBuilder
-    private func makeRouteMapView(usingSwiftUIMap: Bool) -> some View {
-        if usingSwiftUIMap {
-            if #available(iOS 17.0, *) {
-                SwiftUIRouteMapView(
-                    manager: manager,
-                    travelTime: $travelTime,
-                    distance: $distance,
-                    directions: $directions,
-                    routeStatus: $routeStatus,
-                    mode: mode,
-                    region: $manager.region,
-                    mapType: $mapType,
-                    onUserInteraction: manager.pauseFollowingLocation
-                )
-            } else {
-                RouteMapView(
-                    manager: manager,
-                    travelTime: $travelTime,
-                    distance: $distance,
-                    directions: $directions,
-                    routeStatus: $routeStatus,
-                    mode: mode,
-                    region: $manager.region,
-                    mapType: $mapType,
-                    onUserInteraction: manager.pauseFollowingLocation
-                )
-            }
-        } else {
-            RouteMapView(
-                manager: manager,
-                travelTime: $travelTime,
-                distance: $distance,
-                directions: $directions,
-                routeStatus: $routeStatus,
-                mode: mode,
-                region: $manager.region,
-                mapType: $mapType,
-                onUserInteraction: manager.pauseFollowingLocation
-            )
-        }
+        SwiftUIRouteMapView(
+            manager: manager,
+            travelTime: $travelTime,
+            distance: $distance,
+            directions: $directions,
+            routeStatus: $routeStatus,
+            mode: mode,
+            region: $manager.region,
+            mapType: $mapType,
+            onUserInteraction: manager.pauseFollowingLocation
+        )
+        .ignoresSafeArea(.all, edges: .all)
     }
 
     @ViewBuilder

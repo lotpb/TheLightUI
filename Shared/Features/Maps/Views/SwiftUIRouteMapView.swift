@@ -7,7 +7,6 @@ import CoreLocation
 import MapKit
 import SwiftUI
 
-@available(iOS 17.0, *)
 struct SwiftUIRouteMapView: View {
     var manager: LocationManager
     @Binding var travelTime: Double

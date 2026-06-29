@@ -9,10 +9,10 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct CreateNewMessageView: View {
-    
+
     let didSelectNewUser: (UserModel) -> Void
     private let maxWidthForIpad: CGFloat = 700
-    
+
     @Environment(\.dismiss) private var dismiss
     @State private var vm: CreateNewMessageViewModel
     @State private var searchText = ""
@@ -30,7 +30,7 @@ struct CreateNewMessageView: View {
         guard !query.isEmpty else { return vm.users }
         return vm.users.filter { $0.email.localizedCaseInsensitiveContains(query) }
     }
-    
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -45,7 +45,7 @@ struct CreateNewMessageView: View {
     }
 
     private var content: some View {
-        ScrollView(showsIndicators: false) {
+        ScrollView {
             LazyVStack(alignment: .leading, spacing: 14) {
                 header
                 searchField
@@ -61,7 +61,9 @@ struct CreateNewMessageView: View {
             .padding(.horizontal, 20)
             .padding(.top, 18)
             .padding(.bottom, 28)
+            .animation(.snappy, value: vm.errorMessage)
         }
+        .scrollIndicators(.hidden)
         .scrollDismissesKeyboard(.interactively)
     }
 
@@ -105,6 +107,7 @@ struct CreateNewMessageView: View {
                 .padding(.vertical, 10)
                 .frame(maxWidth: .infinity)
                 .background(Color.red.opacity(0.92), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .transition(.move(edge: .top).combined(with: .opacity))
         }
     }
 
@@ -123,7 +126,7 @@ struct CreateNewMessageView: View {
     }
 
     private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarTrailing) {
+        ToolbarItem(placement: .topBarTrailing) {
             Button("Cancel") {
                 dismiss()
             }
@@ -147,7 +150,7 @@ private struct NewMessageUserRow: View {
     let user: UserModel
 
     private var displayName: String {
-        user.email//.replacingOccurrences(of: "@optonline.net", with: "")
+        user.email
     }
 
     var body: some View {

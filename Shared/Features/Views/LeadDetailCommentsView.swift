@@ -34,7 +34,7 @@ struct LeadDetailCommentsView: View {
                 .font(.footnote)
 
             Text(detail.comments)
-                .foregroundColor(.primary)
+                .foregroundStyle(Color.primary)
                 .frame(maxWidth: .infinity, alignment: .topLeading)
                 .textSelection(.enabled)
         }
@@ -53,14 +53,8 @@ struct LeadDetailCommentsView: View {
 private struct LeadDetailCommentsEditor: View {
     @Binding var detail: CustomerItem
 
-    private static let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .full
-        return formatter
-    }()
-
     private var formattedDate: String {
-        Self.dateFormatter.string(from: Date())
+        Date().formatted(date: .complete, time: .omitted)
     }
 
     var body: some View {
@@ -78,7 +72,7 @@ private struct LeadDetailCommentsEditor: View {
 
             TextEditor(text: $detail.comments)
                 .font(.headline)
-                .foregroundColor(.primary)
+                .foregroundStyle(Color.primary)
         }
         .frame(width: 380, height: 260)
     }

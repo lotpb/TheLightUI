@@ -21,7 +21,7 @@ struct LandMarkListView: View {
     }
     
     var body: some View {
-        ScrollView(showsIndicators: false) {
+        ScrollView {
             LazyVStack(spacing: 10) {
                 if landMarks.isEmpty {
                     emptyState
@@ -38,6 +38,7 @@ struct LandMarkListView: View {
             }
             .padding(.vertical, 4)
         }
+        .scrollIndicators(.hidden)
     }
 
     private var emptyState: some View {

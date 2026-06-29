@@ -139,7 +139,7 @@ struct LeadDetailUI: View {
                 .ignoresSafeArea()
 
             // Scrollable content with header, fields, and comments.
-            ScrollView(.vertical, showsIndicators: true) {
+            ScrollView(.vertical) {
                 VStack(spacing: LeadDetailLayout.containerSpacing) {
                     // Photo/name header with fullscreen photo support.
                     LeadDetailHeaderView(detail: $detail, showFullscreen: $coordinator.showFullscreen)
@@ -165,7 +165,7 @@ struct LeadDetailUI: View {
         .applySheets(item: $coordinator.activeSheet, content: sheetContent)
         .applyLocationAlert(using: locationAlertIsPresented, message: coordinator.locationAlertMessage ?? "", onDismiss: { coordinator.locationAlertMessage = nil })
         // Apply theme color to foreground and accent (tint).
-        .foregroundColor(themeColor)
+        .foregroundStyle(themeColor)
         .tint(themeColor)
         .background(Color(.systemGroupedBackground))
         // Keep content comfortably narrow on large screens.
@@ -184,16 +184,13 @@ struct LeadDetailUI: View {
         .onChange(of: detail.isActive) {
             syncActiveColor()
         }
-//        .onChange(of: detail.isActive) { _ in
-//            syncActiveColor()
-//        }
     }
 
     // Toolbar: close, actions menu, and edit entry point.
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         // Leading: dismiss button.
-        ToolbarItem(placement: .navigationBarLeading) {
+        ToolbarItem(placement: .topBarLeading) {
             Button(action: { dismiss() }) {
                 Label("Close", systemImage: "xmark.circle")
             }
@@ -201,7 +198,7 @@ struct LeadDetailUI: View {
         }
 
         // Trailing: overflow action menu.
-        ToolbarItem(placement: .navigationBarTrailing) {
+        ToolbarItem(placement: .topBarTrailing) {
             Menu {
                 actionMenuButtons
             } label: {
@@ -210,7 +207,7 @@ struct LeadDetailUI: View {
         }
 
         // Trailing: Edit button opens the form sheet.
-        ToolbarItem(placement: .navigationBarTrailing) {
+        ToolbarItem(placement: .topBarTrailing) {
             Button(action: { coordinator.presentEdit() }) {
                 Text("Edit").fontWeight(.semibold)
             }
@@ -455,8 +452,8 @@ private extension View {
 }
 
 // Preview with sample data for design-time visualization.
-struct LeadDetailUI_Previews: PreviewProvider {
-    static var previews: some View {
+#Preview("Lead Detail - Dark") {
+    NavigationStack {
         LeadDetailUI(detail: CustomerItem(
             id: "8899999",
             isActive: true,
@@ -487,6 +484,6 @@ struct LeadDetailUI_Previews: PreviewProvider {
         ))
         .environment(CustomerData())
         .environment(PickerDataModel())
-        .preferredColorScheme(.dark)
     }
+    .preferredColorScheme(.dark)
 }

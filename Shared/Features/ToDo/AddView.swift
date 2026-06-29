@@ -75,11 +75,9 @@ struct AddView: View {
     }
 }
 
-struct AddView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationStack {
-            AddView()
-        }
-        .environment(ListViewModel(itemStore: UserDefaultsItemStore()))
+#Preview {
+    NavigationStack {
+        AddView()
     }
+    .environment(ListViewModel(itemStore: UserDefaultsItemStore()))
 }

@@ -8,39 +8,92 @@
 import Foundation
 import Observation
 
+enum ToDoFilter: String, CaseIterable, Identifiable {
+    case all
+    case completed
+    case notCompleted
 
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .all:
+            "All"
+        case .completed:
+            "Completed"
+        case .notCompleted:
+            "Not Completed"
+        }
+    }
+
+    func includes(_ item: ItemModel) -> Bool {
+        switch self {
+        case .all:
+            true
+        case .completed:
+            item.isCompleted
+        case .notCompleted:
+            !item.isCompleted
+        }
+    }
+}
+
+@MainActor
 @Observable
 class ListViewModel {
-    
+
     var items: [ItemModel] = [] {
         didSet {
+            recomputeVisibleItems()
             saveItems()
         }
     }
-    
+
+    /// The active filter. Owned by the model so the filtered collection can be
+    /// cached and recomputed only when an input changes, rather than on every
+    /// `body` evaluation.
+    var filter: ToDoFilter = .notCompleted {
+        didSet { recomputeVisibleItems() }
+    }
+
+    /// The items the list should display, prepared once per input change.
+    private(set) var visibleItems: [ItemModel] = []
+
     @ObservationIgnored private let itemStore: ItemStoring
-    
+
     init(itemStore: ItemStoring) {
         self.itemStore = itemStore
         getItems()
     }
-    
+
     func getItems() {
         guard let savedItems = itemStore.loadItems() else { return }
         items = savedItems
     }
-    
-    func deleteItem(at indexSet: IndexSet) {
-        items.remove(atOffsets: indexSet)
+
+    /// Deletes items by offsets into the visible (filtered) collection.
+    func deleteItem(at offsets: IndexSet) {
+        let ids = Set(offsets.map { visibleItems[$0].id })
+        items.removeAll { ids.contains($0.id) }
     }
-    
-    func moveItem(from index: IndexSet, toIndex: Int) {
-        items.move(fromOffsets: index, toOffset: toIndex)
+
+    func deleteItem(_ item: ItemModel) {
+        items.removeAll { $0.id == item.id }
     }
-    
+
+    /// Reorders within the visible subset, then writes the new order back into
+    /// `items` without disturbing the positions of items hidden by the filter.
+    func moveItem(from source: IndexSet, to destination: Int) {
+        var reordered = visibleItems
+        reordered.move(fromOffsets: source, toOffset: destination)
+
+        let visibleIDs = Set(visibleItems.map(\.id))
+        var iterator = reordered.makeIterator()
+        items = items.map { visibleIDs.contains($0.id) ? (iterator.next() ?? $0) : $0 }
+    }
+
     func addItem(title: String) {
-        let newItem = ItemModel(title: title, isCompleted: false)
-        items.append(newItem)
+        items.append(ItemModel(title: title, isCompleted: false))
     }
 
     func updateItem(item: ItemModel) {
@@ -48,7 +101,11 @@ class ListViewModel {
             items[index] = item.updateCompletion()
         }
     }
-    
+
+    private func recomputeVisibleItems() {
+        visibleItems = items.filter { filter.includes($0) }
+    }
+
     private func saveItems() {
         itemStore.saveItems(items)
     }

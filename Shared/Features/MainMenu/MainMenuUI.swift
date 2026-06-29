@@ -56,7 +56,7 @@ struct MainMenuUI: View {
 
     var body: some View {
         navigationContainer
-            .accentColor(themeColor)
+            .tint(themeColor)
     }
 
     private var navigationContainer: some View {
@@ -94,7 +94,7 @@ struct MainMenuUI: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarLeading) {
+        ToolbarItem(placement: .topBarLeading) {
             Button {
                 showingLogOut.toggle()
             } label: {
@@ -104,7 +104,7 @@ struct MainMenuUI: View {
             .fontWeight(.bold)
         }
 
-        ToolbarItem(placement: .navigationBarTrailing) {
+        ToolbarItem(placement: .topBarTrailing) {
             Button {
                 isShowingActionDialog.toggle()
             } label: {
@@ -166,17 +166,14 @@ struct MainMenuUI: View {
 }
 
 // MARK: - Preview
-@available(iOS 18.0, *)
-struct MainMenuUI_Previews: PreviewProvider {
-    static var previews: some View {
-        MainMenuUI(
-            onSignOut: { },
-            makeCustomerService: { PreviewCustomerService() },
-            makeCustomerFormService: { PreviewCustomerFormService() },
-            makeWeatherManager: { PreviewWeatherManager() },
-            makeWeatherLocationProvider: { PreviewWeatherLocationProvider() },
-            appBadgeManager: PreviewAppBadgeManager()
-        )
-        .preferredColorScheme(.dark)
-    }
+#Preview {
+    MainMenuUI(
+        onSignOut: { },
+        makeCustomerService: { PreviewCustomerService() },
+        makeCustomerFormService: { PreviewCustomerFormService() },
+        makeWeatherManager: { PreviewWeatherManager() },
+        makeWeatherLocationProvider: { PreviewWeatherLocationProvider() },
+        appBadgeManager: PreviewAppBadgeManager()
+    )
+    .preferredColorScheme(.dark)
 }

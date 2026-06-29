@@ -23,6 +23,7 @@ struct PlaceSearch: View {
     @State private var displayType: DisplayType = .map
     @State private var cameraPosition: MapCameraPosition = .region(.defaultRegion)
     @State private var isDragged: Bool = false
+    @State private var isAwaitingRecenter: Bool = false
     let index: Int
 
     private var numberedLandMarks: [NumberedLandMark] {
@@ -84,11 +85,22 @@ struct PlaceSearch: View {
             .onChange(of: searchText) {
                 viewModel.searchLandmarks(searchText)
             }
+            // Recenter once a fresh location arrives after the user taps Re-center.
+            .onChange(of: locationManager.location?.timestamp) {
+                guard isAwaitingRecenter, let coordinate = locationManager.location?.coordinate else { return }
+                cameraPosition = .region(
+                    MKCoordinateRegion(
+                        center: coordinate,
+                        span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
+                    )
+                )
+                isAwaitingRecenter = false
+            }
             
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button {
                         dismiss()
                     } label: {
@@ -174,14 +186,8 @@ struct PlaceSearch: View {
         .overlay(alignment: .bottom) {
             if isDragged {
                 RecenterButton {
+                    isAwaitingRecenter = true
                     locationManager.requestLocation()
-                    if let userLocation = locationManager.location?.coordinate {
-                        let region = MKCoordinateRegion(
-                            center: userLocation,
-                            span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
-                        )
-                        cameraPosition = .region(region)
-                    }
                     isDragged = false
                 }
                 .padding(.bottom, 18)

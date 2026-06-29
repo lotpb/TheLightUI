@@ -46,7 +46,7 @@ struct LoginView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView(showsIndicators: false) {
+            ScrollView {
                 VStack(alignment: .leading, spacing: Layout.sectionSpacing) {
                     header
                     formContent
@@ -56,8 +56,9 @@ struct LoginView: View {
                 .padding(.vertical, 28)
                 .frame(maxWidth: .infinity)
             }
+            .scrollIndicators(.hidden)
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
-            .onChange(of: viewModel.loginStatusMessage) { oldValue, newValue in
+            .onChange(of: viewModel.loginStatusMessage) { _, newValue in
                 guard newValue.localizedCaseInsensitiveContains("success") else { return }
                 isShowingLocationCaptureExplanation = true
             }
@@ -70,6 +71,14 @@ struct LoginView: View {
                         focusedField = nil
                     }
                 }
+            }
+            .alert("Save Your Location?", isPresented: $isShowingLocationCaptureExplanation) {
+                Button("Allow") {
+                    Task { await captureLoginLocation() }
+                }
+                Button("Not Now", role: .cancel) { }
+            } message: {
+                Text("TheLightUI can save your current location to personalize weather and directions. You can change this anytime in Settings.")
             }
         }
         .task(id: selectedPhotoItem) {
@@ -323,12 +332,10 @@ struct LoginView: View {
         }
     }
 
-    private func captureLoginLocation() {
-        locationCaptureManager.requestSingleLocation { coordinate in
-            guard let coordinate else { return }
-            SecureSettingsStore.saveString(String(coordinate.latitude), forKey: SettingsUI.latitudeKey)
-            SecureSettingsStore.saveString(String(coordinate.longitude), forKey: SettingsUI.longitudeKey)
-        }
+    private func captureLoginLocation() async {
+        guard let coordinate = await locationCaptureManager.requestSingleLocation() else { return }
+        SecureSettingsStore.saveString(String(coordinate.latitude), forKey: SettingsUI.latitudeKey)
+        SecureSettingsStore.saveString(String(coordinate.longitude), forKey: SettingsUI.longitudeKey)
     }
 }
 
@@ -403,7 +410,7 @@ private extension View {
                     .stroke(isFocused ? Color.blue : Color.clear, lineWidth: 1.5)
             }
             .contentShape(Rectangle())
-            .foregroundColor(.primary)
+            .foregroundStyle(Color.primary)
     }
 }
 
