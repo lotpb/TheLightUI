@@ -30,7 +30,7 @@ struct LandMarkCategoryView: View {
     @State private var selectedCategory = ""
     
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
+        ScrollView(.horizontal) {
             HStack(spacing: 10) {
                 ForEach(Self.categories, id: \.self) { category in
                     Button {
@@ -47,6 +47,7 @@ struct LandMarkCategoryView: View {
             .padding(.horizontal, 4)
             .padding(.vertical, 2)
         }
+        .scrollIndicators(.hidden)
     }
 }
 

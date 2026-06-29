@@ -11,6 +11,9 @@ import SwiftData
 @Observable
 final class ExpenseTrackerViewModel {
     var selectedFilter: ExpenseFilter = .all
+    var sortOrder: ExpenseSortOrder = .date
+    var currentMonthOnly = false
+    var searchText = ""
     var title = ""
     var amountText = ""
     var category: ExpenseCategory = .meals
@@ -31,7 +34,25 @@ final class ExpenseTrackerViewModel {
     }
 
     func visibleExpenses(from expenses: [Expense]) -> [Expense] {
-        expenses.filter { selectedFilter.includes($0) }
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let filtered = expenses.filter { expense in
+            guard selectedFilter.includes(expense) else { return false }
+            if currentMonthOnly,
+               !Calendar.current.isDate(expense.date, equalTo: .now, toGranularity: .month) {
+                return false
+            }
+            guard !query.isEmpty else { return true }
+            return expense.title.localizedCaseInsensitiveContains(query)
+                || expense.category.rawValue.localizedCaseInsensitiveContains(query)
+                || expense.notes.localizedCaseInsensitiveContains(query)
+        }
+
+        switch sortOrder {
+        case .date:
+            return filtered.sorted { $0.date > $1.date }
+        case .name:
+            return filtered.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+        }
     }
 
     func totalAmount(for expenses: [Expense]) -> Double {
@@ -39,7 +60,7 @@ final class ExpenseTrackerViewModel {
     }
 
     func reimbursableTotal(for expenses: [Expense]) -> Double {
-        expenses.filter(\.isReimbursable).reduce(0) { $0 + $1.amount }
+        visibleExpenses(from: expenses).filter(\.isReimbursable).reduce(0) { $0 + $1.amount }
     }
 
     func categoryTotals(for expenses: [Expense]) -> [(category: ExpenseCategory, total: Double)] {

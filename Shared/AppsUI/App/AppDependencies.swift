@@ -168,8 +168,8 @@ struct PreviewWeatherLocationProvider: WeatherLocationProviding {
 }
 
 struct PreviewLocationCaptureManager: LocationCaptureManaging {
-    func requestSingleLocation(completion: @escaping (CLLocationCoordinate2D?) -> Void) {
-        completion(CLLocationCoordinate2D(latitude: 25.7617, longitude: -80.1918))
+    func requestSingleLocation() async -> CLLocationCoordinate2D? {
+        CLLocationCoordinate2D(latitude: 25.7617, longitude: -80.1918)
     }
 }
 

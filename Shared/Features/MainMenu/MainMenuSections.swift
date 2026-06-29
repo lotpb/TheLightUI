@@ -10,7 +10,7 @@ struct IncomingSection: View {
     private let menuItems = ["Snapshot", "Statistics"]
 
     var body: some View {
-        Section(header: Text("Incoming").foregroundColor(themeColor)) {
+        Section(header: Text("Incoming").foregroundStyle(themeColor)) {
             ForEach(menuItems, id: \.self) { message in
                 NavigationLink {
                     incomingDestination(for: message)
@@ -87,25 +87,20 @@ struct DataSection: View {
                 title: "Steps Today",
                 subtitle: "Count today's steps",
                 systemImage: "figure.walk.circle.fill"
+            ),
+            DataMenuItem(
+                route: .expenses,
+                title: "Expenses",
+                subtitle: "Track spending",
+                systemImage: "creditcard.fill"
             )
         ])
-
-        if #available(iOS 17.0, *) {
-            items.append(
-                DataMenuItem(
-                    route: .expenses,
-                    title: "Expenses",
-                    subtitle: "Track spending",
-                    systemImage: "creditcard.fill"
-                )
-            )
-        }
 
         return items
     }
 
     var body: some View {
-        Section(header: Text("Data").foregroundColor(themeColor)) {
+        Section(header: Text("Data").foregroundStyle(themeColor)) {
             ForEach(items) { item in
                 MenuRouteButton(item: item, tint: themeColor) {
                     onSelect(item.route)
@@ -171,14 +166,14 @@ struct OutgoingSection: View {
     }
 
     var body: some View {
-        Section(header: Text("Outgoing").foregroundColor(themeColor)) {
+        Section(header: Text("Outgoing").foregroundStyle(themeColor)) {
             ForEach(items) { item in
                 MenuRouteButton(item: item, tint: themeColor) {
                     onSelectRoute(item.route)
                 }
             }
         }
-        .foregroundColor(.primary)
+        .foregroundStyle(.primary)
     }
 }
 

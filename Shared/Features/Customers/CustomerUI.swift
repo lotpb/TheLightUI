@@ -110,16 +110,16 @@ struct CustomerUI: View {
                 appBadgeManager.clearBadge()
                 updateDisplayedItemsCache()
             }
-            .onChange(of: viewModel.items) { _, _ in
+            .onChange(of: viewModel.items) {
                 updateDisplayedItemsCache()
             }
-            .onChange(of: listViewModel.searchText) { _, _ in
+            .onChange(of: listViewModel.searchText) {
                 updateDisplayedItemsCache()
             }
-            .onChange(of: listViewModel.isActiveOnly) { _, _ in
+            .onChange(of: listViewModel.isActiveOnly) {
                 updateDisplayedItemsCache()
             }
-            .onChange(of: listViewModel.selectedSort) { _, _ in
+            .onChange(of: listViewModel.selectedSort) {
                 updateDisplayedItemsCache()
             }
             .confirmationDialog(
@@ -166,7 +166,8 @@ struct CustomerUI: View {
         Toggle(isOn: $listViewModel.isActiveOnly) {
             Text("\(count) Active Only")
         }
-        .toggleStyle(SwitchToggleStyle(tint: themeColor))
+        // Inherits the theme tint applied to the list via `.tint(themeColor)`.
+        .toggleStyle(.switch)
     }
     
     // Rows: navigation to detail, context menu, and swipe actions.
@@ -350,7 +351,7 @@ struct CellView: View, Equatable {
             .resizable()
             .frame(width: Layout.avatarSize, height: Layout.avatarSize, alignment: .topLeading)
             .clipShape(Circle())
-            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+            .overlay { Circle().stroke(.white, lineWidth: 2) }
             .padding(.top, 5)
             .accessibilityHidden(true)
     }
@@ -361,14 +362,14 @@ struct CellView: View, Equatable {
             Text(data.lastname)
                 .font(.title3)
                 .fontWeight(.bold)
-                .foregroundColor(.primary)
+                .foregroundStyle(.primary)
                 .customerCellScaledText()
                 .padding(.top, 3)
                 .accessibilityLabel(Text("Customer name \(data.lastname)"))
 
             Text(data.address)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
                 .customerCellSingleLineText()
                 .accessibilityLabel(Text("Address \(data.address)"))
 
@@ -399,7 +400,7 @@ struct CellView: View, Equatable {
             Text(data.formattedCreationDate)
                 .frame(width: Layout.summaryWidth, height: Layout.summaryHeight)
                 .font(.caption2)
-                .foregroundColor(themeColor)
+                .foregroundStyle(themeColor)
                 .customerCellScaledText()
                 .padding(.top, 3)
                 .accessibilityLabel(Text("Created on \(data.formattedCreationDate)"))
@@ -407,7 +408,7 @@ struct CellView: View, Equatable {
             Text(data.formattedAmount)
                 .frame(width: Layout.summaryWidth, height: Layout.summaryHeight)
                 .customerCellSingleLineText()
-                .foregroundColor(.primary)
+                .foregroundStyle(.primary)
                 .font(.headline)
                 .accessibilityLabel(Text("Amount \(data.formattedAmount)"))
         }
@@ -418,7 +419,7 @@ struct CellView: View, Equatable {
         Image(systemName: systemName)
             .resizable()
             .frame(width: Layout.actionIconSize, height: Layout.actionIconSize)
-            .foregroundColor(themeColor)
+            .foregroundStyle(themeColor)
     }
 }
 

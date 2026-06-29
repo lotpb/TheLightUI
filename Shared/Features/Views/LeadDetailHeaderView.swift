@@ -125,7 +125,7 @@ struct LeadDetailHeaderView: View {
                     .padding(.horizontal, 13)
                     .padding(.vertical, 6)
                     .background(Color.red.opacity(0.9), in: Capsule())
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
             }
         }
     }

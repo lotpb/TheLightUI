@@ -22,7 +22,7 @@ struct MainMessagesView: View {
 
     // Factory for repositories used by child views (CreateNewMessageView).
     private let makeChatRepository: () -> ChatRepositoryProtocol
-    
+
     private enum Layout {
         static let tabBarHeight: CGFloat = 62
         static let floatingButtonTabBarSpacing: CGFloat = 20
@@ -36,7 +36,7 @@ struct MainMessagesView: View {
     @State private var shouldShowNewMessageScreen = false
     // The selected chat user for the chat log.
     @State private var chatUser: UserModel?
-    
+
     // View models: inbox (vm) and active chat log.
     @State private var vm: MainMessagesViewModel
     @State private var chatLogViewModel: ChatLogViewModel
@@ -57,7 +57,7 @@ struct MainMessagesView: View {
             initialValue: ChatLogViewModel(chatUser: nil, repository: chatLogRepository)
         )
     }
-    
+
     var body: some View {
         NavigationStack {
             // Main layered layout: background, content, and floating action button.
@@ -74,11 +74,17 @@ struct MainMessagesView: View {
                 // Floating action to start a new conversation.
                 newMessageButton
             }
-            .overlay(alignment: .top) { errorBanner }
-            // Transient error banner shown at the top.
-            .ignoresSafeArea(.keyboard, edges: .bottom)
+            // Transient error banner shown at the top, animated in and out.
+            .overlay(alignment: .top) {
+                if !vm.errorMessage.isEmpty {
+                    errorBanner
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                }
+            }
+            .animation(.snappy, value: vm.errorMessage)
             // Let content extend under the keyboard for smoother transitions.
-            .navigationBarHidden(true)
+            .ignoresSafeArea(.keyboard, edges: .bottom)
+            .toolbar(.hidden, for: .navigationBar)
             // Programmatic navigation into the chat log when a conversation is opened.
             .navigationDestination(isPresented: $shouldNavigateToChatLogView) {
                 ChatLogView(vm: chatLogViewModel)
@@ -90,11 +96,8 @@ struct MainMessagesView: View {
         .onChange(of: isAuthenticated) {
             updateForAuthenticationState()
         }
-//        .onChange(of: isAuthenticated) { _ in
-//            updateForAuthenticationState()
-//        }
     }
-    
+
     // Top bar showing the current user's avatar, name, presence, and settings.
     private var customNavBar: some View {
         HStack(spacing: 14) {
@@ -117,7 +120,7 @@ struct MainMessagesView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            
+
             Spacer()
 
             // Settings button opens a confirmation dialog for sign out.
@@ -147,10 +150,10 @@ struct MainMessagesView: View {
             Text("What do you want to do?")
         }
     }
-    
+
     // Scrollable inbox with recent conversations or an empty state.
     private var messagesView: some View {
-        ScrollView(showsIndicators: false) {
+        ScrollView {
             LazyVStack(spacing: 12) {
                 // Section header: title and count of conversations.
                 inboxHeader
@@ -175,6 +178,7 @@ struct MainMessagesView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, Layout.messagesBottomPadding)
         }
+        .scrollIndicators(.hidden)
         .refreshable {
             await vm.refreshInbox()
         }
@@ -205,7 +209,7 @@ struct MainMessagesView: View {
         .padding(.top, 6)
         .padding(.bottom, 8)
     }
-    
+
     // Floating "New" button that presents the user picker full screen.
     private var newMessageButton: some View {
         Button {
@@ -237,19 +241,15 @@ struct MainMessagesView: View {
 
     // Top-aligned banner that shows transient error messages from the view model.
     private var errorBanner: some View {
-        Group {
-            if !vm.errorMessage.isEmpty {
-                Text(vm.errorMessage)
-                    .font(.footnote.weight(.medium))
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-                    .background(Color.red.opacity(0.92), in: Capsule())
-                    .padding(.horizontal, 16)
-                    .padding(.top, 10)
-            }
-        }
+        Text(vm.errorMessage)
+            .font(.footnote.weight(.medium))
+            .foregroundStyle(.white)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(Color.red.opacity(0.92), in: Capsule())
+            .padding(.horizontal, 16)
+            .padding(.top, 10)
     }
 
     // Keep inbox state consistent with authentication.
@@ -270,7 +270,7 @@ struct MainMessagesView: View {
 
     // Display name derived from email (customize as needed).
     private func displayName(for email: String?) -> String? {
-        email//?.replacingOccurrences(of: "@optonline.net", with: "")
+        email
     }
 }
 
@@ -307,7 +307,7 @@ private struct RecentMessageRow: View {
 
     // Name to display for the conversation partner.
     private var displayName: String {
-        recentMessage.email//.replacingOccurrences(of: "@optonline.net", with: "")
+        recentMessage.email
     }
 
     var body: some View {

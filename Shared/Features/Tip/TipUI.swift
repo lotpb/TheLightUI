@@ -5,28 +5,45 @@
 
 import SwiftUI
 
+/// Pure value-type model holding the tip calculation inputs and derived results.
+/// Keeping the math out of the view makes it easy to reason about and test.
+struct TipCalculation: Equatable {
+    var bill: Double = 0
+    var tipPercent: Double = 0.20
+    var splitCount: Int = 1
+    /// When enabled, the total is rounded up to the next whole currency unit
+    /// and the tip absorbs the difference.
+    var roundsTotalUp: Bool = false
+
+    /// Total before any rounding is applied.
+    private var rawTotal: Double {
+        bill + bill * tipPercent
+    }
+
+    var total: Double {
+        roundsTotalUp ? rawTotal.rounded(.up) : rawTotal
+    }
+
+    /// Actual tip amount. When rounding is enabled this grows so the total lands
+    /// on a whole number.
+    var tip: Double {
+        max(0, total - bill)
+    }
+
+    var amountPerPerson: Double {
+        guard splitCount > 0 else { return total }
+        return total / Double(splitCount)
+    }
+}
+
 struct TipUI: View {
-    @State private var billAmount = 0.00
-    @State private var tipPercent = 0.20
-    @State private var splitCount = 1
+    @State private var calculation = TipCalculation()
     @FocusState private var isBillAmountFocused: Bool
 
     private let presetTipPercents = [0.15, 0.18, 0.20, 0.25]
 
     private var currencyCode: String {
         Locale.current.currency?.identifier ?? "USD"
-    }
-
-    private var tipAmount: Double {
-        billAmount * tipPercent
-    }
-
-    private var totalAmount: Double {
-        billAmount + tipAmount
-    }
-
-    private var amountPerPerson: Double {
-        totalAmount / Double(splitCount)
     }
 
     var body: some View {
@@ -51,7 +68,7 @@ struct TipUI: View {
                 }
             }
 
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     resetCalculator()
                 } label: {
@@ -70,10 +87,12 @@ struct TipUI: View {
                         Text("Total")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
-                        Text(totalAmount, format: .currency(code: currencyCode))
+                        Text(calculation.total, format: .currency(code: currencyCode))
                             .font(.system(.largeTitle, design: .rounded, weight: .bold))
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
+                            .contentTransition(.numericText(value: calculation.total))
+                            .animation(.snappy, value: calculation.total)
                     }
 
                     Spacer()
@@ -86,12 +105,12 @@ struct TipUI: View {
                 HStack(spacing: 12) {
                     TipMetricView(
                         title: "Tip",
-                        value: tipAmount.formatted(.currency(code: currencyCode)),
+                        value: calculation.tip.formatted(.currency(code: currencyCode)),
                         systemImage: "percent"
                     )
                     TipMetricView(
                         title: "Each",
-                        value: amountPerPerson.formatted(.currency(code: currencyCode)),
+                        value: calculation.amountPerPerson.formatted(.currency(code: currencyCode)),
                         systemImage: "person.2.fill"
                     )
                 }
@@ -102,22 +121,21 @@ struct TipUI: View {
 
     private var billSection: some View {
         Section("Bill") {
-            TextField("Bill Amount", value: $billAmount, format: .currency(code: currencyCode))
+            TextField("Bill Amount", value: $calculation.bill, format: .currency(code: currencyCode))
                 .keyboardType(.decimalPad)
                 .focused($isBillAmountFocused)
                 .font(.title3.monospacedDigit())
-                .onChange(of: billAmount) { _, newValue in
-                    billAmount = max(0, newValue)
+                .onChange(of: calculation.bill) { _, newValue in
+                    if newValue < 0 {
+                        calculation.bill = 0
+                    }
                 }
-//                .onChange(of: billAmount) { newValue in
-//                    billAmount = max(0, newValue)
-//                }
         }
     }
 
     private var tipSection: some View {
         Section("Tip") {
-            Picker("Tip Percent", selection: $tipPercent) {
+            Picker("Tip Percent", selection: $calculation.tipPercent) {
                 ForEach(presetTipPercents, id: \.self) { percent in
                     Text(percent, format: .percent.precision(.fractionLength(0)))
                         .tag(percent)
@@ -129,11 +147,11 @@ struct TipUI: View {
                 HStack {
                     Label("Custom", systemImage: "slider.horizontal.3")
                     Spacer()
-                    Text(tipPercent, format: .percent.precision(.fractionLength(0)))
+                    Text(calculation.tipPercent, format: .percent.precision(.fractionLength(0)))
                         .font(.headline.monospacedDigit())
                 }
 
-                Slider(value: $tipPercent, in: 0...0.35, step: 0.01)
+                Slider(value: $calculation.tipPercent, in: 0...0.35, step: 0.01)
                     .tint(.green)
             }
             .padding(.vertical, 4)
@@ -142,43 +160,46 @@ struct TipUI: View {
 
     private var splitSection: some View {
         Section("Split") {
-            Stepper(value: $splitCount, in: 1...20) {
+            Stepper(value: $calculation.splitCount, in: 1...20) {
                 HStack {
                     Label("People", systemImage: "person.2")
                     Spacer()
-                    Text("\(splitCount)")
+                    Text("\(calculation.splitCount)")
                         .font(.headline.monospacedDigit())
                 }
             }
+
+            Toggle(isOn: $calculation.roundsTotalUp) {
+                Label("Round Total Up", systemImage: "arrow.up.forward")
+            }
+            .tint(.green)
         }
     }
 
     private var breakdownSection: some View {
         Section("Breakdown") {
             LabeledContent("Bill") {
-                Text(billAmount, format: .currency(code: currencyCode))
+                Text(calculation.bill, format: .currency(code: currencyCode))
             }
 
             LabeledContent("Tip") {
-                Text(tipAmount, format: .currency(code: currencyCode))
+                Text(calculation.tip, format: .currency(code: currencyCode))
             }
 
             LabeledContent("Total") {
-                Text(totalAmount, format: .currency(code: currencyCode))
+                Text(calculation.total, format: .currency(code: currencyCode))
                     .fontWeight(.semibold)
             }
 
             LabeledContent("Per Person") {
-                Text(amountPerPerson, format: .currency(code: currencyCode))
+                Text(calculation.amountPerPerson, format: .currency(code: currencyCode))
                     .fontWeight(.semibold)
             }
         }
     }
 
     private func resetCalculator() {
-        billAmount = 0
-        tipPercent = 0.20
-        splitCount = 1
+        calculation = TipCalculation()
         isBillAmountFocused = true
     }
 }

@@ -87,7 +87,7 @@ struct MapButtonView: View {
         } label: {
             circularIcon("mappin.and.ellipse")
         }
-        .foregroundColor(.primary)
+        .foregroundStyle(Color.primary)
         .opacity(directions.isEmpty ? 0.45 : 1)
         .disabled(directions.isEmpty)
         .accessibilityLabel("Show Directions")
@@ -107,7 +107,7 @@ struct MapButtonView: View {
         } label: {
             circularIcon(mapType == .standard ? "network" : "map")
         }
-        .foregroundColor(.primary)
+        .foregroundStyle(Color.primary)
         .accessibilityLabel("Toggle Map Type")
     }
 
@@ -125,7 +125,7 @@ struct MapButtonView: View {
         } label: {
             circularText(mapType == .hybridFlyover ? "2D" : "3D")
         }
-        .foregroundColor(.primary)
+        .foregroundStyle(Color.primary)
         .accessibilityLabel(mapType == .hybridFlyover ? "Switch to 2D Mode" : "Switch to 3D Mode")
     }
     
@@ -139,14 +139,14 @@ struct MapButtonView: View {
         } label: {
             circularIcon("location.fill")
         }
-        .foregroundColor(.primary)
+        .foregroundStyle(Color.primary)
         .accessibilityLabel("Current Location")
     }
 
     private var speedBadge: some View {
         VStack {
             Text(speedText)
-                .foregroundColor(.primary)
+                .foregroundStyle(Color.primary)
                 .font(.headline)
                 .fontWeight(.bold)
                 .frame(width: 120, height: 50)
@@ -168,7 +168,7 @@ struct MapButtonView: View {
                 .font(.headline)
                 .bold()
                 .padding()
-                .foregroundColor(.primary)
+                .foregroundStyle(Color.primary)
 
             Divider()
                 .background(Color.secondary)
@@ -186,13 +186,13 @@ struct MapButtonView: View {
             } header: {
                 Text("Distance")
                     .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(Color.secondary)
                     .multilineTextAlignment(.trailing)
             }
         }
         .frame(height: 96)
         .scrollDisabled(true)
-        .foregroundColor(Color.white)
+        .foregroundStyle(Color.white)
     }
 
     private var routeStepsTable: some View {
@@ -204,11 +204,11 @@ struct MapButtonView: View {
             } header: {
                 Text("Steps")
                     .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(Color.secondary)
                     .multilineTextAlignment(.trailing)
             }
         }
-        .foregroundColor(Color.white)
+        .foregroundStyle(Color.white)
         
     }
 
@@ -225,14 +225,14 @@ struct MapButtonView: View {
 
                 Text(step.distanceText)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(Color.secondary)
             }
 
             Spacer(minLength: 12)
 
             Text(step.travelTimeText)
                 .font(.subheadline.weight(.semibold))
-                .foregroundColor(.secondary)
+                .foregroundStyle(Color.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.85)
                 .multilineTextAlignment(.trailing)
@@ -253,7 +253,7 @@ struct MapButtonView: View {
 
             Text(formattedTravelTime(travelTime))
                 .font(.subheadline.weight(.semibold))
-                .foregroundColor(.secondary)
+                .foregroundStyle(Color.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.85)
                 .multilineTextAlignment(.trailing)

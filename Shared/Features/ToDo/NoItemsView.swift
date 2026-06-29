@@ -7,27 +7,29 @@
 import SwiftUI
 
 struct NoItemsView: View {
-    
+
+    /// Invoked when the user taps the call-to-action. The parent owns how an
+    /// item gets added (e.g. presenting the add sheet with its view model).
+    var onAdd: () -> Void
+
     @State private var animate = false
-    
+
     var body: some View {
-        ScrollView(showsIndicators: true) {
+        ScrollView {
             VStack(spacing: 10) {
                 Text("there are no items")
                     .font(.title)
                     .fontWeight(.semibold)
                 Text("maybe you should add a bunch of items")
                     .padding(.bottom, 15)
-                NavigationLink {
-                    AddView()
-                } label: {
+                Button(action: onAdd) {
                     Text("Add Something")
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .frame(height: 45)
                         .background(animate ? Color.purple : Color.orange)
-                        .cornerRadius(15)
+                        .clipShape(.rect(cornerRadius: 15))
                 }
                 .padding(.horizontal, animate ? 30 : 50)
                 .shadow(
@@ -46,7 +48,7 @@ struct NoItemsView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-    
+
     private func addAnimation() {
         guard !animate else { return }
         Task {
@@ -62,12 +64,9 @@ struct NoItemsView: View {
     }
 }
 
-struct NoItemsView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationStack {
-            NoItemsView()
-                .navigationTitle("No Item")
-        }
+#Preview {
+    NavigationStack {
+        NoItemsView {}
+            .navigationTitle("No Item")
     }
 }
-

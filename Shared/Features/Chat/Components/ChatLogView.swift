@@ -10,7 +10,7 @@ import PhotosUI
 import SDWebImageSwiftUI
 
 struct ChatLogView: View {
-    
+
     private enum Layout {
         static let tabBarHeight: CGFloat = 62
         static let messageBarBottomPadding = tabBarHeight
@@ -20,13 +20,14 @@ struct ChatLogView: View {
     @State private var selectedPhoto: PhotosPickerItem? = nil
     @State private var isPickingPhoto = false
     @FocusState private var isMessageFieldFocused: Bool
-    
+
     var body: some View {
         ZStack(alignment: .top) {
             ChatBackground()
             messagesView
             errorBanner
         }
+        .animation(.snappy, value: vm.errorMessage)
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -41,9 +42,9 @@ struct ChatLogView: View {
             vm.stopListening()
         }
     }
-    
+
     static let emptyScrollToString = "Empty"
-    
+
     private var messagesView: some View {
         ScrollViewReader { scrollViewProxy in
             ScrollView {
@@ -53,13 +54,11 @@ struct ChatLogView: View {
                             .padding(.top, 120)
                     }
 
-                    ForEach(vm.chatMessages.indices, id: \.self) { index in
-                        let message = vm.chatMessages[index]
-
+                    ForEach(displayMessages) { item in
                         MessageView(
-                            message: message,
+                            message: item.message,
                             currentUserId: vm.currentUserId,
-                            showsTimestamp: shouldShowTimestamp(at: index)
+                            showsTimestamp: item.showsTimestamp
                         )
                     }
 
@@ -82,22 +81,31 @@ struct ChatLogView: View {
             .onChange(of: vm.chatMessages.count) {
                 scrollToBottom(using: scrollViewProxy, animated: true)
             }
-//            .onChange(of: vm.chatMessages.count) { _ in
-//                scrollToBottom(using: scrollViewProxy, animated: true)
-//            }
         }
     }
-    
+
     private var messageBarBottomPadding: CGFloat {
         isMessageFieldFocused ? 0 : Layout.messageBarBottomPadding
     }
 
-    private func shouldShowTimestamp(at index: Int) -> Bool {
-        guard index > 0 else { return true }
+    // A chat message paired with whether it should display a date header, identified
+    // by its stable Firestore document id so the list can diff rows by identity.
+    private struct DisplayMessage: Identifiable {
+        let message: ChatMessage
+        let showsTimestamp: Bool
 
-        let previousMessage = vm.chatMessages[index - 1]
-        let currentMessage = vm.chatMessages[index]
-        return !Calendar.current.isDate(previousMessage.timestamp, inSameDayAs: currentMessage.timestamp)
+        var id: String { message.id ?? "\(message.fromId)-\(message.timestamp.timeIntervalSince1970)" }
+    }
+
+    // Build the rows once, computing each message's date-header visibility from its
+    // predecessor (a header is shown when the day changes between consecutive messages).
+    private var displayMessages: [DisplayMessage] {
+        let messages = vm.chatMessages
+        return messages.enumerated().map { index, message in
+            let showsTimestamp = index == 0
+                || !Calendar.current.isDate(messages[index - 1].timestamp, inSameDayAs: message.timestamp)
+            return DisplayMessage(message: message, showsTimestamp: showsTimestamp)
+        }
     }
 
     private func scrollToBottom(using scrollViewProxy: ScrollViewProxy, animated: Bool) {
@@ -111,7 +119,7 @@ struct ChatLogView: View {
             }
         }
     }
-    
+
     private var chatBottomBar: some View {
         HStack(alignment: .bottom, spacing: 10) {
             photoPickerButton
@@ -190,20 +198,19 @@ struct ChatLogView: View {
         .padding(.bottom, 5)
     }
 
+    @ViewBuilder
     private var errorBanner: some View {
-        Group {
-            if !vm.errorMessage.isEmpty {
-                Text(vm.errorMessage)
-                    .font(.footnote.weight(.medium))
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-                    .background(Color.red.opacity(0.92), in: Capsule())
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-            }
+        if !vm.errorMessage.isEmpty {
+            Text(vm.errorMessage)
+                .font(.footnote.weight(.medium))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(Color.red.opacity(0.92), in: Capsule())
+                .padding(.horizontal)
+                .padding(.top, 8)
+                .transition(.move(edge: .top).combined(with: .opacity))
         }
     }
 }
@@ -343,21 +350,10 @@ struct MessageView: View {
     }
 }
 
-struct ChatLogView_Previews: PreviewProvider {
-    static var previews: some View {
-        // Create a mock chat user for preview
-        let mockUser = UserModel(uid: "6787g8fghctrdcrt6", email: "arp1@gmail.com", profileImageUrl: "profile-rabbit-toy.png")
-        let vm = ChatLogViewModel(chatUser: mockUser)
-        return Group {
-            NavigationStack {
-                ChatLogView(vm: vm)
-            }
-            //.preferredColorScheme(.light)
-
-            NavigationStack {
-                ChatLogView(vm: vm)
-            }
-            .preferredColorScheme(.dark)
-        }
+#Preview("Chat Log") {
+    let mockUser = UserModel(uid: "6787g8fghctrdcrt6", email: "arp1@gmail.com", profileImageUrl: "profile-rabbit-toy.png")
+    NavigationStack {
+        ChatLogView(vm: ChatLogViewModel(chatUser: mockUser))
     }
+    .preferredColorScheme(.dark)
 }

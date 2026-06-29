@@ -63,9 +63,17 @@ struct FormUI: View {
             )
         )
 
-        UISegmentedControl.appearance().selectedSegmentTintColor = UIColor.lightGray
-        UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
+        // Configure the global segmented-control appearance exactly once,
+        // rather than on every initialization of this view.
+        Self.configureSegmentedControlAppearance
     }
+
+    // Lazily-initialized once on first access; SwiftUI has no native API for a
+    // segmented picker's selected-segment tint, so the UIKit proxy is still required.
+    private static let configureSegmentedControlAppearance: Void = {
+        UISegmentedControl.appearance().selectedSegmentTintColor = .lightGray
+        UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
+    }()
 
     var body: some View {
         // Embed form in a navigation stack for title/toolbar/alerts.
@@ -74,7 +82,7 @@ struct FormUI: View {
                 .navigationTitle("Data Entry")
                 // Toolbar with Close and Save actions.
                 .toolbar { toolbarContent }
-                .foregroundColor(themeColor)
+                .foregroundStyle(themeColor)
                 // Success alert displayed after saving.
                 .alert("Success", isPresented: $viewModel.showAlertUpdate) {
                     Button("Ok") {
@@ -85,7 +93,7 @@ struct FormUI: View {
                 }
         }
         // Accent/tint color for controls.
-        .accentColor(themeColor)
+        .tint(themeColor)
     }
 
     // Main form content with sections.
@@ -114,7 +122,7 @@ struct FormUI: View {
                         .resizable()
                         .frame(width: Layout.avatarSize, height: Layout.avatarSize)
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        .overlay { Circle().stroke(.white, lineWidth: 2) }
                         .padding(.trailing, 5)
 
                     // Placeholder for editing the profile photo.
@@ -122,7 +130,7 @@ struct FormUI: View {
                         Text("Edit")
                             .font(.callout)
                             .fontWeight(.bold)
-                            .foregroundColor(themeColor)
+                            .foregroundStyle(themeColor)
                     }
                     .padding(.top, 8)
                 }
@@ -180,10 +188,11 @@ struct FormUI: View {
                     .formTextStyle()
             }
             // Persist active state to the underlying model.
-            .onChange(of: viewModel.activeIsOn) { oldValue, newValue in
+            .onChange(of: viewModel.activeIsOn) {
                 viewModel.updateActiveStatus()
             }
-            .toggleStyle(SwitchToggleStyle(tint: themeColor))
+            // Inherits the theme tint applied via `.tint(themeColor)`.
+            .toggleStyle(.switch)
 
             // Salesman picklist.
             pickerRow("Salesman:", selection: $viewModel.selectSalesman, items: pickerviewModel.pickSalesman) { tag in
@@ -254,7 +263,7 @@ struct FormUI: View {
             Spacer()
 
             TextEditor(text: $viewModel.detail.comments)
-                .foregroundColor(.primary)
+                .foregroundStyle(Color.primary)
                 .lineLimit(2)
         }
     }
@@ -262,19 +271,21 @@ struct FormUI: View {
     // Segmented picker for star rating.
     private var ratingRow: some View {
         HStack {
-            Text("Rating: **\(Image(systemName: "star"))**")
-                .formTextStyle()
-                .imageScale(.small)
-                .symbolVariant(.fill)
-                .foregroundStyle(.yellow)
+            // "Rating:" uses the accent color; only the star is yellow.
+            (
+                Text("Rating: ").foregroundStyle(themeColor)
+                + Text(Image(systemName: "star.fill")).foregroundStyle(.yellow)
+            )
+            .formTextStyle()
+            .imageScale(.small)
 
             Picker("Pick rating here", selection: $viewModel.selectedRate) {
                 ForEach(pickerviewModel.pickRate, id: \.self) {
                     Text($0)
                 }
             }
-            .pickerStyle(SegmentedPickerStyle())
-            .foregroundColor(themeColor)
+            .pickerStyle(.segmented)
+            .foregroundStyle(themeColor)
         }
     }
 
@@ -427,11 +438,13 @@ private extension TextField {
     func formStyle() -> some View {
         self
             .font(.system(size: 20.0))
-            .foregroundColor(.primary)
+            // `Color.primary` (not the hierarchical `.primary`) so the field
+            // text uses the adaptive label color, not the inherited theme tint.
+            .foregroundStyle(Color.primary)
             .frame(minWidth: 50, maxWidth: .infinity)
             .multilineTextAlignment(.leading)
             .textInputAutocapitalization(.sentences)
-            .cornerRadius(10)
+            .clipShape(.rect(cornerRadius: 10))
     }
 }
 
@@ -448,7 +461,7 @@ private extension Text {
     // Styling for picker text to align and scale properly.
     func pickerTextStyle() -> some View {
         self
-            .foregroundColor(.primary)
+            .foregroundStyle(Color.primary)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 10)
             .lineLimit(1)

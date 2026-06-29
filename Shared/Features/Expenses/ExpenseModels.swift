@@ -74,6 +74,22 @@ enum ExpenseCategory: String, CaseIterable, Identifiable, Codable {
     }
 }
 
+enum ExpenseSortOrder: String, CaseIterable, Identifiable {
+    case date = "Date"
+    case name = "Name"
+
+    var id: String { rawValue }
+
+    var systemImage: String {
+        switch self {
+        case .date:
+            "calendar"
+        case .name:
+            "textformat"
+        }
+    }
+}
+
 enum ExpenseFilter: String, CaseIterable, Identifiable {
     case all = "All"
     case reimbursable = "Reimbursable"

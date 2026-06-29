@@ -51,7 +51,6 @@ struct MainTopView: View {
 
     private var backendRow: some View {
         statusRow(title: "Backend:", value: backEnd, systemImage: "circle.hexagongrid.fill")
-            //.symbolRenderingMode(.multicolor)
             .symbolEffect(
                 .variableColor
                 .iterative
@@ -79,9 +78,9 @@ struct MainTopView: View {
             weatherRow
         }
         .symbolRenderingMode(.multicolor)
-        .foregroundColor(.white)
+        .foregroundStyle(.white)
         .background(themeColor)
-        .cornerRadius(Layout.cornerRadius)
+        .clipShape(.rect(cornerRadius: Layout.cornerRadius))
         .frame(height: Layout.height, alignment: .leading)
         .padding()
         .task {

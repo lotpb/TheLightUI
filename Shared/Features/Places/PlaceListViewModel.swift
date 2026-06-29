@@ -13,6 +13,7 @@ import Observation
 @Observable
 class PlaceListViewModel {
     @ObservationIgnored private let placeSearchService: PlaceSearchServicing
+    @ObservationIgnored private var searchTask: Task<Void, Never>?
 
     var landMarks: [LandMark] = []
     private(set) var errorMessage = ""
@@ -21,19 +22,32 @@ class PlaceListViewModel {
         self.placeSearchService = placeSearchService
     }
 
+    deinit {
+        searchTask?.cancel()
+    }
+
     func searchLandmarks(_ searchTerm: String) {
         let trimmedSearchTerm = searchTerm.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        searchTask?.cancel()
+
         guard !trimmedSearchTerm.isEmpty else {
             landMarks = []
             errorMessage = ""
             return
         }
 
-        Task {
+        searchTask = Task { [weak self] in
+            guard let self else { return }
             do {
-                landMarks = try await placeSearchService.searchLandmarks(matching: trimmedSearchTerm)
+                let results = try await placeSearchService.searchLandmarks(matching: trimmedSearchTerm)
+                guard !Task.isCancelled else { return }
+                landMarks = results
                 errorMessage = ""
+            } catch is CancellationError {
+                return
             } catch {
+                guard !Task.isCancelled else { return }
                 landMarks = []
                 errorMessage = error.localizedDescription
             }
@@ -60,16 +74,8 @@ struct MKLocalPlaceSearchService: PlaceSearchServicing {
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = searchTerm
 
-        return try await withCheckedThrowingContinuation { continuation in
-            MKLocalSearch(request: request).start { response, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-
-                continuation.resume(returning: response?.mapItems ?? [])
-            }
-        }
+        let response = try await MKLocalSearch(request: request).start()
+        return response.mapItems
     }
 }
 

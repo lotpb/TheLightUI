@@ -49,11 +49,6 @@ struct BottomSheetUI: View {
         return String(format: "Speed: %.0f", speed)
     }
 
-    private var courseText: String {
-        let course = max(locationManager.location?.course ?? 0.0, 0.0)
-        return String(format: "Course: %.0f", course)
-    }
-
     private var travelTimeText: String {
         let totalMinutes = max(Int((travelTime / 60).rounded()), 0)
         let hours = totalMinutes / 60
@@ -105,14 +100,6 @@ struct BottomSheetUI: View {
 
     private var addressText: String {
         "\(locationManager.currentPlacemark?.subThoroughfare ?? "No Address") \(locationManager.currentPlacemark?.thoroughfare ?? "")\n\(locationManager.currentPlacemark?.locality ?? "") \(locationManager.currentPlacemark?.administrativeArea ?? "") \(locationManager.currentPlacemark?.postalCode ?? "")\n\(locationManager.currentPlacemark?.country ?? "")"
-    }
-
-    private var shareText: String {
-        let coord = locationManager.location?.coordinate
-        let lat = coord?.latitude ?? 0
-        let lon = coord?.longitude ?? 0
-        let niceAddress = addressText.replacingOccurrences(of: "\n", with: ", ")
-        return "I'm here: \(niceAddress) (\(String(format: "%.5f", lat)), \(String(format: "%.5f", lon)))"
     }
 
     private var mapsURL: URL? {
@@ -290,7 +277,9 @@ struct BottomSheetUI: View {
                 Text("Details").tag(1)
             }
             .pickerStyle(.segmented)
-            .modifier(OnChangeCompat(selection: $selection))
+            .onChange(of: selection) { _, _ in
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            }
             .padding(.horizontal)
 
             ScrollView(.vertical, showsIndicators: false) {
@@ -304,7 +293,7 @@ struct BottomSheetUI: View {
                 }
                 .padding(.top, 4)
                 .padding(.bottom, 12)
-                .foregroundColor(.primary)
+                .foregroundStyle(Color.primary)
             }
         }
     }
@@ -352,30 +341,15 @@ struct BottomSheetUI: View {
     @ViewBuilder
     private var shareLocationButton: some View {
         if let mapsURL {
-            if #available(iOS 16.0, *) {
-                ShareLink(item: mapsURL) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.headline)
-                        .foregroundStyle(.blue)
-                        .frame(width: 32, height: 32)
-                        .background(Color(.tertiarySystemBackground), in: Circle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Share your location")
-            } else {
-                Button {
-                    UIPasteboard.general.string = shareText + " \n" + mapsURL.absoluteString
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                } label: {
-                    Image(systemName: "doc.on.doc")
-                        .font(.headline)
-                        .foregroundStyle(.blue)
-                        .frame(width: 32, height: 32)
-                        .background(Color(.tertiarySystemBackground), in: Circle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Copy your location")
+            ShareLink(item: mapsURL) {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.headline)
+                    .foregroundStyle(.blue)
+                    .frame(width: 32, height: 32)
+                    .background(Color(.tertiarySystemBackground), in: Circle())
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Share your location")
         }
     }
 
@@ -493,26 +467,10 @@ struct BottomSheetUI: View {
 
             Text(favorite.title)
                 .font(.footnote.weight(.semibold))
-                .foregroundColor(.primary)
+                .foregroundStyle(Color.primary)
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 4)
     }
 
-}
-
-private struct OnChangeCompat: ViewModifier {
-    @Binding var selection: Int
-
-    func body(content: Content) -> some View {
-        if #available(iOS 17.0, *) {
-            content.onChange(of: selection) { _, _ in
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            }
-        } else {
-            content.onChange(of: selection) { _ in
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            }
-        }
-    }
 }
