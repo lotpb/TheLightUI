@@ -26,6 +26,7 @@
 		AF15AA2D275C5B2C0098CB04 /* ChatBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF15AA2C275C5B2C0098CB04 /* ChatBubble.swift */; };
 		AF15AA2E275C5B2C0098CB04 /* ChatBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF15AA2C275C5B2C0098CB04 /* ChatBubble.swift */; };
 		AF1B37AB27935EAB00374C0F /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1B37AA27935EAB00374C0F /* NotificationManager.swift */; };
+		AF1EEDF82FF1E51C005414BF /* Prospects.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1EEDED2FF1E51C005414BF /* Prospects.swift */; };
 		AF2519202729AF660077B00D /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF25191F2729AF660077B00D /* ImagePicker.swift */; };
 		AF2519212729AF660077B00D /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF25191F2729AF660077B00D /* ImagePicker.swift */; };
 		AF2960122FEF6FAD002EE47B /* InstagramStory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2960112FEF6FAD002EE47B /* InstagramStory.swift */; };
@@ -244,6 +245,7 @@
 		AF10B673277A67D90086F160 /* MembershipUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MembershipUI.swift; sourceTree = "<group>"; };
 		AF15AA2C275C5B2C0098CB04 /* ChatBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBubble.swift; sourceTree = "<group>"; };
 		AF1B37AA27935EAB00374C0F /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		AF1EEDED2FF1E51C005414BF /* Prospects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Prospects.swift; sourceTree = "<group>"; };
 		AF25191F2729AF660077B00D /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		AF2960112FEF6FAD002EE47B /* InstagramStory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstagramStory.swift; sourceTree = "<group>"; };
 		AF2B3D83278FA7DF007767F0 /* WebUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebUI.swift; sourceTree = "<group>"; };
@@ -703,6 +705,7 @@
 				AF92B8CB2678170700729208 /* GlassMorphism.swift */,
 				AF92B8972678150400729208 /* GradientUI.swift */,
 				AF8CA0A5277618EC00142D38 /* DirectionsUI.swift */,
+				AF1EEDED2FF1E51C005414BF /* Prospects.swift */,
 				AF10B673277A67D90086F160 /* MembershipUI.swift */,
 				AFA7D2BA27971D00001DAF7B /* StacksView.swift */,
 				AF845E41267832BA000F5501 /* TwitterUI.swift */,
@@ -1038,6 +1041,7 @@
 				AFBCC5E22765671E00F0B0A8 /* FirebaseConstants.swift in Sources */,
 				AF5373842778C099001F40B6 /* WeatherManager.swift in Sources */,
 				AFB760A62FE22CA2002D1A83 /* MainMenuSections.swift in Sources */,
+				AF1EEDF82FF1E51C005414BF /* Prospects.swift in Sources */,
 				AF92B8A82678157100729208 /* Loader.swift in Sources */,
 				AFF95EF8274816EF00724250 /* UserModel.swift in Sources */,
 				AF92B8CF2678178B00729208 /* GradientTextUI.swift in Sources */,
