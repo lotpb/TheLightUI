@@ -235,7 +235,8 @@ private struct ProductSection: View {
     private var sectionHeader: some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(title)
-                .font(.system(.title3, design: .rounded, weight: .bold))
+                .font(.system(.title3, design: .rounded))
+                .fontWeight(.bold)
                 .foregroundStyle(FurnitureStyle.ink)
 
             Text(subtitle)
@@ -340,7 +341,8 @@ private struct ProductCardView: View {
                 .foregroundStyle(FurnitureStyle.accent)
 
             Text(product.name)
-                .font(.system(.subheadline, design: .rounded, weight: .bold))
+                .font(.system(.subheadline, design: .rounded))
+                .fontWeight(.bold)
                 .foregroundStyle(FurnitureStyle.ink)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -351,7 +353,7 @@ private struct ProductCardView: View {
         HStack(spacing: 4) {
             Image(systemName: "star.fill")
                 .font(.caption2)
-                .foregroundStyle(.yellow)
+                .foregroundStyle(Color.yellow)
 
             Text("\(product.rating).0")
                 .font(.caption.weight(.semibold))
@@ -360,7 +362,8 @@ private struct ProductCardView: View {
             Spacer(minLength: 8)
 
             Text(product.price)
-                .font(.system(.subheadline, design: .rounded, weight: .bold))
+                .font(.system(.subheadline, design: .rounded))
+                .fontWeight(.bold)
                 .foregroundStyle(FurnitureStyle.ink)
         }
     }
@@ -469,7 +472,11 @@ private struct CategorySelectorView: View {
                         CategoryView(isActive: selectedCategory == category, text: category.rawValue)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityAddTraits(selectedCategory == category ? .isSelected : [])
+                    .accessibilityAddTraits(
+                        selectedCategory == category
+                        ? AccessibilityTraits.isSelected
+                        : AccessibilityTraits()
+                    )
                 }
             }
             .padding(.horizontal, 20)
@@ -478,7 +485,7 @@ private struct CategorySelectorView: View {
     }
 
     private func select(_ category: FurnitureCategory) {
-        withAnimation(.snappy(duration: 0.25, extraBounce: 0.1)) {
+        withAnimation(.easeInOut(duration: 0.25)) {
             selectedCategory = category
         }
     }

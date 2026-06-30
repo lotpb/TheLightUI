@@ -73,7 +73,7 @@ struct MembershipUI: View {
 //                    updateCode()
 //                }
                 .onChange(of: emailAddress) {
-                    SecureSettingsStore.saveString(last, forKey: SettingsUI.emailKey)
+                    SecureSettingsStore.saveString(emailAddress, forKey: SettingsUI.emailKey)
                     updateCode()
                 }
 //                .onChange(of: ) { newValue in
@@ -155,8 +155,9 @@ struct MembershipUI: View {
     // MARK: - Actions
 
     private func saveQRCode() {
-        let imageSaver = ImageSaver()
-        imageSaver.writeToPhotoAlbum(image: qrCode)
+        Task {
+            try? await ImageSaver().writeToPhotoAlbum(image: qrCode)
+        }
     }
 
     private func loadSecureSettings() {
