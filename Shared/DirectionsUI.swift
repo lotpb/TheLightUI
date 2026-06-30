@@ -64,7 +64,7 @@ struct DirectionsUI: View {
         if let errorMessage = viewModel.errorMessage {
             Section {
                 Text(errorMessage)
-                    .foregroundColor(.red)
+                    .foregroundStyle(.red)
             }
         }
     }
@@ -83,7 +83,7 @@ struct DirectionsUI: View {
 
                     Text(viewModel.routeTravelTimeText)
                         .font(.subheadline.weight(.semibold))
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(Color.secondary)
                         .multilineTextAlignment(.trailing)
                 }
             }
@@ -104,14 +104,14 @@ struct DirectionsUI: View {
                             Text(step.instructions)
                             Text(step.distanceText)
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(Color.secondary)
                         }
 
                         Spacer(minLength: 12)
 
                         Text(step.travelTimeText)
                             .font(.subheadline.weight(.semibold))
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(Color.secondary)
                             .multilineTextAlignment(.trailing)
                     }
                 }
@@ -121,7 +121,7 @@ struct DirectionsUI: View {
 
     private var emptyStepsMessage: some View {
         Text("No directions loaded")
-            .foregroundColor(.secondary)
+            .foregroundStyle(Color.secondary)
     }
 
     // MARK: - Actions

@@ -21,12 +21,6 @@ struct GradientTextUI: View {
     }
 }
 
-struct GradientTextUI_Previews: PreviewProvider {
-    static var previews: some View {
-        GradientTextUI()
-    }
-}
-
 private struct GradientTitleText: View {
     let title: String
 
@@ -54,17 +48,17 @@ private struct FeatureCard: View {
         VStack(spacing: 18) {
             Image(systemName: "star.fill")
                 .font(.system(size: 44, weight: .semibold))
-                .foregroundColor(.white.opacity(0.92))
+                .foregroundStyle(.white.opacity(0.92))
                 .shadow(radius: 12)
 
             Text("App of the day")
                 .font(.title.bold())
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .shadow(radius: 20)
 
             Text("A compact gradient card with reusable SwiftUI styling.")
                 .font(.subheadline.weight(.semibold))
-                .foregroundColor(.white.opacity(0.82))
+                .foregroundStyle(.white.opacity(0.82))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)
         }
@@ -81,3 +75,8 @@ private struct FeatureCard: View {
         .shadow(color: Color("pink2").opacity(0.3), radius: 20, x: 0, y: 10)
     }
 }
+// MARK: - Preview
+#Preview("Gradient Text") {
+    GradientTextUI()
+}
+
