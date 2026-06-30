@@ -10,7 +10,7 @@ import Charts
 
 // MARK: - Chart Model
 struct ChartItem: Identifiable {
-    var id = UUID()
+    let id = UUID()
     let type: String
     let value: Double
 
@@ -31,6 +31,7 @@ struct ChartView: View {
     }
 
     @Environment(\.dismiss) private var dismiss
+    @State private var selectedType: String?
     private let items = ChartItem.sampleItems
 
     var body: some View {
@@ -53,6 +54,11 @@ struct ChartView: View {
         }
     }
 
+    private var selectedItem: ChartItem? {
+        guard let selectedType else { return nil }
+        return items.first { $0.type == selectedType }
+    }
+
     private var barChartSection: some View {
         ChartSection(title: "Bar", color: .red) {
             Chart(items) { item in
@@ -61,7 +67,16 @@ struct ChartView: View {
                     y: .value("Profit", item.value)
                 )
                 .foregroundStyle(Color.red.gradient)
+                .opacity(selectedType == nil || selectedType == item.type ? 1 : 0.35)
+                .annotation(position: .top, alignment: .center) {
+                    if selectedType == item.type {
+                        Text(item.value, format: .number)
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(Color.red)
+                    }
+                }
             }
+            .modifier(BarSelectionModifier(selectedType: $selectedType))
         }
     }
 
@@ -73,6 +88,8 @@ struct ChartView: View {
                     y: .value("Profit", item.value)
                 )
                 .foregroundStyle(Color.blue.gradient)
+                .interpolationMethod(.catmullRom)
+                .symbol(.circle)
             }
         }
     }
@@ -85,18 +102,34 @@ struct ChartView: View {
                     y: .value("Profit", item.value)
                 )
                 .foregroundStyle(Color.green.gradient)
+                .interpolationMethod(.catmullRom)
             }
         }
     }
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarLeading) {
-            Button {
+        ToolbarItem(placement: .topBarLeading) {
+            Button(role: .cancel) {
                 dismiss()
             } label: {
                 Label("Close", systemImage: "xmark.circle.fill")
             }
+        }
+    }
+}
+
+// MARK: - Bar Selection Modifier
+/// Adds tap-to-select interactivity on iOS 17+, where `chartXSelection` is available,
+/// while leaving the chart untouched on the project's iOS 16 deployment floor.
+private struct BarSelectionModifier: ViewModifier {
+    @Binding var selectedType: String?
+
+    func body(content: Content) -> some View {
+        if #available(iOS 17.0, *) {
+            content.chartXSelection(value: $selectedType)
+        } else {
+            content
         }
     }
 }
@@ -114,7 +147,7 @@ private struct ChartSection<Content: View>: View {
         VStack(alignment: .leading, spacing: spacing) {
             Label(title, systemImage: "chart.bar.xaxis")
                 .font(.headline)
-                .foregroundColor(color)
+                .foregroundStyle(color)
 
             content
                 .frame(height: chartHeight)

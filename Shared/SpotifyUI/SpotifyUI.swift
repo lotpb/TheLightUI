@@ -12,7 +12,7 @@ struct SpotifyUI: View {
     
     @State private var viewModel = MainMessagesViewModel()
     @State private var searchText = ""
-    @State private var showSideBar = true
+    @State private var showSideBar = false
     
     private var filteredRecentlyPlayed: [Song] {
         filterSongs(recentlyPlayed)
@@ -31,7 +31,7 @@ struct SpotifyUI: View {
         ZStack(alignment: .leading) {
             SpotifyBackground()
 
-            ScrollView(showsIndicators: false) {
+            ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
                     topBar
                     heroHeader
@@ -44,10 +44,11 @@ struct SpotifyUI: View {
                 .padding(.vertical, 18)
                 .frame(maxWidth: .infinity)
             }
+            .scrollIndicators(.hidden)
 
-            SideTabViewUI(showSideBar: $showSideBar)
+            SideTabViewUI(showSideBar: $showSideBar, viewModel: viewModel)
         }
-        .animation(.spring(response: 0.35, dampingFraction: 0.82), value: showSideBar)
+        .animation(.snappy(duration: 0.35), value: showSideBar)
         .task { await viewModel.fetchCurrentUser() }
     }
 

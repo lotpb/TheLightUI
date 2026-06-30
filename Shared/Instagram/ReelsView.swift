@@ -128,7 +128,7 @@ private struct ReelsPlayer: View {
         }
         .padding(.horizontal)
         .padding(.bottom, 20)
-        .foregroundColor(.white)
+        .foregroundStyle(.white)
         .frame(maxHeight: .infinity, alignment: .bottom)
     }
 
@@ -144,7 +144,7 @@ private struct ReelsPlayer: View {
     private var volumeIndicator: some View {
         Image(systemName: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
             .font(.title)
-            .foregroundColor(.white)
+            .foregroundStyle(.white)
             .padding()
             .background(.secondary)
             .clipShape(Circle())
@@ -179,7 +179,7 @@ private struct ReelsPlayer: View {
 
         volumeFeedbackTask?.cancel()
         volumeFeedbackTask = Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 800_000_000)
+            try? await Task.sleep(for: .milliseconds(800))
             guard !Task.isCancelled else { return }
 
             withAnimation {
@@ -224,12 +224,13 @@ private struct ReelCaptionView: View {
     @ViewBuilder
     private var caption: some View {
         if showMore {
-            ScrollView(.vertical, showsIndicators: false) {
+            ScrollView(.vertical) {
                 Text(reel.mediaFile.title + Self.expandedCaptionText)
                     .font(.callout)
                     .fontWeight(.semibold)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .scrollIndicators(.hidden)
             .frame(height: ReelsView.Layout.expandedCaptionHeight)
             .onTapGesture(perform: toggleCaption)
         } else {
@@ -242,7 +243,7 @@ private struct ReelCaptionView: View {
 
                     Text("more")
                         .font(.callout.bold())
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
                 .padding(.top, 5)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -289,7 +290,7 @@ private struct ActionButtons: View {
     var body: some View {
         VStack(spacing: 25) {
             Button {
-                withAnimation(.spring()) {
+                withAnimation(.bouncy) {
                     isLiked.toggle()
                 }
             } label: {
@@ -349,15 +350,15 @@ private struct ReelsEmptyState: View {
         VStack(spacing: 12) {
             Image(systemName: "play.slash")
                 .font(.largeTitle)
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundStyle(.white.opacity(0.7))
 
             Text("No reels available")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
 
             Text("Add MP4 files to the app bundle to show reels here.")
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundStyle(.white.opacity(0.7))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
         }

@@ -203,7 +203,6 @@
 		AFC0BAA72FCC56A100A64782 /* ContactAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFC0BAA52FCC56A100A64782 /* ContactAddView.swift */; };
 		AFC519522FC89A98003A4AEA /* MessageDateFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFC519512FC89A98003A4AEA /* MessageDateFormatting.swift */; };
 		AFC519532FC89A98003A4AEA /* MessageDateFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFC519512FC89A98003A4AEA /* MessageDateFormatting.swift */; };
-		AFD27C18275BFA5900ED1CD9 /* Date+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD27C17275BFA5900ED1CD9 /* Date+Helpers.swift */; };
 		AFDE91CA2793341D00302CF2 /* PlaceSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFDE91C92793341D00302CF2 /* PlaceSearch.swift */; };
 		AFDE91CC2793348D00302CF2 /* PlaceListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFDE91CB2793348D00302CF2 /* PlaceListViewModel.swift */; };
 		AFDE91CE279334D200302CF2 /* LandMark.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFDE91CD279334D200302CF2 /* LandMark.swift */; };
@@ -350,7 +349,6 @@
 		AFC0BAA22FCC532E00A64782 /* CalendarEventEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEventEditView.swift; sourceTree = "<group>"; };
 		AFC0BAA52FCC56A100A64782 /* ContactAddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactAddView.swift; sourceTree = "<group>"; };
 		AFC519512FC89A98003A4AEA /* MessageDateFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageDateFormatting.swift; sourceTree = "<group>"; };
-		AFD27C17275BFA5900ED1CD9 /* Date+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Helpers.swift"; sourceTree = "<group>"; };
 		AFDE91C92793341D00302CF2 /* PlaceSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceSearch.swift; sourceTree = "<group>"; };
 		AFDE91CB2793348D00302CF2 /* PlaceListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceListViewModel.swift; sourceTree = "<group>"; };
 		AFDE91CD279334D200302CF2 /* LandMark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandMark.swift; sourceTree = "<group>"; };
@@ -723,7 +721,6 @@
 			children = (
 				AFF40FA1275291CF0080CE8E /* Movies */,
 				AF92B8A22678157100729208 /* ExtensionUI.swift */,
-				AFD27C17275BFA5900ED1CD9 /* Date+Helpers.swift */,
 				AF54E4D827739F4A0062B1F4 /* Double.swift */,
 				AF03D36B27886D720021493A /* ColorOptions.swift */,
 				AF85283D2787930700E7F8D8 /* ImageSaver.swift */,
@@ -1062,7 +1059,6 @@
 				AF48266D2FC72B35005A8C42 /* CustomCorners.swift in Sources */,
 				AFC0BAA42FCC532E00A64782 /* CalendarEventEditView.swift in Sources */,
 				AF743B7C2FE1DE97003F5E7B /* ImagePreparation.swift in Sources */,
-				AFD27C18275BFA5900ED1CD9 /* Date+Helpers.swift in Sources */,
 				AFE4AE0D2FC8698F00F86B2E /* AppDependencies.swift in Sources */,
 				AF86C0682FDF1E3A00F450F9 /* MainMenuCoordinator.swift in Sources */,
 				AF997FB72FE32ABD00797FD5 /* StepsTodayView.swift in Sources */,

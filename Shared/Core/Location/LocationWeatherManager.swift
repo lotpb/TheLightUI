@@ -7,20 +7,22 @@
 
 import CoreLocation
 import Foundation
+import Observation
 
 protocol WeatherLocationProviding {
     @MainActor func requestLocation() async throws -> CLLocationCoordinate2D
 }
 
-final class LocationWeatherManager: NSObject, ObservableObject, WeatherLocationProviding {
+@Observable
+final class LocationWeatherManager: NSObject, WeatherLocationProviding {
     typealias Completion = (Result<CLLocationCoordinate2D, Swift.Error>) -> Void
 
-    private let manager = CLLocationManager()
-    private var completion: Completion?
-    private var timeoutTask: Task<Void, Never>?
-    private let requestTimeout: Duration
+    @ObservationIgnored private let manager = CLLocationManager()
+    @ObservationIgnored private var completion: Completion?
+    @ObservationIgnored private var timeoutTask: Task<Void, Never>?
+    @ObservationIgnored private let requestTimeout: Duration
 
-    @Published var permissionDenied = false
+    var permissionDenied = false
 
     init(requestTimeout: Duration = .seconds(10)) {
         self.requestTimeout = requestTimeout

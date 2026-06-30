@@ -10,7 +10,7 @@ import SwiftUI
 
 struct SideTabViewUI: View {
     @Binding var showSideBar: Bool
-    @State private var viewModel = MainMessagesViewModel()
+    let viewModel: MainMessagesViewModel
     @State private var selectedTab = "house.fill"
     @State private var volume: CGFloat = 0.4
     
@@ -27,9 +27,8 @@ struct SideTabViewUI: View {
             }
         }
         .frame(width: showSideBar ? 82 : 42, alignment: .leading)
-        .animation(.spring(response: 0.35, dampingFraction: 0.82), value: showSideBar)
+        .animation(.snappy(duration: 0.35), value: showSideBar)
         .zIndex(1)
-        .task { await viewModel.fetchCurrentUser() }
     }
 
     private var sidebarContent: some View {
@@ -139,9 +138,10 @@ struct SideTabViewUI: View {
 
 private struct SideTabPreviewContainer: View {
     @State private var showSideBar = true
+    @State private var viewModel = MainMessagesViewModel()
 
     var body: some View {
-        SideTabViewUI(showSideBar: $showSideBar)
+        SideTabViewUI(showSideBar: $showSideBar, viewModel: viewModel)
     }
 }
 
@@ -154,7 +154,7 @@ struct TabButtonUI: View {
 
     var body: some View {
         Button {
-            withAnimation(.spring(response: 0.25, dampingFraction: 0.82)) {
+            withAnimation(.snappy(duration: 0.25)) {
                 selectedTab = image
                 onSelect()
             }

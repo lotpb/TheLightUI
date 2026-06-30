@@ -7,9 +7,11 @@
 
 import SwiftUI
 import MapKit
-import SDWebImageSwiftUI
 
 struct UserFormUI: View {
+    // Fallback location used until the user's stored coordinates load.
+    private static let defaultCoordinate = CLLocationCoordinate2D(latitude: 26.465019, longitude: -80.124528)
+
     @State private var viewModel = MainMessagesViewModel()
 
     @State private var storedLatitude = ""
@@ -20,17 +22,17 @@ struct UserFormUI: View {
 
     // Parse stored latitude/longitude with sensible defaults.
     private var latitudeValue: Double {
-        Double(storedLatitude.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 26.465019
+        Double(storedLatitude.trimmingCharacters(in: .whitespacesAndNewlines)) ?? Self.defaultCoordinate.latitude
     }
     private var longitudeValue: Double {
-        Double(storedLongitude.trimmingCharacters(in: .whitespacesAndNewlines)) ?? -80.124528
+        Double(storedLongitude.trimmingCharacters(in: .whitespacesAndNewlines)) ?? Self.defaultCoordinate.longitude
     }
 
     @State private var coordinateRegion = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: 26.465019, longitude: -80.124528),
+        center: UserFormUI.defaultCoordinate,
         span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
     )
-    
+
     
 
     private var profileName: String {
@@ -66,7 +68,7 @@ struct UserFormUI: View {
     }
 
     var body: some View {
-        ScrollView(showsIndicators: true) {
+        ScrollView {
             profileMap
             profileImage
             profileDetails
@@ -105,7 +107,7 @@ struct UserFormUI: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(profileName)
                 .font(.title)
-                .foregroundColor(.primary)
+                .foregroundStyle(Color.primary)
 
             HStack {
                 Text(profileCity)
@@ -113,7 +115,7 @@ struct UserFormUI: View {
                 Text(profileState)
             }
             .font(.subheadline)
-            .foregroundColor(.secondary)
+            .foregroundStyle(.secondary)
 
             Divider()
 
@@ -127,26 +129,11 @@ struct UserFormUI: View {
 
 private struct ProfileLocationMap: View {
     @Binding var coordinateRegion: MKCoordinateRegion
-
-    var body: some View {
-        if #available(iOS 17.0, *) {
-            ModernProfileLocationMap(coordinateRegion: coordinateRegion)
-        } else {
-            Map(
-                coordinateRegion: $coordinateRegion,
-                interactionModes: .all,
-                showsUserLocation: true
-            )
-        }
-    }
-}
-
-@available(iOS 17.0, *)
-private struct ModernProfileLocationMap: View {
     @State private var position: MapCameraPosition
 
-    init(coordinateRegion: MKCoordinateRegion) {
-        _position = State(initialValue: .region(coordinateRegion))
+    init(coordinateRegion: Binding<MKCoordinateRegion>) {
+        _coordinateRegion = coordinateRegion
+        _position = State(initialValue: .region(coordinateRegion.wrappedValue))
     }
 
     var body: some View {
@@ -157,6 +144,14 @@ private struct ModernProfileLocationMap: View {
             MapUserLocationButton()
             MapCompass()
             MapScaleView()
+        }
+        // Follow the region when stored coordinates load or change.
+        // MKCoordinateRegion isn't Equatable, so observe its center components.
+        .onChange(of: coordinateRegion.center.latitude) {
+            position = .region(coordinateRegion)
+        }
+        .onChange(of: coordinateRegion.center.longitude) {
+            position = .region(coordinateRegion)
         }
     }
 }

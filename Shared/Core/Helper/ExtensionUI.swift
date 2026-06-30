@@ -10,11 +10,6 @@
 import SwiftUI
 
 extension View {
-    // Convenience helper to fetch the current screen bounds.
-    func getRectUI() -> CGRect {
-        UIScreen.main.bounds
-    }
-    
     // Returns the safe area insets of the first key window, or .zero if unavailable.
     func getSafeAreaUI() -> UIEdgeInsets {
         UIApplication.shared.firstKeyWindow?.safeAreaInsets ?? .zero
@@ -30,14 +25,6 @@ extension UIApplication {
             .first { $0.isKeyWindow } // the window currently receiving keyboard and non-touch events
     }
 }
-
-//enum PhoneCallURL {
-//    /// Builds a tel:// URL from a raw phone string using `PhoneNumber` normalization.
-//    /// - Returns nil if no digits are found.
-//    static func telephoneURL(from rawValue: String) -> URL? {
-//        PhoneNumber(raw: rawValue).url
-//    }
-//}
 
 extension OpenURLAction {
     /// Attempts to initiate a phone call by converting a raw string into a tel:// URL and opening it.

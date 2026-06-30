@@ -134,7 +134,7 @@ struct FurnitureUI: View {
     }
 
     private var content: some View {
-        ScrollView(showsIndicators: false) {
+        ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 AppBarView()
                 TagLineView()
@@ -145,8 +145,7 @@ struct FurnitureUI: View {
                     title: "Popular",
                     subtitle: "Curated pieces for calm rooms",
                     products: filteredPopularProducts,
-                    cardSize: 150
-                    ,
+                    cardSize: 150,
                     showsDetailLinks: true
                 )
 
@@ -161,6 +160,7 @@ struct FurnitureUI: View {
             .padding(.top, 12)
             .padding(.bottom, 104)
         }
+        .scrollIndicators(.hidden)
     }
 
     private func filteredProducts(from products: [FurnitureProduct]) -> [FurnitureProduct] {
@@ -175,11 +175,11 @@ struct FurnitureUI: View {
 }
 
 private enum FurnitureStyle {
-    static let ink = Color(red: 0.10, green: 0.12, blue: 0.16)
-    static let secondaryInk = Color(red: 0.42, green: 0.45, blue: 0.50)
-    static let accent = Color(red: 0.12, green: 0.55, blue: 0.52)
-    static let coral = Color(red: 0.90, green: 0.45, blue: 0.36)
-    static let control = Color.white.opacity(0.72)
+    static let ink = CustomColor.furnitureInk
+    static let secondaryInk = CustomColor.furnitureSecondaryInk
+    static let accent = CustomColor.furnitureAccent
+    static let coral = CustomColor.furnitureCoral
+    static let control = CustomColor.furnitureControl
 }
 
 private struct FurnitureBackground: View {
@@ -266,7 +266,7 @@ private struct ProductSection: View {
     }
 
     private var productCarousel: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
+        ScrollView(.horizontal) {
             HStack(spacing: 14) {
                 ForEach(products) { product in
                     productCard(for: product)
@@ -274,6 +274,7 @@ private struct ProductSection: View {
             }
             .padding(.horizontal, 20)
         }
+        .scrollIndicators(.hidden)
     }
 
     @ViewBuilder
@@ -459,7 +460,7 @@ private struct CategorySelectorView: View {
     @Binding var selectedCategory: FurnitureCategory
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
+        ScrollView(.horizontal) {
             HStack(spacing: 10) {
                 ForEach(categories) { category in
                     Button {
@@ -473,10 +474,11 @@ private struct CategorySelectorView: View {
             }
             .padding(.horizontal, 20)
         }
+        .scrollIndicators(.hidden)
     }
 
     private func select(_ category: FurnitureCategory) {
-        withAnimation(.spring(response: 0.25, dampingFraction: 0.85)) {
+        withAnimation(.snappy(duration: 0.25, extraBounce: 0.1)) {
             selectedCategory = category
         }
     }

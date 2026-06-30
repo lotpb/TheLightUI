@@ -28,28 +28,15 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         notificationCenter.delegate = self
     }
     
-    /// Requests notification authorization using a completion handler.
-    /// Calls back on the main thread with the result.
-    func requestAuthorization(completion: ((Bool) -> Void)? = nil) {
-        // Ask the user for permission to show alerts, play sounds, and update badges.
-        notificationCenter.requestAuthorization(options: authorizationOptions) { granted, error in
-            if let error {
-                print("Notification authorization failed: \(error.localizedDescription)")
-            }
-            
-            Task { @MainActor in
-                completion?(granted)
-            }
-        }
-    }
-    
-    /// Async/await wrapper around authorization request.
+    /// Requests notification authorization to show alerts, play sounds, and update badges.
+    /// - Returns: `true` if the user granted permission.
+    @discardableResult
     func requestAuthorization() async -> Bool {
-        // Bridge the completion-based API to async/await.
-        await withCheckedContinuation { continuation in
-            requestAuthorization { granted in
-                continuation.resume(returning: granted)
-            }
+        do {
+            return try await notificationCenter.requestAuthorization(options: authorizationOptions)
+        } catch {
+            print("Notification authorization failed: \(error.localizedDescription)")
+            return false
         }
     }
     
@@ -79,8 +66,10 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         )
         
         // Enqueue the notification request with the system.
-        notificationCenter.add(request) { error in
-            if let error {
+        Task {
+            do {
+                try await notificationCenter.add(request)
+            } catch {
                 print("Failed to schedule notification: \(error.localizedDescription)")
             }
         }

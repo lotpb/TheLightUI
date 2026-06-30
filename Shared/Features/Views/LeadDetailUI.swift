@@ -218,12 +218,16 @@ struct LeadDetailUI: View {
     // Action menu items for contact/calendar/email/message/phone and location sharing.
     @ViewBuilder
     private var actionMenuButtons: some View {
-        Button("Add to Contacts") { coordinator.presentContact() }
-        Button("Add Calendar Event") { coordinator.presentCalendarEvent() }
+        Button { coordinator.presentContact() } label: {
+            Label("Add to Contacts", systemImage: "person.crop.circle.badge.plus")
+        }
+        Button { coordinator.presentCalendarEvent() } label: {
+            Label("Add Calendar Event", systemImage: "calendar.badge.plus")
+        }
         // Asynchronously request and share a one-time location link.
         Button(action: { coordinator.shareMyLocation() }) {
             HStack {
-                Text("Share My Location")
+                Label("Share My Location", systemImage: "location")
                 if coordinator.isRequestingLocationShare {
                     Spacer(minLength: 8)
                     ProgressView()
@@ -231,10 +235,16 @@ struct LeadDetailUI: View {
             }
         }
         .disabled(coordinator.isRequestingLocationShare)
-        Button("Call Phone") { openURL.callPhoneNumber(detail.phone) }
-        Button("Send Email") { coordinator.presentEmail() }
+        Button { openURL.callPhoneNumber(detail.phone) } label: {
+            Label("Call Phone", systemImage: "phone")
+        }
+        Button { coordinator.presentEmail() } label: {
+            Label("Send Email", systemImage: "envelope")
+        }
         if coordinator.canSendMessages {
-            Button("Send Message") { coordinator.presentMessage() }
+            Button { coordinator.presentMessage() } label: {
+                Label("Send Message", systemImage: "message")
+            }
         }
         //Button("Add to Customer") { }
         //Button("$ pay") { }

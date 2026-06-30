@@ -14,9 +14,6 @@ struct LiveAppBadgeManager: AppBadgeManaging {
     var badgeNumber: Int {
         UserDefaults.standard.integer(forKey: "badgeNumber")
     }
-//    var badgeNumber: Int {
-//        UIApplication.shared.applicationIconBadgeNumber
-//    }
 
     func clearBadge() {
         UserDefaults.standard.set(0, forKey: "badgeNumber")
@@ -27,9 +24,6 @@ struct LiveAppBadgeManager: AppBadgeManaging {
             }
         }
     }
-//    func clearBadge() {
-//        UIApplication.shared.applicationIconBadgeNumber = 0
-//    }
 }
 
 struct PreviewAppBadgeManager: AppBadgeManaging {

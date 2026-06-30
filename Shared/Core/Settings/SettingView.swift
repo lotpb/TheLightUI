@@ -54,7 +54,7 @@ struct SettingView: View {
             accountSection
             memberSection
             themeSection
-            soundsSection
+            //soundsSection
             mapSection
             calendarSection
             generalSection
@@ -77,8 +77,8 @@ struct SettingView: View {
             settingsTextField("Company", text: $settings.companyName)
             SettingsToggleRow(title: "Subscriber", isOn: $settings.isSubscriber)
             backendPicker
-            SettingsToggleRow(title: "Background Fetch", isOn: $settings.isBackfetch)
-            SettingsToggleRow(title: "Prevent Auto-Lock", isOn: $settings.isAutoLockDisabled)
+            //SettingsToggleRow(title: "Background Fetch", isOn: $settings.isBackfetch)
+            //SettingsToggleRow(title: "Prevent Auto-Lock", isOn: $settings.isAutoLockDisabled)
             termsDisclosure
         }
     }
@@ -94,12 +94,12 @@ struct SettingView: View {
         }
     }
 
-    private var soundsSection: some View {
-        Section("Sounds") {
-            SettingsToggleRow(title: "Speak", isOn: $settings.isSpeak)
-            SettingsToggleRow(title: "Music", isOn: $settings.isMusic)
-        }
-    }
+//    private var soundsSection: some View {
+//        Section("Sounds") {
+//            SettingsToggleRow(title: "Speak", isOn: $settings.isSpeak)
+//            SettingsToggleRow(title: "Music", isOn: $settings.isMusic)
+//        }
+//    }
 
     private var mapSection: some View {
         Section("Map") {
@@ -118,8 +118,12 @@ struct SettingView: View {
     private var generalSection: some View {
         Section("General") {
             settingsTextField("Area Code", text: $settings.areaCode, keyboardType: .numberPad)
-            settingsTextField("Email Title", text: $settings.emailTitle)
-            settingsTextField("Email Message", text: $settings.emailMessage)
+            DisclosureGroup("Email Title") {
+                settingsTextField("", text: $settings.emailTitle)
+            }
+            DisclosureGroup("Email Message") {
+                settingsTextField("", text: $settings.emailMessage)
+            }
             settingsTextField("Version", text: $settings.version)
         }
     }
@@ -138,7 +142,7 @@ struct SettingView: View {
     private var termsDisclosure: some View {
         DisclosureGroup("Show Terms") {
             Text("By using our Services (website, app, or software), you agree to these Terms. If you don’t agree, stop using them.")
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
         }
     }
 

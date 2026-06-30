@@ -47,7 +47,7 @@ struct InstagramHome: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarLeading) {
+        ToolbarItem(placement: .topBarLeading) {
             Button {
                 dismiss()
             } label: {
@@ -56,7 +56,7 @@ struct InstagramHome: View {
             .accessibilityLabel("Close Instagram home")
         }
 
-        ToolbarItemGroup(placement: .navigationBarTrailing) {
+        ToolbarItemGroup(placement: .topBarTrailing) {
             Button { } label: {
                 Image(systemName: "plus")
             }
@@ -93,7 +93,7 @@ private struct StoryCarousel: View {
     let stories: [IGStory]
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
+        ScrollView(.horizontal) {
             HStack(spacing: 14) {
                 ForEach(stories) { story in
                     StoryButton(story: story)
@@ -101,6 +101,7 @@ private struct StoryCarousel: View {
             }
             .padding(.horizontal)
         }
+        .scrollIndicators(.hidden)
         .accessibilityLabel("Stories")
     }
 }
@@ -137,7 +138,7 @@ private struct StoryButton: View {
 
                 Text(story.handle)
                     .font(.caption)
-                    .foregroundColor(.primary)
+                    .foregroundStyle(Color.primary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
                     .frame(width: 74)
@@ -613,5 +614,5 @@ private struct IGActivity: Identifiable {
 
 #Preview("Instagram Home - Dynamic Type") {
     InstagramHome()
-        .environment(\.sizeCategory, .accessibilityExtraExtraExtraLarge)
+        .environment(\.dynamicTypeSize, .accessibility5)
 }
