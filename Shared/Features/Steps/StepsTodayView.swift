@@ -25,7 +25,6 @@ struct StepsTodayView: View {
         .navigationTitle("Steps Today")
         .navigationBarTitleDisplayMode(.inline)
         .tint(themeColor)
-        .accentColor(themeColor)
         .task {
             viewModel.startTrackingToday()
         }
@@ -39,13 +38,6 @@ struct StepsTodayView: View {
                 viewModel.stopTracking()
             }
         }
-//        .onChange(of: scenePhase) { phase in
-//            if phase == .active {
-//                viewModel.startTrackingToday()
-//            } else {
-//                viewModel.stopTracking()
-//            }
-//        }
     }
 
     private var summarySection: some View {
@@ -130,7 +122,15 @@ private final class StepsTodayViewModel {
     let dailyGoal = 10_000
 
     @ObservationIgnored private let pedometer = CMPedometer()
-    @ObservationIgnored private var isTracking = false
+    @ObservationIgnored private var trackingTask: Task<Void, Never>?
+
+    /// A `Sendable` snapshot of pedometer readings, so values can cross from
+    /// CoreMotion's background queue to the main actor without passing the
+    /// non-`Sendable` `CMPedometerData` across actor boundaries.
+    private struct StepsSample: Sendable {
+        let steps: Int
+        let distanceMeters: Double?
+    }
 
     var startOfDay: Date {
         Calendar.current.startOfDay(for: .now)
@@ -159,35 +159,26 @@ private final class StepsTodayViewModel {
             return
         }
 
-        statusText = status(for: CMPedometer.authorizationStatus())
-        statusColor = statusColor(for: CMPedometer.authorizationStatus())
+        updateStatus()
 
-        queryToday()
-
-        guard !isTracking else { return }
-        isTracking = true
-        pedometer.startUpdates(from: startOfDay) { [weak self] data, error in
-            Task { @MainActor in
-                self?.handle(data: data, error: error)
-            }
+        guard trackingTask == nil else { return }
+        trackingTask = Task { [weak self] in
+            await self?.track()
         }
     }
 
     func stopTracking() {
-        pedometer.stopUpdates()
-        isTracking = false
+        trackingTask?.cancel()
+        trackingTask = nil
     }
 
-    private func queryToday() {
-        pedometer.queryPedometerData(from: startOfDay, to: .now) { [weak self] data, error in
-            Task { @MainActor in
-                self?.handle(data: data, error: error)
+    private func track() async {
+        // Seed with today's accumulated data, then stream live updates.
+        do {
+            if let sample = try await todaySample() {
+                apply(sample)
             }
-        }
-    }
-
-    private func handle(data: CMPedometerData?, error: Error?) {
-        if let error {
+        } catch {
             steps = 0
             distanceMeters = nil
             statusText = error.localizedDescription
@@ -195,16 +186,49 @@ private final class StepsTodayViewModel {
             return
         }
 
-        guard let data else {
-            statusText = "No Data"
-            statusColor = .secondary
-            return
+        for await sample in pedometerUpdates() {
+            apply(sample)
         }
+    }
 
-        steps = data.numberOfSteps.intValue
-        distanceMeters = data.distance?.doubleValue
-        statusText = status(for: CMPedometer.authorizationStatus())
-        statusColor = statusColor(for: CMPedometer.authorizationStatus())
+    private func todaySample() async throws -> StepsSample? {
+        try await withCheckedThrowingContinuation { continuation in
+            pedometer.queryPedometerData(from: startOfDay, to: .now) { data, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: data.map(Self.sample(from:)))
+                }
+            }
+        }
+    }
+
+    private func pedometerUpdates() -> AsyncStream<StepsSample> {
+        AsyncStream { continuation in
+            pedometer.startUpdates(from: startOfDay) { data, _ in
+                guard let data else { return }
+                continuation.yield(Self.sample(from: data))
+            }
+            continuation.onTermination = { [pedometer] _ in
+                pedometer.stopUpdates()
+            }
+        }
+    }
+
+    private nonisolated static func sample(from data: CMPedometerData) -> StepsSample {
+        StepsSample(steps: data.numberOfSteps.intValue, distanceMeters: data.distance?.doubleValue)
+    }
+
+    private func apply(_ sample: StepsSample) {
+        steps = sample.steps
+        distanceMeters = sample.distanceMeters
+        updateStatus()
+    }
+
+    private func updateStatus() {
+        let authorizationStatus = CMPedometer.authorizationStatus()
+        statusText = status(for: authorizationStatus)
+        statusColor = statusColor(for: authorizationStatus)
     }
 
     private func status(for authorizationStatus: CMAuthorizationStatus) -> String {

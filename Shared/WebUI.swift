@@ -123,24 +123,32 @@ private struct WebBookmarkDetail: View {
             if #available(iOS 26.0, *) {
                 WebView(url: bookmark.url)
                     .webViewBackForwardNavigationGestures(.enabled)
+                    .webViewMagnificationGestures(.enabled)
+                    .webViewTextSelection(.enabled)
+                    .webViewLinkPreviews(.enabled)
             } else {
-                fallbackView
+                LegacyWebView(url: bookmark.url)
             }
         }
+        .ignoresSafeArea(edges: .bottom)
+    }
+}
+
+/// Renders web content on the project's iOS 16 deployment floor, where the SwiftUI
+/// `WebView` (iOS 26+) isn't available, by bridging a `WKWebView`.
+private struct LegacyWebView: UIViewRepresentable {
+    let url: URL
+
+    func makeUIView(context: Context) -> WKWebView {
+        let webView = WKWebView()
+        webView.allowsBackForwardNavigationGestures = true
+        webView.load(URLRequest(url: url))
+        return webView
     }
 
-    private var fallbackView: some View {
-        VStack(spacing: 20) {
-            PlaceholderView(
-                title: "Web Preview Unavailable",
-                message: "Open this bookmark in Safari to view the page.",
-                systemImage: "safari"
-            )
-
-            Link("Open in Safari", destination: bookmark.url)
-                .buttonStyle(.borderedProminent)
-        }
-        .padding()
+    func updateUIView(_ webView: WKWebView, context: Context) {
+        guard webView.url != url else { return }
+        webView.load(URLRequest(url: url))
     }
 }
 

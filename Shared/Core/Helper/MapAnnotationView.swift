@@ -47,11 +47,11 @@ struct MapAnnotationView: View {
             if let number {
                 Text("\(number)")
                     .font(.headline.bold())
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
             } else {
                 Image(systemName: "mappin")
                     .font(.headline.bold())
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
             }
         }
         .overlay(
@@ -64,7 +64,7 @@ struct MapAnnotationView: View {
         Image(systemName: "triangle.fill")
             .resizable()
             .scaledToFit()
-            .foregroundColor(markerColor)
+            .foregroundStyle(markerColor)
             .frame(width: Layout.pointerSize, height: Layout.pointerSize)
             .rotationEffect(.degrees(180))
             .offset(y: Layout.pointerOffset)

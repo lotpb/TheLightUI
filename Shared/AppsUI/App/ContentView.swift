@@ -78,7 +78,11 @@ struct ContentView: View {
         case .web:
             WebUI()
         case .twitter:
-            TwitterUI()
+            if #available(iOS 18.0, *) {
+                TwitterUI()
+            } else {
+                Text("Requires iOS 18")
+            }
         }
     }
 }

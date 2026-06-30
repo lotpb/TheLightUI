@@ -65,18 +65,18 @@ struct FurnitureDetail: View {
         .frame(maxWidth: Layout.maxContentWidth)
         .navigationBarBackButtonHidden(true)
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
+            ToolbarItem(placement: .topBarLeading) {
                 BackButton(action: dismiss.callAsFunction)
             }
 
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .topBarTrailing) {
                 FavoriteButton()
             }
         }
     }
 
     private var content: some View {
-        ScrollView(showsIndicators: true) {
+        ScrollView {
             productImage
             DescriptionView(product: product)
         }

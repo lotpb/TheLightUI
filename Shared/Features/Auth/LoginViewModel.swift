@@ -129,6 +129,11 @@ final class LoginViewModel {
     ) {
         SecureSettingsStore.saveString(firstName, forKey: SettingsUI.firstNameKey, defaults: defaults, passwordStore: passwordStore)
         SecureSettingsStore.saveString(lastName, forKey: SettingsUI.lastNameKey, defaults: defaults, passwordStore: passwordStore)
+
+        // Derive the username from the user's initials (first letter of first and last name).
+        let firstInitial = firstName.first.map { String($0).uppercased() } ?? ""
+        let lastInitial = lastName.first.map { String($0).uppercased() } ?? ""
+        defaults.set(firstInitial + lastInitial, forKey: SettingsUI.usernameKey)
         SecureSettingsStore.saveString(email, forKey: SettingsUI.emailKey, defaults: defaults, passwordStore: passwordStore)
         SecureSettingsStore.saveString(phoneNumber, forKey: SettingsUI.phoneKey, defaults: defaults, passwordStore: passwordStore)
         SecureSettingsStore.removeString(forKey: SettingsUI.legacyPasswordKey, defaults: defaults, passwordStore: passwordStore)

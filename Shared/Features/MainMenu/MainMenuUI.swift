@@ -18,7 +18,6 @@ struct MainMenuUI: View {
     private let makeWeatherLocationProvider: () -> WeatherLocationProviding
     private let appBadgeManager: AppBadgeManaging
     @State private var showingLogOut = false
-    @State private var isShowingActionDialog = false
     @State private var activeSheet: MainMenuSheet?
     @State private var activeRoute: MainMenuFullscreenRoute?
     @State private var path: [MainMenuDataRoute] = []
@@ -84,9 +83,6 @@ struct MainMenuUI: View {
         } message: {
             Text("What do you want to do?")
         }
-        .confirmationDialog("Pick a menu item", isPresented: $isShowingActionDialog, titleVisibility: .visible) {
-            actionDialogButtons
-        }
         .sheet(item: $activeSheet) { sheet in
             coordinator.sheetContent(sheet)
         }
@@ -105,8 +101,8 @@ struct MainMenuUI: View {
         }
 
         ToolbarItem(placement: .topBarTrailing) {
-            Button {
-                isShowingActionDialog.toggle()
+            Menu {
+                actionDialogButtons
             } label: {
                 Label("Action", systemImage: "square.and.arrow.up")
             }
@@ -116,14 +112,25 @@ struct MainMenuUI: View {
     @ViewBuilder
     private var actionDialogButtons: some View {
         #if DEBUG
-        Button("About") { showModal(.about) }
+        Button { showModal(.about) } label: {
+            Label("About", systemImage: "info.circle")
+        }
         #endif
-        Button("Email Support") { activeSheet = .email }
-        Button("Settings") { showModal(.settings) }
-        Button("Directions") { showModal(.directions) }
-        Button("Users") { showModal(.users) }
-        Button("Membership Card") { showModal(.membership) }
-        Button("Cancel", role: .cancel) { }
+        Button { activeSheet = .email } label: {
+            Label("Email Support", systemImage: "envelope")
+        }
+        Button { showModal(.settings) } label: {
+            Label("Settings", systemImage: "gearshape")
+        }
+        Button { showModal(.directions) } label: {
+            Label("Directions", systemImage: "map")
+        }
+        Button { showModal(.users) } label: {
+            Label("Users", systemImage: "person.2")
+        }
+        Button { showModal(.membership) } label: {
+            Label("Membership Card", systemImage: "creditcard")
+        }
     }
 
     private var menuList: some View {

@@ -61,11 +61,6 @@ enum ScrollOffsetAnchor: CaseIterable, Sendable {
 extension View {
     /// Reads the view's position for the given anchor into the provided binding.
     func scrollOffset(_ offset: Binding<CGFloat>, anchor: ScrollOffsetAnchor = .top) -> some View {
-        modifier(ScrollViewOffsetModifier(anchor: anchor, offset: offset.wrappedValue.binding))
+        modifier(ScrollViewOffsetModifier(anchor: anchor, offset: offset))
     }
-}
-
-private extension CGFloat {
-    /// Provides a temporary binding to a value. Used to keep the extension concise.
-    var binding: Binding<CGFloat> { .constant(self) }
 }

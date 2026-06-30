@@ -82,9 +82,14 @@ struct LeadDetailHeaderView: View {
 
     private var followMapRow: some View {
         HStack(alignment: .center, spacing: 12) {
-            Label(detail.isActive ? "Following" : "Follow", systemImage: detail.isActive ? "star.fill" : "star")
+            Label {
+                Text(detail.isActive ? "Following" : "Follow")
+                    .foregroundStyle(Color.accentColor)
+            } icon: {
+                Image(systemName: detail.isActive ? "star.fill" : "star")
+            }
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(detail.isActive ? .blue : .secondary)
+                .foregroundStyle(detail.isActive ? .yellow : .secondary)
                 .onTapGesture { toggleActive() }
                 .accessibilityLabel("Toggle Follow")
 

@@ -8,6 +8,7 @@
 
 import SwiftUI
 
+@available(iOS 18.0, *)
 @MainActor
 struct TwitterUI: View {
     fileprivate enum Layout {
@@ -60,32 +61,27 @@ struct TwitterUI: View {
     }
 
     private var headerView: some View {
-        GeometryReader { proxy in
-            let minY = proxy.frame(in: .global).minY
+        ZStack {
+            headerGradient
 
-            ZStack {
-                headerGradient
+            Text(companyName)
+                .font(.system(size: 40, weight: .heavy))
+                .lineLimit(1)
+                .minimumScaleFactor(0.9)
+                .padding(.top, 40)
 
-                Text(companyName)
-                    .font(.system(size: 40, weight: .heavy))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.9)
-                    .padding(.top, 40)
-
-                BlurViewUI(style: .systemChromeMaterialDark)
-                    .opacity(headerBlurOpacity)
-            }
-            .clipped()
-            .frame(height: minY > 0 ? Layout.headerHeight + minY : nil)
-            .offset(y: minY > 0 ? -minY : -minY < Layout.collapsedHeaderOffset ? 0 : -minY - Layout.collapsedHeaderOffset)
-            .onAppear {
-                offset = minY
-            }
-            .onChange(of: minY) { _, newValue in
-                offset = newValue
-            }
+            BlurViewUI(style: .systemChromeMaterialDark)
+                .opacity(headerBlurOpacity)
         }
-        .frame(height: Layout.headerHeight)
+        .clipped()
+        .frame(height: offset > 0 ? Layout.headerHeight + offset : Layout.headerHeight)
+        .offset(y: offset > 0 ? -offset : -offset < Layout.collapsedHeaderOffset ? 0 : -offset - Layout.collapsedHeaderOffset)
+        .frame(height: Layout.headerHeight, alignment: .top)
+        .onGeometryChange(for: CGFloat.self) { proxy in
+            proxy.frame(in: .scrollView).minY
+        } action: { newValue in
+            offset = newValue
+        }
         .zIndex(1)
     }
 
@@ -295,9 +291,9 @@ private struct TweetView: View {
                 (
                     Text("TheLight")
                         .fontWeight(.bold)
-                        .foregroundColor(.primary)
+                        .foregroundStyle(Color.primary)
                     + Text(" @_TheLight")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(Color.secondary)
                 )
 
                 Text(tweet)

@@ -200,12 +200,12 @@ struct FormUI: View {
             }
 
             // Job type picklist.
-            pickerRow("Job:", selection: $viewModel.selectJob, items: pickerviewModel.pickJob, horizontalPadding: 52) { tag in
+            pickerRow("Job:", selection: $viewModel.selectJob, items: pickerviewModel.pickJob) { tag in
                 viewModel.updateJob(tag)
             }
 
             // Product picklist.
-            pickerRow("Product:", selection: $viewModel.selectProduct, items: pickerviewModel.pickProduct, horizontalPadding: 15) { tag in
+            pickerRow("Product:", selection: $viewModel.selectProduct, items: pickerviewModel.pickProduct) { tag in
                 viewModel.updateProduct(tag)
             }
 
@@ -213,7 +213,7 @@ struct FormUI: View {
             quantityRow
 
             // Contractor picklist.
-            pickerRow("Contractor:", selection: $viewModel.selectContractor, items: pickerviewModel.pickContractor, horizontalPadding: -10) { tag in
+            pickerRow("Contractor:", selection: $viewModel.selectContractor, items: pickerviewModel.pickContractor) { tag in
                 viewModel.updateContractor(tag)
             }
 
@@ -262,9 +262,9 @@ struct FormUI: View {
                 .formTextStyle()
             Spacer()
 
-            TextEditor(text: $viewModel.detail.comments)
+            TextField("Comments", text: $viewModel.detail.comments, axis: .vertical)
                 .foregroundStyle(Color.primary)
-                .lineLimit(2)
+                .lineLimit(2...)
         }
     }
 
@@ -335,20 +335,27 @@ struct FormUI: View {
         _ title: String,
         selection: Binding<Int>,
         items: [String],
-        horizontalPadding: CGFloat = 0,
         onChange: @escaping (Int) -> Void
     ) -> some View {
-        HStack {
+        HStack(spacing: 0) {
+            // Fixed-width label so every picker value aligns at the same leading edge.
+            Text(title)
+                .formTextStyle()
+
             Picker(title, selection: selection) {
                 ForEach(items.indices, id: \.self) { index in
                     Text(items[index])
                         .pickerTextStyle()
-                        .padding(.horizontal, horizontalPadding)
                 }
             }
+            .labelsHidden()
+            .fixedSize()
+            .tint(Color.primary)
             .onChange(of: selection.wrappedValue) { oldValue, newValue in
                 onChange(newValue)
             }
+
+            Spacer()
         }
     }
 
@@ -454,6 +461,8 @@ private extension Text {
         self
             .font(.system(size: 18.0))
             .bold()
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
             .frame(width: FormUI.Layout.labelWidth, alignment: .leading)
             .textSelection(.enabled)
     }
