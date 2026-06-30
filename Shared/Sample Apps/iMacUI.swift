@@ -28,7 +28,7 @@ private struct iMacScreenView: View {
 
             Image(systemName: "applelogo")
                 .font(.system(size: 180))
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
                 .offset(y: -60)
 
             iMacPortsView()
@@ -65,7 +65,7 @@ private struct PowerButton: View {
 
             Image(systemName: "power")
                 .font(.system(size: 13))
-                .foregroundColor(Color.white.opacity(0.7))
+                .foregroundStyle(Color.white.opacity(0.7))
         }
         .frame(width: 33, height: 33)
         .overlay(
@@ -92,7 +92,7 @@ private struct USBTypeCPort: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 8, height: 8)
-                .foregroundColor(Color.gray.opacity(0.6))
+                .foregroundStyle(Color.gray.opacity(0.6))
                 .opacity(thunderbolt ? 1 : 0)
 
             ZStack {

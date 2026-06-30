@@ -73,7 +73,7 @@ struct ContentView: View {
                 }
                 .expenseModelContainer()
             } else {
-                Text("Requires iOS 17")
+                Text("Requires iOS 18")
             }
         case .web:
             WebUI()
@@ -174,7 +174,7 @@ private struct TabBarItem: View {
                     .minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity, minHeight: 48)
-            .foregroundColor(isSelected ? .primary : .secondary)
+            .foregroundStyle(isSelected ? .primary : .secondary)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

@@ -47,7 +47,7 @@ private struct MacBookScreen: View {
                     .fill(Color.white.opacity(0.14))
                     .overlay(
                         Text("MacBook Pro")
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .offset(y: -11)
                     )
             }

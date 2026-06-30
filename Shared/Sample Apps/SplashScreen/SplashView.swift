@@ -19,7 +19,7 @@ struct SplashView: View {
         } titleView: {
             Text("TheLight")
                 .font(.system(size: 35).bold())
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
         } logoView: {
             Image(profileImageName)
                 .resizable()

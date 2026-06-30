@@ -13,10 +13,24 @@ struct GlassMorphism: View {
         ZStack {
             GlassBackground()
 
+            glassContent
+        }
+        .ignoresSafeArea()
+    }
+
+    /// Hosts the glass card in a `GlassEffectContainer` on iOS 26+ for the best
+    /// Liquid Glass rendering performance; earlier systems present the card directly.
+    @ViewBuilder
+    private var glassContent: some View {
+        if #available(iOS 26.0, *) {
+            GlassEffectContainer {
+                GlassCard()
+                    .padding(.horizontal, GlassStyle.screenPadding)
+            }
+        } else {
             GlassCard()
                 .padding(.horizontal, GlassStyle.screenPadding)
         }
-        .ignoresSafeArea()
     }
 }
 
@@ -92,11 +106,7 @@ private struct GlassCard: View {
         }
         .padding(24)
         .frame(maxWidth: GlassStyle.cardMaxWidth)
-        .background(.ultraThinMaterial, in: GlassStyle.cardShape)
-        .overlay {
-            GlassStyle.cardShape
-                .stroke(.white.opacity(0.74), lineWidth: 1)
-        }
+        .glassSurface(in: GlassStyle.cardShape)
         .shadow(color: .black.opacity(0.12), radius: 28, x: 0, y: 18)
         .shadow(color: GlassStyle.tint.opacity(0.16), radius: 44, x: 0, y: 20)
     }
@@ -143,16 +153,29 @@ private struct GlassCard: View {
         }
     }
 
+    @ViewBuilder
     private var actionButton: some View {
-        Button {} label: {
-            Label("Preview", systemImage: "rectangle.stack.fill")
-                .font(.subheadline.weight(.semibold))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 13)
-                .foregroundStyle(.white)
-                .background(GlassStyle.ink, in: Capsule())
+        if #available(iOS 26.0, *) {
+            // Prominent Liquid Glass CTA: the style supplies its own glass
+            // capsule and legible foreground; tint carries the brand color.
+            Button {} label: { actionLabel }
+                .buttonStyle(.glassProminent)
+                .tint(GlassStyle.ink)
+        } else {
+            Button {} label: {
+                actionLabel
+                    .foregroundStyle(.white)
+                    .background(GlassStyle.ink, in: Capsule())
+            }
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
+    }
+
+    private var actionLabel: some View {
+        Label("Preview", systemImage: "rectangle.stack.fill")
+            .font(.subheadline.weight(.semibold))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 13)
     }
 }
 
@@ -183,6 +206,36 @@ private struct GlassMetricView: View {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(.white.opacity(0.52), lineWidth: 1)
         }
+    }
+}
+
+// MARK: - Liquid Glass surface
+
+/// Applies a true Liquid Glass material on iOS 26+, falling back to the
+/// translucent material + hairline-stroke treatment on earlier systems so
+/// the card keeps its frosted look on older devices.
+private struct GlassSurface<S: Shape>: ViewModifier {
+    let shape: S
+    let fallbackStrokeOpacity: Double
+
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            // Liquid Glass supplies its own edge highlight, so the manual
+            // stroke used in the fallback is intentionally dropped here.
+            content.glassEffect(.regular, in: shape)
+        } else {
+            content
+                .background(.ultraThinMaterial, in: shape)
+                .overlay {
+                    shape.stroke(.white.opacity(fallbackStrokeOpacity), lineWidth: 1)
+                }
+        }
+    }
+}
+
+private extension View {
+    func glassSurface<S: Shape>(in shape: S, fallbackStrokeOpacity: Double = 0.74) -> some View {
+        modifier(GlassSurface(shape: shape, fallbackStrokeOpacity: fallbackStrokeOpacity))
     }
 }
 

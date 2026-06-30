@@ -11,7 +11,7 @@ struct LaunchScreenView: View {
             VStack(spacing: 12) {
                 Text("TheLight")
                     .font(.system(size: 50, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .accessibilityLabel("App Name: TheLight")
 
                 Image("Icon167")

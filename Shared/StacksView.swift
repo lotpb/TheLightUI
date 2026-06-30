@@ -73,7 +73,7 @@ struct StacksView: View {
                 .padding(.horizontal)
 
             LazyVGrid(columns: columns, spacing: Layout.gridSpacing) {
-                ForEach(Array(section.cards.enumerated()), id: \.element.id) { _, card in
+                ForEach(section.cards) { card in
                     if let destination = card.destination {
                         NavigationLink {
                             destinationView(for: destination)
@@ -109,7 +109,7 @@ struct StacksView: View {
             Text("Try another search.")
                 .font(.subheadline)
         }
-        .foregroundColor(.secondary)
+        .foregroundStyle(Color.secondary)
         .frame(maxWidth: .infinity)
         .padding(.top, 60)
     }
@@ -197,7 +197,7 @@ private struct StackCategoryCard: View {
     private var title: some View {
         Text(card.title)
             .font(.headline.bold())
-            .foregroundColor(.white)
+            .foregroundStyle(.white)
             .lineLimit(2)
             .minimumScaleFactor(0.8)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
