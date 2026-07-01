@@ -24,6 +24,10 @@ struct PlaceSearch: View {
     @State private var cameraPosition: MapCameraPosition = .region(.defaultRegion)
     @State private var isDragged: Bool = false
     @State private var isAwaitingRecenter: Bool = false
+    @State private var selectedLandmarkID: UUID?
+    @State private var travelTime: String?
+    @State private var travelDistance: String?
+    @State private var isProgrammaticSearchUpdate = false
     let index: Int
 
     private var numberedLandMarks: [NumberedLandMark] {
@@ -45,15 +49,79 @@ struct PlaceSearch: View {
         )
     }
     
+    /// Switches to the map, highlights the tapped landmark, and frames the camera so
+    /// both the selected pin and the user's current location stay in view.
     private func centerMap(on landMark: LandMark) {
-        let region = MKCoordinateRegion(
+        selectedLandmarkID = landMark.id
+        // Show the selected place's name in the search bar without kicking off a new search.
+        isProgrammaticSearchUpdate = true
+        searchText = landMark.name
+
+        // Frame both the selected pin and the user's location (if known).
+        var coordinates = [landMark.coordinate]
+        if let userCoordinate = locationManager.location?.coordinate {
+            coordinates.append(userCoordinate)
+        }
+        let region = regionThatFits(coordinates) ?? MKCoordinateRegion(
             center: landMark.coordinate,
             span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
         )
-        cameraPosition = .region(region)
+        withAnimation(.easeInOut) {
+            cameraPosition = .region(region)
+        }
         locationManager.stopUpdating()
         isDragged = false
         displayType = .map
+        calculateTravelTime(to: landMark)
+    }
+
+    /// Estimates driving time from the user's current location to the selected landmark.
+    private func calculateTravelTime(to landMark: LandMark) {
+        travelTime = nil
+        travelDistance = nil
+        let request = MKDirections.Request()
+        request.source = MKMapItem.forCurrentLocation()
+        request.destination = MKMapItem(placemark: landMark.placemark)
+        request.transportType = .automobile
+
+        Task {
+            let response = try? await MKDirections(request: request).calculateETA()
+            guard let response, landMark.id == selectedLandmarkID else { return }
+
+            let timeFormatter = DateComponentsFormatter()
+            timeFormatter.allowedUnits = [.hour, .minute]
+            timeFormatter.unitsStyle = .abbreviated
+            travelTime = timeFormatter.string(from: response.expectedTravelTime)
+
+            let distanceFormatter = MKDistanceFormatter()
+            distanceFormatter.unitStyle = .abbreviated
+            travelDistance = distanceFormatter.string(fromDistance: response.distance)
+        }
+    }
+
+    /// Builds a region large enough to enclose every landmark, so all pins are visible at once.
+    private func regionThatFits(_ landMarks: [LandMark]) -> MKCoordinateRegion? {
+        regionThatFits(landMarks.map(\.coordinate))
+    }
+
+    /// Builds a region large enough to enclose all of the given coordinates.
+    private func regionThatFits(_ coordinates: [CLLocationCoordinate2D]) -> MKCoordinateRegion? {
+        guard
+            let minLat = coordinates.map(\.latitude).min(),
+            let maxLat = coordinates.map(\.latitude).max(),
+            let minLon = coordinates.map(\.longitude).min(),
+            let maxLon = coordinates.map(\.longitude).max()
+        else { return nil }
+
+        let center = CLLocationCoordinate2D(
+            latitude: (minLat + maxLat) / 2,
+            longitude: (minLon + maxLon) / 2
+        )
+        let span = MKCoordinateSpan(
+            latitudeDelta: max((maxLat - minLat) * 1.4, 0.02),
+            longitudeDelta: max((maxLon - minLon) * 1.4, 0.02)
+        )
+        return MKCoordinateRegion(center: center, span: span)
     }
     
     
@@ -76,14 +144,31 @@ struct PlaceSearch: View {
                 .padding(.top, 14)
             }
             .onAppear {
-                locationManager.stopUpdating()
+                // Request permission and a fresh fix so the blue user-location dot
+                // appears and the map centers on the user on first launch.
+                isAwaitingRecenter = true
+                locationManager.requestLocation()
             }
             .onDisappear {
                 locationManager.stopUpdating()
             }
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search places")
             .onChange(of: searchText) {
+                guard !isProgrammaticSearchUpdate else {
+                    isProgrammaticSearchUpdate = false
+                    return
+                }
                 viewModel.searchLandmarks(searchText)
+            }
+            // Frame every result on the map whenever a new set of landmarks loads.
+            .onChange(of: viewModel.landMarks.map(\.id)) {
+                selectedLandmarkID = nil
+                travelTime = nil
+                travelDistance = nil
+                if let region = regionThatFits(viewModel.landMarks) {
+                    cameraPosition = .region(region)
+                    isDragged = false
+                }
             }
             // Recenter once a fresh location arrives after the user taps Re-center.
             .onChange(of: locationManager.location?.timestamp) {
@@ -144,6 +229,15 @@ struct PlaceSearch: View {
                 .foregroundStyle(.secondary)
 
             Spacer()
+
+            if let travelTime {
+                Label(
+                    [travelDistance, travelTime].compactMap { $0 }.joined(separator: " · "),
+                    systemImage: "car.fill"
+                )
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.yellow)
+            }
         }
         .padding(.horizontal, 4)
     }
@@ -161,12 +255,29 @@ struct PlaceSearch: View {
 
     private var mapView: some View {
         Map(position: $cameraPosition) {
-            UserAnnotation()
+            // Once a place is searched/selected, tint the user-location marker the same
+            // yellow as the selected pin; otherwise show the default blue location dot.
+            if selectedLandmarkID != nil {
+                UserAnnotation {
+                    Image(systemName: "location.fill")
+                        .font(.caption.bold())
+                        .foregroundStyle(.white)
+                        .frame(width: 22, height: 22)
+                        .background(Color.yellow, in: Circle())
+                        .overlay(Circle().stroke(.white, lineWidth: 2))
+                        .shadow(color: .black.opacity(0.25), radius: 4, x: 0, y: 2)
+                }
+            } else {
+                UserAnnotation()
+            }
 
             ForEach(numberedLandMarks) { item in
                 Annotation("", coordinate: item.landMark.coordinate) {
-                    MapAnnotationView(number: item.number)
-                        .scaleEffect(0.7)
+                    MapAnnotationView(
+                        number: item.number,
+                        isSelected: item.landMark.id == selectedLandmarkID
+                    )
+                    .scaleEffect(0.7)
                 }
             }
         }
