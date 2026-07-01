@@ -7,8 +7,8 @@
 
 import LocalAuthentication
 
-final class AuthenticationService {
-    func authenticateUsingTouchId(completion: @escaping (Bool, Error?) -> Void) {
+final class AuthenticationService: Sendable {
+    func authenticateUsingTouchId(completion: @escaping @Sendable (Bool, Error?) -> Void) {
         let context = LAContext()
         var error: NSError?
         

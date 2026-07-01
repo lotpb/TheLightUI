@@ -15,6 +15,9 @@ struct TheLightUIApp: App {
     private let dependencies: AppDependencies
 
     init() {
+        // Firebase MUST be configured before `AppDependencies.live` is built:
+        // `.live` eagerly constructs FirebaseSessionService, which calls
+        // `Auth.auth()`, and Auth traps if the default app isn't configured yet.
         if FirebaseApp.app() == nil {
             FirebaseApp.configure()
         }

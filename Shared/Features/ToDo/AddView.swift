@@ -24,7 +24,7 @@ struct AddView: View {
                         .font(.headline)
                     TextField("Type something here…", text: $textFieldText)
                         .textInputAutocapitalization(.sentences)
-                        .disableAutocorrection(false)
+                        .autocorrectionDisabled(false)
                         .submitLabel(.done)
                         .onSubmit { saveButtonClicked() }
                         .padding(12)

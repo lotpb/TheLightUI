@@ -12,7 +12,7 @@ struct LoginUserSettings {
     let phoneNumber: String
 }
 
-protocol LoginServicing {
+protocol LoginServicing: Sendable {
     var currentUserId: String? { get }
 
     func signIn(email: String, password: String) async throws -> String

@@ -13,18 +13,19 @@ protocol WeatherLocationProviding {
     @MainActor func requestLocation() async throws -> CLLocationCoordinate2D
 }
 
+@MainActor
 @Observable
 final class LocationWeatherManager: NSObject, WeatherLocationProviding {
     typealias Completion = (Result<CLLocationCoordinate2D, Swift.Error>) -> Void
 
-    @ObservationIgnored private let manager = CLLocationManager()
+    @ObservationIgnored nonisolated(unsafe) private let manager = CLLocationManager()
     @ObservationIgnored private var completion: Completion?
     @ObservationIgnored private var timeoutTask: Task<Void, Never>?
     @ObservationIgnored private let requestTimeout: Duration
 
     var permissionDenied = false
 
-    init(requestTimeout: Duration = .seconds(10)) {
+    nonisolated init(requestTimeout: Duration = .seconds(10)) {
         self.requestTimeout = requestTimeout
         super.init()
         manager.delegate = self
@@ -32,9 +33,10 @@ final class LocationWeatherManager: NSObject, WeatherLocationProviding {
     }
 
     deinit {
+        // `manager` is owned solely by this instance and holds only a weak
+        // reference back via its delegate, so CoreLocation stops updating and
+        // tears down automatically as this object deallocates.
         timeoutTask?.cancel()
-        manager.stopUpdatingLocation()
-        manager.delegate = nil
     }
 }
 
@@ -105,14 +107,16 @@ extension LocationWeatherManager {
 
 extension LocationWeatherManager: CLLocationManagerDelegate {
     nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        let status = manager.authorizationStatus
         Task { @MainActor [weak self] in
-            self?.handleAuthorizationStatus(manager.authorizationStatus)
+            self?.handleAuthorizationStatus(status)
         }
     }
 
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        let coordinate = locations.last?.coordinate
         Task { @MainActor [weak self] in
-            guard let coordinate = locations.last?.coordinate else {
+            guard let coordinate else {
                 self?.finish(with: .failure(Error.failedToGetCoordinates))
                 return
             }

@@ -6,17 +6,17 @@
 import Foundation
 import FirebaseFirestore
 
-protocol CustomerListener {
+protocol CustomerListener: Sendable {
     func remove()
 }
 
-protocol CustomerServicing {
+protocol CustomerServicing: Sendable {
     @discardableResult
     func listenForCustomers(onChange: @escaping (Result<[CustomerItem], Error>) -> Void) -> CustomerListener
     func deleteCustomer(id: String) async throws
 }
 
-final class FirebaseCustomerListener: CustomerListener {
+final class FirebaseCustomerListener: CustomerListener, @unchecked Sendable {
     private let registration: ListenerRegistration
 
     init(registration: ListenerRegistration) {
@@ -28,7 +28,7 @@ final class FirebaseCustomerListener: CustomerListener {
     }
 }
 
-final class FirebaseCustomerService: CustomerServicing {
+final class FirebaseCustomerService: CustomerServicing, @unchecked Sendable {
     private let firestore: Firestore
     init(firestore: Firestore = Firestore.firestore()) {
         self.firestore = firestore

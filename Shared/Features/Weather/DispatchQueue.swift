@@ -8,7 +8,7 @@
 import Foundation
 
 extension DispatchQueue {
-    static func onMain(_ closure: @escaping () -> ()) {
+    static func onMain(_ closure: @escaping @Sendable () -> ()) {
         if Thread.current.isMainThread {
             closure()
         } else {
@@ -17,7 +17,7 @@ extension DispatchQueue {
             }
         }
     }
-    static func onMainSync(_ closure: @escaping () -> ()) {
+    static func onMainSync(_ closure: @escaping @Sendable () -> ()) {
         if Thread.current.isMainThread {
             closure()
         } else {

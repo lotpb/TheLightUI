@@ -12,6 +12,7 @@ import UIKit
 import UserNotifications
 
 /// Centralized helper for local notifications: authorization, scheduling, and delegate handling.
+@MainActor
 final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     // Singleton instance to use throughout the app.
     static let shared = NotificationManager()
@@ -131,7 +132,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     }
     
     /// Present notifications as a banner with sound even when the app is in the foreground.
-    func userNotificationCenter(
+    nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void

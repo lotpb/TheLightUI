@@ -138,11 +138,12 @@ struct LoginView: View {
     }
 
     private var profilePhotoPicker: some View {
-        let title = viewModel.image == nil ? "Choose Profile Photo" : "Change Profile Photo"
+        let image = viewModel.image
+        let title = image == nil ? "Choose Profile Photo" : "Change Profile Photo"
 
         return PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
             VStack(spacing: 10) {
-                avatarContent
+                AvatarView(image: image)
                     .overlay(alignment: .bottomTrailing) {
                         Image(systemName: "camera.fill")
                             .font(.system(size: 15, weight: .bold))
@@ -161,23 +162,6 @@ struct LoginView: View {
         .buttonStyle(.plain)
         .disabled(viewModel.isProcessing)
         .accessibilityLabel(title)
-    }
-
-    @ViewBuilder
-    private var avatarContent: some View {
-        if let image = viewModel.image {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFill()
-                .frame(width: Layout.avatarSize, height: Layout.avatarSize)
-                .clipShape(Circle())
-        } else {
-            Image(systemName: "person.fill")
-                .font(.system(size: Layout.avatarPlaceholderSize, weight: .medium))
-                .foregroundStyle(.secondary)
-                .frame(width: Layout.avatarSize, height: Layout.avatarSize)
-                .background(Color(.tertiarySystemGroupedBackground), in: Circle())
-        }
     }
 
     private var accountFields: some View {
@@ -340,6 +324,26 @@ struct LoginView: View {
 }
 
 // MARK: - Supporting Views
+private struct AvatarView: View {
+    let image: UIImage?
+
+    var body: some View {
+        if let image {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+                .frame(width: LoginView.Layout.avatarSize, height: LoginView.Layout.avatarSize)
+                .clipShape(Circle())
+        } else {
+            Image(systemName: "person.fill")
+                .font(.system(size: LoginView.Layout.avatarPlaceholderSize, weight: .medium))
+                .foregroundStyle(.secondary)
+                .frame(width: LoginView.Layout.avatarSize, height: LoginView.Layout.avatarSize)
+                .background(Color(.tertiarySystemGroupedBackground), in: Circle())
+        }
+    }
+}
+
 private enum LoginField: Hashable {
     case firstName
     case lastName
