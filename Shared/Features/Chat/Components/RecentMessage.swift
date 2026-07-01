@@ -17,18 +17,12 @@ struct RecentMessage: Codable, Identifiable {
     let profileImageUrl: String
     let timestamp: Date
     
-    private static let relativeDateFormatter: RelativeDateTimeFormatter = {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .abbreviated
-        return formatter
-    }()
-    
     var username: String {
         email.components(separatedBy: "@").first ?? email
     }
-    
+
     var timeAgo: String {
-        Self.relativeDateFormatter.localizedString(for: timestamp, relativeTo: Date())
+        MessageDateFormatting.relativeTimeAgo(for: timestamp)
     }
 
     var sentDateText: String {

@@ -8,12 +8,12 @@
 import Foundation
 import CoreLocation
 
-protocol WeatherManaging {
+protocol WeatherManaging: Sendable {
     func getCurrentWeather(latitude: CLLocationDegrees, longitude: CLLocationDegrees) async throws -> API.CurrentWeather.Response
 }
 
-class WeatherManager: WeatherManaging {
-    
+final class WeatherManager: WeatherManaging {
+
 }
 
 extension WeatherManager {

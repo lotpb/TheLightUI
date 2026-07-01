@@ -8,11 +8,11 @@ import FirebaseAuth
 import FirebaseFirestore
 import FirebaseStorage
 
-protocol ChatListener {
+protocol ChatListener: Sendable {
     func remove()
 }
 
-protocol ChatRepositoryProtocol {
+protocol ChatRepositoryProtocol: Sendable {
     var currentUserId: String? { get }
 
     func signOut() throws
@@ -33,7 +33,7 @@ protocol ChatRepositoryProtocol {
     func sendImageMessage(_ imageData: Data, to chatUser: UserModel) async throws
 }
 
-final class FirebaseChatListener: ChatListener {
+final class FirebaseChatListener: ChatListener, @unchecked Sendable {
     private let registration: ListenerRegistration
 
     init(registration: ListenerRegistration) {

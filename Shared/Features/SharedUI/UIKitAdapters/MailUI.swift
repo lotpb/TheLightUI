@@ -341,18 +341,17 @@ public struct MailView: UIViewControllerRepresentable {
             self.onResult = onResult
         }
         
-        public nonisolated func mailComposeController(
+        @MainActor
+        public func mailComposeController(
             _ controller: MFMailComposeViewController,
             didFinishWith result: MFMailComposeResult,
             error: Error?
         ) {
-            Task { @MainActor in
-                controller.dismiss(animated: true) { [onResult] in
-                    if let error {
-                        onResult(.failure(error))
-                    } else {
-                        onResult(.success(result))
-                    }
+            controller.dismiss(animated: true) { [onResult] in
+                if let error {
+                    onResult(.failure(error))
+                } else {
+                    onResult(.success(result))
                 }
             }
         }

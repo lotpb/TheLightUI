@@ -6,7 +6,7 @@
 import Foundation
 import FirebaseFirestore
 
-protocol CustomerFormServicing {
+protocol CustomerFormServicing: Sendable {
     var currentUserId: String? { get }
     func addCustomer(_ payload: CustomerFormPayload) async throws -> String
     func updateCustomer(id: String, payload: CustomerFormPayload) async throws

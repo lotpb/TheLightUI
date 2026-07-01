@@ -55,7 +55,7 @@ class PlaceListViewModel {
     }
 }
 
-protocol PlaceSearchServicing {
+protocol PlaceSearchServicing: Sendable {
     func searchLandmarks(matching searchTerm: String) async throws -> [LandMark]
     func searchPlaces(matching searchTerm: String) async throws -> [LandMark]
 }

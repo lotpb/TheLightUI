@@ -33,16 +33,16 @@ struct CarouselBodyView: View {
             }
             .frame(width: cardSize.width, height: cardSize.height)
             .frame(width: size.width, height: size.height)
+            .rotation3DEffect(
+                .degrees(progress(in: size.width) * 90),
+                axis: (x: 0, y: 1, z: 0),
+                anchor: offset > 0 ? .leading : .trailing,
+                anchorZ: 0,
+                perspective: 0.6
+            )
         }
         .tag(page.id)
         .modifier(ScrollViewOffsetModifier(anchor: .leading, offset: $offset))
-        .rotation3DEffect(
-            .degrees(progress * 90),
-            axis: (x: 0, y: 1, z: 0),
-            anchor: offset > 0 ? .leading : .trailing,
-            anchorZ: 0,
-            perspective: 0.6
-        )
     }
     
     private var headerContent: some View {
@@ -91,8 +91,8 @@ struct CarouselBodyView: View {
         .background(.white, in: RoundedRectangle(cornerRadius: 4))
     }
     
-    private var progress: CGFloat {
-        -offset / UIScreen.main.bounds.width
+    private func progress(in width: CGFloat) -> CGFloat {
+        width > 0 ? -offset / width : 0
     }
 }
 

@@ -1,12 +1,15 @@
 import Foundation
 import CoreLocation
 
-protocol LocationCaptureManaging {
+protocol LocationCaptureManaging: Sendable {
     /// Request a single location fix, returning `nil` if permission is denied or the request times out.
     func requestSingleLocation() async -> CLLocationCoordinate2D?
 }
 
-final class LocationCaptureManager: NSObject, LocationCaptureManaging {
+/// Marked `@unchecked Sendable` because all mutable state is confined to the main
+/// thread: the instance is created on the main actor, and both the CoreLocation
+/// delegate callbacks and the timeout `Timer` fire on the main run loop.
+final class LocationCaptureManager: NSObject, LocationCaptureManaging, @unchecked Sendable {
     private let locationManager = CLLocationManager()
     private var completion: ((CLLocationCoordinate2D?) -> Void)?
     private var timeoutTimer: Timer?

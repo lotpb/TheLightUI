@@ -18,7 +18,7 @@ struct AppDependencies {
     let makeWeatherLocationProvider: () -> WeatherLocationProviding
     let makeLocationCaptureManager: () -> LocationCaptureManaging
 
-    static let live = AppDependencies(
+    nonisolated(unsafe) static let live = AppDependencies(
         sessionService: FirebaseSessionService(),
         makeLoginService: { FirebaseLoginService() },
         makeAuthenticationService: { AuthenticationService() },
@@ -31,7 +31,7 @@ struct AppDependencies {
         makeLocationCaptureManager: { LocationCaptureManager() }
     )
 
-    static let preview = AppDependencies(
+    nonisolated(unsafe) static let preview = AppDependencies(
         sessionService: PreviewSessionService(),
         makeLoginService: { PreviewLoginService() },
         makeAuthenticationService: { AuthenticationService() },

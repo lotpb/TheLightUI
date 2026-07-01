@@ -17,6 +17,12 @@ enum MessageDateFormatting {
         return date.formatted(.dateTime.weekday(.wide).hour().minute())
     }
 
+    static func relativeTimeAgo(for date: Date, relativeTo referenceDate: Date = Date()) -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        return formatter.localizedString(for: date, relativeTo: referenceDate)
+    }
+
     static func compactDateTime(for date: Date) -> String {
         let calendar = Calendar.current
 

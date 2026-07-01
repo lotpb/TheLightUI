@@ -31,7 +31,7 @@ struct ScrollViewOffsetModifier: ViewModifier {
 
 // MARK: - Preference Key
 private struct ScrollOffsetPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
+    static let defaultValue: CGFloat = 0
 
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         // Prefer the most recent value; if multiple geometry readers update in the same pass,

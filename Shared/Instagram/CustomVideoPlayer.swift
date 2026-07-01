@@ -58,7 +58,10 @@ struct CustomVideoPlayer: UIViewControllerRepresentable {
         player.actionAtItemEnd = loops ? .none : .pause
     }
 
-    final class Coordinator: NSObject {
+    /// Marked `@unchecked Sendable` because the coordinator is only ever used on
+    /// the main thread: SwiftUI creates and drives it there, and its KVO / end-of-
+    /// playback observers hop back before mutating state.
+    final class Coordinator: NSObject, @unchecked Sendable {
         private var player: AVPlayer
         private var loops: Bool
         private var endPlaybackObserver: NSObjectProtocol?
