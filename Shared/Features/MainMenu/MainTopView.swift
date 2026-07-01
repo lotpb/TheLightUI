@@ -89,7 +89,7 @@ struct MainTopView: View {
             #endif
             isActive = true
             await loadCurrentTemperature()
-            loadTodaySteps()
+            await loadTodaySteps()
         }
         .onDisappear {
             isActive = false
@@ -115,7 +115,7 @@ struct MainTopView: View {
     }
 
     @MainActor
-    private func loadTodaySteps() {
+    private func loadTodaySteps() async {
         guard isActive else { return }
         guard CMPedometer.isStepCountingAvailable() else {
             currentStepsText = "Unavailable"
@@ -123,28 +123,54 @@ struct MainTopView: View {
         }
 
         let startOfDay = Calendar.current.startOfDay(for: .now)
-        pedometer.queryPedometerData(from: startOfDay, to: .now) { data, error in
-            Task { @MainActor in
-                updateSteps(data: data, error: error)
-            }
-        }
 
-        pedometer.startUpdates(from: startOfDay) { data, error in
-            Task { @MainActor in
-                updateSteps(data: data, error: error)
+        // Seed with today's accumulated steps, then stream live updates.
+        applySteps(await todaySteps(from: startOfDay))
+
+        for await steps in stepUpdates(from: startOfDay) {
+            applySteps(steps)
+        }
+    }
+
+    private func todaySteps(from startOfDay: Date) async -> Int? {
+        await withCheckedContinuation { continuation in
+            // CoreMotion invokes this handler on its own background queue. The
+            // explicit `@Sendable` strips the `@MainActor` isolation this closure
+            // would otherwise inherit from the enclosing context — without it the
+            // Swift runtime traps with a dispatch queue assertion when CoreMotion
+            // calls back off the main actor. It captures only the `Sendable`
+            // continuation and hands off through a `nonisolated` converter.
+            pedometer.queryPedometerData(from: startOfDay, to: .now) { @Sendable data, _ in
+                continuation.resume(returning: data.map(Self.stepCount(from:)))
             }
         }
     }
 
+    private func stepUpdates(from startOfDay: Date) -> AsyncStream<Int> {
+        AsyncStream { continuation in
+            pedometer.startUpdates(from: startOfDay) { @Sendable data, _ in
+                guard let data else { return }
+                continuation.yield(Self.stepCount(from: data))
+            }
+        }
+    }
+
+    /// Extracts a `Sendable` step count so pedometer readings can cross from
+    /// CoreMotion's background queue to the main actor without carrying the
+    /// non-`Sendable` `CMPedometerData` across the boundary.
+    private nonisolated static func stepCount(from data: CMPedometerData) -> Int {
+        data.numberOfSteps.intValue
+    }
+
     @MainActor
-    private func updateSteps(data: CMPedometerData?, error: Error?) {
+    private func applySteps(_ steps: Int?) {
         guard isActive else { return }
-        guard error == nil, let data else {
+        guard let steps else {
             currentStepsText = "Unavailable"
             return
         }
 
-        currentStepsText = data.numberOfSteps.intValue.formatted(.number)
+        currentStepsText = steps.formatted(.number)
     }
 
     private func systemImage(for weather: API.CurrentWeather.Response.WeatherResponse?) -> String {
