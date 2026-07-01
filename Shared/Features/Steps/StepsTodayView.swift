@@ -6,11 +6,15 @@
 import CoreMotion
 import Observation
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 struct StepsTodayView: View {
     @AppStorage("color") private var color: Int?
     @State private var viewModel = StepsTodayViewModel()
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
 
     private var themeColor: Color {
         AppTheme.accentColor(for: color)
@@ -42,29 +46,8 @@ struct StepsTodayView: View {
 
     private var summarySection: some View {
         Section {
-            VStack(alignment: .leading, spacing: 18) {
-                HStack(alignment: .firstTextBaseline) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Steps")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        Text(viewModel.steps, format: .number)
-                            .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                            .monospacedDigit()
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-                    }
-
-                    Spacer()
-
-                    Image(systemName: "figure.walk.circle.fill")
-                        .font(.system(size: 42))
-                        .foregroundStyle(themeColor)
-                }
-
-                ProgressView(value: viewModel.goalProgress)
-                    .tint(themeColor)
-                    .accessibilityLabel("Daily step goal progress")
+            VStack(spacing: 20) {
+                progressRing
 
                 HStack(spacing: 12) {
                     StepsMetricView(
@@ -74,15 +57,52 @@ struct StepsTodayView: View {
                         accentColor: themeColor
                     )
                     StepsMetricView(
-                        title: "Progress",
-                        value: viewModel.goalPercentText,
-                        systemImage: "chart.line.uptrend.xyaxis",
+                        title: viewModel.goalReached ? "Reached" : "Remaining",
+                        value: viewModel.goalReached ? "Done" : viewModel.stepsRemaining.formatted(.number),
+                        systemImage: viewModel.goalReached ? "checkmark.seal.fill" : "flag.checkered",
                         accentColor: themeColor
                     )
                 }
             }
-            .padding(.vertical, 6)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
         }
+    }
+
+    private var progressRing: some View {
+        ZStack {
+            Circle()
+                .stroke(themeColor.opacity(0.15), lineWidth: 14)
+
+            Circle()
+                .trim(from: 0, to: viewModel.goalProgress)
+                .stroke(themeColor, style: StrokeStyle(lineWidth: 14, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .animation(.snappy, value: viewModel.goalProgress)
+
+            VStack(spacing: 4) {
+                Image(systemName: viewModel.goalReached ? "checkmark" : "figure.walk")
+                    .font(.title2)
+                    .foregroundStyle(themeColor)
+                    .contentTransition(.symbolEffect(.replace))
+
+                Text(viewModel.steps, format: .number)
+                    .font(.system(.largeTitle, design: .rounded, weight: .bold))
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+
+                Text(viewModel.goalReached ? "Goal reached!" : "\(viewModel.goalPercentText) of goal")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(34)
+        }
+        .frame(width: 190, height: 190)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Steps today")
+        .accessibilityValue("\(viewModel.steps) steps, \(viewModel.goalPercentText) of daily goal")
     }
 
     private var detailsSection: some View {
@@ -98,8 +118,13 @@ struct StepsTodayView: View {
             }
 
             LabeledContent("Status") {
-                Text(viewModel.statusText)
-                    .foregroundStyle(viewModel.statusColor)
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(viewModel.statusColor)
+                        .frame(width: 8, height: 8)
+                    Text(viewModel.statusText)
+                        .foregroundStyle(viewModel.statusColor)
+                }
             }
 
             Button {
@@ -107,7 +132,23 @@ struct StepsTodayView: View {
             } label: {
                 Label("Refresh", systemImage: "arrow.clockwise")
             }
+
+            if viewModel.needsSettings {
+                Button {
+                    openSettings()
+                } label: {
+                    Label("Open Settings", systemImage: "gearshape")
+                }
+            }
         }
+    }
+
+    private func openSettings() {
+        #if canImport(UIKit)
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+            openURL(url)
+        }
+        #endif
     }
 }
 
@@ -142,6 +183,25 @@ private final class StepsTodayViewModel {
 
     var goalPercentText: String {
         goalProgress.formatted(.percent.precision(.fractionLength(0)))
+    }
+
+    var stepsRemaining: Int {
+        max(dailyGoal - steps, 0)
+    }
+
+    var goalReached: Bool {
+        steps >= dailyGoal
+    }
+
+    /// Whether motion access has been refused, so the UI can offer a jump to
+    /// Settings rather than leaving the user stuck.
+    var needsSettings: Bool {
+        switch CMPedometer.authorizationStatus() {
+        case .denied, .restricted:
+            true
+        default:
+            false
+        }
     }
 
     var distanceText: String? {
@@ -193,7 +253,7 @@ private final class StepsTodayViewModel {
 
     private func todaySample() async throws -> StepsSample? {
         try await withCheckedThrowingContinuation { continuation in
-            pedometer.queryPedometerData(from: startOfDay, to: .now) { data, error in
+            pedometer.queryPedometerData(from: startOfDay, to: .now) { @Sendable data, error in
                 if let error {
                     continuation.resume(throwing: error)
                 } else {
@@ -205,12 +265,14 @@ private final class StepsTodayViewModel {
 
     private func pedometerUpdates() -> AsyncStream<StepsSample> {
         AsyncStream { continuation in
-            pedometer.startUpdates(from: startOfDay) { data, _ in
+            pedometer.startUpdates(from: startOfDay) { @Sendable data, _ in
                 guard let data else { return }
                 continuation.yield(Self.sample(from: data))
             }
-            continuation.onTermination = { [pedometer] _ in
-                pedometer.stopUpdates()
+            continuation.onTermination = { [weak self] _ in
+                Task { @MainActor in
+                    self?.pedometer.stopUpdates()
+                }
             }
         }
     }

@@ -59,6 +59,19 @@ class ListViewModel {
     /// The items the list should display, prepared once per input change.
     private(set) var visibleItems: [ItemModel] = []
 
+    /// Number of completed items across the whole list (ignores the filter),
+    /// used to drive the header progress indicator.
+    var completedCount: Int {
+        items.filter(\.isCompleted).count
+    }
+
+    /// A plain-text summary of the list suitable for sharing.
+    var shareText: String {
+        guard !items.isEmpty else { return "My To Do List is empty." }
+        let lines = items.map { "\($0.isCompleted ? "✅" : "▢") \($0.title)" }
+        return (["My To Do List", ""] + lines).joined(separator: "\n")
+    }
+
     @ObservationIgnored private let itemStore: ItemStoring
 
     init(itemStore: ItemStoring) {
@@ -79,6 +92,22 @@ class ListViewModel {
 
     func deleteItem(_ item: ItemModel) {
         items.removeAll { $0.id == item.id }
+    }
+
+    /// Removes every item from the list.
+    func clearAll() {
+        items.removeAll()
+    }
+
+    /// Sorts the whole list so outstanding items surface first, then
+    /// alphabetically by title within each completion state.
+    func sortItems() {
+        items.sort { lhs, rhs in
+            if lhs.isCompleted != rhs.isCompleted {
+                return !lhs.isCompleted
+            }
+            return lhs.title.localizedCaseInsensitiveCompare(rhs.title) == .orderedAscending
+        }
     }
 
     /// Reorders within the visible subset, then writes the new order back into

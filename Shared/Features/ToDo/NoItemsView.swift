@@ -16,11 +16,18 @@ struct NoItemsView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 10) {
-                Text("there are no items")
+            VStack(spacing: 12) {
+                Image(systemName: "checklist")
+                    .font(.system(size: 64))
+                    .foregroundStyle(.tint)
+                    .symbolEffect(.pulse)
+                    .padding(.bottom, 4)
+
+                Text("No Items Yet")
                     .font(.title)
                     .fontWeight(.semibold)
-                Text("maybe you should add a bunch of items")
+                Text("Add your first task and start checking things off.")
+                    .foregroundStyle(.secondary)
                     .padding(.bottom, 15)
                 Button(action: onAdd) {
                     Text("Add Something")
@@ -38,7 +45,7 @@ struct NoItemsView: View {
                     x: 0,
                     y: animate ? 25 : 10
                 )
-                .scaleEffect(animate ? 1.1 : 1.3)
+                .scaleEffect(animate ? 1.05 : 1.15)
                 .offset(y: animate ? 6 : 0)
             }
             .frame(maxWidth: 400)
