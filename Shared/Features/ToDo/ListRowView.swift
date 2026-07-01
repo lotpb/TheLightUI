@@ -12,20 +12,25 @@ struct ListRowView: View {
     let item: ItemModel
 
     var body: some View {
-        HStack {
-            Image(systemName: item.isCompleted ? "checkmark.circle" : "circle")
+        HStack(spacing: 14) {
+            Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
+                .font(.title2)
                 .foregroundStyle(item.isCompleted ? Color.green : .clear)
                 .background(
                     Circle().stroke(
                         AngularGradient(gradient: Gradient(colors: CustomColor.gradColors), center: .center),
-                        style: StrokeStyle(lineWidth: 1.0, lineCap: .round, lineJoin: .round)
+                        style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round)
                     )
                 )
+                .contentTransition(.symbolEffect(.replace))
 
             Text(item.title)
+                .font(.body)
+                .strikethrough(item.isCompleted, color: .secondary)
+                .foregroundStyle(item.isCompleted ? .secondary : .primary)
+
             Spacer()
         }
-        .font(.title2)
         .padding(.vertical, 8)
     }
 }
