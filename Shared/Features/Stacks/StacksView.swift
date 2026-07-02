@@ -68,9 +68,16 @@ struct StacksView: View {
 
     private func sectionView(_ section: StackSection) -> some View {
         VStack(alignment: .leading, spacing: Layout.gridSpacing) {
-            Text(section.title)
-                .font(.headline.bold())
-                .padding(.horizontal)
+            HStack(alignment: .firstTextBaseline) {
+                Text(section.title)
+                    .font(.headline.bold())
+                Spacer()
+                Text("\(section.cards.count)")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
+            .padding(.horizontal)
 
             LazyVGrid(columns: columns, spacing: Layout.gridSpacing) {
                 ForEach(section.cards) { card in
@@ -80,7 +87,7 @@ struct StacksView: View {
                         } label: {
                             StackCategoryCard(card: card)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PressableCardStyle())
                     } else {
                         StackCategoryCard(card: card)
                     }
@@ -101,17 +108,9 @@ struct StacksView: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "magnifyingglass")
-                .font(.largeTitle)
-            Text("No Results")
-                .font(.headline)
-            Text("Try another search.")
-                .font(.subheadline)
-        }
-        .foregroundStyle(Color.secondary)
-        .frame(maxWidth: .infinity)
-        .padding(.top, 60)
+        ContentUnavailableView.search(text: searchText)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 60)
     }
 
     @ToolbarContentBuilder
@@ -171,8 +170,8 @@ private struct StackCard: Identifiable {
 // MARK: - Card
 private struct StackCategoryCard: View {
     private enum Layout {
-        static let cornerRadius: CGFloat = 7
-        static let imageCornerRadius: CGFloat = 5
+        static let cornerRadius: CGFloat = 12
+        static let imageCornerRadius: CGFloat = 6
         static let imageSize: CGFloat = 75
         static let cardHeight: CGFloat = 100
         static let imageXOffset: CGFloat = 18
@@ -184,7 +183,13 @@ private struct StackCategoryCard: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             RoundedRectangle(cornerRadius: Layout.cornerRadius, style: .continuous)
-                .fill(card.color)
+                .fill(
+                    LinearGradient(
+                        colors: [card.color, card.color.opacity(0.72)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
 
             title
             artwork
@@ -192,6 +197,7 @@ private struct StackCategoryCard: View {
         .frame(height: Layout.cardHeight)
         .clipShape(RoundedRectangle(cornerRadius: Layout.cornerRadius, style: .continuous))
         .contentShape(RoundedRectangle(cornerRadius: Layout.cornerRadius, style: .continuous))
+        .shadow(color: card.color.opacity(0.35), radius: 6, x: 0, y: 4)
     }
 
     private var title: some View {
@@ -212,6 +218,18 @@ private struct StackCategoryCard: View {
             .clipShape(RoundedRectangle(cornerRadius: Layout.imageCornerRadius, style: .continuous))
             .rotationEffect(.degrees(Layout.imageRotation))
             .offset(x: Layout.imageXOffset)
+    }
+}
+
+// MARK: - Button Style
+
+/// Gives navigable cards a subtle tactile press-down response.
+private struct PressableCardStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .opacity(configuration.isPressed ? 0.9 : 1)
+            .animation(.snappy(duration: 0.2), value: configuration.isPressed)
     }
 }
 

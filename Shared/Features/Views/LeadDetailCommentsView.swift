@@ -46,6 +46,8 @@ struct LeadDetailCommentsView: View {
         )
         .popover(isPresented: $showPopover) {
             LeadDetailCommentsEditor(detail: $detail)
+                // When the popover adapts to a sheet on iPhone, keep it at half height.
+                .presentationDetents([.medium, .large])
         }
     }
 }
@@ -53,27 +55,24 @@ struct LeadDetailCommentsView: View {
 private struct LeadDetailCommentsEditor: View {
     @Binding var detail: CustomerItem
 
-    private var formattedDate: String {
-        Date().formatted(date: .complete, time: .omitted)
-    }
-
     var body: some View {
-        VStack {
-            Text(formattedDate)
-                .font(.title2)
-                .padding(.bottom, 15)
+        VStack(alignment: .leading, spacing: 10) {
+            Text(Date.now.formatted(date: .complete, time: .omitted))
+                .font(.title3)
                 .lineLimit(1)
-                .minimumScaleFactor(0.1)
+                .minimumScaleFactor(0.6)
+                .frame(maxWidth: .infinity)
 
             Text("Comments:")
-                .font(.title3)
-                .fontWeight(.bold)
-                .padding(.bottom, 10)
+                .font(.headline)
 
             TextEditor(text: $detail.comments)
                 .font(.headline)
                 .foregroundStyle(Color.primary)
         }
-        .frame(width: 380, height: 260)
+        .padding()
+        // Ideal size drives the iPad popover; the flexible bounds let the
+        // iPhone sheet adaptation fill its detent instead of clipping.
+        .frame(minWidth: 320, idealWidth: 380, maxWidth: .infinity, minHeight: 240, idealHeight: 280, maxHeight: .infinity)
     }
 }

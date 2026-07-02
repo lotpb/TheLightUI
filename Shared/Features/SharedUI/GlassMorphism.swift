@@ -18,18 +18,53 @@ struct GlassMorphism: View {
         .ignoresSafeArea()
     }
 
-    /// Hosts the glass card in a `GlassEffectContainer` on iOS 26+ for the best
-    /// Liquid Glass rendering performance; earlier systems present the card directly.
+    /// Hosts the glass shapes in a `GlassEffectContainer` on iOS 26+ so the card
+    /// and toolbar render together and can blend or morph; earlier systems
+    /// present the same stack directly.
     @ViewBuilder
     private var glassContent: some View {
         if #available(iOS 26.0, *) {
-            GlassEffectContainer {
-                GlassCard()
-                    .padding(.horizontal, GlassStyle.screenPadding)
+            GlassEffectContainer(spacing: 12) {
+                stackedContent
             }
         } else {
+            stackedContent
+        }
+    }
+
+    private var stackedContent: some View {
+        VStack(spacing: 28) {
             GlassCard()
                 .padding(.horizontal, GlassStyle.screenPadding)
+
+            GlassToolbar()
+        }
+    }
+}
+
+// Floating toolbar of circular glass controls. On iOS 26 each circle uses the
+// interactive Liquid Glass variant, so it reacts to touch like a glass button.
+private struct GlassToolbar: View {
+    private let actions: [(symbol: String, title: String)] = [
+        ("paintbrush.fill", "Paint"),
+        ("wand.and.stars", "Effects"),
+        ("square.on.square", "Layers")
+    ]
+
+    var body: some View {
+        HStack(spacing: 20) {
+            ForEach(actions, id: \.symbol) { action in
+                Button {} label: {
+                    Image(systemName: action.symbol)
+                        .font(.system(size: 19, weight: .semibold))
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(GlassStyle.ink)
+                        .frame(width: 56, height: 56)
+                }
+                .buttonStyle(.plain)
+                .glassSurface(in: Circle(), interactive: true)
+                .accessibilityLabel(action.title)
+            }
         }
     }
 }
@@ -39,10 +74,10 @@ private enum GlassStyle {
     static let cornerRadius: CGFloat = 30
     static let cardMaxWidth: CGFloat = 360
     static let iconSize: CGFloat = 52
-    static let tint = Color(red: 0.10, green: 0.58, blue: 0.78)
-    static let accent = Color(red: 0.96, green: 0.45, blue: 0.52)
-    static let ink = Color(red: 0.10, green: 0.13, blue: 0.20)
-    static let secondaryInk = Color(red: 0.28, green: 0.33, blue: 0.42)
+    static let tint = Color(red: 0.42, green: 0.36, blue: 0.90)
+    static let accent = Color(red: 0.98, green: 0.66, blue: 0.36)
+    static let ink = Color(red: 0.13, green: 0.11, blue: 0.28)
+    static let secondaryInk = Color(red: 0.35, green: 0.33, blue: 0.50)
 
     static var cardShape: RoundedRectangle {
         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
@@ -54,9 +89,9 @@ private struct GlassBackground: View {
         ZStack {
             LinearGradient(
                 colors: [
-                    Color(red: 0.93, green: 0.97, blue: 0.98),
-                    Color(red: 0.77, green: 0.88, blue: 0.92),
-                    Color(red: 0.98, green: 0.86, blue: 0.82)
+                    Color(red: 0.94, green: 0.93, blue: 0.99),
+                    Color(red: 0.79, green: 0.80, blue: 0.95),
+                    Color(red: 0.99, green: 0.88, blue: 0.79)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -217,12 +252,13 @@ private struct GlassMetricView: View {
 private struct GlassSurface<S: Shape>: ViewModifier {
     let shape: S
     let fallbackStrokeOpacity: Double
+    var interactive = false
 
     func body(content: Content) -> some View {
         if #available(iOS 26.0, *) {
             // Liquid Glass supplies its own edge highlight, so the manual
             // stroke used in the fallback is intentionally dropped here.
-            content.glassEffect(.regular, in: shape)
+            content.glassEffect(interactive ? .regular.interactive() : .regular, in: shape)
         } else {
             content
                 .background(.ultraThinMaterial, in: shape)
@@ -234,12 +270,15 @@ private struct GlassSurface<S: Shape>: ViewModifier {
 }
 
 private extension View {
-    func glassSurface<S: Shape>(in shape: S, fallbackStrokeOpacity: Double = 0.74) -> some View {
-        modifier(GlassSurface(shape: shape, fallbackStrokeOpacity: fallbackStrokeOpacity))
+    func glassSurface<S: Shape>(
+        in shape: S,
+        fallbackStrokeOpacity: Double = 0.74,
+        interactive: Bool = false
+    ) -> some View {
+        modifier(GlassSurface(shape: shape, fallbackStrokeOpacity: fallbackStrokeOpacity, interactive: interactive))
     }
 }
 
-@available(iOS 18.0, *)
 #Preview("Glass Morphism") {
     GlassMorphism()
 }

@@ -59,14 +59,10 @@ struct LeadDetailHeaderView: View {
                     .lineLimit(1)
             }
 
-            Spacer(minLength: 1) //8
+            Spacer(minLength: 1)
 
             VStack(spacing: 8) {
-                Image("taylor_swift_profile")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 88, height: 88)
-                    .clipShape(Circle())
+                InitialsAvatarView(firstName: detail.first, lastName: detail.lastname, size: 88)
                     .overlay(Circle().stroke(.white.opacity(0.7), lineWidth: 1))
                     .shadow(radius: 2)
 
@@ -82,16 +78,22 @@ struct LeadDetailHeaderView: View {
 
     private var followMapRow: some View {
         HStack(alignment: .center, spacing: 12) {
-            Label {
-                Text(detail.isActive ? "Following" : "Follow")
-                    .foregroundStyle(Color.accentColor)
-            } icon: {
-                Image(systemName: detail.isActive ? "star.fill" : "star")
-            }
+            // A Button (rather than onTapGesture) gives VoiceOver the button trait
+            // and standard press feedback.
+            Button {
+                toggleActive()
+            } label: {
+                Label {
+                    Text(detail.isActive ? "Following" : "Follow")
+                        .foregroundStyle(Color.accentColor)
+                } icon: {
+                    Image(systemName: detail.isActive ? "star.fill" : "star")
+                }
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(detail.isActive ? .yellow : .secondary)
-                .onTapGesture { toggleActive() }
-                .accessibilityLabel("Toggle Follow")
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Toggle Follow")
 
             Spacer()
 
@@ -140,4 +142,3 @@ struct LeadDetailHeaderView: View {
         activeColor = detail.isActive ? 1 : 0
     }
 }
-

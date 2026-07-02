@@ -75,18 +75,15 @@ struct MapUI: View {
         travelTime: Double,
         distance: Double
     ) {
-        self.init(
-            mode: .route(
-                destination: MapDestination(
-                    street: mapstreet,
-                    city: mapcity,
-                    state: mapstate,
-                    zip: mapzip
-                )
-            ),
-            travelTime: travelTime,
-            distance: distance
+        let destination = MapDestination(
+            street: mapstreet,
+            city: mapcity,
+            state: mapstate,
+            zip: mapzip
         )
+        self.mode = .route(destination: destination)
+        self._travelTime = State(initialValue: travelTime)
+        self._distance = State(initialValue: distance)
     }
 
     var body: some View {
@@ -131,9 +128,9 @@ struct MapUI: View {
             mode: mode,
             region: $manager.region,
             mapType: $mapType,
-            onUserInteraction: manager.pauseFollowingLocation
+            onUserInteraction: { manager.pauseFollowingLocation() }
         )
-        .ignoresSafeArea(.all, edges: .all)
+        .ignoresSafeArea()
     }
 
     @ViewBuilder
@@ -184,9 +181,7 @@ struct MapUI: View {
     }
 }
 
-#Preview("Customers - Dark") {
+#Preview("Map - Dark") {
     MapUI(mode: .currentLocation, travelTime: 0.00, distance: 0.00)
         .preferredColorScheme(.dark)
 }
-
-

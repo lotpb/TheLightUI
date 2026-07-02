@@ -14,8 +14,7 @@ import CodeScanner
 struct MembershipUI: View {
     private enum Layout {
         static let contentSpacing: CGFloat = 16
-        static let qrCodeSize: CGFloat = 220
-        static let topPadding: CGFloat = 15
+        static let qrCodeSize: CGFloat = 190
     }
 
     @State private var first = ""
@@ -41,6 +40,8 @@ struct MembershipUI: View {
     var body: some View {
         NavigationStack {
             content
+                .background(Color(.systemGroupedBackground))
+                .scrollDismissesKeyboard(.interactively)
                 .navigationTitle("Membership")
                 .toolbar { toolbarContent }
                 .sheet(isPresented: $isShowingScanner) {
@@ -53,76 +54,126 @@ struct MembershipUI: View {
                 .onChange(of: fullName) {
                     updateNameStorage(from: fullName)
                 }
-            
-                //.onChange(of: fullName) { newValue in updateNameStorage(from: newValue) }
-            
                 .onChange(of: first) {
                     SecureSettingsStore.saveString(first, forKey: SettingsUI.firstNameKey)
-                    updateCode()
                 }
-//                .onChange(of: first) { newValue in
-//                    SecureSettingsStore.saveString(newValue, forKey: SettingsUI.firstNameKey)
-//                    updateCode()
-//                }
                 .onChange(of: last) {
                     SecureSettingsStore.saveString(last, forKey: SettingsUI.lastNameKey)
-                    updateCode()
                 }
-//                .onChange(of: last) { newValue in
-//                    SecureSettingsStore.saveString(newValue, forKey: SettingsUI.lastNameKey)
-//                    updateCode()
-//                }
                 .onChange(of: emailAddress) {
                     SecureSettingsStore.saveString(emailAddress, forKey: SettingsUI.emailKey)
+                }
+                .onChange(of: membershipPayload) {
                     updateCode()
                 }
-//                .onChange(of: ) { newValue in
-//                    SecureSettingsStore.saveString(newValue, forKey: SettingsUI.emailKey)
-//                    updateCode()
-//                }
         }
     }
 
     // MARK: - Content
 
     private var content: some View {
-        VStack(spacing: Layout.contentSpacing) {
-            memberFields
-            qrCodeImage
-            Spacer()
+        ScrollView {
+            VStack(spacing: Layout.contentSpacing) {
+                memberFields
+                membershipCard
+            }
+            .padding(.horizontal)
+            .padding(.top, 8)
+            .padding(.bottom, 24)
         }
-        .padding(.horizontal)
     }
 
     private var memberFields: some View {
-        Group {
-            TextField("First and Last Name", text: $fullName)
-                .textFieldStyle(.roundedBorder)
-                .textContentType(.name)
-                .font(.headline)
-                .padding(.top, Layout.topPadding)
+        VStack(spacing: 10) {
+            fieldCard(label: "name") {
+                TextField("First and Last Name", text: $fullName)
+                    .textContentType(.name)
+                    .submitLabel(.next)
+            }
 
-            TextField("Email Address", text: $emailAddress)
-                .textFieldStyle(.roundedBorder)
-                .textContentType(.emailAddress)
-                .keyboardType(.emailAddress)
-                .textInputAutocapitalization(.never)
-                .font(.headline)
+            fieldCard(label: "email") {
+                TextField("Email Address", text: $emailAddress)
+                    .textContentType(.emailAddress)
+                    .keyboardType(.emailAddress)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .submitLabel(.done)
+            }
         }
     }
 
-    private var qrCodeImage: some View {
-        Image(uiImage: qrCode)
-            .resizable()
-            .interpolation(.none)
-            .scaledToFit()
-            .frame(width: Layout.qrCodeSize, height: Layout.qrCodeSize)
-            .contextMenu {
-                Button(action: saveQRCode) {
-                    Label("Save to Photos", systemImage: "square.and.arrow.down")
+    // A Contacts-style field card: small secondary label above the input.
+    private func fieldCard(label: String, @ViewBuilder content: () -> some View) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+
+            content()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    private var cardDisplayName: String {
+        let name = fullName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? "Member Name" : name
+    }
+
+    // A Wallet-pass-style card holding the QR code and member details.
+    private var membershipCard: some View {
+        VStack(spacing: 14) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("TheLight")
+                        .font(.headline)
+
+                    Text("Member")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "person.crop.circle.badge.checkmark")
+                    .font(.title3)
+                    .foregroundStyle(.blue)
+                    .accessibilityHidden(true)
+            }
+
+            // QR codes need a light background to stay scannable in dark mode.
+            Image(uiImage: qrCode)
+                .resizable()
+                .interpolation(.none)
+                .scaledToFit()
+                .frame(width: Layout.qrCodeSize, height: Layout.qrCodeSize)
+                .padding(10)
+                .background(.white, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .contextMenu {
+                    Button(action: saveQRCode) {
+                        Label("Save to Photos", systemImage: "square.and.arrow.down")
+                    }
+                }
+                .accessibilityLabel("Membership QR code")
+
+            VStack(spacing: 2) {
+                Text(cardDisplayName)
+                    .font(.subheadline.weight(.semibold))
+
+                if !emailAddress.isEmpty {
+                    Text(emailAddress)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
                 }
             }
-            .padding(.top, Layout.topPadding)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     @ToolbarContentBuilder

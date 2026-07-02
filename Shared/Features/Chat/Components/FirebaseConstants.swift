@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct FirebaseConstants {
+enum FirebaseConstants {
     static let fromId = "fromId"
     static let toId = "toId"
     static let text = "text"

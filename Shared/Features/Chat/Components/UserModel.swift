@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  UserModel.swift
 //  TheLightUI (iOS)
 //
 //  Created by Peter Balsamo on 11/19/21.
@@ -13,4 +13,8 @@ import FirebaseFirestore
 struct UserModel: Codable, Identifiable, @unchecked Sendable {
     @DocumentID var id: String?
     let uid, email, profileImageUrl: String
+
+    var username: String {
+        email.components(separatedBy: "@").first ?? email
+    }
 }

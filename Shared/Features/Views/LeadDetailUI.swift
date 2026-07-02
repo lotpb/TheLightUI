@@ -26,7 +26,8 @@ private enum LeadDetailLayout {
 }
 
 // A reusable rounded list container with automatic bottom dividers between rows.
-private struct RoundedContainerList<RowData, RowContent: View>: View {
+// Rows are identified by their element's stable id so state and animations survive updates.
+private struct RoundedContainerList<RowData: Identifiable, RowContent: View>: View {
     let rows: [RowData]
     let rowContent: (RowData) -> RowContent
 
@@ -36,14 +37,14 @@ private struct RoundedContainerList<RowData, RowContent: View>: View {
     }
 
     var body: some View {
-        LazyVStack(spacing: 0) {
-            ForEach(Array(rows.enumerated()), id: \.offset) { index, data in
+        VStack(spacing: 0) {
+            ForEach(rows) { data in
                 rowContent(data)
                     .padding(.horizontal, LeadDetailLayout.rowHorizontalPadding)
                     .padding(.vertical, LeadDetailLayout.rowVerticalPadding)
                     .background(Color(.secondarySystemGroupedBackground))
                     .overlay(alignment: .bottom) {
-                        if index < rows.count - 1 {
+                        if data.id != rows.last?.id {
                             Divider().padding(.leading, LeadDetailLayout.rowHorizontalPadding)
                         }
                     }
@@ -162,8 +163,17 @@ struct LeadDetailUI: View {
         .navigationTitle("Profile")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbarContent }
-        .applySheets(item: $coordinator.activeSheet, content: sheetContent)
-        .applyLocationAlert(using: locationAlertIsPresented, message: coordinator.locationAlertMessage ?? "", onDismiss: { coordinator.locationAlertMessage = nil })
+        .sheet(item: $coordinator.activeSheet, content: sheetContent)
+        .alert("Location Unavailable", isPresented: locationAlertIsPresented) {
+            Button("OK", role: .cancel) { coordinator.locationAlertMessage = nil }
+        } message: {
+            Text(coordinator.locationAlertMessage ?? "")
+        }
+        // Mirror the customer's active state into AppStorage to drive theme accents.
+        .onAppear(perform: syncActiveColor)
+        .onChange(of: detail.isActive) {
+            syncActiveColor()
+        }
         // Apply theme color to foreground and accent (tint).
         .foregroundStyle(themeColor)
         .tint(themeColor)
@@ -174,16 +184,10 @@ struct LeadDetailUI: View {
 
     // Reusable list of labeled customer fields with separators and rounded container.
     private var detailFieldList: some View {
-        let fields = detailFields
-
-        return RoundedContainerList(fields) { customer in
+        RoundedContainerList(detailFields) { customer in
             LeadDetailFieldRow(formData: customer)
         }
         .padding(.horizontal)
-        .onAppear(perform: syncActiveColor)
-        .onChange(of: detail.isActive) {
-            syncActiveColor()
-        }
     }
 
     // Toolbar: close, actions menu, and edit entry point.
@@ -446,21 +450,6 @@ struct LeadDetailUI: View {
     }
 }
 
-// Convenience modifiers to apply sheets and the location alert as standard view modifiers
-private extension View {
-    func applyLocationAlert(using binder: Binding<Bool>, message: @autoclosure @escaping () -> String, onDismiss: @escaping () -> Void) -> some View {
-        self.alert("Location Unavailable", isPresented: binder) {
-            Button("OK", role: .cancel) { onDismiss() }
-        } message: {
-            Text(message())
-        }
-    }
-
-    func applySheets<Item: Identifiable>(item: Binding<Item?>, @ViewBuilder content: @escaping (Item) -> some View) -> some View {
-        self.sheet(item: item, content: content)
-    }
-}
-
 // Preview with sample data for design-time visualization.
 #Preview("Lead Detail - Dark") {
     NavigationStack {
@@ -479,7 +468,7 @@ private extension View {
             phone: "516-241-4786",
             comments: "Hello",
             spouse: "Janet",
-            email: "eunitedws@icloud.com.com",
+            email: "eunitedws@icloud.com",
             contractorIndex: 5,
             photo: "none",
             lastUpdateDate: Date(),

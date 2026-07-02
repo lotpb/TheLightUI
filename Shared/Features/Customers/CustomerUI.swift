@@ -345,15 +345,11 @@ struct CellView: View, Equatable {
         }
     }
 
-    // Static placeholder avatar with circular mask.
+    // Monogram avatar built from the customer's initials.
     private var avatar: some View {
-        Image("taylor_swift_profile")
-            .resizable()
-            .frame(width: Layout.avatarSize, height: Layout.avatarSize, alignment: .topLeading)
-            .clipShape(Circle())
+        InitialsAvatarView(firstName: data.first, lastName: data.lastname, size: Layout.avatarSize)
             .overlay { Circle().stroke(.white, lineWidth: 2) }
             .padding(.top, 5)
-            .accessibilityHidden(true)
     }
 
     // Name, address, and row-level actions.

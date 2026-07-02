@@ -34,8 +34,6 @@ struct MainMessagesView: View {
     @State private var shouldShowLogOutOptions = false
     @State private var shouldNavigateToChatLogView = false
     @State private var shouldShowNewMessageScreen = false
-    // The selected chat user for the chat log.
-    @State private var chatUser: UserModel?
 
     // View models: inbox (vm) and active chat log.
     @State private var vm: MainMessagesViewModel
@@ -231,7 +229,6 @@ struct MainMessagesView: View {
             CreateNewMessageView(
                 didSelectNewUser: { user in
                     self.shouldNavigateToChatLogView.toggle()
-                    self.chatUser = user
                     self.chatLogViewModel.chatUser = user
                 },
                 repository: makeChatRepository()
@@ -263,14 +260,13 @@ struct MainMessagesView: View {
 
     // Compute chat user from a recent message and navigate to the chat log.
     private func openChat(for recentMessage: RecentMessage) {
-        chatUser = vm.chatUser(for: recentMessage)
-        chatLogViewModel.chatUser = chatUser
+        chatLogViewModel.chatUser = vm.chatUser(for: recentMessage)
         shouldNavigateToChatLogView.toggle()
     }
 
     // Display name derived from email (customize as needed).
     private func displayName(for email: String?) -> String? {
-        email
+        email?.components(separatedBy: "@").first
     }
 }
 
@@ -307,7 +303,7 @@ private struct RecentMessageRow: View {
 
     // Name to display for the conversation partner.
     private var displayName: String {
-        recentMessage.email
+        recentMessage.username
     }
 
     var body: some View {
