@@ -21,38 +21,8 @@ struct RecentMessage: Codable, Identifiable {
         email.components(separatedBy: "@").first ?? email
     }
 
-    var timeAgo: String {
-        MessageDateFormatting.relativeTimeAgo(for: timestamp)
-    }
-
-    var sentDateText: String {
-        MessageDateFormatting.compactDateTime(for: timestamp)
-    }
-
-
-    var daysAndHoursAgoText: String {
-        daysAndHoursAgoText(relativeTo: Date())
-    }
-
     func daysAndHoursAgoText(relativeTo date: Date) -> String {
-        let elapsedSeconds = max(0, Int(date.timeIntervalSince(timestamp)))
-        let days = elapsedSeconds / 86_400
-        let hours = elapsedSeconds / 3_600
-        let minutes = elapsedSeconds / 60
-
-        if days > 0 {
-            return "\(days)d"
-        }
-
-        if hours > 0 {
-            return "\(hours)h"
-        }
-
-        if minutes > 0 {
-            return "\(minutes)m"
-        }
-
-        return "\(elapsedSeconds)s"
+        Duration.seconds(max(0, date.timeIntervalSince(timestamp)))
+            .formatted(.units(allowed: [.days, .hours, .minutes, .seconds], width: .narrow, maximumUnitCount: 1))
     }
 }
-

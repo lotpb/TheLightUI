@@ -21,9 +21,9 @@ struct MapButtonView: View {
     @State private var lastNon3DMapType: MKMapType = .standard
 
     private var speedText: String {
-        let metersPerSecond = max(manager.location?.speed ?? 0.0, 0.0)
-        let speed = 2.23694 * metersPerSecond
-        return String(format: "Speed: %.0f", speed)
+        Measurement(value: max(manager.location?.speed ?? 0, 0), unit: UnitSpeed.metersPerSecond)
+            .converted(to: .milesPerHour)
+            .formatted(.measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(0))))
     }
 
     var body: some View {

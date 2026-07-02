@@ -118,12 +118,13 @@ struct FormUI: View {
         Section {
             HStack {
                 VStack(spacing: 5) {
-                    Image("taylor_swift_profile")
-                        .resizable()
-                        .frame(width: Layout.avatarSize, height: Layout.avatarSize)
-                        .clipShape(Circle())
-                        .overlay { Circle().stroke(.white, lineWidth: 2) }
-                        .padding(.trailing, 5)
+                    InitialsAvatarView(
+                        firstName: viewModel.detail.first,
+                        lastName: viewModel.detail.lastname,
+                        size: Layout.avatarSize
+                    )
+                    .overlay { Circle().stroke(.white, lineWidth: 2) }
+                    .padding(.trailing, 5)
 
                     // Placeholder for editing the profile photo.
                     Button {} label: {
@@ -151,7 +152,8 @@ struct FormUI: View {
 
                     // Creation date (or primary date) picker.
                     HStack {
-                        DatePicker("", selection: $viewModel.pickDate, displayedComponents: .date)
+                        // Real title so VoiceOver announces the field; labelsHidden keeps it visually unchanged.
+                        DatePicker("Created", selection: $viewModel.pickDate, displayedComponents: .date)
                             .clipped()
                             .labelsHidden()
 
@@ -168,7 +170,7 @@ struct FormUI: View {
 
     private var customerInfoSection: some View {
         // Section: address, city, state/zip, phone, amount, email.
-        Section(header: Text("\(viewModel.detail.formController) Info")) {
+        Section("\(viewModel.detail.formController) Info") {
             labeledTextField("Address:", placeholder: "address", text: $viewModel.detail.street)
             labeledTextField("City:", placeholder: "city", text: $viewModel.detail.city)
 
@@ -224,7 +226,7 @@ struct FormUI: View {
 
     private var miscSection: some View {
         // Section: spouse, rating, start/complete dates, and photo URL/name.
-        Section(header: Text("Misc")) {
+        Section("Misc") {
             labeledTextField("Spouse:", placeholder: "spouse", text: $viewModel.detail.spouse)
             ratingRow
             dateRow("Start:", title: "Start", selection: $viewModel.pickStartDate)
@@ -331,6 +333,8 @@ struct FormUI: View {
     }
 
     // Reusable picker row that forwards selection changes via a callback.
+    // Note: the picklists are static and the Int index is the persisted selection
+    // value on the model, so indices are the genuine identity here.
     private func pickerRow(
         _ title: String,
         selection: Binding<Int>,
@@ -351,7 +355,7 @@ struct FormUI: View {
             .labelsHidden()
             .fixedSize()
             .tint(Color.primary)
-            .onChange(of: selection.wrappedValue) { oldValue, newValue in
+            .onChange(of: selection.wrappedValue) { _, newValue in
                 onChange(newValue)
             }
 
@@ -387,7 +391,9 @@ struct FormUI: View {
             Spacer()
 
             Stepper {
-                TextField(label, value: value, formatter: AppNumberFormatters.integer)
+                // FormatStyle-based field; grouping disabled to match the previous
+                // plain-integer NumberFormatter output.
+                TextField(label, value: value, format: .number.grouping(.never))
                     .formStyle()
                     .frame(minWidth: minWidth, maxWidth: maxWidth)
                     .keyboardType(keyboardType)
@@ -490,8 +496,7 @@ private extension Text {
             formService: PreviewCustomerFormService()
         )
         .environment(CustomerData(customerService: PreviewCustomerService()))
-            .environment(PickerDataModel())
+        .environment(PickerDataModel())
     }
     .preferredColorScheme(.dark)
 }
-

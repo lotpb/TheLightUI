@@ -12,6 +12,7 @@ struct UserFormUI: View {
     // Fallback location used until the user's stored coordinates load.
     private static let defaultCoordinate = CLLocationCoordinate2D(latitude: 26.465019, longitude: -80.124528)
 
+    @Environment(\.openURL) private var openURL
     @State private var viewModel = MainMessagesViewModel()
 
     @State private var storedLatitude = ""
@@ -19,6 +20,7 @@ struct UserFormUI: View {
     @State private var storedFirstName = ""
     @State private var storedLastName = ""
     @State private var storedPhone = ""
+    @State private var storedEmail = ""
 
     // Parse stored latitude/longitude with sensible defaults.
     private var latitudeValue: Double {
@@ -28,12 +30,9 @@ struct UserFormUI: View {
         Double(storedLongitude.trimmingCharacters(in: .whitespacesAndNewlines)) ?? Self.defaultCoordinate.longitude
     }
 
-    @State private var coordinateRegion = MKCoordinateRegion(
-        center: UserFormUI.defaultCoordinate,
-        span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
-    )
-
-    
+    private var storedCoordinate: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: latitudeValue, longitude: longitudeValue)
+    }
 
     private var profileName: String {
         let fullName = [storedFirstName, storedLastName]
@@ -46,13 +45,16 @@ struct UserFormUI: View {
 
     private let profileCity = "Delray Beach"
     private let profileState = "Florida"
+    private let profileRole = "Employee"
+    private let profileDescription = "I am a happy user of TheLight."
 
-    private var profileTitle: String {
-        let phone = storedPhone.trimmingCharacters(in: .whitespacesAndNewlines)
-        return phone.isEmpty ? "Employee" : phone
+    private var trimmedPhone: String {
+        storedPhone.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private let profileDescription = "I am a happy user of TheLight."
+    private var trimmedEmail: String {
+        storedEmail.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 
     private func loadSecureSettings() {
         storedLatitude = SecureSettingsStore.loadString(forKey: SettingsUI.latitudeKey)
@@ -60,11 +62,7 @@ struct UserFormUI: View {
         storedFirstName = SecureSettingsStore.loadString(forKey: SettingsUI.firstNameKey)
         storedLastName = SecureSettingsStore.loadString(forKey: SettingsUI.lastNameKey)
         storedPhone = SecureSettingsStore.loadString(forKey: SettingsUI.phoneKey)
-    }
-
-    private func updateRegionFromSettings() {
-        let center = CLLocationCoordinate2D(latitude: latitudeValue, longitude: longitudeValue)
-        coordinateRegion.center = center
+        storedEmail = SecureSettingsStore.loadString(forKey: SettingsUI.emailKey)
     }
 
     var body: some View {
@@ -73,25 +71,19 @@ struct UserFormUI: View {
             profileImage
             profileDetails
         }
-        .onAppear {
-            loadSecureSettings()
-            updateRegionFromSettings()
-        }
+        .background(Color(.systemGroupedBackground))
+        .onAppear(perform: loadSecureSettings)
         .task { await viewModel.fetchCurrentUser() }
-        .onChange(of: storedLatitude) { updateRegionFromSettings() }
-        .onChange(of: storedLongitude) { updateRegionFromSettings() }
         .navigationTitle("Profile")
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private var profileMap: some View {
-        ProfileLocationMap(
-            coordinateRegion: $coordinateRegion
-        )
-        .ignoresSafeArea(edges: .top)
-        .frame(height: 300)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-        .shadow(radius: 4)
+        ProfileLocationMap(coordinate: storedCoordinate, markerTitle: profileName)
+            .ignoresSafeArea(edges: .top)
+            .frame(height: 300)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .shadow(radius: 4)
     }
 
     private var profileImage: some View {
@@ -104,40 +96,132 @@ struct UserFormUI: View {
     }
 
     private var profileDetails: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(profileName)
-                .font(.title)
-                .foregroundStyle(Color.primary)
+        VStack(spacing: 16) {
+            VStack(spacing: 2) {
+                Text(profileName)
+                    .font(.title2.bold())
+                    .multilineTextAlignment(.center)
 
-            HStack {
-                Text(profileCity)
-                Spacer()
-                Text(profileState)
+                Text(profileRole)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             }
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
 
-            Divider()
+            VStack(spacing: 10) {
+                if !trimmedPhone.isEmpty {
+                    phoneCard
+                }
 
-            Text(profileTitle)
-                .font(.title2)
-            Text(profileDescription)
+                if !trimmedEmail.isEmpty {
+                    emailCard
+                }
+
+                contactCard(label: "location", value: "\(profileCity), \(profileState)")
+                contactCard(label: "notes", value: profileDescription)
+            }
         }
-        .padding()
+        .padding(.horizontal)
+        .padding(.top, 10)
+        .padding(.bottom, 24)
+    }
+
+    // Phone card with a trailing call button, in the style of Contacts.
+    private var phoneCard: some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("phone")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+
+                Text(trimmedPhone)
+                    .foregroundStyle(Color.primary)
+            }
+
+            Spacer()
+
+            Button {
+                openURL.callPhoneNumber(trimmedPhone)
+            } label: {
+                Image(systemName: "phone.fill")
+                    .font(.headline)
+                    .foregroundStyle(.blue)
+                    .frame(width: 34, height: 34)
+                    .background(Color(.tertiarySystemBackground), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Call \(profileName)")
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    // Email card with a trailing compose button, in the style of Contacts.
+    private var emailCard: some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("email")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+
+                Text(trimmedEmail)
+                    .foregroundStyle(Color.primary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+
+            Spacer()
+
+            Button {
+                if let url = URL(string: "mailto:\(trimmedEmail)") {
+                    openURL(url)
+                }
+            } label: {
+                Image(systemName: "envelope.fill")
+                    .font(.headline)
+                    .foregroundStyle(.blue)
+                    .frame(width: 34, height: 34)
+                    .background(Color(.tertiarySystemBackground), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Email \(profileName)")
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    // A Contacts-style field card: small secondary label above the value.
+    private func contactCard(label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+
+            Text(value)
+                .foregroundStyle(Color.primary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
 
 private struct ProfileLocationMap: View {
-    @Binding var coordinateRegion: MKCoordinateRegion
+    let coordinate: CLLocationCoordinate2D
+    let markerTitle: String
     @State private var position: MapCameraPosition
 
-    init(coordinateRegion: Binding<MKCoordinateRegion>) {
-        _coordinateRegion = coordinateRegion
-        _position = State(initialValue: .region(coordinateRegion.wrappedValue))
+    init(coordinate: CLLocationCoordinate2D, markerTitle: String) {
+        self.coordinate = coordinate
+        self.markerTitle = markerTitle
+        _position = State(initialValue: Self.camera(for: coordinate))
     }
 
     var body: some View {
         Map(position: $position, interactionModes: .all) {
+            Marker(markerTitle, systemImage: "person.fill", coordinate: coordinate)
             UserAnnotation()
         }
         .mapControls {
@@ -145,14 +229,21 @@ private struct ProfileLocationMap: View {
             MapCompass()
             MapScaleView()
         }
-        // Follow the region when stored coordinates load or change.
-        // MKCoordinateRegion isn't Equatable, so observe its center components.
-        .onChange(of: coordinateRegion.center.latitude) {
-            position = .region(coordinateRegion)
+        // Recenter when the stored coordinates load or change.
+        // CLLocationCoordinate2D isn't Equatable, so observe its components.
+        .onChange(of: coordinate.latitude) {
+            position = Self.camera(for: coordinate)
         }
-        .onChange(of: coordinateRegion.center.longitude) {
-            position = .region(coordinateRegion)
+        .onChange(of: coordinate.longitude) {
+            position = Self.camera(for: coordinate)
         }
+    }
+
+    private static func camera(for coordinate: CLLocationCoordinate2D) -> MapCameraPosition {
+        .region(MKCoordinateRegion(
+            center: coordinate,
+            span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
+        ))
     }
 }
 

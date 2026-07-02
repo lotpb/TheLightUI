@@ -10,33 +10,52 @@ import CoreLocationUI
 
 struct WelcomeView: View {
     let requestLocation: () -> Void
-    
+
     var body: some View {
-        VStack {
-            VStack(spacing: 20) {
+        VStack(spacing: 24) {
+            weatherSymbol
+                .accessibilityHidden(true)
+
+            VStack(spacing: 12) {
                 Text("Welcome to the Weather App")
-                    .bold().font(.title)
-                Text("Please share your current location to get the weather in your area")
-                    .padding()
+                    .font(.title.bold())
+                Text("Share your current location to get the weather in your area.")
+                    .foregroundStyle(.secondary)
             }
             .multilineTextAlignment(.center)
-            .padding()
-            
+
             LocationButton(.shareCurrentLocation) {
                 requestLocation()
             }
-            .clipShape(RoundedRectangle(cornerRadius: 30))
             .symbolVariant(.fill)
+            .labelStyle(.titleAndIcon)
             .foregroundStyle(.white)
+            .clipShape(Capsule())
+
+            Text("Your location is only used to fetch the local forecast.")
+                .font(.footnote)
+                .foregroundStyle(.tertiary)
+                .multilineTextAlignment(.center)
         }
+        .padding(.horizontal, 32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    private var weatherSymbol: some View {
+        let icon = Image(systemName: "cloud.sun.fill")
+            .symbolRenderingMode(.multicolor)
+            .font(.system(size: 72))
+        if #available(iOS 17.0, *) {
+            icon.symbolEffect(.pulse)
+        } else {
+            icon
+        }
     }
 }
 
-struct WelcomeView_Previews: PreviewProvider {
-    static var previews: some View {
-        WelcomeView(requestLocation: {})
-            .background(Color.background)
-            .preferredColorScheme(.dark)
-    }
+#Preview {
+    WelcomeView(requestLocation: {})
+        .background(Color.background)
+        .preferredColorScheme(.dark)
 }

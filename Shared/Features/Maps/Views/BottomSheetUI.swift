@@ -8,7 +8,7 @@ import SwiftUI
 
 struct BottomSheetUI: View {
     private struct Favorite: Identifiable {
-        let id = UUID()
+        var id: String { title }
         let title: String
         let systemImage: String
         let color: Color
@@ -31,7 +31,6 @@ struct BottomSheetUI: View {
     @State private var offset: CGFloat = 0
     @State private var dragStartOffset: CGFloat?
 
-    private let metersPerMile: Double = 1609.344
     private let favorites = [
         Favorite(title: "Home", systemImage: "house.fill", color: .blue),
         Favorite(title: "Work", systemImage: "briefcase.fill", color: .gray),
@@ -44,21 +43,26 @@ struct BottomSheetUI: View {
     private let safeAreaSpacing: CGFloat = 12
 
     private var speedText: String {
-        let metersPerSecond = max(locationManager.location?.speed ?? 0.0, 0.0)
-        let speed = 2.23694 * metersPerSecond
-        return String(format: "Speed: %.0f", speed)
+        Measurement(value: max(locationManager.location?.speed ?? 0, 0), unit: UnitSpeed.metersPerSecond)
+            .converted(to: .milesPerHour)
+            .formatted(.measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(0))))
+    }
+
+    private var altitudeText: String {
+        Measurement(value: locationManager.location?.altitude ?? 0, unit: UnitLength.meters)
+            .converted(to: .feet)
+            .formatted(.measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(0))))
+    }
+
+    private var distanceText: String {
+        Measurement(value: distance, unit: UnitLength.meters)
+            .converted(to: .miles)
+            .formatted(.measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(1))))
     }
 
     private var travelTimeText: String {
-        let totalMinutes = max(Int((travelTime / 60).rounded()), 0)
-        let hours = totalMinutes / 60
-        let minutes = totalMinutes % 60
-
-        if hours > 0 {
-            return "\(hours) hr \(minutes) min"
-        }
-
-        return "\(minutes) min"
+        Duration.seconds(max(travelTime, 0))
+            .formatted(.units(allowed: [.hours, .minutes], width: .abbreviated))
     }
 
     private var locationRows: [LocationInfoRow] {
@@ -68,7 +72,7 @@ struct BottomSheetUI: View {
             LocationInfoRow(
                 id: "altitude",
                 title: "Altitude",
-                value: String(format: "%.0f ft", locationManager.location?.altitude ?? 0),
+                value: altitudeText,
                 systemImage: "arrow.up.and.down.circle"
             ),
             LocationInfoRow(
@@ -92,7 +96,7 @@ struct BottomSheetUI: View {
             LocationInfoRow(
                 id: "speed",
                 title: "Speed",
-                value: String(format: "%.0f mph", max(locationManager.location?.speed ?? 0.0, 0.0) * 2.23694),
+                value: speedText,
                 systemImage: "gauge.medium"
             )
         ]
@@ -105,7 +109,7 @@ struct BottomSheetUI: View {
     private var mapsURL: URL? {
         let coord = locationManager.location?.coordinate
         guard let lat = coord?.latitude, let lon = coord?.longitude else { return nil }
-        return URL(string: "http://maps.apple.com/?ll=\(lat),\(lon)")
+        return URL(string: "https://maps.apple.com/?ll=\(lat),\(lon)")
     }
 
     var body: some View {
@@ -243,7 +247,7 @@ struct BottomSheetUI: View {
 
                 HStack(spacing: 14) {
                     Label(travelTimeText, systemImage: "clock")
-                    Label(String(format: "%0.1f mi", distance / metersPerMile), systemImage: "map")
+                    Label(distanceText, systemImage: "map")
                 }
                 .font(.subheadline.monospacedDigit())
                 .foregroundStyle(Color.primary)
@@ -278,7 +282,7 @@ struct BottomSheetUI: View {
             }
             .pickerStyle(.segmented)
             .onChange(of: selection) { _, _ in
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                impact(.light)
             }
             .padding(.horizontal)
 
@@ -311,7 +315,7 @@ struct BottomSheetUI: View {
 
             HStack(spacing: 16) {
                 Label(speedText, systemImage: "gauge.medium")
-                Label(String(format: "Alt %.0fft", locationManager.location?.altitude ?? 0), systemImage: "arrow.up.and.down.circle")
+                Label(altitudeText, systemImage: "arrow.up.and.down.circle")
             }
             .font(.caption)
             .foregroundStyle(.secondary)
@@ -356,7 +360,7 @@ struct BottomSheetUI: View {
     private var callDestinationButton: some View {
         Button {
             openURL.callPhoneNumber("")
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            impact(.light)
         } label: {
             Image(systemName: "phone.fill")
                 .font(.headline)

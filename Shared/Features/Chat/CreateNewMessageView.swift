@@ -150,7 +150,7 @@ private struct NewMessageUserRow: View {
     let user: UserModel
 
     private var displayName: String {
-        user.email
+        user.username
     }
 
     var body: some View {

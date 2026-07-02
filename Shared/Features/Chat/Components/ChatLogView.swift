@@ -18,7 +18,6 @@ struct ChatLogView: View {
 
     @Bindable var vm: ChatLogViewModel
     @State private var selectedPhoto: PhotosPickerItem? = nil
-    @State private var isPickingPhoto = false
     @FocusState private var isMessageFieldFocused: Bool
 
     var body: some View {
@@ -170,7 +169,7 @@ struct ChatLogView: View {
                 } catch {
                     vm.errorMessage = "Could not prepare image: \(error.localizedDescription)"
                 }
-                await MainActor.run { selectedPhoto = nil }
+                selectedPhoto = nil
             }
         }
     }
@@ -230,7 +229,7 @@ private struct ChatNavigationTitle: View {
     let user: UserModel?
 
     private var displayName: String {
-        user?.email.replacingOccurrences(of: "@optonline.net", with: "") ?? "Chat"
+        user?.username ?? "Chat"
     }
 
     var body: some View {

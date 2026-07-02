@@ -15,71 +15,30 @@ struct WebUI: View {
     private let bookmarks = WebBookmark.defaultBookmarks
 
     var body: some View {
-        GeometryReader { proxy in
-            if proxy.size.width > 700 {
-                HStack(spacing: 0) {
-                    bookmarkList
-                        .frame(width: 280)
-
-                    Divider()
-
-                    detailView
+        NavigationSplitView {
+            List(bookmarks, selection: $selectedBookmark) { bookmark in
+                NavigationLink(value: bookmark) {
+                    BookmarkRow(bookmark: bookmark)
                 }
+            }
+            .navigationTitle("Bookmarks")
+        } detail: {
+            if let selectedBookmark {
+                WebBookmarkDetail(bookmark: selectedBookmark)
             } else {
-                VStack(spacing: 0) {
-                    bookmarkPicker
-                    Divider()
-                    detailView
-                }
+                noSelectionPlaceholder
             }
-        }
-        .toolbar(.hidden, for: .navigationBar)
-    }
-
-    private var bookmarkList: some View {
-        List(bookmarks) { bookmark in
-            Button {
-                selectedBookmark = bookmark
-            } label: {
-                BookmarkRow(
-                    bookmark: bookmark,
-                    isSelected: selectedBookmark == bookmark
-                )
-            }
-            .buttonStyle(.plain)
-        }
-        .listStyle(.sidebar)
-    }
-
-    private var bookmarkPicker: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
-                ForEach(bookmarks) { bookmark in
-                    Button {
-                        selectedBookmark = bookmark
-                    } label: {
-                        Label(bookmark.title, systemImage: bookmark.systemImage)
-                            .font(.subheadline.weight(.semibold))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(
-                                Capsule()
-                                    .fill(selectedBookmark == bookmark ? Color.accentColor : Color.secondary.opacity(0.12))
-                            )
-                            .foregroundStyle(selectedBookmark == bookmark ? Color.white : Color.primary)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 10)
         }
     }
 
     @ViewBuilder
-    private var detailView: some View {
-        if let selectedBookmark {
-            WebBookmarkDetail(bookmark: selectedBookmark)
+    private var noSelectionPlaceholder: some View {
+        if #available(iOS 17.0, *) {
+            ContentUnavailableView(
+                "Select a Bookmark",
+                systemImage: "bookmark",
+                description: Text("Choose a website from the bookmarks list.")
+            )
         } else {
             PlaceholderView(
                 title: "Select a Bookmark",
@@ -93,25 +52,22 @@ struct WebUI: View {
 // MARK: - Views
 private struct BookmarkRow: View {
     let bookmark: WebBookmark
-    let isSelected: Bool
 
     var body: some View {
         Label {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(bookmark.title)
                     .font(.headline)
 
                 Text(bookmark.host)
                     .font(.subheadline)
-                    .foregroundStyle(isSelected ? .white.opacity(0.8) : .secondary)
+                    .foregroundStyle(.secondary)
             }
         } icon: {
             Image(systemName: bookmark.systemImage)
-                .foregroundStyle(isSelected ? Color.white : Color.accentColor)
+                .foregroundStyle(Color.accentColor)
         }
-        .padding(.vertical, 4)
-        .foregroundStyle(isSelected ? .white : .primary)
-        .listRowBackground(isSelected ? Color.accentColor : Color.clear)
+        .padding(.vertical, 2)
     }
 }
 
@@ -131,6 +87,13 @@ private struct WebBookmarkDetail: View {
             }
         }
         .ignoresSafeArea(edges: .bottom)
+        .navigationTitle(bookmark.title)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                ShareLink(item: bookmark.url)
+            }
+        }
     }
 }
 
@@ -179,22 +142,23 @@ private struct PlaceholderView: View {
 
 // MARK: - Model
 private struct WebBookmark: Identifiable, Hashable {
-    let id = UUID()
     let title: String
     let url: URL
     let systemImage: String
+
+    var id: URL { url }
 
     var host: String {
         url.host(percentEncoded: false) ?? url.absoluteString
     }
 
     static let defaultBookmarks: [WebBookmark] = [
-        ("Apple", "https://apple.com", "book"),
-        ("Google News", "https://news.google.com", "book"),
-        ("Bongino Report", "https://bonginoreport.com", "book"),
-        ("Blaze", "https://www.theblaze.com", "book"),
-        ("Drudge Report", "https://www.drudgereport.com", "book"),
-        ("CNN", "https://www.cnn.com", "book")
+        ("Apple", "https://apple.com", "apple.logo"),
+        ("Google News", "https://news.google.com", "newspaper"),
+        ("Bongino Report", "https://bonginoreport.com", "newspaper"),
+        ("Blaze", "https://www.theblaze.com", "newspaper"),
+        ("Drudge Report", "https://www.drudgereport.com", "newspaper"),
+        ("CNN", "https://www.cnn.com", "newspaper")
     ].compactMap { title, urlString, systemImage in
         guard let url = URL(string: urlString) else { return nil }
         return WebBookmark(title: title, url: url, systemImage: systemImage)

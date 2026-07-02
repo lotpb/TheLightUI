@@ -6,7 +6,9 @@
 import Foundation
 
 struct CustomerDetailField: Identifiable {
-    let id = UUID().uuidString
+    // Labels are unique per detail screen, so they provide a stable identity
+    // across body evaluations (a fresh UUID here would reset row identity on every update).
+    var id: String { label }
     let name: String
     let label: String
 }
