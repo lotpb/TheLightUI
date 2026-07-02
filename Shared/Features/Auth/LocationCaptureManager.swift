@@ -73,8 +73,8 @@ final class LocationCaptureManager: NSObject, LocationCaptureManaging, @unchecke
 }
 
 extension LocationCaptureManager: CLLocationManagerDelegate {
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        switch status {
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        switch manager.authorizationStatus {
         case .authorizedAlways, .authorizedWhenInUse:
             if completion != nil {
                 startLocationUpdates()

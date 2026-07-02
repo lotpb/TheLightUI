@@ -10,7 +10,7 @@ struct IncomingSection: View {
     private let menuItems = ["Snapshot", "Statistics"]
 
     var body: some View {
-        Section(header: Text("Incoming").foregroundStyle(themeColor)) {
+        Section {
             ForEach(menuItems, id: \.self) { message in
                 NavigationLink {
                     incomingDestination(for: message)
@@ -18,6 +18,8 @@ struct IncomingSection: View {
                     incomingLabel(message)
                 }
             }
+        } header: {
+            Text("Incoming").foregroundStyle(themeColor)
         }
     }
 
@@ -100,12 +102,14 @@ struct DataSection: View {
     }
 
     var body: some View {
-        Section(header: Text("Data").foregroundStyle(themeColor)) {
+        Section {
             ForEach(items) { item in
                 MenuRouteButton(item: item, tint: themeColor) {
                     onSelect(item.route)
                 }
             }
+        } header: {
+            Text("Data").foregroundStyle(themeColor)
         }
     }
 }
@@ -158,6 +162,12 @@ struct OutgoingSection: View {
                 title: "Instagram",
                 subtitle: "Social feed",
                 systemImage: "camera.circle.fill"
+            ),
+            FullscreenMenuItem(
+                route: .tweet,
+                title: "Twitter",
+                subtitle: "Social feed",
+                systemImage: "camera.circle.fill"
             )
         ])
         #endif
@@ -166,14 +176,15 @@ struct OutgoingSection: View {
     }
 
     var body: some View {
-        Section(header: Text("Outgoing").foregroundStyle(themeColor)) {
+        Section {
             ForEach(items) { item in
                 MenuRouteButton(item: item, tint: themeColor) {
                     onSelectRoute(item.route)
                 }
             }
+        } header: {
+            Text("Outgoing").foregroundStyle(themeColor)
         }
-        .foregroundStyle(.primary)
     }
 }
 

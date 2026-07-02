@@ -6,7 +6,7 @@
 import Foundation
 import Observation
 
-protocol SessionServicing {
+protocol SessionServicing: Sendable {
     var currentUserId: String? { get }
     func signOut() throws
 }

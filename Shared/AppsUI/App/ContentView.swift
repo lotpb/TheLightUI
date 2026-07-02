@@ -75,14 +75,10 @@ struct ContentView: View {
             } else {
                 Text("Requires iOS 18")
             }
+        case .tip:
+            TipUI()
         case .web:
             WebUI()
-        case .twitter:
-            if #available(iOS 18.0, *) {
-                TwitterUI()
-            } else {
-                Text("Requires iOS 18")
-            }
         }
     }
 }
@@ -93,8 +89,8 @@ private enum RootTab: CaseIterable, Identifiable {
     case chat
     case ToDo
     case Expense
+    case tip
     case web
-    case twitter
 
     static var visibleTabs: [RootTab] {
         #if DEBUG
@@ -112,8 +108,8 @@ private enum RootTab: CaseIterable, Identifiable {
         case .chat: return "message.fill"
         case .ToDo: return "wave.3.left"
         case .Expense: return "dollarsign.circle"
+        case .tip: return "percent"
         case .web: return "network"
-        case .twitter: return "brain.head.profile"
         }
     }
 
@@ -123,8 +119,8 @@ private enum RootTab: CaseIterable, Identifiable {
         case .chat: return "Chat"
         case .ToDo: return "To Do"
         case .Expense: return "Expense"
+        case .tip: return "Tip"
         case .web: return "Web"
-        case .twitter: return "Tweet"
         }
     }
 }

@@ -90,6 +90,39 @@ enum ExpenseSortOrder: String, CaseIterable, Identifiable {
     }
 }
 
+enum ExpenseDateRange: String, CaseIterable, Identifiable {
+    case thisMonth = "This Month"
+    case lastMonth = "Last Month"
+    case allTime = "All Time"
+
+    var id: String { rawValue }
+
+    var systemImage: String {
+        switch self {
+        case .thisMonth:
+            "calendar"
+        case .lastMonth:
+            "calendar.badge.clock"
+        case .allTime:
+            "infinity"
+        }
+    }
+
+    func includes(_ date: Date) -> Bool {
+        switch self {
+        case .allTime:
+            return true
+        case .thisMonth:
+            return Calendar.current.isDate(date, equalTo: .now, toGranularity: .month)
+        case .lastMonth:
+            guard let lastMonth = Calendar.current.date(byAdding: .month, value: -1, to: .now) else {
+                return false
+            }
+            return Calendar.current.isDate(date, equalTo: lastMonth, toGranularity: .month)
+        }
+    }
+}
+
 enum ExpenseFilter: String, CaseIterable, Identifiable {
     case all = "All"
     case reimbursable = "Reimbursable"

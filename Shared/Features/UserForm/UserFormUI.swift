@@ -9,61 +9,16 @@ import SwiftUI
 import MapKit
 
 struct UserFormUI: View {
-    // Fallback location used until the user's stored coordinates load.
-    private static let defaultCoordinate = CLLocationCoordinate2D(latitude: 26.465019, longitude: -80.124528)
-
     @Environment(\.openURL) private var openURL
     @State private var viewModel = MainMessagesViewModel()
+    @State private var profile = UserFormProfile()
 
-    @State private var storedLatitude = ""
-    @State private var storedLongitude = ""
-    @State private var storedFirstName = ""
-    @State private var storedLastName = ""
-    @State private var storedPhone = ""
-    @State private var storedEmail = ""
+    // Fallbacks shown until reverse geocoding of the stored coordinate completes.
+    @State private var profileCity = "Delray Beach"
+    @State private var profileState = "Florida"
 
-    // Parse stored latitude/longitude with sensible defaults.
-    private var latitudeValue: Double {
-        Double(storedLatitude.trimmingCharacters(in: .whitespacesAndNewlines)) ?? Self.defaultCoordinate.latitude
-    }
-    private var longitudeValue: Double {
-        Double(storedLongitude.trimmingCharacters(in: .whitespacesAndNewlines)) ?? Self.defaultCoordinate.longitude
-    }
-
-    private var storedCoordinate: CLLocationCoordinate2D {
-        CLLocationCoordinate2D(latitude: latitudeValue, longitude: longitudeValue)
-    }
-
-    private var profileName: String {
-        let fullName = [storedFirstName, storedLastName]
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-            .joined(separator: " ")
-
-        return fullName.isEmpty ? "Peter Balsamo" : fullName
-    }
-
-    private let profileCity = "Delray Beach"
-    private let profileState = "Florida"
-    private let profileRole = "Employee"
-    private let profileDescription = "I am a happy user of TheLight."
-
-    private var trimmedPhone: String {
-        storedPhone.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    private var trimmedEmail: String {
-        storedEmail.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    private func loadSecureSettings() {
-        storedLatitude = SecureSettingsStore.loadString(forKey: SettingsUI.latitudeKey)
-        storedLongitude = SecureSettingsStore.loadString(forKey: SettingsUI.longitudeKey)
-        storedFirstName = SecureSettingsStore.loadString(forKey: SettingsUI.firstNameKey)
-        storedLastName = SecureSettingsStore.loadString(forKey: SettingsUI.lastNameKey)
-        storedPhone = SecureSettingsStore.loadString(forKey: SettingsUI.phoneKey)
-        storedEmail = SecureSettingsStore.loadString(forKey: SettingsUI.emailKey)
-    }
+    private let profileRole = "User"
+    private let profileDescription = "Another happy user of TheLight."
 
     var body: some View {
         ScrollView {
@@ -72,14 +27,28 @@ struct UserFormUI: View {
             profileDetails
         }
         .background(Color(.systemGroupedBackground))
-        .onAppear(perform: loadSecureSettings)
+        .onAppear { profile = UserFormProfile.loadFromSecureSettings() }
         .task { await viewModel.fetchCurrentUser() }
+        // Re-geocode whenever the stored coordinates load or change.
+        .task(id: "\(profile.latitude),\(profile.longitude)") { await updateCityAndState() }
         .navigationTitle("Profile")
         .navigationBarTitleDisplayMode(.inline)
     }
 
+    // Fills the city/state card from the same coordinate the profile map shows,
+    // keeping the fallbacks when geocoding fails (e.g. offline).
+    private func updateCityAndState() async {
+        let place = await ProfilePlaceLookup.cityAndState(for: profile.coordinate)
+        if let city = place.city {
+            profileCity = city
+        }
+        if let state = place.state {
+            profileState = state
+        }
+    }
+
     private var profileMap: some View {
-        ProfileLocationMap(coordinate: storedCoordinate, markerTitle: profileName)
+        ProfileLocationMap(coordinate: profile.coordinate, markerTitle: profile.displayName)
             .ignoresSafeArea(edges: .top)
             .frame(height: 300)
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
@@ -98,7 +67,7 @@ struct UserFormUI: View {
     private var profileDetails: some View {
         VStack(spacing: 16) {
             VStack(spacing: 2) {
-                Text(profileName)
+                Text(profile.displayName)
                     .font(.title2.bold())
                     .multilineTextAlignment(.center)
 
@@ -108,16 +77,16 @@ struct UserFormUI: View {
             }
 
             VStack(spacing: 10) {
-                if !trimmedPhone.isEmpty {
+                if !profile.trimmedPhone.isEmpty {
                     phoneCard
                 }
 
-                if !trimmedEmail.isEmpty {
+                if !profile.trimmedEmail.isEmpty {
                     emailCard
                 }
 
-                contactCard(label: "location", value: "\(profileCity), \(profileState)")
-                contactCard(label: "notes", value: profileDescription)
+                ProfileCardRow(label: "location", value: "\(profileCity), \(profileState)")
+                ProfileCardRow(label: "notes", value: profileDescription)
             }
         }
         .padding(.horizontal)
@@ -127,81 +96,76 @@ struct UserFormUI: View {
 
     // Phone card with a trailing call button, in the style of Contacts.
     private var phoneCard: some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("phone")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-
-                Text(trimmedPhone)
-                    .foregroundStyle(Color.primary)
+        ProfileCardRow(
+            label: "phone",
+            value: profile.trimmedPhone,
+            action: ProfileCardRow.Action(systemImage: "phone.fill", accessibilityLabel: "Call \(profile.displayName)") {
+                openURL.callPhoneNumber(profile.trimmedPhone)
             }
-
-            Spacer()
-
-            Button {
-                openURL.callPhoneNumber(trimmedPhone)
-            } label: {
-                Image(systemName: "phone.fill")
-                    .font(.headline)
-                    .foregroundStyle(.blue)
-                    .frame(width: 34, height: 34)
-                    .background(Color(.tertiarySystemBackground), in: Circle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Call \(profileName)")
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        )
     }
 
     // Email card with a trailing compose button, in the style of Contacts.
     private var emailCard: some View {
+        ProfileCardRow(
+            label: "email",
+            value: profile.trimmedEmail,
+            truncatesValue: true,
+            action: ProfileCardRow.Action(systemImage: "envelope.fill", accessibilityLabel: "Email \(profile.displayName)") {
+                if let url = URL(string: "mailto:\(profile.trimmedEmail)") {
+                    openURL(url)
+                }
+            }
+        )
+    }
+}
+
+// A Contacts-style field card: small secondary label above the value,
+// with an optional trailing action button such as call or compose.
+private struct ProfileCardRow: View {
+    struct Action {
+        let systemImage: String
+        let accessibilityLabel: String
+        let handler: () -> Void
+    }
+
+    let label: String
+    let value: String
+    var truncatesValue = false
+    var action: Action?
+
+    private var valueLineLimit: Int? {
+        truncatesValue ? 1 : nil
+    }
+
+    var body: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("email")
+                Text(label)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
 
-                Text(trimmedEmail)
+                Text(value)
                     .foregroundStyle(Color.primary)
-                    .lineLimit(1)
+                    .lineLimit(valueLineLimit)
                     .truncationMode(.middle)
             }
 
-            Spacer()
+            Spacer(minLength: 0)
 
-            Button {
-                if let url = URL(string: "mailto:\(trimmedEmail)") {
-                    openURL(url)
+            if let action {
+                // Wrapped in a closure: previews reject function values passed directly.
+                Button(action: { action.handler() }) {
+                    Image(systemName: action.systemImage)
+                        .font(.headline)
+                        .foregroundStyle(.blue)
+                        .frame(width: 34, height: 34)
+                        .background(Color(.tertiarySystemBackground), in: Circle())
                 }
-            } label: {
-                Image(systemName: "envelope.fill")
-                    .font(.headline)
-                    .foregroundStyle(.blue)
-                    .frame(width: 34, height: 34)
-                    .background(Color(.tertiarySystemBackground), in: Circle())
+                .buttonStyle(.plain)
+                .accessibilityLabel(action.accessibilityLabel)
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Email \(profileName)")
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-    }
-
-    // A Contacts-style field card: small secondary label above the value.
-    private func contactCard(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(label)
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-
-            Text(value)
-                .foregroundStyle(Color.primary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
