@@ -31,7 +31,7 @@ protocol LoginServicing: Sendable {
     ) async throws
 }
 
-final class FirebaseLoginService: LoginServicing {
+struct FirebaseLoginService: LoginServicing {
     private let manager: FirebaseManager
 
     init(manager: FirebaseManager = .shared) {
@@ -121,9 +121,9 @@ enum LoginServiceError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .missingUserId, .missingCurrentUser:
-            return "Could not find the authenticated user."
+            "Could not find the authenticated user."
         case .missingProfileImageURL:
-            return "Could not create a URL for the selected profile image."
+            "Could not create a URL for the selected profile image."
         }
     }
 }

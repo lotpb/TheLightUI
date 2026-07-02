@@ -31,6 +31,7 @@ enum MainMenuFullscreenRoute: Identifiable {
     case weather
     case stacks
     case instagram
+    case tweet
     case chart
 
     var id: Self { self }
@@ -89,7 +90,11 @@ struct MainMenuCoordinator {
     func dataDestination(_ route: MainMenuDataRoute) -> some View {
         switch route {
         case .leads:
-            WaveUI()
+            CustomerUI(
+                customerService: makeCustomerService(),
+                formService: makeCustomerFormService(),
+                appBadgeManager: appBadgeManager
+            )
         case .customers:
             CustomerUI(
                 customerService: makeCustomerService(),
@@ -97,9 +102,17 @@ struct MainMenuCoordinator {
                 appBadgeManager: appBadgeManager
             )
         case .vendors:
-            SpotifyUI()
+            CustomerUI(
+                customerService: makeCustomerService(),
+                formService: makeCustomerFormService(),
+                appBadgeManager: appBadgeManager
+            )
         case .employee:
-            GlassMorphism()
+            CustomerUI(
+                customerService: makeCustomerService(),
+                formService: makeCustomerFormService(),
+                appBadgeManager: appBadgeManager
+            )
         case .expenses:
             ExpenseTrackerView()
                 .expenseModelContainer()
@@ -128,6 +141,8 @@ struct MainMenuCoordinator {
             StacksView()
         case .instagram:
             InstagramHome()
+        case .tweet:
+            TwitterUI()
         case .chart:
             ChartView()
         }

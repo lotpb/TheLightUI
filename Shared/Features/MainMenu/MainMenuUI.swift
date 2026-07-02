@@ -77,11 +77,10 @@ struct MainMenuUI: View {
         .navigationTitle("Main Menu")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbarContent }
-        .confirmationDialog("Settings", isPresented: $showingLogOut, titleVisibility: .visible) {
+        // Confirmation dialogs get an automatic Cancel button; the title asks
+        // the question directly per the HIG pattern for destructive actions.
+        .confirmationDialog("Are you sure you want to sign out?", isPresented: $showingLogOut, titleVisibility: .visible) {
             Button("Sign Out", role: .destructive) { handleSignOut() }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("What do you want to do?")
         }
         .sheet(item: $activeSheet) { sheet in
             coordinator.sheetContent(sheet)
@@ -94,17 +93,15 @@ struct MainMenuUI: View {
             Button {
                 showingLogOut.toggle()
             } label: {
-                Image(systemName: "gearshape.fill")
+                Label("Sign Out", systemImage: "gearshape")
             }
-            .font(.footnote)
-            .fontWeight(.bold)
         }
 
         ToolbarItem(placement: .topBarTrailing) {
             Menu {
                 actionDialogButtons
             } label: {
-                Label("Action", systemImage: "square.and.arrow.up")
+                Label("More", systemImage: "ellipsis.circle")
             }
         }
     }

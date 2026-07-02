@@ -45,8 +45,11 @@ struct ExpenseTrackerView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    Toggle(isOn: $viewModel.currentMonthOnly) {
-                        Label("This Month", systemImage: "calendar")
+                    Picker("Date Range", selection: $viewModel.dateRange) {
+                        ForEach(ExpenseDateRange.allCases) { range in
+                            Label(range.rawValue, systemImage: range.systemImage)
+                                .tag(range)
+                        }
                     }
                     Picker("Sort By", selection: $viewModel.sortOrder) {
                         ForEach(ExpenseSortOrder.allCases) { order in
@@ -55,7 +58,7 @@ struct ExpenseTrackerView: View {
                         }
                     }
                 } label: {
-                    Image(systemName: viewModel.currentMonthOnly ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+                    Image(systemName: viewModel.dateRange != .allTime ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
                 }
                 .accessibilityLabel("Filter and sort expenses")
             }

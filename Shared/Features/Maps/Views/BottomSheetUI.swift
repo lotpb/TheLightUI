@@ -435,7 +435,7 @@ struct BottomSheetUI: View {
 
                         Spacer()
                     }
-                    .padding(.horizontal, 5)
+                    .padding(.horizontal, 8)
                     .padding(.vertical, 8)
                     .background(
                         RoundedRectangle(cornerRadius: 15, style: .continuous)
@@ -446,9 +446,9 @@ struct BottomSheetUI: View {
                             .stroke(.white.opacity(0.52), lineWidth: 1)
                     }
                 }
-                .padding(.horizontal, 15)
                 .padding(.vertical, 4)
             }
+            .padding(.horizontal)
             Spacer(minLength: 8)
         }
     }

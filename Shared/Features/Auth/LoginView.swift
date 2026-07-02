@@ -238,7 +238,7 @@ struct LoginView: View {
 
                     Text(viewModel.isProcessing ? "Working" : viewModel.primaryActionTitle)
                 }
-                .font(.system(size: 16, weight: .semibold))
+                .font(.headline)
                 .frame(maxWidth: .infinity, minHeight: Layout.buttonHeight)
             }
             .buttonStyle(.borderedProminent)
@@ -248,7 +248,7 @@ struct LoginView: View {
             if viewModel.isLoginMode {
                 Button(action: viewModel.sendPasswordReset) {
                     Label("Reset Password", systemImage: "envelope.badge")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.headline)
                         .frame(maxWidth: .infinity, minHeight: Layout.buttonHeight)
                 }
                 .buttonStyle(.bordered)
@@ -258,7 +258,7 @@ struct LoginView: View {
 
             Button(action: viewModel.loginUsingTouchId) {
                 Label("Sign in with Face ID", systemImage: "faceid")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.headline)
                     .frame(maxWidth: .infinity, minHeight: Layout.buttonHeight)
             }
             .buttonStyle(.bordered)

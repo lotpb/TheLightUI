@@ -8,47 +8,28 @@
 import LocalAuthentication
 
 final class AuthenticationService: Sendable {
-    func authenticateUsingTouchId(completion: @escaping @Sendable (Bool, Error?) -> Void) {
+    func authenticateUsingTouchId() async throws -> Bool {
         let context = LAContext()
         var error: NSError?
-        
+
         guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
-            Task { @MainActor in
-                completion(false, error)
-            }
-            return
+            throw error ?? LAError(.biometryNotAvailable)
         }
-        
-        context.evaluatePolicy(
+
+        return try await context.evaluatePolicy(
             .deviceOwnerAuthenticationWithBiometrics,
             localizedReason: localizedReason(for: context.biometryType)
-        ) { success, error in
-            Task { @MainActor in
-                completion(success, error)
-            }
-        }
+        )
     }
-    
-    func authenticateUsingTouchId() async throws -> Bool {
-        try await withCheckedThrowingContinuation { continuation in
-            authenticateUsingTouchId { success, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: success)
-                }
-            }
-        }
-    }
-    
+
     private func localizedReason(for biometryType: LABiometryType) -> String {
         switch biometryType {
         case .faceID:
-            return "Face ID authentication is required"
+            "Face ID authentication is required"
         case .touchID:
-            return "Touch ID authentication is required"
+            "Touch ID authentication is required"
         default:
-            return "Biometric authentication is required"
+            "Biometric authentication is required"
         }
     }
 }

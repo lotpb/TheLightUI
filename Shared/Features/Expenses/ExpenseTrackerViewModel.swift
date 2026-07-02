@@ -12,7 +12,7 @@ import SwiftData
 final class ExpenseTrackerViewModel {
     var selectedFilter: ExpenseFilter = .all
     var sortOrder: ExpenseSortOrder = .date
-    var currentMonthOnly = false
+    var dateRange: ExpenseDateRange = .thisMonth
     var searchText = ""
     var title = ""
     var amountText = ""
@@ -37,10 +37,7 @@ final class ExpenseTrackerViewModel {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         let filtered = expenses.filter { expense in
             guard selectedFilter.includes(expense) else { return false }
-            if currentMonthOnly,
-               !Calendar.current.isDate(expense.date, equalTo: .now, toGranularity: .month) {
-                return false
-            }
+            guard dateRange.includes(expense.date) else { return false }
             guard !query.isEmpty else { return true }
             return expense.title.localizedCaseInsensitiveContains(query)
                 || expense.category.rawValue.localizedCaseInsensitiveContains(query)
