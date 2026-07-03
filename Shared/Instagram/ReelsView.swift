@@ -257,7 +257,7 @@ private struct ReelCaptionView: View {
         }
     }
 
-    private static let expandedCaptionText = " hktftfluyglgihilighi oyggigpi gggpip pggih."
+    private static let expandedCaptionText = " Shot on location with natural light. Full breakdown and gear list in the comments."
 }
 
 private struct ReelAudioRow: View {

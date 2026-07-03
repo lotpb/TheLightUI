@@ -9,7 +9,7 @@ import SwiftUI
 
 // MARK: - Model
 
-struct FurnitureDetailProduct {
+struct FurnitureDetailProduct: Hashable, Sendable {
     let title: String
     let imageName: String
     let price: String
@@ -28,7 +28,7 @@ extension FurnitureDetailProduct {
         rating: 4.9,
         description: "Luxury Swedish Chair is a contemporary chair based on the virtues of modern craft. It carries on the simplicity and honesty of the archetypal chair.",
         sizes: ["Height: 120 cm", "Wide: 80 cm", "Diameter: 72 cm"],
-        treatment: "Jati Wood, Canvas,\nAmazing Love",
+        treatment: "Jati wood, canvas,\nmatte lacquer finish",
         colors: [.white, .black, Color(red: 0.18, green: 0.64, blue: 0.67)]
     )
 }

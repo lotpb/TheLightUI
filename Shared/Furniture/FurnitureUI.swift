@@ -20,7 +20,7 @@ private enum FurnitureCategory: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
-private struct FurnitureProduct: Identifiable {
+private struct FurnitureProduct: Identifiable, Hashable, Sendable {
     let id: String
     let name: String
     let imageName: String
@@ -55,7 +55,7 @@ private struct FurnitureProduct: Identifiable {
             rating: Double(rating),
             description: description,
             sizes: ["Height: 120 cm", "Wide: 80 cm", "Diameter: 72 cm"],
-            treatment: "Jati Wood, Canvas,\nAmazing Love",
+            treatment: "Jati wood, canvas,\nmatte lacquer finish",
             colors: [.white, .black, Color(red: 0.18, green: 0.64, blue: 0.67)]
         )
     }

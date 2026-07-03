@@ -15,38 +15,44 @@ struct SpotifyUI: View {
     @State private var showSideBar = false
     
     private var filteredRecentlyPlayed: [Song] {
-        filterSongs(recentlyPlayed)
+        filterSongs(MusicLibrary.recentlyPlayed)
     }
     
     private var filteredLikedSongs: [Song] {
-        filterSongs(likedSongs)
+        filterSongs(MusicLibrary.likedSongs)
     }
     
     private var filteredGenres: [String] {
-        guard !searchText.isEmpty else { return generes }
-        return generes.filter { $0.localizedCaseInsensitiveContains(searchText) }
+        guard !searchText.isEmpty else { return MusicLibrary.genres }
+        return MusicLibrary.genres.filter { $0.localizedCaseInsensitiveContains(searchText) }
     }
     
     var body: some View {
-        ZStack(alignment: .leading) {
-            SpotifyBackground()
+        GeometryReader { proxy in
+            ZStack(alignment: .leading) {
+                SpotifyBackground()
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 28) {
-                    topBar
-                    heroHeader
-                    recentlyPlayedSection
-                    genresSection
-                    likedSongsSection
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 28) {
+                        topBar
+                        heroHeader
+                        recentlyPlayedSection
+                        genresSection
+                        likedSongsSection
+                    }
+                    .padding(.leading, showSideBar ? 102 : 62)
+                    .padding(.trailing, 20)
+                    .padding(.vertical, 18)
+                    .frame(maxWidth: .infinity)
                 }
-                .padding(.leading, showSideBar ? 102 : 62)
-                .padding(.trailing, 20)
-                .padding(.vertical, 18)
-                .frame(maxWidth: .infinity)
-            }
-            .scrollIndicators(.hidden)
+                .scrollIndicators(.hidden)
 
-            SideTabViewUI(showSideBar: $showSideBar, viewModel: viewModel)
+                SideTabViewUI(
+                    showSideBar: $showSideBar,
+                    viewModel: viewModel,
+                    bottomSafeAreaInset: proxy.safeAreaInsets.bottom
+                )
+            }
         }
         .animation(.snappy(duration: 0.35), value: showSideBar)
         .task { await viewModel.fetchCurrentUser() }
@@ -171,8 +177,8 @@ struct SpotifyUI: View {
     private func filterSongs(_ songs: [Song]) -> [Song] {
         guard !searchText.isEmpty else { return songs }
         return songs.filter {
-            $0.album_name.localizedCaseInsensitiveContains(searchText) ||
-            $0.album_author.localizedCaseInsensitiveContains(searchText)
+            $0.albumName.localizedCaseInsensitiveContains(searchText) ||
+            $0.albumAuthor.localizedCaseInsensitiveContains(searchText)
         }
     }
 }
@@ -243,7 +249,7 @@ private struct FeaturedSongCard: View {
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
-            Image(song.album_cover)
+            Image(song.albumCover)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -265,14 +271,15 @@ private struct FeaturedSongCard: View {
                         .background(SpotifyStyle.accent, in: Circle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Play \(song.albumName)")
 
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(song.album_name)
+                    Text(song.albumName)
                         .font(.system(.title2, design: .rounded, weight: .bold))
                         .foregroundStyle(.white)
                         .lineLimit(1)
 
-                    Text(song.album_author)
+                    Text(song.albumAuthor)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.white.opacity(0.72))
                         .lineLimit(1)
@@ -308,19 +315,19 @@ private struct LikedSongRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(song.album_cover)
+            Image(song.albumCover)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(width: 58, height: 58)
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(song.album_name)
+                Text(song.albumName)
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(.white)
                     .lineLimit(1)
 
-                Text(song.album_author)
+                Text(song.albumAuthor)
                     .font(.footnote)
                     .foregroundStyle(.white.opacity(0.56))
                     .lineLimit(1)
@@ -330,6 +337,7 @@ private struct LikedSongRow: View {
 
             Image(systemName: "heart.fill")
                 .foregroundStyle(SpotifyStyle.accent)
+                .accessibilityLabel("Liked")
         }
         .padding(12)
         .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 22, style: .continuous))

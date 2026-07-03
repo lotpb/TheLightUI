@@ -55,6 +55,6 @@ final class FirebaseCustomerService: CustomerServicing, @unchecked Sendable {
     func deleteCustomer(id: String) async throws {
         try await firestore.collection(CustomerFirestoreSchema.collection)
             .document(id)
-            .deleteAsync()
+            .delete()
     }
 }

@@ -1,5 +1,5 @@
 //
-//  BlurView123.swift
+//  BlurViewUI.swift
 //  TheLight2
 //
 //  Created by Peter Balsamo on 5/25/21.
@@ -7,20 +7,16 @@
 //
 
 import SwiftUI
-///LoginView, MapUI, BottomActionSheet, TwitterUI
-struct BlurViewUI: UIViewRepresentable {
 
+/// UIKit blur bridge for styles SwiftUI materials don't cover (e.g. systemChromeMaterialDark).
+struct BlurViewUI: UIViewRepresentable {
     var style: UIBlurEffect.Style
 
     func makeUIView(context: Context) -> UIVisualEffectView {
-
-        let view = UIVisualEffectView(effect: UIBlurEffect(style: style))
-
-        return view
+        UIVisualEffectView(effect: UIBlurEffect(style: style))
     }
 
     func updateUIView(_ uiView: UIVisualEffectView, context: Context) {
-
+        uiView.effect = UIBlurEffect(style: style)
     }
-
 }

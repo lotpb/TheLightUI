@@ -68,7 +68,7 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
         let snapshot = try await manager.firestore
             .collection(FirebaseConstants.users)
             .document(uid)
-            .getDocumentAsync(missingSnapshotError: ChatRepositoryError.userNotFound)
+            .getDocument()
 
         let user = try snapshot.data(as: UserModel.self)
 
@@ -79,7 +79,7 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
     func fetchAvailableUsers() async throws -> [UserModel] {
         let snapshot = try await manager.firestore
             .collection(FirebaseConstants.users)
-            .getDocumentsAsync(missingSnapshotError: ChatRepositoryError.emptySnapshot)
+            .getDocuments()
 
         return snapshot.documents.compactMap { snapshot -> UserModel? in
             guard let user = try? snapshot.data(as: UserModel.self), user.uid != currentUserId else {
@@ -164,10 +164,8 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
         let metadata = StorageMetadata()
         metadata.contentType = "image/jpeg"
 
-        try await storageRef.uploadDataAsync(imageData, metadata: metadata)
-        let imageURL = try await storageRef.downloadURLAsync(
-            missingURLError: ChatRepositoryError.missingImageURL
-        ).absoluteString
+        try await storageRef.putDataAsync(imageData, metadata: metadata)
+        let imageURL = try await storageRef.downloadURL().absoluteString
 
         try await sendMessage(
             text: imageURL,
@@ -243,7 +241,7 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
         batch.setData(senderRecentData, forDocument: senderRecentDocument)
         batch.setData(recipientRecentData, forDocument: recipientRecentDocument)
 
-        try await batch.commitAsync()
+        try await batch.commit()
     }
 
     private func cachedCurrentUser() async throws -> UserModel {
@@ -276,20 +274,11 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
 
 enum ChatRepositoryError: LocalizedError {
     case missingCurrentUser
-    case userNotFound
-    case missingImageURL
-    case emptySnapshot
 
     var errorDescription: String? {
         switch self {
         case .missingCurrentUser:
             return "Could not find the current user."
-        case .userNotFound:
-            return "Could not load the current user profile."
-        case .missingImageURL:
-            return "Could not create a download URL for the selected image."
-        case .emptySnapshot:
-            return "Firestore returned an empty snapshot."
         }
     }
 }

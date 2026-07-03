@@ -6,29 +6,30 @@
 //  Copyright © 2021 Peter Balsamo. All rights reserved.
 //
 
-import SwiftUI
+import Foundation
 
-struct Song: Identifiable {
-    let id = UUID().uuidString
-    let album_name: String
-    let album_author: String
-    let album_cover: String
+struct Song: Identifiable, Hashable, Sendable {
+    let id = UUID()
+    let albumName: String
+    let albumAuthor: String
+    let albumCover: String
 }
 
-let recentlyPlayed = [
-    
-    Song(album_name: "Bad Blood", album_author: "Taylor Swift", album_cover: "taylor_swift_profile"),
-    Song(album_name: "Believer", album_author: "Kurt Hugo Schneider", album_cover: "taylor_swift_profile"),
-    Song(album_name: "Let Me Love You", album_author: "DJ Snake", album_cover: "taylor_swift_profile"),
-    Song(album_name: "Shape Of You", album_author: "Ed Sherran", album_cover: "taylor_swift_profile"),
-]
+// Static sample content backing the Spotify demo screen.
+enum MusicLibrary {
+    static let recentlyPlayed: [Song] = [
+        Song(albumName: "Bad Blood", albumAuthor: "Taylor Swift", albumCover: "taylor_swift_profile"),
+        Song(albumName: "Believer", albumAuthor: "Kurt Hugo Schneider", albumCover: "taylor_swift_profile"),
+        Song(albumName: "Let Me Love You", albumAuthor: "DJ Snake", albumCover: "taylor_swift_profile"),
+        Song(albumName: "Shape Of You", albumAuthor: "Ed Sheeran", albumCover: "taylor_swift_profile"),
+    ]
 
-let likedSongs = [
-    
-    Song(album_name: "Bad Blood", album_author: "Taylor Swift", album_cover: "taylor_swift_profile"),
-    Song(album_name: "Believer", album_author: "Kurt Hugo Schneider", album_cover: "taylor_swift_profile"),
-    Song(album_name: "Let Me Love You", album_author: "DJ Snake", album_cover: "taylor_swift_profile"),
-    Song(album_name: "Shape Of You", album_author: "Ed Sherran", album_cover: "taylor_swift_profile"),
-]
+    static let likedSongs: [Song] = [
+        Song(albumName: "Bad Blood", albumAuthor: "Taylor Swift", albumCover: "taylor_swift_profile"),
+        Song(albumName: "Believer", albumAuthor: "Kurt Hugo Schneider", albumCover: "taylor_swift_profile"),
+        Song(albumName: "Let Me Love You", albumAuthor: "DJ Snake", albumCover: "taylor_swift_profile"),
+        Song(albumName: "Shape Of You", albumAuthor: "Ed Sheeran", albumCover: "taylor_swift_profile"),
+    ]
 
-let generes = ["Classic", "Hip-Hop", "Electronic", "Chilout", "Dark", "Calm", "Ambient", "Dance"]
+    static let genres = ["Classic", "Hip-Hop", "Electronic", "Chillout", "Dark", "Calm", "Ambient", "Dance"]
+}

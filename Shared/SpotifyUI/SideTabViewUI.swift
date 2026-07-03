@@ -8,14 +8,35 @@
 
 import SwiftUI
 
+enum SideTab: CaseIterable {
+    case home, browse, voice, recents
+
+    var icon: String {
+        switch self {
+        case .home: "house.fill"
+        case .browse: "safari.fill"
+        case .voice: "mic.fill"
+        case .recents: "clock.fill"
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .home: "Home"
+        case .browse: "Browse"
+        case .voice: "Voice"
+        case .recents: "Recents"
+        }
+    }
+}
+
 struct SideTabViewUI: View {
     @Binding var showSideBar: Bool
     let viewModel: MainMessagesViewModel
-    @State private var selectedTab = "house.fill"
-    @State private var volume: CGFloat = 0.4
-    
-    private let tabs = ["house.fill", "safari.fill", "mic.fill", "clock.fill"]
-    
+    var bottomSafeAreaInset: CGFloat = 0
+    @State private var selectedTab: SideTab = .home
+    @State private var volume = 0.4
+
     var body: some View {
         Group {
             if showSideBar {
@@ -40,8 +61,8 @@ struct SideTabViewUI: View {
                 .padding(.top, 16)
             
             VStack(spacing: 10) {
-                ForEach(tabs, id: \.self) { tab in
-                    TabButtonUI(image: tab, selectedTab: $selectedTab) {
+                ForEach(SideTab.allCases, id: \.self) { tab in
+                    TabButtonUI(tab: tab, selectedTab: $selectedTab) {
                         showSideBar = false
                     }
                 }
@@ -52,7 +73,7 @@ struct SideTabViewUI: View {
             
             volumeControls
             toggleButton
-                .padding(.bottom, getSafeAreaUI().bottom == 0 ? 16 : 4)
+                .padding(.bottom, bottomPadding)
         }
         .frame(width: 82)
         .background(.black.opacity(0.26))
@@ -69,9 +90,14 @@ struct SideTabViewUI: View {
             Spacer()
 
             toggleButton
-                .padding(.bottom, getSafeAreaUI().bottom == 0 ? 16 : 4)
+                .padding(.bottom, bottomPadding)
         }
         .frame(width: 42)
+    }
+
+    // Lift the toggle off the screen edge on devices without a bottom safe area.
+    private var bottomPadding: CGFloat {
+        bottomSafeAreaInset == 0 ? 16 : 4
     }
 
     private var volumeControls: some View {
@@ -100,6 +126,9 @@ struct SideTabViewUI: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }
             .frame(height: 96)
+            .accessibilityElement()
+            .accessibilityLabel("Volume")
+            .accessibilityValue(volume.formatted(.percent.precision(.fractionLength(0))))
             
             Button {
                 adjustVolume(by: -0.1)
@@ -126,7 +155,7 @@ struct SideTabViewUI: View {
         .accessibilityLabel(showSideBar ? "Hide sidebar" : "Show sidebar")
     }
     
-    private func adjustVolume(by amount: CGFloat) {
+    private func adjustVolume(by amount: Double) {
         volume = min(max(volume + amount, 0), 1)
     }
 }
@@ -146,26 +175,27 @@ private struct SideTabPreviewContainer: View {
 }
 
 struct TabButtonUI: View {
-    let image: String
-    @Binding var selectedTab: String
+    let tab: SideTab
+    @Binding var selectedTab: SideTab
     let onSelect: () -> Void
     
-    private var isSelected: Bool { selectedTab == image }
+    private var isSelected: Bool { selectedTab == tab }
 
     var body: some View {
         Button {
             withAnimation(.snappy(duration: 0.25)) {
-                selectedTab = image
+                selectedTab = tab
                 onSelect()
             }
         } label: {
-            Image(systemName: image)
+            Image(systemName: tab.icon)
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(isSelected ? .black : .white.opacity(0.58))
                 .frame(width: 48, height: 48)
                 .background(isSelected ? SpotifyStyle.accent : .clear, in: Circle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(image)
+        .accessibilityLabel(tab.title)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

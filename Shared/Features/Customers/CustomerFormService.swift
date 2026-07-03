@@ -26,27 +26,14 @@ final class FirebaseCustomerFormService: CustomerFormServicing {
     func addCustomer(_ payload: CustomerFormPayload) async throws -> String {
         try await manager.firestore
             .collection(CustomerFirestoreSchema.collection)
-            .addDocumentAsync(
-                data: payload.firestoreData,
-                missingDocumentIdError: CustomerFormServiceError.missingDocumentId
-            )
+            .addDocument(data: payload.firestoreData)
+            .documentID
     }
 
     func updateCustomer(id: String, payload: CustomerFormPayload) async throws {
         try await manager.firestore
             .collection(CustomerFirestoreSchema.collection)
             .document(id)
-            .setDataAsync(payload.firestoreData)
-    }
-}
-
-enum CustomerFormServiceError: LocalizedError {
-    case missingDocumentId
-
-    var errorDescription: String? {
-        switch self {
-        case .missingDocumentId:
-            return "Could not read the new customer document ID."
-        }
+            .setData(payload.firestoreData)
     }
 }

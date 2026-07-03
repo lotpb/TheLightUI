@@ -15,14 +15,9 @@ struct Loader: View {
     var body: some View {
         Group {
             if isAnimating {
-                if let tint {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .tint(tint)
-                } else {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                }
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .tint(tint)
             }
         }
         .scaleEffect(scale)

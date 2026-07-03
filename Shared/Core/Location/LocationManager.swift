@@ -36,22 +36,6 @@ final class LocationManager: NSObject {
         configureLocationManager()
     }
 
-    func requestLocateInfo() {
-        requestLocation()
-    }
-
-
-    var statusString: String {
-        switch locationStatus {
-        case .notDetermined: return "notDetermined"
-        case .authorizedWhenInUse: return "authorizedWhenInUse"
-        case .authorizedAlways: return "authorizedAlways"
-        case .restricted: return "restricted"
-        case .denied: return "denied"
-        @unknown default: return "unknown"
-        }
-    }
-
     func reverseGeocode(location: CLLocation?) {
         guard let location else { return }
         geocoder.cancelGeocode()
@@ -115,11 +99,6 @@ final class LocationManager: NSObject {
         isFollowingLocation = true
         focusLocation()
         startUpdating()
-    }
-
-    /// Permanently stop following until explicitly resumed.
-    func stopFollowingLocation() {
-        pauseFollowingLocation()
     }
 
     private func configureLocationManager() {

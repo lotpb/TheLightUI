@@ -5,26 +5,9 @@
 //  Created by Peter Balsamo on 5/25/21.
 //
 
-// Utility helpers for UI metrics, app metadata, phone calls, and device model resolution.
+// Utility helpers for app metadata, phone calls, and device model resolution.
 
 import SwiftUI
-
-extension View {
-    // Returns the safe area insets of the first key window, or .zero if unavailable.
-    func getSafeAreaUI() -> UIEdgeInsets {
-        UIApplication.shared.firstKeyWindow?.safeAreaInsets ?? .zero
-    }
-}
-
-extension UIApplication {
-    // Attempts to find the app's first key window across connected scenes (supports multi-scene).
-    var firstKeyWindow: UIWindow? {
-        connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap(\.windows)
-            .first { $0.isKeyWindow } // the window currently receiving keyboard and non-touch events
-    }
-}
 
 extension OpenURLAction {
     /// Attempts to initiate a phone call by converting a raw string into a tel:// URL and opening it.

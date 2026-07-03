@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct IGStory: Identifiable {
+struct IGStory: Identifiable, Hashable, Sendable {
     let id = UUID()
     let handle: String
     let imageName: String
@@ -27,7 +27,7 @@ struct IGStory: Identifiable {
     ]
 }
 
-struct IGFeedPost: Identifiable {
+struct IGFeedPost: Identifiable, Hashable, Sendable {
     let id = UUID()
     let author: String
     let location: String
@@ -72,7 +72,7 @@ struct IGFeedPost: Identifiable {
     ]
 }
 
-struct IGSuggestion: Identifiable {
+struct IGSuggestion: Identifiable, Hashable, Sendable {
     let id = UUID()
     let title: String
     let imageName: String
@@ -90,7 +90,7 @@ struct IGSuggestion: Identifiable {
     ]
 }
 
-struct IGActivity: Identifiable {
+struct IGActivity: Identifiable, Hashable, Sendable {
     let id = UUID()
     let title: String
     let subtitle: String

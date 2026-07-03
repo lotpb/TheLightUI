@@ -61,7 +61,7 @@ struct InstagramActivityView: View {
     var body: some View {
         List(activities) { activity in
             HStack(spacing: 12) {
-                Image(activity.systemImage)
+                Image(systemName: activity.systemImage)
                     .font(.headline)
                     .foregroundStyle(activity.color)
                     .frame(width: 34, height: 34)

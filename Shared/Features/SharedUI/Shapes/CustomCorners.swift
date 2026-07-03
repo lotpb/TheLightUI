@@ -11,11 +11,19 @@ struct CustomCorners: Shape {
     }
 
     func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(
+        Path(
             roundedRect: rect,
-            byRoundingCorners: corners,
-            cornerRadii: CGSize(width: radius, height: radius)
+            cornerRadii: RectangleCornerRadii(
+                topLeading: radius(for: .topLeft),
+                bottomLeading: radius(for: .bottomLeft),
+                bottomTrailing: radius(for: .bottomRight),
+                topTrailing: radius(for: .topRight)
+            ),
+            style: .continuous
         )
-        return Path(path.cgPath)
+    }
+
+    private func radius(for corner: UIRectCorner) -> CGFloat {
+        corners.contains(corner) ? radius : 0
     }
 }

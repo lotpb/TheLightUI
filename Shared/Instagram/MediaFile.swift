@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct MediaFile: Identifiable {
+struct MediaFile: Identifiable, Hashable, Sendable {
     let id: String
     let url: String
     let title: String

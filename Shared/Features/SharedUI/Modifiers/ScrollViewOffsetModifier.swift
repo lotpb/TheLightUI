@@ -52,9 +52,6 @@ enum ScrollOffsetAnchor: CaseIterable, Sendable {
         case .trailing: return frame.maxX
         }
     }
-
-    @available(*, deprecated, renamed: "top")
-    static var Top: ScrollOffsetAnchor { .top }
 }
 
 // MARK: - Convenience API

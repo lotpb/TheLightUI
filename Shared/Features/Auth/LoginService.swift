@@ -3,6 +3,9 @@
 //  TheLightUI
 //
 
+import FirebaseAuth
+import FirebaseFirestore
+import FirebaseStorage
 import Foundation
 
 struct LoginUserSettings {
@@ -43,23 +46,15 @@ struct FirebaseLoginService: LoginServicing {
     }
 
     func signIn(email: String, password: String) async throws -> String {
-        try await manager.auth.signInUserIdAsync(
-            email: email,
-            password: password,
-            missingUserIdError: LoginServiceError.missingUserId
-        )
+        try await manager.auth.signIn(withEmail: email, password: password).user.uid
     }
 
     func createUser(email: String, password: String) async throws -> String {
-        try await manager.auth.createUserIdAsync(
-            email: email,
-            password: password,
-            missingUserIdError: LoginServiceError.missingUserId
-        )
+        try await manager.auth.createUser(withEmail: email, password: password).user.uid
     }
 
     func sendPasswordReset(email: String) async throws {
-        try await manager.auth.sendPasswordResetAsync(email: email)
+        try await manager.auth.sendPasswordReset(withEmail: email)
     }
 
     func sendEmailVerification() async throws {
@@ -67,14 +62,14 @@ struct FirebaseLoginService: LoginServicing {
             throw LoginServiceError.missingCurrentUser
         }
 
-        try await user.sendEmailVerificationAsync()
+        try await user.sendEmailVerification()
     }
 
     func fetchUserSettings(userId: String) async throws -> LoginUserSettings {
         let snapshot = try await manager.firestore
             .collection(FirebaseConstants.users)
             .document(userId)
-            .getDocumentAsync()
+            .getDocument()
 
         return LoginUserSettings(
             firstName: snapshot.get(FirebaseConstants.firstName) as? String ?? "",
@@ -86,8 +81,8 @@ struct FirebaseLoginService: LoginServicing {
 
     func uploadProfileImage(_ imageData: Data, userId: String) async throws -> URL {
         let ref = manager.storage.reference(withPath: userId)
-        try await ref.uploadDataAsync(imageData)
-        return try await ref.downloadURLAsync(missingURLError: LoginServiceError.missingProfileImageURL)
+        try await ref.putDataAsync(imageData)
+        return try await ref.downloadURL()
     }
 
     func storeUserInformation(
@@ -109,21 +104,17 @@ struct FirebaseLoginService: LoginServicing {
 
         try await manager.firestore.collection(FirebaseConstants.users)
             .document(userId)
-            .setDataAsync(userData)
+            .setData(userData)
     }
 }
 
 enum LoginServiceError: LocalizedError {
-    case missingUserId
     case missingCurrentUser
-    case missingProfileImageURL
 
     var errorDescription: String? {
         switch self {
-        case .missingUserId, .missingCurrentUser:
+        case .missingCurrentUser:
             "Could not find the authenticated user."
-        case .missingProfileImageURL:
-            "Could not create a URL for the selected profile image."
         }
     }
 }
