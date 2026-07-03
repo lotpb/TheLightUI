@@ -12,18 +12,18 @@ struct LandMarkCategoryView: View {
     private static let categories = [
         "Groceries",
         "Restaurants",
-        "Hotels",
-        "Coffee",
         "Gas",
+        "Parks",
+        "Coffee",
         "Takeout",
         "Pharmacies",
         "Burger",
         "ATM",
         "Ice Cream",
         "Auto Repair",
+        "Lodging",
         "EV Charging",
-        "Hardware",
-        "Parks"
+        "Hardware"
     ]
     
     let onSelectedCategory: (String) -> Void

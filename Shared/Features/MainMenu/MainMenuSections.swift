@@ -27,9 +27,9 @@ struct IncomingSection: View {
     private func incomingDestination(for message: String) -> some View {
         switch message {
         case "Statistics":
-            SpotifyUI()
+            iMacUI()
         default:
-            GradientTextUI()
+            MacbookPro()
         }
     }
 

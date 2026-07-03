@@ -164,7 +164,7 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
         let metadata = StorageMetadata()
         metadata.contentType = "image/jpeg"
 
-        try await storageRef.putDataAsync(imageData, metadata: metadata)
+        _ = try await storageRef.putDataAsync(imageData, metadata: metadata)
         let imageURL = try await storageRef.downloadURL().absoluteString
 
         try await sendMessage(

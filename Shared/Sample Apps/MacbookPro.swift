@@ -11,19 +11,18 @@ struct MacbookPro: View {
     var body: some View {
         ZStack {
             MacBookScreen()
-                .frame(width: 1265, height: 695)
+                .frame(width: 350, height: 250) //1265-695
 
             MacBookBase()
-                .frame(width: 1200, height: 1000)
+                .frame(width: 300, height: 250) //1200-1000
         }
     }
 }
 
-struct MacbookPro_Previews: PreviewProvider {
-    static var previews: some View {
-        MacbookPro()
-            .previewLayout(.fixed(width: 1500, height: 1000))
-    }
+#Preview("MacbookPro") {
+    MacbookPro()
+        //.previewLayout(.fixed(width: 300, height: 250))
+        .preferredColorScheme(.dark)
 }
 
 private struct MacBookScreen: View {
@@ -38,7 +37,7 @@ private struct MacBookScreen: View {
                 Image("macOS")
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                    .frame(width: 1200, height: 590)
+                    .frame(width: 200, height: 100) //1200-590
                     .clipped()
                     .padding(.top, 40)
                     .padding(.bottom, 15)
@@ -48,7 +47,7 @@ private struct MacBookScreen: View {
                     .overlay(
                         Text("MacBook Pro")
                             .foregroundStyle(.white)
-                            .offset(y: -11)
+                            .offset(y: -11) //-11
                     )
             }
 
@@ -100,7 +99,7 @@ private struct MacBookBase: View {
         }
         .scaleEffect(1.7)
         .overlay(trackpad.offset(y: -13))
-        .offset(y: 340)
+        .offset(y: 120)
     }
 
     private var hinge: some View {

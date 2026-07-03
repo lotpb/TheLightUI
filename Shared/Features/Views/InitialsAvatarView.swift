@@ -16,20 +16,25 @@ public struct InitialsAvatarView: View {
     }
 
     public var body: some View {
-        let backgroundColor = Color(UIColor.secondarySystemFill)
         ZStack {
             Circle()
-                .fill(backgroundColor)
-                .frame(width: size, height: size)
-                .aspectRatio(1, contentMode: .fit)
+                .fill(
+                    LinearGradient(
+                        colors: [Color(UIColor.systemGray2), Color(UIColor.systemGray)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
             Text(initials)
-                .bold()
-                .foregroundColor(.primary)
-                .accessibilityLabel("Profile image")
-                .accessibilityValue(initials)
-                .accessibilityAddTraits(.isImage)
+                .font(.system(size: size * 0.42, weight: .medium, design: .rounded))
+                .foregroundStyle(.white)
+                .minimumScaleFactor(0.5)
         }
-        .accessibilityElement(children: .combine)
+        .frame(width: size, height: size)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Profile image")
+        .accessibilityValue(initials)
+        .accessibilityAddTraits(.isImage)
     }
 
     public init(firstName: String, lastName: String, size: CGFloat) {
@@ -39,7 +44,7 @@ public struct InitialsAvatarView: View {
     }
 }
 
-#Preview {
+#Preview(traits: .sizeThatFitsLayout) {
     VStack(spacing: 20) {
         InitialsAvatarView(firstName: "Alice", lastName: "Smith", size: 64)
         InitialsAvatarView(firstName: "Bob", lastName: "", size: 48)
@@ -47,5 +52,4 @@ public struct InitialsAvatarView: View {
         InitialsAvatarView(firstName: "", lastName: "", size: 50)
     }
     .padding()
-    .previewLayout(.sizeThatFits)
 }

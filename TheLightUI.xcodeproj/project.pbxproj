@@ -24,8 +24,7 @@
 		AF15AA2D275C5B2C0098CB04 /* ChatBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF15AA2C275C5B2C0098CB04 /* ChatBubble.swift */; };
 		AF15AA2E275C5B2C0098CB04 /* ChatBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF15AA2C275C5B2C0098CB04 /* ChatBubble.swift */; };
 		AF1B37AB27935EAB00374C0F /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1B37AA27935EAB00374C0F /* NotificationManager.swift */; };
-		AF2F67472FF7F50000741D30 /* UserFormProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F67462FF7F50000741D30 /* UserFormProfile.swift */; };
-		AF2F67482FF7F50000741D30 /* UserFormProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F67462FF7F50000741D30 /* UserFormProfile.swift */; };
+		AF2F67402FF7F20400741D30 /* LaunchScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F67362FF7F20400741D30 /* LaunchScreenView.swift */; };
 		AF2F674A2FF7F6CD00741D30 /* UserFormModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F67492FF7F6CD00741D30 /* UserFormModel.swift */; };
 		AF2F674B2FF7F6CD00741D30 /* UserFormModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F67492FF7F6CD00741D30 /* UserFormModel.swift */; };
 		AF2F674D2FF80DAA00741D30 /* InitialsAvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F674C2FF80DAA00741D30 /* InitialsAvatarView.swift */; };
@@ -251,7 +250,7 @@
 		AF108C0C2762681200084752 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		AF15AA2C275C5B2C0098CB04 /* ChatBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBubble.swift; sourceTree = "<group>"; };
 		AF1B37AA27935EAB00374C0F /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
-		AF2F67462FF7F50000741D30 /* UserFormProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserFormProfile.swift; sourceTree = "<group>"; };
+		AF2F67362FF7F20400741D30 /* LaunchScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreenView.swift; sourceTree = "<group>"; };
 		AF2F67492FF7F6CD00741D30 /* UserFormModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserFormModel.swift; sourceTree = "<group>"; };
 		AF2F674C2FF80DAA00741D30 /* InitialsAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialsAvatarView.swift; sourceTree = "<group>"; };
 		AF348489274568BE0091BA5A /* FirebaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseManager.swift; sourceTree = "<group>"; };
@@ -388,8 +387,6 @@
 		AF997FB92FE3309800797FD5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				CarouselSliderUI.swift,
-				SplashScreen/SplashView.swift,
 				WaveUI.swift,
 			);
 			target = AF92B866267812A300729208 /* TheLightUI (macOS) */;
@@ -455,6 +452,7 @@
 			children = (
 				AF92B85A267812A100729208 /* TheLightUIApp.swift */,
 				AF54E4DA2773AD4F0062B1F4 /* ContentView.swift */,
+				AF2F67362FF7F20400741D30 /* LaunchScreenView.swift */,
 				AFE4AE0B2FC8698F00F86B2E /* AppDependencies.swift */,
 			);
 			path = App;
@@ -486,6 +484,10 @@
 		AF4F5DCF2FC746890003B277 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				AF4F5DD32FC746910003B277 /* MainMenu */,
+				AF4F5DE12FC7506F0003B277 /* Customers */,
+				AF4F5DDA2FC74EAB0003B277 /* Auth */,
+				AF4F5DD02FC7468A0003B277 /* Chat */,
 				AFD5D8842FF4552F008934BE /* SharedUI */,
 				AFD5D86A2FF4538C008934BE /* UserForm */,
 				AFD5D8672FF450FE008934BE /* Directions */,
@@ -495,11 +497,7 @@
 				AFD5D85B2FF450BD008934BE /* Stacks */,
 				AFD5D86E2FF453C9008934BE /* Twitter */,
 				AFD5D8612FF450DA008934BE /* Web */,
-				AF4F5DDA2FC74EAB0003B277 /* Auth */,
-				AF4F5DD32FC746910003B277 /* MainMenu */,
-				AF4F5DE12FC7506F0003B277 /* Customers */,
 				AF4F5DF42FC75C080003B277 /* Views */,
-				AF4F5DD02FC7468A0003B277 /* Chat */,
 				AF4F5E012FC75D540003B277 /* Maps */,
 				AFDF37BD2FCA04FC007A8C8F /* Places */,
 				AFDF37BC2FCA04FB007A8C8F /* Weather */,
@@ -665,7 +663,6 @@
 				AF92B859267812A100729208 /* Shared */,
 				AF92B862267812A300729208 /* Products */,
 				AF488F8A2FE0358700E5F294 /* PrivacyInfo.xcprivacy */,
-				AF2F67462FF7F50000741D30 /* UserFormProfile.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1060,6 +1057,7 @@
 				AF15AA2D275C5B2C0098CB04 /* ChatBubble.swift in Sources */,
 				AFA9531D2FDF33150003ADD1 /* LocationCaptureManager.swift in Sources */,
 				AF9CC6F5279B2C6B0087E9FC /* ListViewModel.swift in Sources */,
+				AF2F67402FF7F20400741D30 /* LaunchScreenView.swift in Sources */,
 				AF5CF3E5277B42150044B06E /* FurnitureDetail.swift in Sources */,
 				AFE2C80C2FE08CA80086C5C8 /* SwiftUIRouteMapView.swift in Sources */,
 				AF4F5E082FC75D870003B277 /* MapButtonView.swift in Sources */,
@@ -1091,7 +1089,6 @@
 				AF2F674A2FF7F6CD00741D30 /* UserFormModel.swift in Sources */,
 				AFB7609F2FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */,
 				AFC519532FC89A98003A4AEA /* MessageDateFormatting.swift in Sources */,
-				AF2F67482FF7F50000741D30 /* UserFormProfile.swift in Sources */,
 				AF53738C2778C643001F40B6 /* LoadingView.swift in Sources */,
 				AF77D64D2FC79827008D456A /* ProfileAvatarImage.swift in Sources */,
 				AF488F882FE0300200E5F294 /* ExpenseModelContainerModifier.swift in Sources */,
@@ -1237,7 +1234,6 @@
 				AFD5D8AA2FF458B7008934BE /* InstagramFeedViews.swift in Sources */,
 				AF488F802FE02FAF00E5F294 /* ExpenseModels.swift in Sources */,
 				AF92B87D267812A400729208 /* TheLightUIApp.swift in Sources */,
-				AF2F67472FF7F50000741D30 /* UserFormProfile.swift in Sources */,
 				AF3AC45A268FF39500562D20 /* InstagramHome.swift in Sources */,
 				AFB760A02FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */,
 				AF2F674B2FF7F6CD00741D30 /* UserFormModel.swift in Sources */,
