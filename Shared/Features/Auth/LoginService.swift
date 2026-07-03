@@ -81,7 +81,7 @@ struct FirebaseLoginService: LoginServicing {
 
     func uploadProfileImage(_ imageData: Data, userId: String) async throws -> URL {
         let ref = manager.storage.reference(withPath: userId)
-        try await ref.putDataAsync(imageData)
+        _ = try await ref.putDataAsync(imageData)
         return try await ref.downloadURL()
     }
 
@@ -118,3 +118,4 @@ enum LoginServiceError: LocalizedError {
         }
     }
 }
+

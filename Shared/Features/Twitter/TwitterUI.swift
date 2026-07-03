@@ -25,6 +25,7 @@ struct TwitterUI: View {
     private let tabs = ["Tweets", "Tweets & Likes", "Media", "Likes"]
 
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dismiss) private var dismiss
     @AppStorage(SettingsUI.isCompanyNameKey) private var companyName = "Main Menu"
     @State private var viewModel = MainMessagesViewModel()
     @State private var offset: CGFloat = 0
@@ -33,31 +34,45 @@ struct TwitterUI: View {
     @Namespace private var animation
 
     var body: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 15) {
-                headerView
+        NavigationStack {
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 15) {
+                    headerView
 
-                VStack {
-                    profileHeader
-                    profileDetails
-                    tabBar
-                    tweetFeed
+                    VStack {
+                        profileHeader
+                        profileDetails
+                        tabBar
+                        tweetFeed
+                    }
+                    .padding(.horizontal)
+                    .zIndex(-offset > Layout.collapsedHeaderOffset ? 0 : 1)
                 }
-                .padding(.horizontal)
-                .zIndex(-offset > Layout.collapsedHeaderOffset ? 0 : 1)
+                .background(surfaceColor)
             }
-            .background(surfaceColor)
+            .frame(maxWidth: Layout.maxContentWidth)
+            .background(alignment: .top) {
+                headerGradient
+                    .frame(height: Layout.headerHeight + Layout.navigationBleedHeight)
+                    .ignoresSafeArea(edges: .top)
+            }
+            .toolbar { toolbarContent }
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .ignoresSafeArea(.all, edges: .top)
+            .task { await viewModel.fetchCurrentUser() }
         }
-        .frame(maxWidth: Layout.maxContentWidth)
-        .background(alignment: .top) {
-            headerGradient
-                .frame(height: Layout.headerHeight + Layout.navigationBleedHeight)
-                .ignoresSafeArea(edges: .top)
+    }
+
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .navigationBarLeading) {
+            Button {
+                dismiss()
+            } label: {
+                Label("Close", systemImage: "xmark.circle.fill")
+            }
         }
-        .toolbarBackground(.hidden, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
-        .ignoresSafeArea(.all, edges: .top)
-        .task { await viewModel.fetchCurrentUser() }
     }
 
     private var headerView: some View {

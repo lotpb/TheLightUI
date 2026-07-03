@@ -24,8 +24,12 @@
 		AF15AA2D275C5B2C0098CB04 /* ChatBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF15AA2C275C5B2C0098CB04 /* ChatBubble.swift */; };
 		AF15AA2E275C5B2C0098CB04 /* ChatBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF15AA2C275C5B2C0098CB04 /* ChatBubble.swift */; };
 		AF1B37AB27935EAB00374C0F /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1B37AA27935EAB00374C0F /* NotificationManager.swift */; };
-		AF2960122FEF6FAD002EE47B /* InstagramStory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2960112FEF6FAD002EE47B /* InstagramStory.swift */; };
-		AF2960132FEF6FAD002EE47B /* InstagramStory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2960112FEF6FAD002EE47B /* InstagramStory.swift */; };
+		AF2F67472FF7F50000741D30 /* UserFormProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F67462FF7F50000741D30 /* UserFormProfile.swift */; };
+		AF2F67482FF7F50000741D30 /* UserFormProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F67462FF7F50000741D30 /* UserFormProfile.swift */; };
+		AF2F674A2FF7F6CD00741D30 /* UserFormModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F67492FF7F6CD00741D30 /* UserFormModel.swift */; };
+		AF2F674B2FF7F6CD00741D30 /* UserFormModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F67492FF7F6CD00741D30 /* UserFormModel.swift */; };
+		AF2F674D2FF80DAA00741D30 /* InitialsAvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F674C2FF80DAA00741D30 /* InitialsAvatarView.swift */; };
+		AF2F674E2FF80DAA00741D30 /* InitialsAvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F674C2FF80DAA00741D30 /* InitialsAvatarView.swift */; };
 		AF34848A274568BE0091BA5A /* FirebaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF348489274568BE0091BA5A /* FirebaseManager.swift */; };
 		AF34848B274568BE0091BA5A /* FirebaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF348489274568BE0091BA5A /* FirebaseManager.swift */; };
 		AF34848E27457B8C0091BA5A /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = AF34848D27457B8C0091BA5A /* SDWebImageSwiftUI */; };
@@ -153,7 +157,6 @@
 		AF9CC6FB279B2CF10087E9FC /* NoItemsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF9CC6FA279B2CF10087E9FC /* NoItemsView.swift */; };
 		AFA9531C2FDF33150003ADD1 /* LocationCaptureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFA9531B2FDF33150003ADD1 /* LocationCaptureManager.swift */; };
 		AFA9531D2FDF33150003ADD1 /* LocationCaptureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFA9531B2FDF33150003ADD1 /* LocationCaptureManager.swift */; };
-		AFA953202FDF340C0003ADD1 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AFA9531E2FDF340C0003ADD1 /* Info.plist */; };
 		AFB7609F2FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB7609E2FE1F16B002D1A83 /* ImagePreprocessor.swift */; };
 		AFB760A02FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB7609E2FE1F16B002D1A83 /* ImagePreprocessor.swift */; };
 		AFB760A22FE22C78002D1A83 /* MainTopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB760A12FE22C78002D1A83 /* MainTopView.swift */; };
@@ -248,7 +251,9 @@
 		AF108C0C2762681200084752 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		AF15AA2C275C5B2C0098CB04 /* ChatBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBubble.swift; sourceTree = "<group>"; };
 		AF1B37AA27935EAB00374C0F /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
-		AF2960112FEF6FAD002EE47B /* InstagramStory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstagramStory.swift; sourceTree = "<group>"; };
+		AF2F67462FF7F50000741D30 /* UserFormProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserFormProfile.swift; sourceTree = "<group>"; };
+		AF2F67492FF7F6CD00741D30 /* UserFormModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserFormModel.swift; sourceTree = "<group>"; };
+		AF2F674C2FF80DAA00741D30 /* InitialsAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialsAvatarView.swift; sourceTree = "<group>"; };
 		AF348489274568BE0091BA5A /* FirebaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseManager.swift; sourceTree = "<group>"; };
 		AF3AC455268FF1FD00562D20 /* MediaFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaFile.swift; sourceTree = "<group>"; };
 		AF3AC458268FF39500562D20 /* InstagramHome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstagramHome.swift; sourceTree = "<group>"; };
@@ -314,7 +319,7 @@
 		AF92B85A267812A100729208 /* TheLightUIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheLightUIApp.swift; sourceTree = "<group>"; };
 		AF92B85C267812A300729208 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AF92B861267812A300729208 /* TheLightUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TheLightUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		AF92B867267812A300729208 /* TheLightUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TheLightUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AF92B867267812A300729208 /* TheLightUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = TheLightUI.app; path = "/Volumes/Macintosh SSD/Desktop/TheLightUI/build/Debug/TheLightUI.app"; sourceTree = "<absolute>"; };
 		AF92B8902678130800729208 /* TheLightUI--iOS--Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "TheLightUI--iOS--Info.plist"; sourceTree = "<group>"; };
 		AF92B8A22678157100729208 /* ExtensionUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExtensionUI.swift; sourceTree = "<group>"; };
 		AF92B8AE267816A600729208 /* SpotifyUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyUI.swift; sourceTree = "<group>"; };
@@ -328,7 +333,6 @@
 		AF9CC6F8279B2CC50087E9FC /* AddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddView.swift; sourceTree = "<group>"; };
 		AF9CC6FA279B2CF10087E9FC /* NoItemsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoItemsView.swift; sourceTree = "<group>"; };
 		AFA9531B2FDF33150003ADD1 /* LocationCaptureManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationCaptureManager.swift; sourceTree = "<group>"; };
-		AFA9531E2FDF340C0003ADD1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AFB7609E2FE1F16B002D1A83 /* ImagePreprocessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePreprocessor.swift; sourceTree = "<group>"; };
 		AFB760A12FE22C78002D1A83 /* MainTopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTopView.swift; sourceTree = "<group>"; };
 		AFB760A42FE22CA2002D1A83 /* MainMenuSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuSections.swift; sourceTree = "<group>"; };
@@ -583,7 +587,6 @@
 				AF4A670627565F40005D1D8B /* AuthenticationService.swift */,
 				AFA9531B2FDF33150003ADD1 /* LocationCaptureManager.swift */,
 				AFB7609E2FE1F16B002D1A83 /* ImagePreprocessor.swift */,
-				AFA9531E2FDF340C0003ADD1 /* Info.plist */,
 			);
 			path = Auth;
 			sourceTree = "<group>";
@@ -621,6 +624,7 @@
 				AF4F5DF82FC75C340003B277 /* LeadDetailFieldRow.swift */,
 				AF4F5DFB2FC75C350003B277 /* LeadDetailCommentsView.swift */,
 				AF5E019B2FCB9D1600945764 /* LeadDetailCoordinator.swift */,
+				AF2F674C2FF80DAA00741D30 /* InitialsAvatarView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -661,7 +665,7 @@
 				AF92B859267812A100729208 /* Shared */,
 				AF92B862267812A300729208 /* Products */,
 				AF488F8A2FE0358700E5F294 /* PrivacyInfo.xcprivacy */,
-				AF2960112FEF6FAD002EE47B /* InstagramStory.swift */,
+				AF2F67462FF7F50000741D30 /* UserFormProfile.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -685,7 +689,6 @@
 			isa = PBXGroup;
 			children = (
 				AF92B861267812A300729208 /* TheLightUI.app */,
-				AF92B867267812A300729208 /* TheLightUI.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -804,6 +807,7 @@
 		AFD5D86A2FF4538C008934BE /* UserForm */ = {
 			isa = PBXGroup;
 			children = (
+				AF2F67492FF7F6CD00741D30 /* UserFormModel.swift */,
 				AFD5D8692FF4538C008934BE /* UserFormUI.swift */,
 			);
 			path = UserForm;
@@ -1042,7 +1046,6 @@
 				AF92B881267812A400729208 /* Assets.xcassets in Resources */,
 				AF0E0D99267BB63C00E6CC7D /* GoogleService-Info.plist in Resources */,
 				AF488F8C2FE0358700E5F294 /* PrivacyInfo.xcprivacy in Resources */,
-				AFA953202FDF340C0003ADD1 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1081,13 +1084,14 @@
 				AF4F5DDC2FC74EDA0003B277 /* LoginService.swift in Sources */,
 				AF792F47269009250011D787 /* CustomVideoPlayer.swift in Sources */,
 				AF4F5DEC2FC751950003B277 /* CustomerFormService.swift in Sources */,
-				AF2960132FEF6FAD002EE47B /* InstagramStory.swift in Sources */,
 				AFD5D8622FF450DA008934BE /* WebUI.swift in Sources */,
 				AF488F7F2FE02FAF00E5F294 /* ExpenseModels.swift in Sources */,
 				AF03D36C27886D720021493A /* ColorOptions.swift in Sources */,
 				AFDE91D52793364D00302CF2 /* LandMarkListView.swift in Sources */,
+				AF2F674A2FF7F6CD00741D30 /* UserFormModel.swift in Sources */,
 				AFB7609F2FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */,
 				AFC519532FC89A98003A4AEA /* MessageDateFormatting.swift in Sources */,
+				AF2F67482FF7F50000741D30 /* UserFormProfile.swift in Sources */,
 				AF53738C2778C643001F40B6 /* LoadingView.swift in Sources */,
 				AF77D64D2FC79827008D456A /* ProfileAvatarImage.swift in Sources */,
 				AF488F882FE0300200E5F294 /* ExpenseModelContainerModifier.swift in Sources */,
@@ -1154,6 +1158,7 @@
 				AF5373802778C000001F40B6 /* WeatherView.swift in Sources */,
 				AF9CC6F3279B2C440087E9FC /* ItemModel.swift in Sources */,
 				AF77D6532FC7A661008D456A /* SessionViewModel.swift in Sources */,
+				AF2F674D2FF80DAA00741D30 /* InitialsAvatarView.swift in Sources */,
 				AFE4AE102FC873DE00F86B2E /* AppSettingsStore.swift in Sources */,
 				AF54E4E12773B27D0062B1F4 /* CustomerUI.swift in Sources */,
 				AF792F442690047C0011D787 /* Reel.swift in Sources */,
@@ -1221,7 +1226,6 @@
 				AF4F5E0A2FC75DC40003B277 /* BottomSheetUI.swift in Sources */,
 				AF4F5DE42FC750A70003B277 /* CustomerModels.swift in Sources */,
 				AFD5D86B2FF4538C008934BE /* UserFormUI.swift in Sources */,
-				AF2960122FEF6FAD002EE47B /* InstagramStory.swift in Sources */,
 				AF86C0692FDF1E3A00F450F9 /* MainMenuCoordinator.swift in Sources */,
 				AF4F5DFA2FC75C340003B277 /* LeadDetailFieldRow.swift in Sources */,
 				AF997FB32FE3244900797FD5 /* TipUI.swift in Sources */,
@@ -1233,8 +1237,10 @@
 				AFD5D8AA2FF458B7008934BE /* InstagramFeedViews.swift in Sources */,
 				AF488F802FE02FAF00E5F294 /* ExpenseModels.swift in Sources */,
 				AF92B87D267812A400729208 /* TheLightUIApp.swift in Sources */,
+				AF2F67472FF7F50000741D30 /* UserFormProfile.swift in Sources */,
 				AF3AC45A268FF39500562D20 /* InstagramHome.swift in Sources */,
 				AFB760A02FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */,
+				AF2F674B2FF7F6CD00741D30 /* UserFormModel.swift in Sources */,
 				AF92B8B2267816A600729208 /* SpotifyUI.swift in Sources */,
 				AF4F5DED2FC751950003B277 /* CustomerFormService.swift in Sources */,
 				AF792F48269009250011D787 /* CustomVideoPlayer.swift in Sources */,
@@ -1267,6 +1273,7 @@
 				AF792F452690047C0011D787 /* Reel.swift in Sources */,
 				AF4F5DC32FC742F30003B277 /* MainMessagesViewModel.swift in Sources */,
 				AF4F5DEF2FC758540003B277 /* CustomerFirestoreDTO.swift in Sources */,
+				AF2F674E2FF80DAA00741D30 /* InitialsAvatarView.swift in Sources */,
 				AF488F852FE02FF400E5F294 /* ExpenseTrackerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
