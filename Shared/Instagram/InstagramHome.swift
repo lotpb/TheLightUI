@@ -8,6 +8,11 @@
 import SwiftUI
 
 struct InstagramHome: View {
+    private enum Layout {
+        // Matches TwitterUI.Layout.maxContentWidth so both read the same on iPad.
+        static let maxContentWidth: CGFloat = 700
+    }
+
     @State private var currentTab = InstagramHomeTab.home
     @Environment(\.dismiss) private var dismiss
 
@@ -38,6 +43,8 @@ struct InstagramHome: View {
 
                 InstagramHomeTabBar(currentTab: $currentTab)
             }
+            .frame(maxWidth: Layout.maxContentWidth)
+            .frame(maxWidth: .infinity)
             .background(currentTab.backgroundColor.ignoresSafeArea())
             .navigationTitle(currentTab.navigationTitle)
             .navigationBarTitleDisplayMode(.inline)

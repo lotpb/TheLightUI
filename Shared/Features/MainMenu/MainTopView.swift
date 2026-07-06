@@ -9,7 +9,9 @@ import SwiftUI
 // MARK: - Header
 struct MainTopView: View {
     private enum Layout {
-        static let height: CGFloat = 145
+        @MainActor static var height: CGFloat {
+            UIDevice.current.userInterfaceIdiom == .pad ? 200 : 145
+        }
         static let cornerRadius: CGFloat = 20
         static let titleSize: CGFloat = 32
     }

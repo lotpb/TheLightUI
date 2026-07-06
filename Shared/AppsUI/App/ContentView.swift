@@ -6,11 +6,14 @@
 //
 
 import SwiftUI
+import UIKit
 
 // MARK: - Root Content
 struct ContentView: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var session: SessionViewModel
     @State private var selection: RootTab = .home
+    @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
 
     private let dependencies: AppDependencies
 
@@ -22,20 +25,72 @@ struct ContentView: View {
     }
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            tabContent
-            Divider()
-            TabBarView(selection: $selection)
+        rootLayout
+            .fullScreenCover(isPresented: $session.isLoginPresented) {
+                LoginView(
+                    loginService: dependencies.makeLoginService(),
+                    authenticationService: dependencies.makeAuthenticationService(),
+                    locationCaptureManager: dependencies.makeLocationCaptureManager(),
+                    didCompleteLoginProcess: session.handleLoginCompleted
+                )
+            }
+    }
+
+    // Sidebar on full-width iPad; custom tab bar on iPhone and in compact
+    // iPad multitasking widths.
+    @ViewBuilder
+    private var rootLayout: some View {
+        if usesSidebar {
+            sidebarLayout
+        } else {
+            tabBarLayout
         }
-        .ignoresSafeArea(.keyboard, edges: .bottom)
-        .fullScreenCover(isPresented: $session.isLoginPresented) {
-            LoginView(
-                loginService: dependencies.makeLoginService(),
-                authenticationService: dependencies.makeAuthenticationService(),
-                locationCaptureManager: dependencies.makeLocationCaptureManager(),
-                didCompleteLoginProcess: session.handleLoginCompleted
-            )
+    }
+
+    // Pro Max iPhones report a regular width in landscape, so also require
+    // the pad idiom before swapping the tab bar for a sidebar.
+    private var usesSidebar: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad && horizontalSizeClass == .regular
+    }
+
+    private var sidebarLayout: some View {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
+            List(selection: sidebarSelection) {
+                ForEach(RootTab.visibleTabs) { tab in
+                    Label(tab.label, systemImage: tab.image)
+                        .tag(tab)
+                }
+            }
+            .navigationTitle("TheLight")
+        } detail: {
+            selectedTabContent
         }
+    }
+
+    /// Adapts the non-optional tab selection to the optional binding that
+    /// sidebar `List` selection requires, ignoring deselection.
+    private var sidebarSelection: Binding<RootTab?> {
+        Binding(
+            get: { selection },
+            set: { newValue in
+                if let newValue {
+                    selection = newValue
+                }
+            }
+        )
+    }
+
+    // The bar contributes a real safe-area inset so every screen clears it
+    // automatically, instead of each screen padding its own bottom edge.
+    private var tabBarLayout: some View {
+        tabContent
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                VStack(spacing: 0) {
+                    Divider()
+                    TabBarView(selection: $selection)
+                }
+            }
+            .ignoresSafeArea(.keyboard, edges: .bottom)
     }
 
     @ViewBuilder
@@ -78,7 +133,13 @@ struct ContentView: View {
         case .tip:
             TipUI()
         case .web:
-            WebUI()
+            // Collapse the iPad sidebar when a bookmark's web page opens so
+            // the page gets the full width; no-op in the tab bar layout.
+            WebUI(onOpenPage: {
+                withAnimation {
+                    columnVisibility = .detailOnly
+                }
+            })
         }
     }
 }
@@ -144,6 +205,10 @@ private struct TabBarView: View {
                 }
             }
         }
+        // Cap the tab row so items stay grouped on wide iPad screens; the
+        // material background still spans the full width below.
+        .frame(maxWidth: 500)
+        .frame(maxWidth: .infinity)
         .padding(EdgeInsets(top: 6, leading: 8, bottom: 8, trailing: 8))
         .background(.ultraThinMaterial)
     }

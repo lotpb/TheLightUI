@@ -16,6 +16,7 @@ struct ChatLogView: View {
         static let messageBarBottomPadding = tabBarHeight
     }
 
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Bindable var vm: ChatLogViewModel
     @State private var selectedPhoto: PhotosPickerItem? = nil
     @FocusState private var isMessageFieldFocused: Bool
@@ -83,8 +84,15 @@ struct ChatLogView: View {
         }
     }
 
+    // Full-width iPad uses the sidebar layout, which has no floating tab bar
+    // to clear, so the message bar can sit at the bottom edge (matches the
+    // usesSidebar condition in ContentView).
     private var messageBarBottomPadding: CGFloat {
-        isMessageFieldFocused ? 0 : Layout.messageBarBottomPadding
+        let usesSidebar = UIDevice.current.userInterfaceIdiom == .pad && horizontalSizeClass == .regular
+        if usesSidebar || isMessageFieldFocused {
+            return 0
+        }
+        return Layout.messageBarBottomPadding
     }
 
     // A chat message paired with whether it should display a date header, identified

@@ -8,15 +8,30 @@
 import SwiftUI
 
 struct iMacUI: View {
+    // The artwork is drawn on a fixed 1000x700 canvas with the stand
+    // extending ~160pt below it; these bounds (plus a small margin) are
+    // used to scale the whole drawing down to fit the available space.
+    private let designSize = CGSize(width: 1040, height: 900)
+
     var body: some View {
-        iMacScreenView()
+        GeometryReader { proxy in
+            let scale = min(
+                proxy.size.width / designSize.width,
+                proxy.size.height / designSize.height,
+                1
+            )
+
+            iMacScreenView()
+                .offset(y: -78) // recenter: the stand hangs below the screen frame
+                .scaleEffect(scale)
+                .frame(width: proxy.size.width, height: proxy.size.height)
+        }
     }
 }
 
 struct iMacUI_Previews: PreviewProvider {
     static var previews: some View {
         iMacUI()
-            .previewLayout(.fixed(width: 1500, height: 1299))
     }
 }
 
@@ -154,7 +169,7 @@ private struct iMacStandView: View {
                 RoundedRectangle(cornerRadius: 2, style: .continuous)
                     .fill(
                         LinearGradient(
-                            colors: [Color.white.opacity(0.8)] + Array(repeating: Color.gray, count: 4),
+                            colors: [Color.white.opacity(0.8)] + [Color](repeating: .gray, count: 4),
                             startPoint: .top,
                             endPoint: .bottom
                         )

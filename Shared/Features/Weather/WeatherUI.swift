@@ -44,7 +44,8 @@ struct WeatherUI: View {
                 }
                 Spacer()
             }
-            
+            .frame(maxWidth: 700)
+            .frame(maxWidth: .infinity)
             .background(Color.background)
             .preferredColorScheme(.dark)
             .navigationBarTitleDisplayMode(.inline)

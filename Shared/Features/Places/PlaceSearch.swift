@@ -217,6 +217,8 @@ struct PlaceSearch: View {
         }
         .pickerStyle(.segmented)
         .frame(maxWidth: 700)
+        // Center the width-capped picker on iPad; the parent VStack is leading-aligned.
+        .frame(maxWidth: .infinity)
     }
 
     private var resultSummary: some View {

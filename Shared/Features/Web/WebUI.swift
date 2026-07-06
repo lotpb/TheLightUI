@@ -10,41 +10,26 @@ import WebKit
 
 // MARK: - Bookmarks
 struct WebUI: View {
-    @State private var selectedBookmark: WebBookmark? = WebBookmark.defaultBookmarks.first
+    /// Called when a bookmark's web page opens, so the iPad root layout can
+    /// collapse its sidebar and give the page the full width.
+    var onOpenPage: (() -> Void)? = nil
 
     private let bookmarks = WebBookmark.defaultBookmarks
 
+    // A plain stack rather than a split view: WebUI sits inside the root
+    // sidebar's detail column on iPad, where nested split views render oddly.
     var body: some View {
-        NavigationSplitView {
-            List(bookmarks, selection: $selectedBookmark) { bookmark in
+        NavigationStack {
+            List(bookmarks) { bookmark in
                 NavigationLink(value: bookmark) {
                     BookmarkRow(bookmark: bookmark)
                 }
             }
             .navigationTitle("Bookmarks")
-        } detail: {
-            if let selectedBookmark {
-                WebBookmarkDetail(bookmark: selectedBookmark)
-            } else {
-                noSelectionPlaceholder
+            .navigationDestination(for: WebBookmark.self) { bookmark in
+                WebBookmarkDetail(bookmark: bookmark)
+                    .onAppear { onOpenPage?() }
             }
-        }
-    }
-
-    @ViewBuilder
-    private var noSelectionPlaceholder: some View {
-        if #available(iOS 17.0, *) {
-            ContentUnavailableView(
-                "Select a Bookmark",
-                systemImage: "bookmark",
-                description: Text("Choose a website from the bookmarks list.")
-            )
-        } else {
-            PlaceholderView(
-                title: "Select a Bookmark",
-                message: "Choose a website from the bookmarks list.",
-                systemImage: "bookmark"
-            )
         }
     }
 }
@@ -112,31 +97,6 @@ private struct LegacyWebView: UIViewRepresentable {
     func updateUIView(_ webView: WKWebView, context: Context) {
         guard webView.url != url else { return }
         webView.load(URLRequest(url: url))
-    }
-}
-
-private struct PlaceholderView: View {
-    let title: String
-    let message: String
-    let systemImage: String
-
-    var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: systemImage)
-                .font(.system(size: 44, weight: .semibold))
-                .foregroundStyle(.secondary)
-
-            Text(title)
-                .font(.title3.weight(.semibold))
-
-            Text(message)
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: 320)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding()
     }
 }
 

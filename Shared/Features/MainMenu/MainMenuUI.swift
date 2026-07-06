@@ -144,9 +144,6 @@ struct MainMenuUI: View {
             )
         }
         .listStyle(.insetGrouped)
-        .safeAreaInset(edge: .bottom) {
-            Color.clear.frame(height: 72)
-        }
         .fullScreenCover(item: $activeRoute) { route in
             coordinator.fullscreenDestination(route)
         }

@@ -36,9 +36,6 @@ struct ExpenseTrackerView: View {
             expenseSection
         }
         .listStyle(.insetGrouped)
-        .safeAreaInset(edge: .bottom) {
-            Color.clear.frame(height: 72)
-        }
         .navigationTitle("Expenses")
         .searchable(text: $viewModel.searchText, prompt: "Search expenses")
         .tint(themeColor)

@@ -37,7 +37,11 @@ struct BottomSheetUI: View {
         Favorite(title: "Add", systemImage: "mappin", color: .pink)
     ]
 
-    private let collapsedVisibleHeight: CGFloat = 16
+    // iPad's bottom safe-area inset is smaller than iPhone's, so peek the
+    // collapsed bar a little higher there to keep it easy to grab.
+    private var collapsedVisibleHeight: CGFloat {
+        UIDevice.current.userInterfaceIdiom == .pad ? 52 : 16
+    }
     private let minimumExpandedTopInset: CGFloat = 150
     private let halfExpandedBottomInset: CGFloat = 60
     private let safeAreaSpacing: CGFloat = 12
@@ -300,6 +304,10 @@ struct BottomSheetUI: View {
                 .foregroundStyle(Color.primary)
             }
         }
+        // Cap the content width and center it on wide iPad layouts; the sheet
+        // background still spans the full width.
+        .frame(maxWidth: 700)
+        .frame(maxWidth: .infinity)
     }
 
     private var locationSummaryCard: some View {
@@ -410,8 +418,8 @@ struct BottomSheetUI: View {
                 .padding(.top, 8)
 
             let columns = [
-                GridItem(.flexible(), spacing: 10),
-                GridItem(.flexible(), spacing: 10)
+                GridItem(.flexible(), spacing: 30),
+                GridItem(.flexible(), spacing: 30)
             ]
             LazyVGrid(columns: columns, spacing: 10) {
                 ForEach(locationRows) { row in

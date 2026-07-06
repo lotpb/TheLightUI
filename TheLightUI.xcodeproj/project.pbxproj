@@ -241,6 +241,7 @@
 		AF00CE112691F7B3003F5CDF /* Reel2.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Reel2.mp4; sourceTree = "<group>"; };
 		AF00CE122691F7B3003F5CDF /* Reel1.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Reel1.mp4; sourceTree = "<group>"; };
 		AF00CE152691FCF7003F5CDF /* Reel3.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Reel3.mp4; sourceTree = "<group>"; };
+		AF03796B2FFBEF7B00F6E1AF /* TheLightUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TheLightUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF03D36B27886D720021493A /* ColorOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorOptions.swift; sourceTree = "<group>"; };
 		AF051E3E279B31610012012B /* ListRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListRowView.swift; sourceTree = "<group>"; };
 		AF0A2348274C33E700B18BBF /* CreateNewMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateNewMessageView.swift; sourceTree = "<group>"; };
@@ -318,7 +319,6 @@
 		AF92B85A267812A100729208 /* TheLightUIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheLightUIApp.swift; sourceTree = "<group>"; };
 		AF92B85C267812A300729208 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AF92B861267812A300729208 /* TheLightUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TheLightUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		AF92B867267812A300729208 /* TheLightUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = TheLightUI.app; path = "/Volumes/Macintosh SSD/Desktop/TheLightUI/build/Debug/TheLightUI.app"; sourceTree = "<absolute>"; };
 		AF92B8902678130800729208 /* TheLightUI--iOS--Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "TheLightUI--iOS--Info.plist"; sourceTree = "<group>"; };
 		AF92B8A22678157100729208 /* ExtensionUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExtensionUI.swift; sourceTree = "<group>"; };
 		AF92B8AE267816A600729208 /* SpotifyUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyUI.swift; sourceTree = "<group>"; };
@@ -486,6 +486,7 @@
 			children = (
 				AF4F5DD32FC746910003B277 /* MainMenu */,
 				AF4F5DE12FC7506F0003B277 /* Customers */,
+				AF4F5DF42FC75C080003B277 /* Views */,
 				AF4F5DDA2FC74EAB0003B277 /* Auth */,
 				AF4F5DD02FC7468A0003B277 /* Chat */,
 				AFD5D8842FF4552F008934BE /* SharedUI */,
@@ -497,7 +498,6 @@
 				AFD5D85B2FF450BD008934BE /* Stacks */,
 				AFD5D86E2FF453C9008934BE /* Twitter */,
 				AFD5D8612FF450DA008934BE /* Web */,
-				AF4F5DF42FC75C080003B277 /* Views */,
 				AF4F5E012FC75D540003B277 /* Maps */,
 				AFDF37BD2FCA04FC007A8C8F /* Places */,
 				AFDF37BC2FCA04FB007A8C8F /* Weather */,
@@ -686,6 +686,7 @@
 			isa = PBXGroup;
 			children = (
 				AF92B861267812A300729208 /* TheLightUI.app */,
+				AF03796B2FFBEF7B00F6E1AF /* TheLightUI.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -975,7 +976,7 @@
 			);
 			name = "TheLightUI (macOS)";
 			productName = "TheLightUI (macOS)";
-			productReference = AF92B867267812A300729208 /* TheLightUI.app */;
+			productReference = AF03796B2FFBEF7B00F6E1AF /* TheLightUI.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */

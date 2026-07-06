@@ -22,7 +22,6 @@ private enum LeadDetailLayout {
     static let rowVerticalPadding: CGFloat = 12
     static let containerCornerRadius: CGFloat = 14
     static let maxWidthForIpad: CGFloat = 700
-    static let tabBarClearance: CGFloat = 72
 }
 
 // A reusable rounded list container with automatic bottom dividers between rows.
@@ -155,9 +154,6 @@ struct LeadDetailUI: View {
                         .padding(.horizontal)
                         .padding(.bottom, 24)
                 }
-            }
-            .safeAreaInset(edge: .bottom) {
-                Color.clear.frame(height: LeadDetailLayout.tabBarClearance)
             }
         }
         .navigationTitle("Profile")
