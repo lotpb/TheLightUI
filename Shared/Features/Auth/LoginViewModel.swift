@@ -17,7 +17,7 @@ final class LoginViewModel {
     var email = ""
     var password = ""
     var image: UIImage?
-    private(set) var isAuthenticated = false
+    private(set) var isAuthenticated = true
     private(set) var isProcessing = false
     var loginStatusMessage = ""
 

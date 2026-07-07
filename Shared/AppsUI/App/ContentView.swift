@@ -14,6 +14,7 @@ struct ContentView: View {
     @State private var session: SessionViewModel
     @State private var selection: RootTab = .home
     @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
+    @State private var tabBarHeight: CGFloat = 0
 
     private let dependencies: AppDependencies
 
@@ -80,14 +81,22 @@ struct ContentView: View {
         )
     }
 
-    // The bar contributes a real safe-area inset so every screen clears it
-    // automatically, instead of each screen padding its own bottom edge.
+    // The bar contributes a real safe-area inset so most screens clear it
+    // automatically. NavigationStack does not forward that inset to the
+    // scroll insets of Lists inside it, so the measured bar height is also
+    // published through the environment for those screens to re-apply.
     private var tabBarLayout: some View {
         tabContent
+            .environment(\.tabBarOverlap, tabBarHeight)
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 VStack(spacing: 0) {
                     Divider()
                     TabBarView(selection: $selection)
+                }
+                .onGeometryChange(for: CGFloat.self) { proxy in
+                    proxy.size.height
+                } action: { height in
+                    tabBarHeight = height
                 }
             }
             .ignoresSafeArea(.keyboard, edges: .bottom)
@@ -142,6 +151,15 @@ struct ContentView: View {
             })
         }
     }
+}
+
+// MARK: - Tab Bar Overlap
+extension EnvironmentValues {
+    /// Height of the custom bottom tab bar overlapping the tab content.
+    /// Screens that host a `List` inside their own `NavigationStack` read
+    /// this to reserve bottom space, because the bar's outer safe-area inset
+    /// stops at the stack boundary. Zero in the sidebar layout and previews.
+    @Entry var tabBarOverlap: CGFloat = 0
 }
 
 // MARK: - Root Tabs

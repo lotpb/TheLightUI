@@ -42,7 +42,7 @@ struct MacbookPro: View {
 
 #Preview("MacbookPro") {
     MacbookPro()
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
 }
 
 private struct MacBookScreen: View {
@@ -67,7 +67,7 @@ private struct MacBookScreen: View {
                     .overlay(
                         Text("MacBook Pro")
                             .foregroundStyle(.white)
-                            .offset(y: -11)
+                            .offset(y: -13)
                     )
             }
 

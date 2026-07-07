@@ -175,9 +175,15 @@ struct MapUI: View {
         BottomSheetUI(
             locationManager: manager,
             profileImageURL: userViewModel.chatUser?.profileImageUrl,
+            destination: routeDestination,
             travelTime: $travelTime,
             distance: $distance
         )
+    }
+
+    private var routeDestination: MapDestination? {
+        guard case .route(let destination) = mode else { return nil }
+        return destination
     }
 }
 

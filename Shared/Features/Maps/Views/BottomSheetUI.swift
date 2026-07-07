@@ -23,9 +23,9 @@ struct BottomSheetUI: View {
 
     var locationManager: LocationManager
     let profileImageURL: String?
+    let destination: MapDestination?
     @Binding var travelTime: Double
     @Binding var distance: Double
-    @Environment(\.openURL) private var openURL
 
     @State private var selection = 0
     @State private var offset: CGFloat = 0
@@ -106,14 +106,26 @@ struct BottomSheetUI: View {
         ]
     }
 
-    private var addressText: String {
+    private var currentAddressText: String {
         "\(locationManager.currentPlacemark?.subThoroughfare ?? "No Address") \(locationManager.currentPlacemark?.thoroughfare ?? "")\n\(locationManager.currentPlacemark?.locality ?? "") \(locationManager.currentPlacemark?.administrativeArea ?? "") \(locationManager.currentPlacemark?.postalCode ?? "")\n\(locationManager.currentPlacemark?.country ?? "")"
+    }
+
+    private var destinationAddressText: String {
+        guard let destination else { return currentAddressText }
+        return "\(destination.street)\n\(destination.city) \(destination.state) \(destination.zip)"
     }
 
     private var mapsURL: URL? {
         let coord = locationManager.location?.coordinate
         guard let lat = coord?.latitude, let lon = coord?.longitude else { return nil }
         return URL(string: "https://maps.apple.com/?ll=\(lat),\(lon)")
+    }
+
+    private var destinationMapsURL: URL? {
+        guard let destination,
+              let encodedAddress = destination.address.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else { return nil }
+        return URL(string: "https://maps.apple.com/?address=\(encodedAddress)")
     }
 
     var body: some View {
@@ -314,7 +326,7 @@ struct BottomSheetUI: View {
         VStack(alignment: .leading, spacing: 8) {
             locationSummaryHeader
 
-            Text(addressText)
+            Text(currentAddressText)
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .lineLimit(nil)
@@ -345,15 +357,24 @@ struct BottomSheetUI: View {
                 .font(.headline)
             Spacer()
             shareLocationButton
-            callDestinationButton
         }
         .padding(.bottom, 2)
     }
 
     @ViewBuilder
     private var shareLocationButton: some View {
-        if let mapsURL {
-            ShareLink(item: mapsURL) {
+        shareButton(url: mapsURL, accessibilityLabel: "Share your location")
+    }
+
+    @ViewBuilder
+    private var shareDestinationButton: some View {
+        shareButton(url: destinationMapsURL, accessibilityLabel: "Share destination address")
+    }
+
+    @ViewBuilder
+    private func shareButton(url: URL?, accessibilityLabel: String) -> some View {
+        if let url {
+            ShareLink(item: url) {
                 Image(systemName: "square.and.arrow.up")
                     .font(.headline)
                     .foregroundStyle(.blue)
@@ -361,23 +382,8 @@ struct BottomSheetUI: View {
                     .background(Color(.tertiarySystemBackground), in: Circle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Share your location")
+            .accessibilityLabel(accessibilityLabel)
         }
-    }
-
-    private var callDestinationButton: some View {
-        Button {
-            openURL.callPhoneNumber("")
-            impact(.light)
-        } label: {
-            Image(systemName: "phone.fill")
-                .font(.headline)
-                .foregroundStyle(.blue)
-                .frame(width: 32, height: 32)
-                .background(Color(.tertiarySystemBackground), in: Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Call destination")
     }
 
     private var favoritesSection: some View {
@@ -400,16 +406,27 @@ struct BottomSheetUI: View {
 
     private var locationSection: some View {
         Group {
-            Text(addressText)
-                .padding()
-                .font(.callout)
-                .foregroundStyle(.primary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(Color(.tertiarySystemGroupedBackground))
-                )
-                .padding(.horizontal)
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 8) {
+                    Image(systemName: "mappin.and.ellipse")
+                        .foregroundStyle(.red)
+                    Text("Destination Location")
+                        .font(.headline)
+                    Spacer()
+                    shareDestinationButton
+                }
+
+                Text(destinationAddressText)
+                    .font(.callout)
+                    .foregroundStyle(.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(Color(.tertiarySystemGroupedBackground))
+            )
+            .padding(.horizontal)
 
             Text("Location Data")
                 .font(.subheadline.weight(.bold))

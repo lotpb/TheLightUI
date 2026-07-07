@@ -11,6 +11,7 @@ import SwiftUI
 @MainActor
 struct MainMenuUI: View {
     @AppStorage("color") private var color: Int?
+    @Environment(\.tabBarOverlap) private var tabBarOverlap
     let onSignOut: () -> Void
     private let makeCustomerService: () -> CustomerServicing
     private let makeCustomerFormService: () -> CustomerFormServicing
@@ -144,6 +145,14 @@ struct MainMenuUI: View {
             )
         }
         .listStyle(.insetGrouped)
+        // The custom tab bar's safe-area inset is applied outside this
+        // screen's NavigationStack, which doesn't forward it to the List's
+        // scroll insets — re-apply it so the last row rests above the bar.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            Color.clear
+                .frame(height: tabBarOverlap)
+                .allowsHitTesting(false)
+        }
         .fullScreenCover(item: $activeRoute) { route in
             coordinator.fullscreenDestination(route)
         }

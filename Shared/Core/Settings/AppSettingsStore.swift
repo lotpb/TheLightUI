@@ -24,20 +24,20 @@ enum SettingsUI {
 
     static let color = "color"
 
-    static let isSpeakKey = "isSpeak"
-    static let isMusicKey = "isMusic"
+    //static let isSpeakKey = "isSpeak"
+    //static let isMusicKey = "isMusic"
 
     static let latitudeKey = "latitude"
     static let longitudeKey = "longitude"
-    static let legacyLongtitudeKey = "longtitude"
+    //static let legacyLongtitudeKey = "longtitude"
 
     static let eventKey = "event"
-    static let durationKey = "duration"
+    static let durationKey = "120"
 
-    static let areacodeKey = "areacode"
-    static let emailTitleKey = "emailtitle"
-    static let emailMessageKey = "emailmessage"
-    static let versionKey = "version"
+    static let areacodeKey = "516"
+    static let emailTitleKey = "TheLight Support"
+    static let emailMessageKey = "Thank you for using TheLight"
+    static let versionKey = "1.0"
 }
 
 enum SecureSettingsStore {
@@ -83,18 +83,17 @@ final class AppSettingsStore {
     var email: String = "" { didSet { saveSecureString(email, forKey: SettingsUI.emailKey) } }
     var phone: String = "" { didSet { saveSecureString(phone, forKey: SettingsUI.phoneKey) } }
     var username: String = "" { didSet { defaults.set(username, forKey: SettingsUI.usernameKey) } }
-    var website: String = "" { didSet { defaults.set(website, forKey: SettingsUI.websiteKey) } }
+    //var website: String = "" { didSet { defaults.set(website, forKey: SettingsUI.websiteKey) } }
 
     var companyName: String = "TheLight Software" { didSet { defaults.set(companyName, forKey: SettingsUI.isCompanyNameKey) } }
     var isSubscriber: Bool = false { didSet { defaults.set(isSubscriber, forKey: SettingsUI.isSubscribedKey) } }
     var backend: String = "Firebase" { didSet { defaults.set(backend, forKey: SettingsUI.backend) } }
     var isBackfetch: Bool = false { didSet { defaults.set(isBackfetch, forKey: SettingsUI.isBackfetch) } }
-    var isAutoLockDisabled: Bool = false { didSet { defaults.set(isAutoLockDisabled, forKey: SettingsUI.isAutolockKey) } }
-
     var color: Int = 0 { didSet { defaults.set(color, forKey: SettingsUI.color) } }
-
-    var isSpeak: Bool = false { didSet { defaults.set(isSpeak, forKey: SettingsUI.isSpeakKey) } }
-    var isMusic: Bool = false { didSet { defaults.set(isMusic, forKey: SettingsUI.isMusicKey) } }
+    
+    //var isAutoLockDisabled: Bool = false { didSet { defaults.set(isAutoLockDisabled, forKey: SettingsUI.isAutolockKey) } }
+    //var isSpeak: Bool = false { didSet { defaults.set(isSpeak, forKey: SettingsUI.isSpeakKey) } }
+    //var isMusic: Bool = false { didSet { defaults.set(isMusic, forKey: SettingsUI.isMusicKey) } }
 
     var latitude: String = "" { didSet { saveSecureString(latitude, forKey: SettingsUI.latitudeKey) } }
     var longitude: String = "" { didSet { saveSecureString(longitude, forKey: SettingsUI.longitudeKey) } }
@@ -120,26 +119,26 @@ final class AppSettingsStore {
         email = Self.loadSecureString(forKey: SettingsUI.emailKey, defaults: defaults, passwordStore: passwordStore)
         phone = Self.loadSecureString(forKey: SettingsUI.phoneKey, defaults: defaults, passwordStore: passwordStore)
         username = defaults.string(forKey: SettingsUI.usernameKey) ?? username
-        website = defaults.string(forKey: SettingsUI.websiteKey) ?? website
+        //website = defaults.string(forKey: SettingsUI.websiteKey) ?? website
 
         companyName = defaults.string(forKey: SettingsUI.isCompanyNameKey) ?? companyName
         isSubscriber = defaults.bool(forKey: SettingsUI.isSubscribedKey)
         backend = defaults.string(forKey: SettingsUI.backend) ?? backend
         isBackfetch = defaults.bool(forKey: SettingsUI.isBackfetch)
-        isAutoLockDisabled = defaults.bool(forKey: SettingsUI.isAutolockKey)
-
         color = defaults.object(forKey: SettingsUI.color) as? Int ?? color
+        
+        //isAutoLockDisabled = defaults.bool(forKey: SettingsUI.isAutolockKey)
+        //isSpeak = defaults.bool(forKey: SettingsUI.isSpeakKey)
+        //isMusic = defaults.bool(forKey: SettingsUI.isMusicKey)
 
-        isSpeak = defaults.bool(forKey: SettingsUI.isSpeakKey)
-        isMusic = defaults.bool(forKey: SettingsUI.isMusicKey)
-
-        latitude = Self.loadSecureString(forKey: SettingsUI.latitudeKey, defaults: defaults, passwordStore: passwordStore)
         // Migrate legacy misspelled key "longtitude" to the corrected "longitude" key if present
-        let legacyLongitude = SecureSettingsStore.loadString(forKey: SettingsUI.legacyLongtitudeKey, defaults: defaults, passwordStore: passwordStore)
-        if !legacyLongitude.isEmpty {
-            SecureSettingsStore.removeString(forKey: SettingsUI.legacyLongtitudeKey, defaults: defaults, passwordStore: passwordStore)
-            saveSecureString(legacyLongitude, forKey: SettingsUI.longitudeKey)
-        }
+//        let legacyLongitude = SecureSettingsStore.loadString(forKey: SettingsUI.legacyLongtitudeKey, defaults: defaults, passwordStore: passwordStore)
+//        if !legacyLongitude.isEmpty {
+//            SecureSettingsStore.removeString(forKey: SettingsUI.legacyLongtitudeKey, defaults: defaults, passwordStore: passwordStore)
+//            saveSecureString(legacyLongitude, forKey: SettingsUI.longitudeKey)
+//        }
+        
+        latitude = Self.loadSecureString(forKey: SettingsUI.latitudeKey, defaults: defaults, passwordStore: passwordStore)
         longitude = Self.loadSecureString(forKey: SettingsUI.longitudeKey, defaultValue: "-80.124528", defaults: defaults, passwordStore: passwordStore)
 
         event = defaults.string(forKey: SettingsUI.eventKey) ?? event

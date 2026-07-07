@@ -13,7 +13,6 @@ import CoreLocation
 struct LoginView: View {
     @State private var viewModel: LoginViewModel
     @State private var selectedPhotoItem: PhotosPickerItem?
-    @State private var isShowingLocationCaptureExplanation = false
     @FocusState private var focusedField: LoginField?
     private let locationCaptureManager: LocationCaptureManaging
 
@@ -60,7 +59,9 @@ struct LoginView: View {
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
             .onChange(of: viewModel.loginStatusMessage) { _, newValue in
                 guard newValue.localizedCaseInsensitiveContains("success") else { return }
-                isShowingLocationCaptureExplanation = true
+                // Unstructured Task so the capture survives the login cover
+                // being dismissed by didCompleteLoginProcess.
+                Task { await captureLoginLocation() }
             }
             .navigationTitle(viewModel.navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
@@ -71,14 +72,6 @@ struct LoginView: View {
                         focusedField = nil
                     }
                 }
-            }
-            .alert("Save Your Location?", isPresented: $isShowingLocationCaptureExplanation) {
-                Button("Allow") {
-                    Task { await captureLoginLocation() }
-                }
-                Button("Not Now", role: .cancel) { }
-            } message: {
-                Text("TheLightUI can save your current location to personalize weather and directions. You can change this anytime in Settings.")
             }
         }
         .task(id: selectedPhotoItem) {
