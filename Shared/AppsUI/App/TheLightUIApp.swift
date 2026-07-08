@@ -11,7 +11,6 @@ import Firebase
 @available(iOS 18.0, *)
 @main
 struct TheLightUIApp: App {
-    @State private var showLaunch = true
     private let dependencies: AppDependencies
 
     init() {
@@ -23,27 +22,41 @@ struct TheLightUIApp: App {
         }
         dependencies = .live
     }
-    
+
     var body: some Scene {
         WindowGroup {
-            ZStack {
-                ContentView(dependencies: dependencies)
-                    .opacity(showLaunch ? 0 : 1)
+            // Keep this closure free of @State captures: SwiftUI's async render
+            // thread can re-evaluate the root content closure, and a MainActor
+            // isolation assert then crashes the app (see device crash logs from
+            // 2026-07-03). Launch-overlay state lives in AppRootView instead.
+            AppRootView(dependencies: dependencies)
+        }
+    }
+}
+
+@available(iOS 18.0, *)
+private struct AppRootView: View {
+    @State private var showLaunch = true
+    let dependencies: AppDependencies
+
+    var body: some View {
+        ZStack {
+            ContentView(dependencies: dependencies)
+                .opacity(showLaunch ? 0 : 1)
+                .animation(.easeInOut(duration: 0.35), value: showLaunch)
+
+            if showLaunch {
+                LaunchScreenView()
+                    .transition(.opacity)
                     .animation(.easeInOut(duration: 0.35), value: showLaunch)
+                    .task {
+                        try? await Task.sleep(for: .seconds(1.2))
+                        guard !Task.isCancelled else { return }
 
-                if showLaunch {
-                    LaunchScreenView()
-                        .transition(.opacity)
-                        .animation(.easeInOut(duration: 0.35), value: showLaunch)
-                        .task {
-                            try? await Task.sleep(for: .seconds(1.2))
-                            guard !Task.isCancelled else { return }
-
-                            withAnimation {
-                                showLaunch = false
-                            }
+                        withAnimation {
+                            showLaunch = false
                         }
-                }
+                    }
             }
         }
     }

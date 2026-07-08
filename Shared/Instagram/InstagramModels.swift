@@ -12,6 +12,7 @@ struct IGStory: Identifiable, Hashable, Sendable {
     let handle: String
     let imageName: String
     let isLive: Bool
+    var profileImageUrl: String? = nil
 
     var accessibilityLabel: String {
         isLive ? "\(handle) live story" : "\(handle) story"

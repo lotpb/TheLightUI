@@ -14,9 +14,18 @@ struct InstagramHome: View {
     }
 
     @State private var currentTab = InstagramHomeTab.home
+    @State private var viewModel = MainMessagesViewModel()
     @Environment(\.dismiss) private var dismiss
 
-    private let stories = IGStory.sampleStories
+    // "Your story" shows the signed-in user's avatar, matching TwitterUI.
+    private var stories: [IGStory] {
+        var stories = IGStory.sampleStories
+        if let index = stories.firstIndex(where: { $0.handle == "Your story" }) {
+            stories[index].profileImageUrl = viewModel.chatUser?.profileImageUrl
+        }
+        return stories
+    }
+
     private let posts = IGFeedPost.samplePosts
     private let suggestions = IGSuggestion.sampleSuggestions
 
@@ -49,6 +58,7 @@ struct InstagramHome: View {
             .navigationTitle(currentTab.navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbarContent }
+            .task { await viewModel.fetchCurrentUser() }
         }
     }
 

@@ -83,14 +83,13 @@ struct LeadDetailHeaderView: View {
             Button {
                 toggleActive()
             } label: {
-                Label {
+                HStack(spacing: 6) {
                     Text(detail.isActive ? "Following" : "Follow")
                         .foregroundStyle(Color.accentColor)
-                } icon: {
                     Image(systemName: detail.isActive ? "star.fill" : "star")
+                        .foregroundStyle(detail.isActive ? Color.yellow : Color.secondary)
                 }
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(detail.isActive ? .yellow : .secondary)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Toggle Follow")

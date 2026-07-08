@@ -54,9 +54,7 @@ struct IGStoryButton: View {
                         .strokeBorder(story.isLive ? Color.red : Color.pink, lineWidth: 3)
                         .frame(width: 70, height: 70)
 
-                    Image(story.imageName)
-                        .resizable()
-                        .scaledToFill()
+                    ProfileAvatarImage(urlString: story.profileImageUrl, fallbackImageName: story.imageName)
                         .frame(width: 62, height: 62)
                         .clipShape(Circle())
                         .background(Circle().fill(Color(.secondarySystemBackground)))
