@@ -19,6 +19,9 @@ struct MapButtonView: View {
     @State private var showDirections = false
     @State private var showLocationPermissionExplanation = false
     @State private var lastNon3DMapType: MKMapType = .standard
+    @State private var geofenceDraft: GeofenceDraft?
+
+    private let geofenceManager = GeofenceManager.shared
 
     private var speedText: String {
         Measurement(value: max(manager.location?.speed ?? 0, 0), unit: UnitSpeed.metersPerSecond)
@@ -37,6 +40,9 @@ struct MapButtonView: View {
         .padding()
         .sheet(isPresented: $showDirections) {
             directionsSheet
+        }
+        .sheet(item: $geofenceDraft) { draft in
+            GeofenceEditorSheet(center: draft.center)
         }
         .confirmationDialog(
             "Use your current location to center the map and calculate nearby directions.",
@@ -62,6 +68,7 @@ struct MapButtonView: View {
         VStack {
             mapTypeButton
             threeDButton
+            geofenceButton
             Spacer()
             locationButton
                 .padding(.bottom, 50)
@@ -128,7 +135,42 @@ struct MapButtonView: View {
         .foregroundStyle(Color.primary)
         .accessibilityLabel(mapType == .hybridFlyover ? "Switch to 2D Mode" : "Switch to 3D Mode")
     }
-    
+
+    private var geofenceButton: some View {
+        Menu {
+            Button {
+                geofenceDraft = GeofenceDraft(center: manager.region.center)
+            } label: {
+                Label("Add Geofence Here", systemImage: "plus.circle")
+            }
+            .disabled(!geofenceManager.canAddGeofence)
+
+            if !geofenceManager.geofences.isEmpty {
+                Menu {
+                    ForEach(geofenceManager.geofences) { geofence in
+                        Button(role: .destructive) {
+                            Task { await geofenceManager.removeGeofence(geofence) }
+                        } label: {
+                            Text(geofence.id)
+                        }
+                    }
+                } label: {
+                    Label("Remove Geofence", systemImage: "minus.circle")
+                }
+
+                Button(role: .destructive) {
+                    Task { await geofenceManager.removeAllGeofences() }
+                } label: {
+                    Label("Remove All Geofences", systemImage: "trash")
+                }
+            }
+        } label: {
+            circularIcon("circle.dashed")
+        }
+        .foregroundStyle(Color.primary)
+        .accessibilityLabel("Geofences")
+    }
+
     private var locationButton: some View {
         Button {
             if manager.locationStatus == .notDetermined {
@@ -331,4 +373,3 @@ private struct CircularIconStyle: ViewModifier {
             .overlay(Circle().stroke(Color.black.opacity(0.06), lineWidth: 1))
     }
 }
-

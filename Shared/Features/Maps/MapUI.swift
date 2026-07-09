@@ -15,6 +15,7 @@ private enum MapLayout {
     static let bannerHorizontalContentPadding: CGFloat = 14
     static let bannerVerticalContentPadding: CGFloat = 10
     static let bannerStrokeOpacity: CGFloat = 0.06
+    static let geofenceEventDisplayDuration: Duration = .seconds(4)
 }
 
 struct MapDestination: Equatable {
@@ -53,6 +54,7 @@ struct MapUI: View {
     @State private var routeStatus: RouteStatus = .idle
 
     private let mode: MapMode
+    private let geofenceManager = GeofenceManager.shared
 
     @State var travelTime: Double
     @State var distance: Double
@@ -100,8 +102,8 @@ struct MapUI: View {
                 mapType: $mapType
             )
             .zIndex(1)
-            // Route status banner
-            routeStatusBanner
+            // Route status and geofence event banners
+            statusBanners
                 .zIndex(2)
             // Bottom sheet with travel details
             bottomSheetLayer
@@ -115,6 +117,9 @@ struct MapUI: View {
         }
         .task {
             await userViewModel.fetchCurrentUser()
+        }
+        .task {
+            await geofenceManager.start()
         }
     }
 
@@ -133,6 +138,15 @@ struct MapUI: View {
         .ignoresSafeArea()
     }
 
+    private var statusBanners: some View {
+        VStack(spacing: 8) {
+            routeStatusBanner
+            geofenceEventBanner
+        }
+        .padding(.top, MapLayout.bannerTopPadding)
+        .animation(.spring(response: 0.28, dampingFraction: 0.86), value: geofenceManager.latestEvent)
+    }
+
     @ViewBuilder
     private var routeStatusBanner: some View {
         switch routeStatus {
@@ -142,6 +156,18 @@ struct MapUI: View {
             routeStatusContent(systemImage: "exclamationmark.triangle.fill", message: message)
         case .idle, .ready:
             EmptyView()
+        }
+    }
+
+    @ViewBuilder
+    private var geofenceEventBanner: some View {
+        if let event = geofenceManager.latestEvent {
+            routeStatusContent(systemImage: event.systemImage, message: event.message)
+                .task(id: event) {
+                    try? await Task.sleep(for: MapLayout.geofenceEventDisplayDuration)
+                    guard !Task.isCancelled else { return }
+                    geofenceManager.clearLatestEvent()
+                }
         }
     }
 
@@ -165,7 +191,6 @@ struct MapUI: View {
         .padding(.vertical, MapLayout.bannerVerticalContentPadding)
         .background(.thinMaterial, in: Capsule())
         .overlay(Capsule().strokeBorder(Color.black.opacity(MapLayout.bannerStrokeOpacity), lineWidth: 1))
-        .padding(.top, MapLayout.bannerTopPadding)
         .padding(.horizontal, MapLayout.bannerHorizontalPadding)
         .transition(.move(edge: .top).combined(with: .opacity))
         .animation(.spring(response: 0.28, dampingFraction: 0.86), value: routeStatus)
