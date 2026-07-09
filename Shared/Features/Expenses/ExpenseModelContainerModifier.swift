@@ -9,7 +9,10 @@ import SwiftData
 extension View {
     @ViewBuilder
     func expenseModelContainer() -> some View {
-        if #available(iOS 27.0, *) {
+        // Keep this gate at the SwiftData floor (iOS 17): "Designed for iPad" on
+        // the Mac reports the macOS-equivalent iOS version (e.g. 26.x), so a
+        // higher gate silently drops the container there and Expenses shows empty.
+        if #available(iOS 17.0, *) {
             ExpenseModelContainerView(content: self)
         } else {
             self
@@ -17,13 +20,12 @@ extension View {
     }
 }
 
-@available(iOS 27.0, *)
+@available(iOS 17.0, *)
 private struct ExpenseModelContainerView<Content: View>: View {
     let content: Content
-    @State private var container = ExpenseModelContainerFactory.makeContainer()
 
     var body: some View {
-        if let container {
+        if let container = ExpenseModelContainerFactory.shared {
             content.modelContainer(container)
         } else {
             ContentUnavailableView(
@@ -35,10 +37,16 @@ private struct ExpenseModelContainerView<Content: View>: View {
     }
 }
 
-@available(iOS 27.0, *)
+@available(iOS 17.0, *)
+@MainActor
 private enum ExpenseModelContainerFactory {
-    @MainActor
-    static func makeContainer() -> ModelContainer? {
+    /// One container shared by every entry point (Expense tab and the main-menu
+    /// route). Each entry point previously built its own container over the same
+    /// store, so an import saved through one screen never reached the @Query of
+    /// the other, still-alive screen.
+    static let shared: ModelContainer? = makeContainer()
+
+    private static func makeContainer() -> ModelContainer? {
         let schema = Schema([Expense.self])
         let persistentConfiguration = ModelConfiguration(schema: schema)
 

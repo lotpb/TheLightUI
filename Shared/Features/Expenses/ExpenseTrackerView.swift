@@ -5,14 +5,7 @@
 
 import SwiftUI
 import SwiftData
-import Charts
-
-/// Shared currency format style derived from the user's current locale.
-private enum ExpenseFormat {
-    static var currency: FloatingPointFormatStyle<Double>.Currency {
-        .currency(code: Locale.current.currency?.identifier ?? "USD")
-    }
-}
+import UniformTypeIdentifiers
 
 struct ExpenseTrackerView: View {
     @AppStorage("color") private var color: Int?
@@ -20,6 +13,12 @@ struct ExpenseTrackerView: View {
     @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
     @State private var viewModel = ExpenseTrackerViewModel()
     @State private var isShowingEditor = false
+    @State private var isImporting = false
+    @State private var isExporting = false
+    @State private var exportDocument: ExpenseJSONDocument?
+    @State private var transferMessage: String?
+    @State private var isShowingTransferAlert = false
+    @State private var jsonPreview: ExpenseJSONPreview?
 
     private var visibleExpenses: [Expense] {
         viewModel.visibleExpenses(from: expenses)
@@ -54,6 +53,24 @@ struct ExpenseTrackerView: View {
                                 .tag(order)
                         }
                     }
+                    Divider()
+                    Button {
+                        isImporting = true
+                    } label: {
+                        Label("Import JSON", systemImage: "square.and.arrow.down")
+                    }
+                    Button {
+                        startExport()
+                    } label: {
+                        Label("Export JSON", systemImage: "square.and.arrow.up")
+                    }
+                    .disabled(expenses.isEmpty)
+                    Button {
+                        showJSONPreview()
+                    } label: {
+                        Label("View JSON", systemImage: "doc.text.magnifyingglass")
+                    }
+                    .disabled(expenses.isEmpty)
                 } label: {
                     Image(systemName: viewModel.dateRange != .allTime ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
                 }
@@ -77,6 +94,81 @@ struct ExpenseTrackerView: View {
                 }
             }
         }
+        // .data is included because fileExporter on some iOS versions saves the
+        // file without a .json extension, which the system then types as generic
+        // data and the picker would grey out.
+        .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json, .plainText, .data]) { result in
+            handleImport(result)
+        }
+        .fileExporter(
+            isPresented: $isExporting,
+            document: exportDocument,
+            contentType: .json,
+            defaultFilename: "Expenses.json"
+        ) { result in
+            if case .failure(let error) = result {
+                showTransferMessage("Export failed: \(error.localizedDescription)")
+            }
+        }
+        .alert(transferMessage ?? "", isPresented: $isShowingTransferAlert) {
+            Button("OK", role: .cancel) {}
+        }
+        .sheet(item: $jsonPreview) { preview in
+            ExpenseJSONPreviewView(jsonText: preview.text)
+        }
+    }
+
+    private func showJSONPreview() {
+        do {
+            let data = try viewModel.exportData(for: expenses)
+            jsonPreview = ExpenseJSONPreview(text: String(decoding: data, as: UTF8.self))
+        } catch {
+            showTransferMessage("Could not generate JSON: \(error.localizedDescription)")
+        }
+    }
+
+    private func startExport() {
+        do {
+            exportDocument = ExpenseJSONDocument(data: try viewModel.exportData(for: expenses))
+            isExporting = true
+        } catch {
+            showTransferMessage("Export failed: \(error.localizedDescription)")
+        }
+    }
+
+    private func handleImport(_ result: Result<URL, Error>) {
+        do {
+            let url = try result.get()
+            let didStartAccess = url.startAccessingSecurityScopedResource()
+            defer {
+                if didStartAccess {
+                    url.stopAccessingSecurityScopedResource()
+                }
+            }
+            let data = try Data(contentsOf: url)
+            let result = try viewModel.importExpenses(from: data, into: modelContext)
+            showTransferMessage(importMessage(for: result))
+        } catch {
+            showTransferMessage("Import failed: \(error.localizedDescription)")
+        }
+    }
+
+    private func importMessage(for result: (inserted: Int, updated: Int)) -> String {
+        switch result {
+        case (0, 0):
+            return "All expenses in this file already exist and are up to date."
+        case (let inserted, 0):
+            return "Imported \(inserted) expense\(inserted == 1 ? "" : "s")."
+        case (0, let updated):
+            return "Updated \(updated) existing expense\(updated == 1 ? "" : "s")."
+        case (let inserted, let updated):
+            return "Imported \(inserted) new and updated \(updated) existing expense\(inserted + updated == 1 ? "" : "s")."
+        }
+    }
+
+    private func showTransferMessage(_ message: String) {
+        transferMessage = message
+        isShowingTransferAlert = true
     }
 
     private var summarySection: some View {
@@ -87,7 +179,7 @@ struct ExpenseTrackerView: View {
                         Text("Tracked Spend")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
-                        Text(viewModel.totalAmount(for: expenses), format: ExpenseFormat.currency)
+                        Text(viewModel.totalAmount(of: visibleExpenses), format: ExpenseFormat.currency)
                             .font(.system(.largeTitle, design: .rounded, weight: .bold))
                             .contentTransition(.numericText())
                             .lineLimit(1)
@@ -108,7 +200,7 @@ struct ExpenseTrackerView: View {
                     )
                     SummaryMetricView(
                         title: "Reimburse",
-                        value: viewModel.reimbursableTotal(for: expenses).formatted(ExpenseFormat.currency),
+                        value: viewModel.reimbursableTotal(of: visibleExpenses).formatted(ExpenseFormat.currency),
                         systemImage: "arrow.triangle.2.circlepath",
                         accentColor: themeColor
                     )
@@ -193,171 +285,6 @@ struct ExpenseTrackerView: View {
     }
 }
 
-private struct CategoryBreakdownChart: View {
-    let categoryTotals: [(category: ExpenseCategory, total: Double)]
-    @State private var selectedAmount: Double?
-
-    private var total: Double {
-        categoryTotals.reduce(0) { $0 + $1.total }
-    }
-
-    /// Maps the raw angle selection back to the category whose cumulative
-    /// total spans the selected value.
-    private var selectedItem: (category: ExpenseCategory, total: Double)? {
-        guard let selectedAmount else { return nil }
-        var cumulative = 0.0
-        for item in categoryTotals {
-            cumulative += item.total
-            if selectedAmount <= cumulative { return item }
-        }
-        return nil
-    }
-
-    var body: some View {
-        Chart(categoryTotals, id: \.category) { item in
-            SectorMark(
-                angle: .value("Total", item.total),
-                innerRadius: .ratio(0.62),
-                angularInset: 1.5
-            )
-            .cornerRadius(4)
-            .foregroundStyle(by: .value("Category", item.category.rawValue))
-            .opacity(selectedItem == nil || selectedItem?.category == item.category ? 1 : 0.35)
-        }
-        .chartAngleSelection(value: $selectedAmount)
-        .chartLegend(position: .bottom, alignment: .center)
-        .chartBackground { proxy in
-            GeometryReader { geometry in
-                if let plotFrame = proxy.plotFrame {
-                    let frame = geometry[plotFrame]
-                    VStack(spacing: 2) {
-                        Text(selectedItem?.category.rawValue ?? "Total")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Text(selectedItem?.total ?? total, format: ExpenseFormat.currency)
-                            .font(.headline.monospacedDigit())
-                            .contentTransition(.numericText())
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.6)
-                    }
-                    .frame(maxWidth: frame.width * 0.5)
-                    .position(x: frame.midX, y: frame.midY)
-                }
-            }
-        }
-        .animation(.snappy, value: selectedItem?.category)
-    }
-}
-
-private struct ExpenseRowView: View {
-    let expense: Expense
-    let accentColor: Color
-
-    var body: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(accentColor.opacity(0.14))
-                    .frame(width: 42, height: 42)
-                Image(systemName: expense.category.systemImage)
-                    .foregroundStyle(accentColor)
-            }
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(expense.title)
-                    .font(.headline)
-                    .lineLimit(1)
-                HStack(spacing: 6) {
-                    Text(expense.category.rawValue)
-                    Text(expense.date, style: .date)
-                    if expense.isReimbursable {
-                        Text("Reimbursable")
-                    }
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-            }
-
-            Spacer()
-
-            Text(expense.amount, format: ExpenseFormat.currency)
-                .font(.headline.monospacedDigit())
-                .lineLimit(1)
-                .minimumScaleFactor(0.75)
-        }
-        .padding(.vertical, 4)
-    }
-}
-
-private struct ExpenseDetailView: View {
-    let expense: Expense
-
-    var body: some View {
-        List {
-            Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(expense.amount, format: ExpenseFormat.currency)
-                        .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                    Label(expense.category.rawValue, systemImage: expense.category.systemImage)
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.vertical, 8)
-            }
-
-            Section("Details") {
-                LabeledContent("Date") { Text(expense.date, style: .date) }
-                LabeledContent("Type") { Text(expense.isReimbursable ? "Reimbursable" : "Personal") }
-                if !expense.notes.isEmpty {
-                    LabeledContent("Notes") { Text(expense.notes) }
-                }
-            }
-        }
-        .navigationTitle(expense.title)
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-private struct ExpenseEditorView: View {
-    @Environment(\.dismiss) private var dismiss
-    @Bindable var viewModel: ExpenseTrackerViewModel
-    let onSave: () -> Void
-
-    var body: some View {
-        Form {
-            Section("Expense") {
-                TextField("Title", text: $viewModel.title)
-                TextField("Amount", text: $viewModel.amountText)
-                    .keyboardType(.decimalPad)
-                Picker("Category", selection: $viewModel.category) {
-                    ForEach(ExpenseCategory.allCases) { category in
-                        Label(category.rawValue, systemImage: category.systemImage)
-                            .tag(category)
-                    }
-                }
-                DatePicker("Date", selection: $viewModel.date, displayedComponents: .date)
-                Toggle("Reimbursable", isOn: $viewModel.isReimbursable)
-            }
-
-            Section("Notes") {
-                TextField("Optional notes", text: $viewModel.notes, axis: .vertical)
-                    .lineLimit(3...6)
-            }
-        }
-        .navigationTitle("Expense")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") { dismiss() }
-            }
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Save") { onSave() }
-                    .disabled(!viewModel.canSave)
-            }
-        }
-    }
-}
-
 private struct SummaryMetricView: View {
     let title: String
     let value: String
@@ -383,26 +310,6 @@ private struct SummaryMetricView: View {
         }
         .padding(10)
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-    }
-}
-
-enum ExpensePreviewData {
-    @MainActor
-    static var container: ModelContainer {
-        let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try! ModelContainer(for: Expense.self, configurations: configuration)
-
-        sampleExpenses.forEach { container.mainContext.insert($0) }
-        return container
-    }
-
-    static var sampleExpenses: [Expense] {
-        [
-            Expense(title: "Client lunch", amount: 84.32, category: .meals, date: .now.addingTimeInterval(-86400), notes: "Downtown meeting", isReimbursable: true),
-            Expense(title: "Design software", amount: 29.99, category: .software, date: .now.addingTimeInterval(-172800), isReimbursable: false),
-            Expense(title: "Airport parking", amount: 46.00, category: .travel, date: .now.addingTimeInterval(-259200), isReimbursable: true),
-            Expense(title: "Office supplies", amount: 118.47, category: .supplies, date: .now.addingTimeInterval(-432000), isReimbursable: false)
-        ]
     }
 }
 

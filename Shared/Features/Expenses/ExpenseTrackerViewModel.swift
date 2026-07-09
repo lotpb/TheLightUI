@@ -52,12 +52,15 @@ final class ExpenseTrackerViewModel {
         }
     }
 
-    func totalAmount(for expenses: [Expense]) -> Double {
-        visibleExpenses(from: expenses).reduce(0) { $0 + $1.amount }
+    /// Expects the already-filtered list from `visibleExpenses(from:)` so the
+    /// filter isn't recomputed for every metric.
+    func totalAmount(of visibleExpenses: [Expense]) -> Double {
+        visibleExpenses.reduce(0) { $0 + $1.amount }
     }
 
-    func reimbursableTotal(for expenses: [Expense]) -> Double {
-        visibleExpenses(from: expenses).filter(\.isReimbursable).reduce(0) { $0 + $1.amount }
+    /// Expects the already-filtered list from `visibleExpenses(from:)`.
+    func reimbursableTotal(of visibleExpenses: [Expense]) -> Double {
+        visibleExpenses.filter(\.isReimbursable).reduce(0) { $0 + $1.amount }
     }
 
     func categoryTotals(for expenses: [Expense]) -> [(category: ExpenseCategory, total: Double)] {
@@ -121,5 +124,49 @@ final class ExpenseTrackerViewModel {
     func delete(_ expense: Expense, from context: ModelContext) {
         context.delete(expense)
         try? context.save()
+    }
+
+    func exportData(for expenses: [Expense]) throws -> Data {
+        let records = expenses.map(ExpenseRecord.init)
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return try encoder.encode(records)
+    }
+
+    /// Inserts decoded expenses, updating any whose id already exists so that
+    /// re-importing an export from the same device restores edited values
+    /// instead of silently skipping every record.
+    /// Returns the number of inserted and updated expenses.
+    func importExpenses(from data: Data, into context: ModelContext) throws -> (inserted: Int, updated: Int) {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let records = try decoder.decode([ExpenseRecord].self, from: data)
+
+        let existingExpenses = (try? context.fetch(FetchDescriptor<Expense>())) ?? []
+        let expensesByID = Dictionary(existingExpenses.map { ($0.id, $0) }) { first, _ in first }
+        var inserted = 0
+        var updated = 0
+        for record in records {
+            if let existing = expensesByID[record.id] {
+                if ExpenseRecord(existing) != record {
+                    record.apply(to: existing)
+                    updated += 1
+                }
+            } else {
+                context.insert(record.makeExpense())
+                inserted += 1
+            }
+        }
+
+        try context.save()
+
+        // Widen the date range if the current one would hide imported records,
+        // so a successful import is always visible in the list.
+        if inserted + updated > 0, records.contains(where: { !dateRange.includes($0.date) }) {
+            dateRange = .allTime
+        }
+
+        return (inserted, updated)
     }
 }

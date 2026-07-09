@@ -132,6 +132,18 @@
 		AF86C0692FDF1E3A00F450F9 /* MainMenuCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF86C0672FDF1E3A00F450F9 /* MainMenuCoordinator.swift */; };
 		AF86C06B2FDF1EF100F450F9 /* CustomerPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF86C06A2FDF1EF100F450F9 /* CustomerPresentation.swift */; };
 		AF86C06C2FDF1EF100F450F9 /* CustomerPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF86C06A2FDF1EF100F450F9 /* CustomerPresentation.swift */; };
+		AF892F522FFEFC75004D9563 /* ExpenseJSONTransfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF892F512FFEFC75004D9563 /* ExpenseJSONTransfer.swift */; };
+		AF892F532FFEFC75004D9563 /* ExpenseJSONTransfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF892F512FFEFC75004D9563 /* ExpenseJSONTransfer.swift */; };
+		AF892F552FFEFC7D004D9563 /* CategoryBreakdownChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF892F542FFEFC7D004D9563 /* CategoryBreakdownChart.swift */; };
+		AF892F562FFEFC7D004D9563 /* CategoryBreakdownChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF892F542FFEFC7D004D9563 /* CategoryBreakdownChart.swift */; };
+		AF892F582FFEFC86004D9563 /* ExpenseRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF892F572FFEFC86004D9563 /* ExpenseRowView.swift */; };
+		AF892F592FFEFC86004D9563 /* ExpenseRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF892F572FFEFC86004D9563 /* ExpenseRowView.swift */; };
+		AF892F5B2FFEFC8A004D9563 /* ExpenseDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF892F5A2FFEFC8A004D9563 /* ExpenseDetailView.swift */; };
+		AF892F5C2FFEFC8A004D9563 /* ExpenseDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF892F5A2FFEFC8A004D9563 /* ExpenseDetailView.swift */; };
+		AF892F5E2FFEFC8F004D9563 /* ExpenseEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF892F5D2FFEFC8F004D9563 /* ExpenseEditorView.swift */; };
+		AF892F5F2FFEFC8F004D9563 /* ExpenseEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF892F5D2FFEFC8F004D9563 /* ExpenseEditorView.swift */; };
+		AF892F612FFEFC93004D9563 /* ExpensePreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF892F602FFEFC93004D9563 /* ExpensePreviewData.swift */; };
+		AF892F622FFEFC93004D9563 /* ExpensePreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF892F602FFEFC93004D9563 /* ExpensePreviewData.swift */; };
 		AF8CA0A8277688C400142D38 /* SettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF8CA0A7277688C400142D38 /* SettingView.swift */; };
 		AF92B87C267812A400729208 /* TheLightUIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B85A267812A100729208 /* TheLightUIApp.swift */; };
 		AF92B87D267812A400729208 /* TheLightUIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF92B85A267812A100729208 /* TheLightUIApp.swift */; };
@@ -315,6 +327,12 @@
 		AF86C0652FDF1D7400F450F9 /* AppBadgeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppBadgeManager.swift; sourceTree = "<group>"; };
 		AF86C0672FDF1E3A00F450F9 /* MainMenuCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuCoordinator.swift; sourceTree = "<group>"; };
 		AF86C06A2FDF1EF100F450F9 /* CustomerPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerPresentation.swift; sourceTree = "<group>"; };
+		AF892F512FFEFC75004D9563 /* ExpenseJSONTransfer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseJSONTransfer.swift; sourceTree = "<group>"; };
+		AF892F542FFEFC7D004D9563 /* CategoryBreakdownChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBreakdownChart.swift; sourceTree = "<group>"; };
+		AF892F572FFEFC86004D9563 /* ExpenseRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseRowView.swift; sourceTree = "<group>"; };
+		AF892F5A2FFEFC8A004D9563 /* ExpenseDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseDetailView.swift; sourceTree = "<group>"; };
+		AF892F5D2FFEFC8F004D9563 /* ExpenseEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseEditorView.swift; sourceTree = "<group>"; };
+		AF892F602FFEFC93004D9563 /* ExpensePreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpensePreviewData.swift; sourceTree = "<group>"; };
 		AF8CA0A7277688C400142D38 /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingView.swift; path = Shared/Core/Settings/SettingView.swift; sourceTree = SOURCE_ROOT; };
 		AF92B85A267812A100729208 /* TheLightUIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheLightUIApp.swift; sourceTree = "<group>"; };
 		AF92B85C267812A300729208 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -443,6 +461,12 @@
 				AF488F812FE02FC100E5F294 /* ExpenseTrackerViewModel.swift */,
 				AF488F7E2FE02FAF00E5F294 /* ExpenseModels.swift */,
 				AF488F872FE0300200E5F294 /* ExpenseModelContainerModifier.swift */,
+				AF892F512FFEFC75004D9563 /* ExpenseJSONTransfer.swift */,
+				AF892F542FFEFC7D004D9563 /* CategoryBreakdownChart.swift */,
+				AF892F572FFEFC86004D9563 /* ExpenseRowView.swift */,
+				AF892F5A2FFEFC8A004D9563 /* ExpenseDetailView.swift */,
+				AF892F5D2FFEFC8F004D9563 /* ExpenseEditorView.swift */,
+				AF892F602FFEFC93004D9563 /* ExpensePreviewData.swift */,
 			);
 			path = Expenses;
 			sourceTree = "<group>";
@@ -1054,6 +1078,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AF892F562FFEFC7D004D9563 /* CategoryBreakdownChart.swift in Sources */,
 				AF4F5DCA2FC7430B0003B277 /* CreateNewMessageViewModel.swift in Sources */,
 				AF15AA2D275C5B2C0098CB04 /* ChatBubble.swift in Sources */,
 				AFA9531D2FDF33150003ADD1 /* LocationCaptureManager.swift in Sources */,
@@ -1078,6 +1103,7 @@
 				AFD5D8652FF450E8008934BE /* ChartView.swift in Sources */,
 				AF86C06B2FDF1EF100F450F9 /* CustomerPresentation.swift in Sources */,
 				AFE2C80F2FE0906B0086C5C8 /* MapRouteService.swift in Sources */,
+				AF892F5E2FFEFC8F004D9563 /* ExpenseEditorView.swift in Sources */,
 				AF4F5DE02FC74EDA0003B277 /* LoginViewModel.swift in Sources */,
 				AF4F5DF02FC758540003B277 /* CustomerFirestoreDTO.swift in Sources */,
 				AF4F5DDC2FC74EDA0003B277 /* LoginService.swift in Sources */,
@@ -1087,6 +1113,7 @@
 				AF488F7F2FE02FAF00E5F294 /* ExpenseModels.swift in Sources */,
 				AF03D36C27886D720021493A /* ColorOptions.swift in Sources */,
 				AFDE91D52793364D00302CF2 /* LandMarkListView.swift in Sources */,
+				AF892F5C2FFEFC8A004D9563 /* ExpenseDetailView.swift in Sources */,
 				AF2F674A2FF7F6CD00741D30 /* UserFormModel.swift in Sources */,
 				AFB7609F2FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */,
 				AFC519532FC89A98003A4AEA /* MessageDateFormatting.swift in Sources */,
@@ -1120,6 +1147,7 @@
 				AFDE91D32793361700302CF2 /* LandMarkCategoryView.swift in Sources */,
 				AF4F5DC12FC742E40003B277 /* ChatRepository.swift in Sources */,
 				AF92B8A62678157100729208 /* ExtensionUI.swift in Sources */,
+				AF892F592FFEFC86004D9563 /* ExpenseRowView.swift in Sources */,
 				AFBCC5E22765671E00F0B0A8 /* FirebaseConstants.swift in Sources */,
 				AF5373842778C099001F40B6 /* WeatherManager.swift in Sources */,
 				AFB760A62FE22CA2002D1A83 /* MainMenuSections.swift in Sources */,
@@ -1168,12 +1196,14 @@
 				AF92B8B3267816A600729208 /* Song.swift in Sources */,
 				AF9CC6FB279B2CF10087E9FC /* NoItemsView.swift in Sources */,
 				AF997FB22FE3244900797FD5 /* TipUI.swift in Sources */,
+				AF892F622FFEFC93004D9563 /* ExpensePreviewData.swift in Sources */,
 				AF4F5E0B2FC75DC40003B277 /* BottomSheetUI.swift in Sources */,
 				AF86C0662FDF1D7400F450F9 /* AppBadgeManager.swift in Sources */,
 				AFDE91D9279337C300302CF2 /* LocationManager.swift in Sources */,
 				AFDE91D72793367300302CF2 /* RecenterButton.swift in Sources */,
 				AFD5D8A62FF458A4008934BE /* InstagramModels.swift in Sources */,
 				AF745F1027513D4F00E9DB74 /* ChatLogView.swift in Sources */,
+				AF892F522FFEFC75004D9563 /* ExpenseJSONTransfer.swift in Sources */,
 				AF4F5DF92FC75C340003B277 /* LeadDetailFieldRow.swift in Sources */,
 				AF54E4DF2773B22E0062B1F4 /* LeadDetailUI.swift in Sources */,
 				AF4F5DC42FC742F30003B277 /* MainMessagesViewModel.swift in Sources */,
@@ -1209,6 +1239,8 @@
 				AF997FB62FE32ABD00797FD5 /* StepsTodayView.swift in Sources */,
 				AF77D64F2FC7A3FA008D456A /* CustomerFormViewModel.swift in Sources */,
 				AF488F892FE0300200E5F294 /* ExpenseModelContainerModifier.swift in Sources */,
+				AF892F532FFEFC75004D9563 /* ExpenseJSONTransfer.swift in Sources */,
+				AF892F582FFEFC86004D9563 /* ExpenseRowView.swift in Sources */,
 				AF4F5DC02FC742E40003B277 /* ChatRepository.swift in Sources */,
 				AF4A670827565F40005D1D8B /* AuthenticationService.swift in Sources */,
 				AF745F1127513D4F00E9DB74 /* ChatLogView.swift in Sources */,
@@ -1227,6 +1259,7 @@
 				AF86C0692FDF1E3A00F450F9 /* MainMenuCoordinator.swift in Sources */,
 				AF4F5DFA2FC75C340003B277 /* LeadDetailFieldRow.swift in Sources */,
 				AF997FB32FE3244900797FD5 /* TipUI.swift in Sources */,
+				AF892F5B2FFEFC8A004D9563 /* ExpenseDetailView.swift in Sources */,
 				AF488F822FE02FC100E5F294 /* ExpenseTrackerViewModel.swift in Sources */,
 				AF86C0632FDF1B3B00F450F9 /* CustomerListViewModel.swift in Sources */,
 				AF4F5DEA2FC750B60003B277 /* CustomerData.swift in Sources */,
@@ -1247,10 +1280,12 @@
 				AFD5D8962FF4552F008934BE /* BlurViewUI.swift in Sources */,
 				AFD5D8972FF4552F008934BE /* GlassMorphism.swift in Sources */,
 				AFD5D8982FF4552F008934BE /* ScrollViewOffsetModifier.swift in Sources */,
+				AF892F552FFEFC7D004D9563 /* CategoryBreakdownChart.swift in Sources */,
 				AFD5D8992FF4552F008934BE /* CalendarEventEditView.swift in Sources */,
 				AFD5D89A2FF4552F008934BE /* Loader.swift in Sources */,
 				AFD5D89B2FF4552F008934BE /* ContactAddView.swift in Sources */,
 				AFD5D8AC2FF458C7008934BE /* InstagramDiscoverViews.swift in Sources */,
+				AF892F5F2FFEFC8F004D9563 /* ExpenseEditorView.swift in Sources */,
 				AFD5D89C2FF4552F008934BE /* SFSafariViewWrapper.swift in Sources */,
 				AFD5D89D2FF4552F008934BE /* StarRating.swift in Sources */,
 				AFD5D89E2FF4552F008934BE /* AppTheme.swift in Sources */,
@@ -1264,6 +1299,7 @@
 				AF4F5DF62FC75C330003B277 /* LeadDetailHeaderView.swift in Sources */,
 				AF34848B274568BE0091BA5A /* FirebaseManager.swift in Sources */,
 				AF0A234A274C33E700B18BBF /* CreateNewMessageView.swift in Sources */,
+				AF892F612FFEFC93004D9563 /* ExpensePreviewData.swift in Sources */,
 				AF108C0E2762681200084752 /* ChatMessage.swift in Sources */,
 				AFBCC5E32765671E00F0B0A8 /* FirebaseConstants.swift in Sources */,
 				AF108C0B276260C700084752 /* RecentMessage.swift in Sources */,

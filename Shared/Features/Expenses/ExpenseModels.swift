@@ -6,6 +6,13 @@
 import Foundation
 import SwiftData
 
+/// Shared currency format style derived from the user's current locale.
+enum ExpenseFormat {
+    static var currency: FloatingPointFormatStyle<Double>.Currency {
+        .currency(code: Locale.current.currency?.identifier ?? "USD")
+    }
+}
+
 @Model
 final class Expense {
     @Attribute(.unique) var id: UUID
@@ -37,6 +44,48 @@ final class Expense {
     var category: ExpenseCategory {
         get { ExpenseCategory(rawValue: categoryRawValue) ?? .other }
         set { categoryRawValue = newValue.rawValue }
+    }
+}
+
+/// Codable snapshot of an Expense used for JSON import/export.
+struct ExpenseRecord: Codable, Equatable {
+    var id: UUID
+    var title: String
+    var amount: Double
+    var category: ExpenseCategory
+    var date: Date
+    var notes: String
+    var isReimbursable: Bool
+
+    init(_ expense: Expense) {
+        id = expense.id
+        title = expense.title
+        amount = expense.amount
+        category = expense.category
+        date = expense.date
+        notes = expense.notes
+        isReimbursable = expense.isReimbursable
+    }
+
+    func makeExpense() -> Expense {
+        Expense(
+            id: id,
+            title: title,
+            amount: amount,
+            category: category,
+            date: date,
+            notes: notes,
+            isReimbursable: isReimbursable
+        )
+    }
+
+    func apply(to expense: Expense) {
+        expense.title = title
+        expense.amount = amount
+        expense.category = category
+        expense.date = date
+        expense.notes = notes
+        expense.isReimbursable = isReimbursable
     }
 }
 
