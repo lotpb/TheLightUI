@@ -35,6 +35,12 @@ struct CustomerUI: View {
     // Confirmation dialog state for destructive/side-effectful actions.
     @State private var confirmMarkContacted = false
     @State private var pendingContactItem: CustomerItem? = nil
+    // JSON import/export state.
+    @State private var isImporting = false
+    @State private var isExporting = false
+    @State private var exportDocument: CustomerJSONDocument?
+    @State private var transferMessage: String?
+    @State private var isShowingTransferAlert = false
     
     // Primary initializer for production: creates its own data sources.
     @MainActor
@@ -134,6 +140,25 @@ struct CustomerUI: View {
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text("This will remove any pending reminders for \(pendingContactItem?.lastname ?? "this customer").")
+            }
+            // .data is included because fileExporter on some iOS versions saves the
+            // file without a .json extension, which the system then types as generic
+            // data and the picker would grey out.
+            .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json, .plainText, .data]) { result in
+                handleImport(result)
+            }
+            .fileExporter(
+                isPresented: $isExporting,
+                document: exportDocument,
+                contentType: .json,
+                defaultFilename: "Customerswift.json"
+            ) { result in
+                if case .failure(let error) = result {
+                    showTransferMessage("Export failed: \(error.localizedDescription)")
+                }
+            }
+            .alert(transferMessage ?? "", isPresented: $isShowingTransferAlert) {
+                Button("OK", role: .cancel) {}
             }
             // Inject shared models into subtree.
             .environment(viewModel)
@@ -242,7 +267,8 @@ struct CustomerUI: View {
         }
     }
     
-    // Sort menu anchored in the toolbar with a Picker over all SortType cases.
+    // Sort menu anchored in the toolbar with a Picker over all SortType cases,
+    // plus JSON import/export actions.
     private var sortMenu: some View {
         Menu {
             Picker("Sorting options", selection: $listViewModel.selectedSort) {
@@ -251,6 +277,18 @@ struct CustomerUI: View {
                         .tag(sort)
                 }
             }
+            Divider()
+            Button {
+                isImporting = true
+            } label: {
+                Label("Import JSON", systemImage: "square.and.arrow.down")
+            }
+            Button {
+                startExport()
+            } label: {
+                Label("Export JSON", systemImage: "square.and.arrow.up")
+            }
+            .disabled(viewModel.items.isEmpty)
         } label: {
             Label("Sort", systemImage: "line.3.horizontal.decrease.circle")
         }
@@ -278,13 +316,13 @@ struct CustomerUI: View {
             EditButton()
         }
 
-        // Actions: add new customer and open sort menu.
+        // Actions: open sort menu and add new customer (trailing edge).
         ToolbarItemGroup(placement: .topBarTrailing) {
+            sortMenu
+
             Button(action: { isAddingCustomer = true }) {
                 Label("New", systemImage: "plus")
             }
-
-            sortMenu
         }
     }
 
@@ -305,6 +343,95 @@ struct CustomerUI: View {
     // Delegate deletion to the view model.
     private func deleteItems(_ items: [CustomerItem]) {
         viewModel.deleteItems(items)
+    }
+
+    // MARK: - JSON Import/Export
+
+    // Encode the current customer list and present the file exporter.
+    private func startExport() {
+        do {
+            exportDocument = CustomerJSONDocument(data: try CustomerJSONTransfer.exportData(for: viewModel.items))
+            isExporting = true
+        } catch {
+            showTransferMessage("Export failed: \(error.localizedDescription)")
+        }
+    }
+
+    // Read the picked file and hand its decoded records to the importer.
+    private func handleImport(_ result: Result<URL, Error>) {
+        do {
+            let url = try result.get()
+            let didStartAccess = url.startAccessingSecurityScopedResource()
+            defer {
+                if didStartAccess {
+                    url.stopAccessingSecurityScopedResource()
+                }
+            }
+            let data = try Data(contentsOf: url)
+            importRecords(try CustomerJSONTransfer.decodeRecords(from: data))
+        } catch {
+            showTransferMessage("Import failed: \(error.localizedDescription)")
+        }
+    }
+
+    // Upserts imported records into Firestore. Records that keep their exported
+    // document id overwrite the matching document, so re-importing a backup
+    // restores edits instead of duplicating customers. The snapshot listener
+    // refreshes the list automatically once the writes land.
+    private func importRecords(_ records: [CustomerJSONRecord]) {
+        let existingIDs = Set(viewModel.items.map(\.id))
+        Task {
+            var inserted = 0
+            var updated = 0
+            do {
+                for record in records {
+                    let item = record.customerItem
+                    let payload = CustomerFormPayload(
+                        customer: item,
+                        amount: item.amount,
+                        quantity: item.quantity,
+                        rate: item.rate,
+                        creationDate: item.creationDate,
+                        startDate: item.startDate,
+                        completionDate: item.completionDate,
+                        lastUpdateDate: item.lastUpdateDate,
+                        userId: formService.currentUserId
+                    )
+                    if item.id.isEmpty {
+                        _ = try await formService.addCustomer(payload)
+                        inserted += 1
+                    } else {
+                        try await formService.updateCustomer(id: item.id, payload: payload)
+                        if existingIDs.contains(item.id) {
+                            updated += 1
+                        } else {
+                            inserted += 1
+                        }
+                    }
+                }
+                showTransferMessage(importMessage(inserted: inserted, updated: updated))
+            } catch {
+                showTransferMessage("Import failed after \(inserted + updated) of \(records.count) customers: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func importMessage(inserted: Int, updated: Int) -> String {
+        switch (inserted, updated) {
+        case (0, 0):
+            return "No customers found in this file."
+        case (_, 0):
+            return "Imported \(inserted) customer\(inserted == 1 ? "" : "s")."
+        case (0, _):
+            return "Updated \(updated) existing customer\(updated == 1 ? "" : "s")."
+        default:
+            return "Imported \(inserted) new and updated \(updated) existing customer\(inserted + updated == 1 ? "" : "s")."
+        }
+    }
+
+    private func showTransferMessage(_ message: String) {
+        transferMessage = message
+        isShowingTransferAlert = true
     }
 }
 
