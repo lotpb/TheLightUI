@@ -47,9 +47,7 @@ struct BottomSheetUI: View {
     private let safeAreaSpacing: CGFloat = 12
 
     private var speedText: String {
-        Measurement(value: max(locationManager.location?.speed ?? 0, 0), unit: UnitSpeed.metersPerSecond)
-            .converted(to: .milesPerHour)
-            .formatted(.measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(0))))
+        MapFormat.speed(locationManager.location?.speed ?? 0)
     }
 
     private var altitudeText: String {

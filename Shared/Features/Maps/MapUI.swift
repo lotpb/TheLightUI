@@ -18,33 +18,6 @@ private enum MapLayout {
     static let geofenceEventDisplayDuration: Duration = .seconds(4)
 }
 
-struct MapDestination: Equatable {
-    let street: String
-    let city: String
-    let state: String
-    let zip: String
-
-    var address: String {
-        "\(street) \(city), \(state) \(zip)"
-    }
-
-    var displayName: String {
-        "\(street), \(city)"
-    }
-}
-
-enum MapMode: Equatable {
-    case currentLocation
-    case route(destination: MapDestination)
-}
-
-enum RouteStatus: Equatable {
-    case idle
-    case loading
-    case ready
-    case failed(String)
-}
-
 @MainActor
 struct MapUI: View {
     @State private var manager = LocationManager()

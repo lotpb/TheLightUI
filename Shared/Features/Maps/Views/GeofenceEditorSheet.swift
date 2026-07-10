@@ -4,6 +4,7 @@
 //
 
 import CoreLocation
+import MapKit
 import SwiftUI
 
 /// The coordinate captured when the user chooses "Add Geofence Here",
@@ -13,20 +14,33 @@ struct GeofenceDraft: Identifiable {
     let center: CLLocationCoordinate2D
 }
 
-/// A form for naming a new geofence and choosing its radius before adding it.
+/// A form for naming a new geofence, positioning its center pin, and choosing
+/// its radius before adding it. The pin can be dragged on the map to fine-tune
+/// where the fence is placed.
 struct GeofenceEditorSheet: View {
-    let center: CLLocationCoordinate2D
-
     @Environment(\.dismiss) private var dismiss
+    @State private var center: CLLocationCoordinate2D
     @State private var name = ""
     @State private var radius: Double = GeofenceManager.defaultRadius
 
     private let geofenceManager = GeofenceManager.shared
     private static let radiusRange: ClosedRange<Double> = 50...1000
 
+    init(center: CLLocationCoordinate2D) {
+        self._center = State(initialValue: center)
+    }
+
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    mapSection
+                        .frame(height: 220)
+                        .listRowInsets(EdgeInsets())
+                } footer: {
+                    Text("Drag the pin to adjust the geofence location.")
+                }
+
                 Section("Name") {
                     TextField(geofenceManager.suggestedName, text: $name)
                 }
@@ -53,7 +67,41 @@ struct GeofenceEditorSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
+    }
+
+    /// A map preview of the fence. The pin is draggable: the drag location is
+    /// converted back to a coordinate through the MapProxy.
+    private var mapSection: some View {
+        MapReader { proxy in
+            Map(initialPosition: .region(initialRegion)) {
+                MapCircle(center: center, radius: radius)
+                    .foregroundStyle(.blue.opacity(0.15))
+                    .stroke(.blue, lineWidth: 2)
+
+                Annotation("", coordinate: center) {
+                    Image(systemName: "mappin.circle.fill")
+                        .font(.system(size: 34))
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(.white, .red)
+                        .shadow(radius: 2)
+                        .gesture(
+                            DragGesture(minimumDistance: 1, coordinateSpace: .global)
+                                .onChanged { value in
+                                    if let coordinate = proxy.convert(value.location, from: .global) {
+                                        center = coordinate
+                                    }
+                                }
+                        )
+                }
+            }
+        }
+    }
+
+    /// A region wide enough to show the largest selectable radius around the pin.
+    private var initialRegion: MKCoordinateRegion {
+        let span = Self.radiusRange.upperBound * 2.5
+        return MKCoordinateRegion(center: center, latitudinalMeters: span, longitudinalMeters: span)
     }
 
     private var formattedRadius: String {

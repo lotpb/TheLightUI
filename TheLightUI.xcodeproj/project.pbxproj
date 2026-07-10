@@ -26,6 +26,8 @@
 		AF15AA2D275C5B2C0098CB04 /* ChatBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF15AA2C275C5B2C0098CB04 /* ChatBubble.swift */; };
 		AF15AA2E275C5B2C0098CB04 /* ChatBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF15AA2C275C5B2C0098CB04 /* ChatBubble.swift */; };
 		AF1B37AB27935EAB00374C0F /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1B37AA27935EAB00374C0F /* NotificationManager.swift */; };
+		AF219A9B30011A4700A90D4A /* MapModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF219A9A30011A4700A90D4A /* MapModels.swift */; };
+		AF219A9D30011A4D00A90D4A /* MapFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF219A9C30011A4D00A90D4A /* MapFormatting.swift */; };
 		AF2F67402FF7F20400741D30 /* LaunchScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F67362FF7F20400741D30 /* LaunchScreenView.swift */; };
 		AF2F674A2FF7F6CD00741D30 /* UserFormModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F67492FF7F6CD00741D30 /* UserFormModel.swift */; };
 		AF2F674B2FF7F6CD00741D30 /* UserFormModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F67492FF7F6CD00741D30 /* UserFormModel.swift */; };
@@ -34,6 +36,9 @@
 		AF34848A274568BE0091BA5A /* FirebaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF348489274568BE0091BA5A /* FirebaseManager.swift */; };
 		AF34848B274568BE0091BA5A /* FirebaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF348489274568BE0091BA5A /* FirebaseManager.swift */; };
 		AF34848E27457B8C0091BA5A /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = AF34848D27457B8C0091BA5A /* SDWebImageSwiftUI */; };
+		AF38E46B300036B100090C03 /* GeofenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF38E46A300036B100090C03 /* GeofenceManager.swift */; };
+		AF38E46D300036B800090C03 /* GeofenceEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF38E46C300036B800090C03 /* GeofenceEditorSheet.swift */; };
+		AF38E46E300036B800090C03 /* GeofenceEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF38E46C300036B800090C03 /* GeofenceEditorSheet.swift */; };
 		AF3AC456268FF1FD00562D20 /* MediaFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF3AC455268FF1FD00562D20 /* MediaFile.swift */; };
 		AF3AC457268FF1FD00562D20 /* MediaFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF3AC455268FF1FD00562D20 /* MediaFile.swift */; };
 		AF3AC459268FF39500562D20 /* InstagramHome.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF3AC458268FF39500562D20 /* InstagramHome.swift */; };
@@ -184,6 +189,9 @@
 		AFBCC5E32765671E00F0B0A8 /* FirebaseConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFBCC5E12765671E00F0B0A8 /* FirebaseConstants.swift */; };
 		AFC519522FC89A98003A4AEA /* MessageDateFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFC519512FC89A98003A4AEA /* MessageDateFormatting.swift */; };
 		AFC519532FC89A98003A4AEA /* MessageDateFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFC519512FC89A98003A4AEA /* MessageDateFormatting.swift */; };
+		AFC9D931300170D400786FB5 /* ChartModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFC9D930300170D400786FB5 /* ChartModels.swift */; };
+		AFC9D933300170DB00786FB5 /* ChartViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFC9D932300170DB00786FB5 /* ChartViewModel.swift */; };
+		AFC9D935300170E800786FB5 /* ChartSectionViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFC9D934300170E800786FB5 /* ChartSectionViews.swift */; };
 		AFD5D8562FF45093008934BE /* Prospects.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD5D8542FF45093008934BE /* Prospects.swift */; };
 		AFD5D8592FF450AC008934BE /* MembershipUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD5D8572FF450AC008934BE /* MembershipUI.swift */; };
 		AFD5D85C2FF450BD008934BE /* StacksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD5D85A2FF450BD008934BE /* StacksView.swift */; };
@@ -266,10 +274,14 @@
 		AF108C0C2762681200084752 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		AF15AA2C275C5B2C0098CB04 /* ChatBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBubble.swift; sourceTree = "<group>"; };
 		AF1B37AA27935EAB00374C0F /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		AF219A9A30011A4700A90D4A /* MapModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapModels.swift; sourceTree = "<group>"; };
+		AF219A9C30011A4D00A90D4A /* MapFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapFormatting.swift; sourceTree = "<group>"; };
 		AF2F67362FF7F20400741D30 /* LaunchScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreenView.swift; sourceTree = "<group>"; };
 		AF2F67492FF7F6CD00741D30 /* UserFormModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserFormModel.swift; sourceTree = "<group>"; };
 		AF2F674C2FF80DAA00741D30 /* InitialsAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialsAvatarView.swift; sourceTree = "<group>"; };
 		AF348489274568BE0091BA5A /* FirebaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseManager.swift; sourceTree = "<group>"; };
+		AF38E46A300036B100090C03 /* GeofenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeofenceManager.swift; sourceTree = "<group>"; };
+		AF38E46C300036B800090C03 /* GeofenceEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeofenceEditorSheet.swift; sourceTree = "<group>"; };
 		AF3AC455268FF1FD00562D20 /* MediaFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaFile.swift; sourceTree = "<group>"; };
 		AF3AC458268FF39500562D20 /* InstagramHome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstagramHome.swift; sourceTree = "<group>"; };
 		AF3AC45B268FF5E400562D20 /* ReelsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReelsView.swift; sourceTree = "<group>"; };
@@ -360,6 +372,9 @@
 		AFBCC5DE27645EB800F0B0A8 /* MainMenuUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuUI.swift; sourceTree = "<group>"; };
 		AFBCC5E12765671E00F0B0A8 /* FirebaseConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseConstants.swift; sourceTree = "<group>"; };
 		AFC519512FC89A98003A4AEA /* MessageDateFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageDateFormatting.swift; sourceTree = "<group>"; };
+		AFC9D930300170D400786FB5 /* ChartModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartModels.swift; sourceTree = "<group>"; };
+		AFC9D932300170DB00786FB5 /* ChartViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartViewModel.swift; sourceTree = "<group>"; };
+		AFC9D934300170E800786FB5 /* ChartSectionViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartSectionViews.swift; sourceTree = "<group>"; };
 		AFD5D8542FF45093008934BE /* Prospects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Prospects.swift; sourceTree = "<group>"; };
 		AFD5D8572FF450AC008934BE /* MembershipUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MembershipUI.swift; sourceTree = "<group>"; };
 		AFD5D85A2FF450BD008934BE /* StacksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StacksView.swift; sourceTree = "<group>"; };
@@ -581,6 +596,7 @@
 			children = (
 				AFDE91D8279337C300302CF2 /* LocationManager.swift */,
 				AF697E842778C93F00219026 /* LocationWeatherManager.swift */,
+				AF38E46A300036B100090C03 /* GeofenceManager.swift */,
 			);
 			path = Location;
 			sourceTree = "<group>";
@@ -659,6 +675,9 @@
 			isa = PBXGroup;
 			children = (
 				AF105A0C27741204001F3F74 /* MapUI.swift */,
+				AF219A9A30011A4700A90D4A /* MapModels.swift */,
+				AF219A9C30011A4D00A90D4A /* MapFormatting.swift */,
+				AFE2C80E2FE0906B0086C5C8 /* MapRouteService.swift */,
 				AF4F5E022FC75D570003B277 /* Views */,
 			);
 			path = Maps;
@@ -669,8 +688,8 @@
 			children = (
 				AF4F5E062FC75D870003B277 /* MapButtonView.swift */,
 				AF4F5E092FC75DC40003B277 /* BottomSheetUI.swift */,
-				AFE2C80E2FE0906B0086C5C8 /* MapRouteService.swift */,
 				AFE2C80B2FE08CA80086C5C8 /* SwiftUIRouteMapView.swift */,
+				AF38E46C300036B800090C03 /* GeofenceEditorSheet.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -818,6 +837,9 @@
 			isa = PBXGroup;
 			children = (
 				AFD5D8632FF450E8008934BE /* ChartView.swift */,
+				AFC9D930300170D400786FB5 /* ChartModels.swift */,
+				AFC9D932300170DB00786FB5 /* ChartViewModel.swift */,
+				AFC9D934300170E800786FB5 /* ChartSectionViews.swift */,
 			);
 			path = Chart;
 			sourceTree = "<group>";
@@ -1114,6 +1136,7 @@
 				AF4F5DDC2FC74EDA0003B277 /* LoginService.swift in Sources */,
 				AF792F47269009250011D787 /* CustomVideoPlayer.swift in Sources */,
 				AF4F5DEC2FC751950003B277 /* CustomerFormService.swift in Sources */,
+				AF38E46E300036B800090C03 /* GeofenceEditorSheet.swift in Sources */,
 				AFD5D8622FF450DA008934BE /* WebUI.swift in Sources */,
 				AF488F7F2FE02FAF00E5F294 /* ExpenseModels.swift in Sources */,
 				AF03D36C27886D720021493A /* ColorOptions.swift in Sources */,
@@ -1122,13 +1145,17 @@
 				AF2F674A2FF7F6CD00741D30 /* UserFormModel.swift in Sources */,
 				AFB7609F2FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */,
 				AFC519532FC89A98003A4AEA /* MessageDateFormatting.swift in Sources */,
+				AF219A9D30011A4D00A90D4A /* MapFormatting.swift in Sources */,
 				AF53738C2778C643001F40B6 /* LoadingView.swift in Sources */,
 				AF77D64D2FC79827008D456A /* ProfileAvatarImage.swift in Sources */,
 				AF488F882FE0300200E5F294 /* ExpenseModelContainerModifier.swift in Sources */,
 				AF3AC45C268FF5E400562D20 /* ReelsView.swift in Sources */,
+				AFC9D931300170D400786FB5 /* ChartModels.swift in Sources */,
+				AFC9D935300170E800786FB5 /* ChartSectionViews.swift in Sources */,
 				AFD5D8A92FF458B7008934BE /* InstagramFeedViews.swift in Sources */,
 				AFD5D8AD2FF458C7008934BE /* InstagramDiscoverViews.swift in Sources */,
 				AFD5D8852FF4552F008934BE /* ImagePicker.swift in Sources */,
+				AF38E46B300036B100090C03 /* GeofenceManager.swift in Sources */,
 				AFD5D8862FF4552F008934BE /* BlurViewUI.swift in Sources */,
 				AFD5D8872FF4552F008934BE /* GlassMorphism.swift in Sources */,
 				AFD5D8882FF4552F008934BE /* ScrollViewOffsetModifier.swift in Sources */,
@@ -1138,6 +1165,7 @@
 				AFD5D88C2FF4552F008934BE /* SFSafariViewWrapper.swift in Sources */,
 				AFD5D88D2FF4552F008934BE /* StarRating.swift in Sources */,
 				AFD5D88E2FF4552F008934BE /* AppTheme.swift in Sources */,
+				AF219A9B30011A4700A90D4A /* MapModels.swift in Sources */,
 				AFD5D88F2FF4552F008934BE /* ImagePreparation.swift in Sources */,
 				AFD5D8902FF4552F008934BE /* CustomCorners.swift in Sources */,
 				AFD5D8912FF4552F008934BE /* MessageComposeView.swift in Sources */,
@@ -1170,6 +1198,7 @@
 				AF4F5DE72FC750A80003B277 /* CustomerService.swift in Sources */,
 				AFDE91CA2793341D00302CF2 /* PlaceSearch.swift in Sources */,
 				AF3AC456268FF1FD00562D20 /* MediaFile.swift in Sources */,
+				AFC9D933300170DB00786FB5 /* ChartViewModel.swift in Sources */,
 				AF54E4D727739EAD0062B1F4 /* HapticManager.swift in Sources */,
 				AF488F832FE02FC100E5F294 /* ExpenseTrackerViewModel.swift in Sources */,
 				AF108C0D2762681200084752 /* ChatMessage.swift in Sources */,
@@ -1307,6 +1336,7 @@
 				AF0A234A274C33E700B18BBF /* CreateNewMessageView.swift in Sources */,
 				AF892F612FFEFC93004D9563 /* ExpensePreviewData.swift in Sources */,
 				AF108C0E2762681200084752 /* ChatMessage.swift in Sources */,
+				AF38E46D300036B800090C03 /* GeofenceEditorSheet.swift in Sources */,
 				AFBCC5E32765671E00F0B0A8 /* FirebaseConstants.swift in Sources */,
 				AF108C0B276260C700084752 /* RecentMessage.swift in Sources */,
 				AF792F452690047C0011D787 /* Reel.swift in Sources */,

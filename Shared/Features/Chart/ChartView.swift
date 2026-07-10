@@ -8,21 +8,6 @@
 import SwiftUI
 import Charts
 
-// MARK: - Chart Model
-struct ChartItem: Identifiable {
-    let id = UUID()
-    let type: String
-    let value: Double
-
-    static let sampleItems: [ChartItem] = [
-        ChartItem(type: "Engineering", value: 100),
-        ChartItem(type: "Design", value: 35),
-        ChartItem(type: "Operations", value: 72),
-        ChartItem(type: "Sales", value: 22),
-        ChartItem(type: "Mgmt", value: 130)
-    ]
-}
-
 // MARK: - Charts
 struct ChartView: View {
     private enum Layout {
@@ -31,8 +16,16 @@ struct ChartView: View {
     }
 
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedType: String?
-    private let items = ChartItem.sampleItems
+    @State private var viewModel: ChartViewModel
+    @State private var selectedJob: String?
+    @State private var selectedProduct: String?
+    @State private var selectedSalesman: String?
+    @State private var selectedContractor: String?
+    private let sampleItems = ChartItem.sampleItems
+
+    init(customerService: CustomerServicing = FirebaseCustomerService()) {
+        _viewModel = State(initialValue: ChartViewModel(customerService: customerService))
+    }
 
     var body: some View {
         NavigationStack {
@@ -46,7 +39,11 @@ struct ChartView: View {
     private var chartContent: some View {
         ScrollView {
             VStack(spacing: Layout.sectionSpacing) {
-                barChartSection
+                customerSalesSection
+                jobChartSection
+                productChartSection
+                salesmanChartSection
+                contractorChartSection
                 lineChartSection
                 areaChartSection
             }
@@ -54,35 +51,54 @@ struct ChartView: View {
         }
     }
 
-    private var selectedItem: ChartItem? {
-        guard let selectedType else { return nil }
-        return items.first { $0.type == selectedType }
-    }
-
-    private var barChartSection: some View {
-        ChartSection(title: "Bar", color: .red) {
-            Chart(items) { item in
+    private var customerSalesSection: some View {
+        ChartSection(
+            title: "Customer Sales · \(viewModel.formattedTotalAmount) · \(viewModel.customerCount) Customers",
+            color: .orange
+        ) {
+            // Categorical month labels give evenly spaced, full-width bars;
+            // a Date x-axis would scatter thin bars across the whole timeline.
+            Chart(viewModel.monthlySales) { entry in
                 BarMark(
-                    x: .value("Department", item.type),
-                    y: .value("Profit", item.value)
+                    x: .value("Month", entry.label),
+                    y: .value("Amount", entry.total)
                 )
-                .foregroundStyle(Color.red.gradient)
-                .opacity(selectedType == nil || selectedType == item.type ? 1 : 0.35)
-                .annotation(position: .top, alignment: .center) {
-                    if selectedType == item.type {
-                        Text(item.value, format: .number)
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(Color.red)
-                    }
+                .foregroundStyle(Color.orange.gradient)
+            }
+            .chartXScale(domain: viewModel.monthlySales.map(\.label))
+            .overlay {
+                if !viewModel.hasCustomers {
+                    Text(viewModel.isLoading ? "Loading customers…" : "No customer data")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
                 }
             }
-            .modifier(BarSelectionModifier(selectedType: $selectedType))
         }
+    }
+
+    private var jobChartSection: some View {
+        CategoryBarSection(title: "Sales by Job", color: .red, categoryLabel: "Job",
+                           items: viewModel.jobTotals, selection: $selectedJob)
+    }
+
+    private var productChartSection: some View {
+        CategoryBarSection(title: "Sales by Product", color: .purple, categoryLabel: "Product",
+                           items: viewModel.productTotals, selection: $selectedProduct)
+    }
+
+    private var salesmanChartSection: some View {
+        CategoryBarSection(title: "Sales by Salesman", color: .teal, categoryLabel: "Salesman",
+                           items: viewModel.salesmanTotals, selection: $selectedSalesman)
+    }
+
+    private var contractorChartSection: some View {
+        CategoryBarSection(title: "Sales by Contractor", color: .indigo, categoryLabel: "Contractor",
+                           items: viewModel.contractorTotals, selection: $selectedContractor)
     }
 
     private var lineChartSection: some View {
         ChartSection(title: "Line", color: .blue) {
-            Chart(items) { item in
+            Chart(sampleItems) { item in
                 LineMark(
                     x: .value("Department", item.type),
                     y: .value("Profit", item.value)
@@ -96,7 +112,7 @@ struct ChartView: View {
 
     private var areaChartSection: some View {
         ChartSection(title: "Area", color: .green) {
-            Chart(items) { item in
+            Chart(sampleItems) { item in
                 AreaMark(
                     x: .value("Department", item.type),
                     y: .value("Profit", item.value)
@@ -119,44 +135,8 @@ struct ChartView: View {
     }
 }
 
-// MARK: - Bar Selection Modifier
-/// Adds tap-to-select interactivity on iOS 17+, where `chartXSelection` is available,
-/// while leaving the chart untouched on the project's iOS 16 deployment floor.
-private struct BarSelectionModifier: ViewModifier {
-    @Binding var selectedType: String?
-
-    func body(content: Content) -> some View {
-        if #available(iOS 17.0, *) {
-            content.chartXSelection(value: $selectedType)
-        } else {
-            content
-        }
-    }
-}
-
-// MARK: - Chart Section
-private struct ChartSection<Content: View>: View {
-    private let spacing: CGFloat = 12
-    private let chartHeight: CGFloat = 220
-
-    let title: String
-    let color: Color
-    @ViewBuilder let content: Content
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: spacing) {
-            Label(title, systemImage: "chart.bar.xaxis")
-                .font(.headline)
-                .foregroundStyle(color)
-
-            content
-                .frame(height: chartHeight)
-        }
-    }
-}
-
 // MARK: - Preview
 #Preview("Charts - Dark") {
-    ChartView()
+    ChartView(customerService: PreviewCustomerService())
         .preferredColorScheme(.dark)
 }

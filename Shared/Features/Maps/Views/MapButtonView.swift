@@ -24,9 +24,7 @@ struct MapButtonView: View {
     private let geofenceManager = GeofenceManager.shared
 
     private var speedText: String {
-        Measurement(value: max(manager.location?.speed ?? 0, 0), unit: UnitSpeed.metersPerSecond)
-            .converted(to: .milesPerHour)
-            .formatted(.measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(0))))
+        MapFormat.speed(manager.location?.speed ?? 0)
     }
 
     var body: some View {
@@ -287,13 +285,13 @@ struct MapButtonView: View {
             Image(systemName: "map")
                 .frame(width: 24)
 
-            Text(formattedDistance(distance))
+            Text(MapFormat.distance(distance))
                 .lineLimit(1)
                 .minimumScaleFactor(0.85)
 
             Spacer(minLength: 12)
 
-            Text(formattedTravelTime(travelTime))
+            Text(MapFormat.travelTime(travelTime))
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Color.secondary)
                 .lineLimit(1)
@@ -319,33 +317,6 @@ struct MapButtonView: View {
                 .foregroundStyle(.primary)
         }
         .frame(width: 50, height: 50)
-    }
-
-    private func formattedDistance(_ meters: CLLocationDistance) -> String {
-        let measurement = Measurement(value: meters, unit: UnitLength.meters)
-        let formatter = MeasurementFormatter()
-        formatter.unitStyle = .short
-        formatter.unitOptions = [.providedUnit]
-
-        let measurementSystem = Locale.current.measurementSystem
-        let isMetric = measurementSystem == .metric || measurementSystem == .uk
-        let targetUnit: UnitLength = isMetric ? .kilometers : .miles
-        let converted = measurement.converted(to: targetUnit)
-
-        let numberFormatter = NumberFormatter()
-        numberFormatter.maximumFractionDigits = 1
-        numberFormatter.minimumFractionDigits = 0
-        formatter.numberFormatter = numberFormatter
-
-        return formatter.string(from: converted)
-    }
-
-    private func formattedTravelTime(_ travelTime: TimeInterval) -> String {
-        let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = travelTime >= 3600 ? [.hour, .minute] : [.minute]
-        formatter.unitsStyle = .abbreviated
-        formatter.maximumUnitCount = 2
-        return formatter.string(from: max(travelTime, 60)) ?? "1 min"
     }
 
     private func directionsIcon(_ instruction: String) -> String {
