@@ -3,8 +3,10 @@
 //  TheLightUI (iOS)
 //
 
+import AVFoundation
 import CoreLocation
 import Observation
+import UIKit
 
 /// Manages circular geofences using CLMonitor.
 /// - Fences persist across app launches (Core Location stores monitored conditions).
@@ -56,6 +58,7 @@ final class GeofenceManager {
 
     private var monitor: CLMonitor?
     private var eventTask: Task<Void, Never>?
+    private var alertPlayer: AVAudioPlayer?
 
     private init() {}
 
@@ -134,10 +137,27 @@ final class GeofenceManager {
         switch event.state {
         case .satisfied:
             latestEvent = .entered(event.identifier)
+            playAlertSound()
         case .unsatisfied:
             latestEvent = .exited(event.identifier)
+            playAlertSound()
         default:
             break
+        }
+    }
+
+    /// Plays the Tornado alert from the asset catalog when a fence fires.
+    private func playAlertSound() {
+        guard let asset = NSDataAsset(name: "Tornado") else {
+            print("Geofence alert sound asset not found")
+            return
+        }
+        do {
+            let player = try AVAudioPlayer(data: asset.data, fileTypeHint: AVFileType.caf.rawValue)
+            alertPlayer = player
+            player.play()
+        } catch {
+            print("Failed to play geofence alert sound: \(error.localizedDescription)")
         }
     }
 
