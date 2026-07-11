@@ -257,6 +257,8 @@
 		AFE4AE0D2FC8698F00F86B2E /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE4AE0B2FC8698F00F86B2E /* AppDependencies.swift */; };
 		AFE4AE102FC873DE00F86B2E /* AppSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE4AE0F2FC873DE00F86B2E /* AppSettingsStore.swift */; };
 		AFEE000A27285BB900D75C7C /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEE000927285BB900D75C7C /* LoginView.swift */; };
+		AFEFA4CC30027795004C61A5 /* CustomerCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEFA4CB30027795004C61A5 /* CustomerCellView.swift */; };
+		AFEFA4CD30027795004C61A5 /* CustomerCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEFA4CB30027795004C61A5 /* CustomerCellView.swift */; };
 		AFF95EF8274816EF00724250 /* UserModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFF95EF7274816EF00724250 /* UserModel.swift */; };
 		AFF9FE06279E4536006DB401 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AFF9FE05279E4536006DB401 /* Launch Screen.storyboard */; };
 /* End PBXBuildFile section */
@@ -418,6 +420,7 @@
 		AFE4AE0B2FC8698F00F86B2E /* AppDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
 		AFE4AE0F2FC873DE00F86B2E /* AppSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsStore.swift; sourceTree = "<group>"; };
 		AFEE000927285BB900D75C7C /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		AFEFA4CB30027795004C61A5 /* CustomerCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerCellView.swift; sourceTree = "<group>"; };
 		AFF95EF7274816EF00724250 /* UserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModel.swift; sourceTree = "<group>"; };
 		AFF9FE05279E4536006DB401 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -649,6 +652,7 @@
 				AF86C06A2FDF1EF100F450F9 /* CustomerPresentation.swift */,
 				AF0EAE9530001D6900A7247D /* CustomerJSONTransfer.swift */,
 				AFD7D8D23002744E00EF9101 /* CustomerTransferViewModel.swift */,
+				AFEFA4CB30027795004C61A5 /* CustomerCellView.swift */,
 			);
 			path = Customers;
 			sourceTree = "<group>";
@@ -1143,6 +1147,7 @@
 				AF38E46E300036B800090C03 /* GeofenceEditorSheet.swift in Sources */,
 				AFD5D8622FF450DA008934BE /* WebUI.swift in Sources */,
 				AF488F7F2FE02FAF00E5F294 /* ExpenseModels.swift in Sources */,
+				AFEFA4CD30027795004C61A5 /* CustomerCellView.swift in Sources */,
 				AF03D36C27886D720021493A /* ColorOptions.swift in Sources */,
 				AFDE91D52793364D00302CF2 /* LandMarkListView.swift in Sources */,
 				AF892F5C2FFEFC8A004D9563 /* ExpenseDetailView.swift in Sources */,
@@ -1284,6 +1289,7 @@
 				AF4F5DC02FC742E40003B277 /* ChatRepository.swift in Sources */,
 				AF4A670827565F40005D1D8B /* AuthenticationService.swift in Sources */,
 				AF745F1127513D4F00E9DB74 /* ChatLogView.swift in Sources */,
+				AFEFA4CC30027795004C61A5 /* CustomerCellView.swift in Sources */,
 				AFB760A22FE22C78002D1A83 /* MainTopView.swift in Sources */,
 				AFE4AE0C2FC8698F00F86B2E /* AppDependencies.swift in Sources */,
 				AF3AC45D268FF5E400562D20 /* ReelsView.swift in Sources */,

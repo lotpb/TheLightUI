@@ -185,39 +185,28 @@ struct FormUI: View {
     private var jobDetailsSection: some View {
         // Section: active toggle, pickers (salesman/job/product/contractor), quantity, and comments.
         Section {
-            Toggle(isOn: $viewModel.activeIsOn) {
+            // Binds straight to the model; the label tracks the same field.
+            Toggle(isOn: $viewModel.detail.isActive) {
                 Text(viewModel.activeLabel)
                     .formTextStyle()
-            }
-            // Persist active state to the underlying model.
-            .onChange(of: viewModel.activeIsOn) {
-                viewModel.updateActiveStatus()
             }
             // Inherits the theme tint applied via `.tint(themeColor)`.
             .toggleStyle(.switch)
 
             // Salesman picklist.
-            pickerRow("Salesman:", selection: $viewModel.selectSalesman, items: pickerviewModel.pickSalesman) { tag in
-                viewModel.updateSalesman(tag)
-            }
+            pickerRow("Salesman:", selection: $viewModel.detail.salesIndex, items: pickerviewModel.pickSalesman)
 
             // Job type picklist.
-            pickerRow("Job:", selection: $viewModel.selectJob, items: pickerviewModel.pickJob) { tag in
-                viewModel.updateJob(tag)
-            }
+            pickerRow("Job:", selection: $viewModel.detail.jobIndex, items: pickerviewModel.pickJob)
 
             // Product picklist.
-            pickerRow("Product:", selection: $viewModel.selectProduct, items: pickerviewModel.pickProduct) { tag in
-                viewModel.updateProduct(tag)
-            }
+            pickerRow("Product:", selection: $viewModel.detail.productIndex, items: pickerviewModel.pickProduct)
 
             // Quantity stepper.
             quantityRow
 
             // Contractor picklist.
-            pickerRow("Contractor:", selection: $viewModel.selectContractor, items: pickerviewModel.pickContractor) { tag in
-                viewModel.updateContractor(tag)
-            }
+            pickerRow("Contractor:", selection: $viewModel.detail.contractorIndex, items: pickerviewModel.pickContractor)
 
             // Free-form comments.
             commentsRow
@@ -239,7 +228,7 @@ struct FormUI: View {
     private var amountRow: some View {
         stepperRow(
             "Amount:",
-            value: $viewModel.amount,
+            value: $viewModel.detail.amount,
             keyboardType: .decimalPad,
             increment: { viewModel.incrementAmount() },
             decrement: { viewModel.decrementAmount() }
@@ -250,7 +239,7 @@ struct FormUI: View {
     private var quantityRow: some View {
         stepperRow(
             "Quantity:",
-            value: $viewModel.quantity,
+            value: $viewModel.detail.quantity,
             keyboardType: .numberPad,
             increment: { viewModel.incrementQuantity() },
             decrement: { viewModel.decrementQuantity() }
@@ -281,7 +270,7 @@ struct FormUI: View {
             .formTextStyle()
             .imageScale(.small)
 
-            Picker("Pick rating here", selection: $viewModel.selectedRate) {
+            Picker("Pick rating here", selection: $viewModel.detail.rate) {
                 ForEach(pickerviewModel.pickRate, id: \.self) {
                     Text($0)
                 }
@@ -332,14 +321,13 @@ struct FormUI: View {
         }
     }
 
-    // Reusable picker row that forwards selection changes via a callback.
+    // Reusable picker row bound directly to the persisted selection index.
     // Note: the picklists are static and the Int index is the persisted selection
     // value on the model, so indices are the genuine identity here.
     private func pickerRow(
         _ title: String,
         selection: Binding<Int>,
-        items: [String],
-        onChange: @escaping (Int) -> Void
+        items: [String]
     ) -> some View {
         HStack(spacing: 0) {
             // Fixed-width label so every picker value aligns at the same leading edge.
@@ -355,9 +343,6 @@ struct FormUI: View {
             .labelsHidden()
             .fixedSize()
             .tint(Color.primary)
-            .onChange(of: selection.wrappedValue) { _, newValue in
-                onChange(newValue)
-            }
 
             Spacer()
         }
@@ -379,8 +364,6 @@ struct FormUI: View {
     private func stepperRow(
         _ label: String,
         value: Binding<Int>,
-        minWidth: CGFloat = FormUI.Layout.stepperFieldMinWidth,
-        maxWidth: CGFloat = FormUI.Layout.stepperFieldMaxWidth,
         keyboardType: UIKeyboardType = .numberPad,
         increment: @escaping () -> Void,
         decrement: @escaping () -> Void
@@ -395,7 +378,7 @@ struct FormUI: View {
                 // plain-integer NumberFormatter output.
                 TextField(label, value: value, format: .number.grouping(.never))
                     .formStyle()
-                    .frame(minWidth: minWidth, maxWidth: maxWidth)
+                    .frame(minWidth: Layout.stepperFieldMinWidth, maxWidth: Layout.stepperFieldMaxWidth)
                     .keyboardType(keyboardType)
             } onIncrement: {
                 increment()

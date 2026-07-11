@@ -9,21 +9,17 @@ import Observation
 @MainActor
 @Observable
 final class CustomerFormViewModel {
+    // The customer record being created or edited. The form binds directly
+    // to these fields; there is no intermediate copy of the editable state.
     var detail: CustomerItem
     var showAlertUpdate = false
-    var activeIsOn = true
+    // Dates are seeded from init parameters (callers may pass dates that
+    // differ from `detail`), so they live here rather than on `detail`.
     var pickDate: Date
     var pickStartDate: Date
     var pickCompleteDate: Date
-    var mode: CustomerFormMode
-    var selectedRate = ""
-    var selectContractor = 0
-    var selectSalesman = 0
-    var selectJob = 0
-    var selectProduct = 0
-    var amount = 0
-    var quantity = 0
     var errorMessage = ""
+    let mode: CustomerFormMode
     private(set) var shouldFocusFirstName = false
 
     @ObservationIgnored private let formService: CustomerFormServicing
@@ -34,7 +30,7 @@ final class CustomerFormViewModel {
     }
 
     var activeLabel: String {
-        activeIsOn ? "Active:" : "Not Active:"
+        detail.isActive ? "Active:" : "Not Active:"
     }
 
     init(
@@ -58,67 +54,36 @@ final class CustomerFormViewModel {
     }
 
     func loadFormState() {
-        amount = detail.amount
-
         if mode.isNew {
-            resetTextFields()
-            pickDate = Date()
+            detail.resetEditableFields()
             detail.isActive = true
-            activeIsOn = true
+            pickDate = Date()
             shouldFocusFirstName = true
-            return
+        } else {
+            pickDate = detail.creationDate
+            pickStartDate = detail.startDate
+            pickCompleteDate = detail.completionDate
         }
-
-        selectSalesman = detail.salesIndex
-        selectJob = detail.jobIndex
-        selectProduct = detail.productIndex
-        quantity = detail.quantity
-        selectedRate = detail.rate
-        selectContractor = detail.contractorIndex
-        activeIsOn = detail.isActive
-        pickDate = detail.creationDate
-        pickStartDate = detail.startDate
-        pickCompleteDate = detail.completionDate
     }
 
     func consumeFirstNameFocusRequest() {
         shouldFocusFirstName = false
     }
 
-    func updateActiveStatus() {
-        detail.isActive = activeIsOn
-    }
-
-    func updateSalesman(_ index: Int) {
-        detail.salesIndex = index
-    }
-
-    func updateJob(_ index: Int) {
-        detail.jobIndex = index
-    }
-
-    func updateProduct(_ index: Int) {
-        detail.productIndex = index
-    }
-
-    func updateContractor(_ index: Int) {
-        detail.contractorIndex = index
-    }
-
     func incrementAmount() {
-        amount += 1000
+        detail.amount += 1000
     }
 
     func decrementAmount() {
-        amount = max(0, amount - 1000)
+        detail.amount = max(0, detail.amount - 1000)
     }
 
     func incrementQuantity() {
-        quantity += 1
+        detail.quantity += 1
     }
 
     func decrementQuantity() {
-        quantity = max(0, quantity - 1)
+        detail.quantity = max(0, detail.quantity - 1)
     }
 
     func saveButtonTapped() {
@@ -143,7 +108,7 @@ final class CustomerFormViewModel {
             do {
                 let documentID = try await formService.addCustomer(payload)
                 guard !Task.isCancelled else { return }
-                resetTextFields()
+                detail.resetEditableFields()
                 showAlertUpdate = true
                 errorMessage = ""
                 print("Document added with ID: \(documentID)")
@@ -170,7 +135,7 @@ final class CustomerFormViewModel {
             do {
                 try await formService.updateCustomer(id: detail.id, payload: payload)
                 guard !Task.isCancelled else { return }
-                resetTextFields()
+                detail.resetEditableFields()
                 showAlertUpdate = true
                 errorMessage = ""
             } catch is CancellationError {
@@ -185,24 +150,13 @@ final class CustomerFormViewModel {
     private func makePayload(userId: String? = nil) -> CustomerFormPayload {
         CustomerFormPayload(
             customer: detail,
-            amount: amount,
-            quantity: quantity,
-            rate: selectedRate,
+            amount: detail.amount,
+            quantity: detail.quantity,
+            rate: detail.rate,
             creationDate: pickDate,
             startDate: pickStartDate,
             completionDate: pickCompleteDate,
             userId: userId
         )
-    }
-
-    private func resetTextFields() {
-        detail.resetEditableFields()
-        amount = 0
-        quantity = 0
-        selectedRate = ""
-        selectContractor = 0
-        selectSalesman = 0
-        selectJob = 0
-        selectProduct = 0
     }
 }
