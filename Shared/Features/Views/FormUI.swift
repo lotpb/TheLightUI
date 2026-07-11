@@ -170,7 +170,7 @@ struct FormUI: View {
 
     private var customerInfoSection: some View {
         // Section: address, city, state/zip, phone, amount, email.
-        Section("\(viewModel.detail.formController) Info") {
+        Section("Customer Info") {
             labeledTextField("Address:", placeholder: "address", text: $viewModel.detail.street)
             labeledTextField("City:", placeholder: "city", text: $viewModel.detail.city)
 

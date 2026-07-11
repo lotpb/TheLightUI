@@ -91,11 +91,79 @@ struct PreviewLoginService: LoginServicing {
 
 struct PreviewCustomerService: CustomerServicing {
     func listenForCustomers(onChange: @escaping (Result<[CustomerItem], Error>) -> Void) -> CustomerListener {
-        onChange(.success([]))
+        onChange(.success(CustomerItem.previewSamples))
         return PreviewCustomerListener()
     }
 
     func deleteCustomer(id: String) async throws { }
+}
+
+// Sample customers shown by PreviewCustomerService so previews render a
+// populated list without touching Firebase (which is never configured in
+// previews).
+extension CustomerItem {
+    static let previewSamples: [CustomerItem] = [
+        .previewSample(
+            id: "preview-1",
+            first: "Peter",
+            lastname: "Balsamo",
+            street: "213 Higbie Lane",
+            city: "West Islip",
+            amount: 12500,
+            daysAgo: 3,
+            comments: "Called about siding estimate."
+        ),
+        .previewSample(
+            id: "preview-2",
+            first: "Karen",
+            lastname: "Rosch",
+            street: "48 Ocean Ave",
+            city: "Babylon",
+            amount: 8400,
+            daysAgo: 12
+        ),
+        .previewSample(
+            id: "preview-3",
+            first: "John",
+            lastname: "Pellegrino",
+            street: "9 Maple Ct",
+            city: "Bay Shore",
+            amount: 21750,
+            daysAgo: 30,
+            comments: "Wants Andersen windows, follow up in fall.",
+            isActive: false
+        )
+    ]
+
+    private static func previewSample(
+        id: String,
+        first: String,
+        lastname: String,
+        street: String,
+        city: String,
+        amount: Int,
+        daysAgo: Int,
+        comments: String = "",
+        isActive: Bool = true
+    ) -> CustomerItem {
+        var item = CustomerItem.emptyCustomer
+        item.id = id
+        item.isActive = isActive
+        item.first = first
+        item.lastname = lastname
+        item.street = street
+        item.city = city
+        item.state = "NY"
+        item.zip = "11704"
+        item.amount = amount
+        item.creationDate = Date().addingTimeInterval(-Double(daysAgo) * 86400)
+        item.rate = "5"
+        item.phone = "(631) 555-0123"
+        item.comments = comments
+        item.email = "\(first.lowercased())@example.com"
+        item.quantity = 1
+        return item
+    }
 }
 
 struct PreviewCustomerFormService: CustomerFormServicing {

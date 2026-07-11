@@ -29,7 +29,7 @@ enum CustomerLabels {
     static let start = "Start"
     static let complete = "Complete"
     static let saleDate = "Sale Date:"
-    static let customerNews = CustomerConfiguration.customerNews
+    static let customerNews = "Check our new line of fabulous windows and siding."
 }
 
 extension CustomerItem {

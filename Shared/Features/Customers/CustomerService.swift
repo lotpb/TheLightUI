@@ -43,9 +43,7 @@ final class FirebaseCustomerService: CustomerServicing, @unchecked Sendable {
                     return
                 }
 
-                let items = snapshot?.documents.map {
-                    CustomerFirestoreDTO(document: $0).customerItem
-                } ?? []
+                let items = snapshot?.documents.map(CustomerItem.init) ?? []
                 onChange(.success(items))
             }
 

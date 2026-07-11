@@ -473,9 +473,7 @@ struct LeadDetailUI: View {
             quantity: 5,
             salesIndex: 1,
             jobIndex: 1,
-            productIndex: 1,
-            status: .edit,
-            formController: "Customer"
+            productIndex: 1
         ))
         .environment(CustomerData())
         .environment(PickerDataModel())

@@ -6,15 +6,6 @@
 import Foundation
 import Observation
 
-// MARK: - Configuration
-enum CustomerConfiguration {
-    static let leadNews = "Company to expand to a new web advertising directive this week."
-    static let customerNews = "Check our new line of fabulous windows and siding."
-    static let vendorNews = "Peter Balsamo Appointed to United's Board of Directors."
-    static let employeeNews = "Health benifits cancelled immediately, starting today."
-    static let baseURL = "http://lotpb.github.io/UnitedWebPage/index.html"
-}
-
 // MARK: - Customer Form Mode
 enum CustomerFormMode: String, Equatable {
     case new = "New"
@@ -51,8 +42,6 @@ struct CustomerItem: Identifiable, Equatable {
     var salesIndex: Int
     var jobIndex: Int
     var productIndex: Int
-    var status: CustomerFormMode
-    var formController: String
 
     static var emptyCustomer: CustomerItem {
         CustomerItem(
@@ -79,9 +68,7 @@ struct CustomerItem: Identifiable, Equatable {
             quantity: 0,
             salesIndex: 0,
             jobIndex: 0,
-            productIndex: 0,
-            status: .new,
-            formController: "Customer"
+            productIndex: 0
         )
     }
 
@@ -109,29 +96,9 @@ struct CustomerItem: Identifiable, Equatable {
 // MARK: - Picker Data
 @Observable
 class PickerDataModel {
-    var pickSalesman = [String]()
-    var pickJob = [String]()
-    var pickProduct = [String]()
-    var pickContractor = [String]()
-    var pickRate = [String]()
-
-    init() {
-        getData()
-    }
-
-    func getData() {
-        pickSalesman.append(contentsOf: [
-            "", "Peter Balsamo", "Adam Monteleone", "John Pellegrino", "Mike Agunzo"
-        ])
-        pickJob.append(contentsOf: [
-            "", "Windows", "Siding", "Doors", "Roofing"
-        ])
-        pickProduct.append(contentsOf: [
-            "", "Alside", "Andersen", "Ideal", "Marvin"
-        ])
-        pickContractor.append(contentsOf: [
-            "", "A & S Home Improvement", "Islandwide Gutters", "Ashland Home Improvement", "John Kat Windows", "Jose Rosa", "Peter Balsamo"
-        ])
-        pickRate.append(contentsOf: ["5", "4", "3", "2", "1"])
-    }
+    var pickSalesman = ["", "Peter Balsamo", "Adam Monteleone", "John Pellegrino", "Mike Agunzo"]
+    var pickJob = ["", "Windows", "Siding", "Doors", "Roofing"]
+    var pickProduct = ["", "Alside", "Andersen", "Ideal", "Marvin"]
+    var pickContractor = ["", "A & S Home Improvement", "Islandwide Gutters", "Ashland Home Improvement", "John Kat Windows", "Jose Rosa", "Peter Balsamo"]
+    var pickRate = ["5", "4", "3", "2", "1"]
 }

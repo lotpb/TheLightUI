@@ -78,8 +78,8 @@
 		AF4F5DEA2FC750B60003B277 /* CustomerData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4F5DE82FC750B60003B277 /* CustomerData.swift */; };
 		AF4F5DEC2FC751950003B277 /* CustomerFormService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4F5DEB2FC751950003B277 /* CustomerFormService.swift */; };
 		AF4F5DED2FC751950003B277 /* CustomerFormService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4F5DEB2FC751950003B277 /* CustomerFormService.swift */; };
-		AF4F5DEF2FC758540003B277 /* CustomerFirestoreDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4F5DEE2FC758540003B277 /* CustomerFirestoreDTO.swift */; };
-		AF4F5DF02FC758540003B277 /* CustomerFirestoreDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4F5DEE2FC758540003B277 /* CustomerFirestoreDTO.swift */; };
+		AF4F5DEF2FC758540003B277 /* CustomerFirestore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4F5DEE2FC758540003B277 /* CustomerFirestore.swift */; };
+		AF4F5DF02FC758540003B277 /* CustomerFirestore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4F5DEE2FC758540003B277 /* CustomerFirestore.swift */; };
 		AF4F5DF32FC759CE0003B277 /* KeychainPasswordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4F5DF22FC759CE0003B277 /* KeychainPasswordStore.swift */; };
 		AF4F5DF62FC75C330003B277 /* LeadDetailHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4F5DF52FC75C330003B277 /* LeadDetailHeaderView.swift */; };
 		AF4F5DF72FC75C330003B277 /* LeadDetailHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4F5DF52FC75C330003B277 /* LeadDetailHeaderView.swift */; };
@@ -239,6 +239,8 @@
 		AFD5D8AA2FF458B7008934BE /* InstagramFeedViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD5D8A82FF458B7008934BE /* InstagramFeedViews.swift */; };
 		AFD5D8AC2FF458C7008934BE /* InstagramDiscoverViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD5D8AB2FF458C7008934BE /* InstagramDiscoverViews.swift */; };
 		AFD5D8AD2FF458C7008934BE /* InstagramDiscoverViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD5D8AB2FF458C7008934BE /* InstagramDiscoverViews.swift */; };
+		AFD7D8D33002744E00EF9101 /* CustomerTransferViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD7D8D23002744E00EF9101 /* CustomerTransferViewModel.swift */; };
+		AFD7D8D43002744E00EF9101 /* CustomerTransferViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD7D8D23002744E00EF9101 /* CustomerTransferViewModel.swift */; };
 		AFDE91CA2793341D00302CF2 /* PlaceSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFDE91C92793341D00302CF2 /* PlaceSearch.swift */; };
 		AFDE91CC2793348D00302CF2 /* PlaceListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFDE91CB2793348D00302CF2 /* PlaceListViewModel.swift */; };
 		AFDE91CE279334D200302CF2 /* LandMark.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFDE91CD279334D200302CF2 /* LandMark.swift */; };
@@ -302,7 +304,7 @@
 		AF4F5DE52FC750A80003B277 /* CustomerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerService.swift; sourceTree = "<group>"; };
 		AF4F5DE82FC750B60003B277 /* CustomerData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerData.swift; sourceTree = "<group>"; };
 		AF4F5DEB2FC751950003B277 /* CustomerFormService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerFormService.swift; sourceTree = "<group>"; };
-		AF4F5DEE2FC758540003B277 /* CustomerFirestoreDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerFirestoreDTO.swift; sourceTree = "<group>"; };
+		AF4F5DEE2FC758540003B277 /* CustomerFirestore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerFirestore.swift; sourceTree = "<group>"; };
 		AF4F5DF22FC759CE0003B277 /* KeychainPasswordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainPasswordStore.swift; sourceTree = "<group>"; };
 		AF4F5DF52FC75C330003B277 /* LeadDetailHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeadDetailHeaderView.swift; sourceTree = "<group>"; };
 		AF4F5DF82FC75C340003B277 /* LeadDetailFieldRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeadDetailFieldRow.swift; sourceTree = "<group>"; };
@@ -402,6 +404,7 @@
 		AFD5D8A52FF458A4008934BE /* InstagramModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstagramModels.swift; sourceTree = "<group>"; };
 		AFD5D8A82FF458B7008934BE /* InstagramFeedViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstagramFeedViews.swift; sourceTree = "<group>"; };
 		AFD5D8AB2FF458C7008934BE /* InstagramDiscoverViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstagramDiscoverViews.swift; sourceTree = "<group>"; };
+		AFD7D8D23002744E00EF9101 /* CustomerTransferViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerTransferViewModel.swift; sourceTree = "<group>"; };
 		AFDE91C92793341D00302CF2 /* PlaceSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceSearch.swift; sourceTree = "<group>"; };
 		AFDE91CB2793348D00302CF2 /* PlaceListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceListViewModel.swift; sourceTree = "<group>"; };
 		AFDE91CD279334D200302CF2 /* LandMark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandMark.swift; sourceTree = "<group>"; };
@@ -640,11 +643,12 @@
 				AF4F5DE22FC750A70003B277 /* CustomerModels.swift */,
 				AF4F5DE52FC750A80003B277 /* CustomerService.swift */,
 				AF4F5DEB2FC751950003B277 /* CustomerFormService.swift */,
-				AF4F5DEE2FC758540003B277 /* CustomerFirestoreDTO.swift */,
+				AF4F5DEE2FC758540003B277 /* CustomerFirestore.swift */,
 				AF77D64E2FC7A3FA008D456A /* CustomerFormViewModel.swift */,
 				AF86C0622FDF1B3B00F450F9 /* CustomerListViewModel.swift */,
 				AF86C06A2FDF1EF100F450F9 /* CustomerPresentation.swift */,
 				AF0EAE9530001D6900A7247D /* CustomerJSONTransfer.swift */,
+				AFD7D8D23002744E00EF9101 /* CustomerTransferViewModel.swift */,
 			);
 			path = Customers;
 			sourceTree = "<group>";
@@ -1132,7 +1136,7 @@
 				AFE2C80F2FE0906B0086C5C8 /* MapRouteService.swift in Sources */,
 				AF892F5E2FFEFC8F004D9563 /* ExpenseEditorView.swift in Sources */,
 				AF4F5DE02FC74EDA0003B277 /* LoginViewModel.swift in Sources */,
-				AF4F5DF02FC758540003B277 /* CustomerFirestoreDTO.swift in Sources */,
+				AF4F5DF02FC758540003B277 /* CustomerFirestore.swift in Sources */,
 				AF4F5DDC2FC74EDA0003B277 /* LoginService.swift in Sources */,
 				AF792F47269009250011D787 /* CustomVideoPlayer.swift in Sources */,
 				AF4F5DEC2FC751950003B277 /* CustomerFormService.swift in Sources */,
@@ -1204,6 +1208,7 @@
 				AF108C0D2762681200084752 /* ChatMessage.swift in Sources */,
 				AF92B8B5267816A600729208 /* SideTabViewUI.swift in Sources */,
 				AF54E4DB2773AD4F0062B1F4 /* ContentView.swift in Sources */,
+				AFD7D8D33002744E00EF9101 /* CustomerTransferViewModel.swift in Sources */,
 				AF92B87C267812A400729208 /* TheLightUIApp.swift in Sources */,
 				AF5373882778C1EA001F40B6 /* WeatherRow.swift in Sources */,
 				AFE4AE0D2FC8698F00F86B2E /* AppDependencies.swift in Sources */,
@@ -1339,9 +1344,10 @@
 				AF38E46D300036B800090C03 /* GeofenceEditorSheet.swift in Sources */,
 				AFBCC5E32765671E00F0B0A8 /* FirebaseConstants.swift in Sources */,
 				AF108C0B276260C700084752 /* RecentMessage.swift in Sources */,
+				AFD7D8D43002744E00EF9101 /* CustomerTransferViewModel.swift in Sources */,
 				AF792F452690047C0011D787 /* Reel.swift in Sources */,
 				AF4F5DC32FC742F30003B277 /* MainMessagesViewModel.swift in Sources */,
-				AF4F5DEF2FC758540003B277 /* CustomerFirestoreDTO.swift in Sources */,
+				AF4F5DEF2FC758540003B277 /* CustomerFirestore.swift in Sources */,
 				AF2F674E2FF80DAA00741D30 /* InitialsAvatarView.swift in Sources */,
 				AF488F852FE02FF400E5F294 /* ExpenseTrackerView.swift in Sources */,
 			);

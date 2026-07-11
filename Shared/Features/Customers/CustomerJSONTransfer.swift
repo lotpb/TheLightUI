@@ -87,9 +87,7 @@ struct CustomerJSONRecord: Codable, Equatable {
             quantity: quantity,
             salesIndex: salesIndex,
             jobIndex: jobIndex,
-            productIndex: productIndex,
-            status: .edit,
-            formController: "Customer"
+            productIndex: productIndex
         )
     }
 }

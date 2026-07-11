@@ -6,6 +6,9 @@
 import Foundation
 import Observation
 
+// Presentation state for the customer list: search, Active-only filter, and sorting.
+// Owns the derived `displayedItems` collection, recomputed only when an input
+// changes so view bodies never filter/sort inline.
 @MainActor
 @Observable
 final class CustomerListViewModel {
@@ -27,26 +30,39 @@ final class CustomerListViewModel {
         }
     }
 
-    var searchText = ""
-    var isActiveOnly = false
-    var selectedSort: SortType = .date
+    // Inputs: any change recomputes the displayed collection.
+    var allItems: [CustomerItem] = [] {
+        didSet { recomputeDisplayedItems() }
+    }
+    var searchText = "" {
+        didSet { recomputeDisplayedItems() }
+    }
+    var isActiveOnly = false {
+        didSet { recomputeDisplayedItems() }
+    }
+    var selectedSort: SortType = .date {
+        didSet { recomputeDisplayedItems() }
+    }
 
-    func displayedItems(from items: [CustomerItem]) -> [CustomerItem] {
-        let filteredItems = filteredItems(from: items)
+    // Derived collection: already filtered and sorted, ready for ForEach.
+    private(set) var displayedItems: [CustomerItem] = []
+
+    private func recomputeDisplayedItems() {
+        let filteredItems = filteredItems(from: allItems)
 
         switch selectedSort {
         case .date:
-            return filteredItems
+            displayedItems = filteredItems
         case .name:
-            return filteredItems.sorted {
+            displayedItems = filteredItems.sorted {
                 $0.lastname.localizedCaseInsensitiveCompare($1.lastname) == .orderedAscending
             }
         case .location:
-            return filteredItems.sorted {
+            displayedItems = filteredItems.sorted {
                 $0.city.localizedCaseInsensitiveCompare($1.city) == .orderedAscending
             }
         case .active:
-            return filteredItems.sorted { $0.isActive && !$1.isActive }
+            displayedItems = filteredItems.sorted { $0.isActive && !$1.isActive }
         }
     }
 

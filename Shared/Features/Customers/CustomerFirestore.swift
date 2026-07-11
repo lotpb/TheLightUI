@@ -1,7 +1,10 @@
 //
-//  CustomerFirestoreDTO.swift
+//  CustomerFirestore.swift
 //  TheLightUI
 //
+
+// Firestore schema constants, document-to-model mapping, and the write payload
+// for the Customers collection.
 
 import Foundation
 import FirebaseFirestore
@@ -43,90 +46,38 @@ enum CustomerFirestoreSchema {
     }
 }
 
-struct CustomerFirestoreDTO {
-    let id: String
-    let isActive: Bool
-    let first: String
-    let lastname: String
-    let street: String
-    let city: String
-    let state: String
-    let zip: String
-    let amount: Int
-    let creationDate: Date
-    let rate: String
-    let phone: String
-    let comments: String
-    let spouse: String
-    let email: String
-    let contractorIndex: Int
-    let photo: String
-    let lastUpdateDate: Date
-    let startDate: Date
-    let completionDate: Date
-    let quantity: Int
-    let salesIndex: Int
-    let jobIndex: Int
-    let productIndex: Int
-
+extension CustomerItem {
+    // Maps a Firestore document to the app model, tolerating the legacy
+    // schema's mixed value types (string-encoded bools/ints, missing dates).
     init(document: QueryDocumentSnapshot) {
         let fields = CustomerFirestoreSchema.Field.self
         let fallbackDate = Date()
 
-        id = document.documentID
-        isActive = document.stringValue(for: fields.active) == "1"
-        first = document.stringValue(for: fields.first)
-        lastname = document.stringValue(for: fields.lastname)
-        street = document.stringValue(for: fields.street)
-        city = document.stringValue(for: fields.city)
-        state = document.stringValue(for: fields.state)
-        zip = document.stringValue(for: fields.zip)
-        amount = document.intValue(for: fields.amount)
-        creationDate = document.dateValue(for: fields.creationDate) ?? fallbackDate
-        rate = document.stringValue(for: fields.rate)
-        phone = document.stringValue(for: fields.phone)
-        comments = document.stringValue(for: fields.comments)
-        spouse = document.stringValue(for: fields.spouse)
-        email = document.stringValue(for: fields.email)
-        contractorIndex = document.intStringValue(for: fields.contractor)
-        photo = document.stringValue(for: fields.photo)
-        lastUpdateDate = document.dateValue(for: fields.lastUpdate) ?? fallbackDate
-        startDate = document.dateValue(for: fields.start) ?? fallbackDate
-        completionDate = document.dateValue(for: fields.completion) ?? fallbackDate
-        quantity = document.intValue(for: fields.quantity)
-        salesIndex = document.intValue(for: fields.salesNo)
-        jobIndex = document.intValue(for: fields.jobNo)
-        productIndex = document.intValue(for: fields.prodNo)
-    }
-
-    var customerItem: CustomerItem {
-        CustomerItem(
-            id: id,
-            isActive: isActive,
-            first: first,
-            lastname: lastname,
-            street: street,
-            city: city,
-            state: state,
-            zip: zip,
-            amount: amount,
-            creationDate: creationDate,
-            rate: rate,
-            phone: phone,
-            comments: comments,
-            spouse: spouse,
-            email: email,
-            contractorIndex: contractorIndex,
-            photo: photo,
-            lastUpdateDate: lastUpdateDate,
-            startDate: startDate,
-            completionDate: completionDate,
-            quantity: quantity,
-            salesIndex: salesIndex,
-            jobIndex: jobIndex,
-            productIndex: productIndex,
-            status: .edit,
-            formController: "Customer"
+        self.init(
+            id: document.documentID,
+            isActive: document.stringValue(for: fields.active) == "1",
+            first: document.stringValue(for: fields.first),
+            lastname: document.stringValue(for: fields.lastname),
+            street: document.stringValue(for: fields.street),
+            city: document.stringValue(for: fields.city),
+            state: document.stringValue(for: fields.state),
+            zip: document.stringValue(for: fields.zip),
+            amount: document.intValue(for: fields.amount),
+            creationDate: document.dateValue(for: fields.creationDate) ?? fallbackDate,
+            rate: document.stringValue(for: fields.rate),
+            phone: document.stringValue(for: fields.phone),
+            comments: document.stringValue(for: fields.comments),
+            spouse: document.stringValue(for: fields.spouse),
+            email: document.stringValue(for: fields.email),
+            contractorIndex: document.intStringValue(for: fields.contractor),
+            photo: document.stringValue(for: fields.photo),
+            lastUpdateDate: document.dateValue(for: fields.lastUpdate) ?? fallbackDate,
+            startDate: document.dateValue(for: fields.start) ?? fallbackDate,
+            completionDate: document.dateValue(for: fields.completion) ?? fallbackDate,
+            quantity: document.intValue(for: fields.quantity),
+            salesIndex: document.intValue(for: fields.salesNo),
+            jobIndex: document.intValue(for: fields.jobNo),
+            productIndex: document.intValue(for: fields.prodNo)
         )
     }
 }
