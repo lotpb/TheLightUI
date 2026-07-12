@@ -132,6 +132,36 @@ struct MainMenuUI: View {
     }
 
     private var menuList: some View {
+        listWithRowSpacing
+            .listStyle(.insetGrouped)
+        // The custom tab bar's safe-area inset is applied outside this
+        // screen's NavigationStack, which doesn't forward it to the List's
+        // scroll insets — re-apply it so the last row rests above the bar.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            Color.clear
+                .frame(height: tabBarOverlap)
+                .allowsHitTesting(false)
+        }
+        .fullScreenCover(item: $activeRoute) { route in
+            coordinator.fullscreenDestination(route)
+        }
+        .navigationDestination(for: MainMenuDataRoute.self) { route in
+            coordinator.dataDestination(route)
+        }
+    }
+
+    // Spaced rows give each cell its own rounded card, matching the
+    // current system list style; listRowSpacing requires iOS 17.
+    @ViewBuilder
+    private var listWithRowSpacing: some View {
+        if #available(iOS 17.0, *) {
+            listContent.listRowSpacing(10)
+        } else {
+            listContent
+        }
+    }
+
+    private var listContent: some View {
         List {
             #if DEBUG
             IncomingSection(themeColor: themeColor)
@@ -148,21 +178,6 @@ struct MainMenuUI: View {
                 onSelect: { route in path.append(route) },
                 onSelectRoute: showRoute
             )
-        }
-        .listStyle(.insetGrouped)
-        // The custom tab bar's safe-area inset is applied outside this
-        // screen's NavigationStack, which doesn't forward it to the List's
-        // scroll insets — re-apply it so the last row rests above the bar.
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            Color.clear
-                .frame(height: tabBarOverlap)
-                .allowsHitTesting(false)
-        }
-        .fullScreenCover(item: $activeRoute) { route in
-            coordinator.fullscreenDestination(route)
-        }
-        .navigationDestination(for: MainMenuDataRoute.self) { route in
-            coordinator.dataDestination(route)
         }
     }
 

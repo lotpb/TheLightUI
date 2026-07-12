@@ -87,7 +87,10 @@ struct MainTopView: View {
         .padding()
         .task {
             #if DEBUG
-            if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" { return }
+            if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+                currentStepsText = 3240.formatted(.number)
+                return
+            }
             #endif
             isActive = true
             await loadCurrentTemperature()

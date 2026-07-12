@@ -6,17 +6,24 @@
 import SwiftUI
 
 struct IncomingSection: View {
+    @AppStorage(SettingsUI.useThemeMenuIconsKey) private var useThemeMenuIcons = false
     let themeColor: Color
-    private let menuItems = ["Snapshot", "Statistics"]
+    private let menuItems: [IncomingMenuItem] = [
+        IncomingMenuItem(title: "Snapshot", systemImage: "message", iconColor: .green, badge: "NEW ITEMS!"),
+        IncomingMenuItem(title: "Chart", systemImage: "chart.bar.fill", iconColor: .purple, badge: nil)
+    ]
 
     var body: some View {
         Section {
-            ForEach(menuItems, id: \.self) { message in
+            ForEach(menuItems) { item in
                 NavigationLink {
-                    incomingDestination(for: message)
+                    incomingDestination(for: item.title)
                 } label: {
-                    incomingLabel(message)
+                    incomingLabel(item)
                 }
+                // listItemTint only takes effect on the list item itself;
+                // inside the label closure it's ignored.
+                .listItemTint(useThemeMenuIcons ? themeColor : item.iconColor)
             }
         } header: {
             Text("Incoming").foregroundStyle(themeColor)
@@ -26,18 +33,26 @@ struct IncomingSection: View {
     @ViewBuilder
     private func incomingDestination(for message: String) -> some View {
         switch message {
-        case "Statistics":
-            iMacUI()
+        case "Chart":
+            ChartView()
         default:
             MacbookPro()
         }
     }
 
-    private func incomingLabel(_ message: String) -> some View {
-        Label(message, systemImage: "message")
-            .badge("NEW ITEMS!")
-            .listItemTint(themeColor)
+    private func incomingLabel(_ item: IncomingMenuItem) -> some View {
+        Label(item.title, systemImage: item.systemImage)
+            .badge(item.badge.map(Text.init))
     }
+}
+
+private struct IncomingMenuItem: Identifiable {
+    let title: String
+    let systemImage: String
+    let iconColor: Color
+    let badge: String?
+
+    var id: String { title }
 }
 
 struct DataSection: View {
@@ -197,16 +212,6 @@ struct ExploreSection: View {
         ]
 
         #if DEBUG
-        items.insert(
-            FullscreenMenuItem(
-                route: .chart,
-                title: "Chart",
-                subtitle: "Analytics",
-                systemImage: "chart.bar.fill",
-                iconColor: .purple
-            ),
-            at: 0
-        )
         items.append(
             FullscreenMenuItem(
                 route: .stacks,
@@ -256,6 +261,7 @@ private struct FullscreenMenuItem: Identifiable, MenuRouteDisplaying {
 
 #Preview {
     List {
+        IncomingSection(themeColor: .blue)
         DataSection(themeColor: .blue) { _ in }
         ExploreSection(themeColor: .blue) { _ in }
         AppsSection(

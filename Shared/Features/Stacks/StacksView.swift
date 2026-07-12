@@ -104,6 +104,10 @@ struct StacksView: View {
             FurnitureUI()
         case .chart:
             ChartView()
+        case .iMac:
+            iMacUI()
+        case .spotify:
+            SpotifyUI()
         case .wave:
             WaveUI()
         }
@@ -131,6 +135,8 @@ struct StacksView: View {
 private enum StackDestination {
     case furniture
     case chart
+    case iMac
+    case spotify
     case wave
 }
 
@@ -142,10 +148,10 @@ private struct StackSection: Identifiable {
     static let sampleSections = [
         StackSection(title: "Your top genres", cards: [
             StackCard(title: "Furniture", imageName: "chair_1", color: .brown, destination: .furniture),
-            StackCard(title: "Chart", imageName: "ZuckBuddist", color: .purple, destination: .chart)
+            StackCard(title: "iMac", imageName: "ZuckBuddist", color: .purple, destination: .iMac)
         ]),
         StackSection(title: "Featured podcast categories", cards: [
-            StackCard(title: "Podcast New\nReleases", imageName: "taylor_swift_profile", color: .pink, destination: .chart),
+            StackCard(title: "Spotify", imageName: "taylor_swift_profile", color: .pink, destination: .spotify),
             StackCard(title: "Wave", imageName: "chair_2", color: .blue, destination: .wave)
         ]),
         StackSection(title: "Browse all", cards: [
