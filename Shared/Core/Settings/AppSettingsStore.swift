@@ -23,12 +23,15 @@ enum SettingsUI {
     static let isAutolockKey = "isautolock"
 
     static let color = "color"
+    static let useThemeMenuIconsKey = "useThemeMenuIcons"
 
     //static let isSpeakKey = "isSpeak"
     //static let isMusicKey = "isMusic"
 
     static let latitudeKey = "latitude"
     static let longitudeKey = "longitude"
+    static let isGeofenceAlertsKey = "isGeofenceAlerts"
+    static let showGeofencePinsKey = "showGeofencePins"
     //static let legacyLongtitudeKey = "longtitude"
 
     static let eventKey = "event"
@@ -90,6 +93,7 @@ final class AppSettingsStore {
     var backend: String = "Firebase" { didSet { defaults.set(backend, forKey: SettingsUI.backend) } }
     var isBackfetch: Bool = false { didSet { defaults.set(isBackfetch, forKey: SettingsUI.isBackfetch) } }
     var color: Int = 0 { didSet { defaults.set(color, forKey: SettingsUI.color) } }
+    var useThemeMenuIcons: Bool = false { didSet { defaults.set(useThemeMenuIcons, forKey: SettingsUI.useThemeMenuIconsKey) } }
     
     //var isAutoLockDisabled: Bool = false { didSet { defaults.set(isAutoLockDisabled, forKey: SettingsUI.isAutolockKey) } }
     //var isSpeak: Bool = false { didSet { defaults.set(isSpeak, forKey: SettingsUI.isSpeakKey) } }
@@ -97,6 +101,8 @@ final class AppSettingsStore {
 
     var latitude: String = "" { didSet { saveSecureString(latitude, forKey: SettingsUI.latitudeKey) } }
     var longitude: String = "" { didSet { saveSecureString(longitude, forKey: SettingsUI.longitudeKey) } }
+    var isGeofenceAlerts: Bool = true { didSet { defaults.set(isGeofenceAlerts, forKey: SettingsUI.isGeofenceAlertsKey) } }
+    var showGeofencePins: Bool = true { didSet { defaults.set(showGeofencePins, forKey: SettingsUI.showGeofencePinsKey) } }
     var event: String = "" { didSet { defaults.set(event, forKey: SettingsUI.eventKey) } }
     var duration: String = "" { didSet { defaults.set(duration, forKey: SettingsUI.durationKey) } }
     var areaCode: String = "" { didSet { defaults.set(areaCode, forKey: SettingsUI.areacodeKey) } }
@@ -126,6 +132,7 @@ final class AppSettingsStore {
         backend = defaults.string(forKey: SettingsUI.backend) ?? backend
         isBackfetch = defaults.bool(forKey: SettingsUI.isBackfetch)
         color = defaults.object(forKey: SettingsUI.color) as? Int ?? color
+        useThemeMenuIcons = defaults.bool(forKey: SettingsUI.useThemeMenuIconsKey)
         
         //isAutoLockDisabled = defaults.bool(forKey: SettingsUI.isAutolockKey)
         //isSpeak = defaults.bool(forKey: SettingsUI.isSpeakKey)
@@ -140,6 +147,9 @@ final class AppSettingsStore {
         
         latitude = Self.loadSecureString(forKey: SettingsUI.latitudeKey, defaults: defaults, passwordStore: passwordStore)
         longitude = Self.loadSecureString(forKey: SettingsUI.longitudeKey, defaultValue: "-80.124528", defaults: defaults, passwordStore: passwordStore)
+        // Defaults to true, so bool(forKey:) (false when unset) won't work here.
+        isGeofenceAlerts = defaults.object(forKey: SettingsUI.isGeofenceAlertsKey) as? Bool ?? isGeofenceAlerts
+        showGeofencePins = defaults.object(forKey: SettingsUI.showGeofencePinsKey) as? Bool ?? showGeofencePins
 
         event = defaults.string(forKey: SettingsUI.eventKey) ?? event
         duration = defaults.string(forKey: SettingsUI.durationKey) ?? duration

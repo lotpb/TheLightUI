@@ -50,13 +50,15 @@ struct DataSection: View {
                 route: .leads,
                 title: "Leads",
                 subtitle: "Potential customers",
-                systemImage: "person.crop.circle.badge.plus"
+                systemImage: "person.crop.circle.badge.plus",
+                iconColor: .blue
             ),
             DataMenuItem(
                 route: .customers,
                 title: "Customers",
                 subtitle: "Active accounts",
-                systemImage: "person.2.fill"
+                systemImage: "person.2.fill",
+                iconColor: .indigo
             )
         ]
 
@@ -66,37 +68,18 @@ struct DataSection: View {
                 route: .vendors,
                 title: "Vendors",
                 subtitle: "Suppliers",
-                systemImage: "shippingbox.fill"
+                systemImage: "shippingbox.fill",
+                iconColor: .brown
             ),
             DataMenuItem(
                 route: .employee,
                 title: "Employee",
                 subtitle: "Team directory",
-                systemImage: "person.text.rectangle"
+                systemImage: "person.text.rectangle",
+                iconColor: .teal
             )
         ])
         #endif
-
-        items.append(contentsOf: [
-            DataMenuItem(
-                route: .tip,
-                title: "Tip Calculator",
-                subtitle: "Split a bill",
-                systemImage: "receipt.fill"
-            ),
-            DataMenuItem(
-                route: .steps,
-                title: "Steps Today",
-                subtitle: "Count today's steps",
-                systemImage: "figure.walk.circle.fill"
-            ),
-            DataMenuItem(
-                route: .expenses,
-                title: "Expenses",
-                subtitle: "Track spending",
-                systemImage: "creditcard.fill"
-            )
-        ])
 
         return items
     }
@@ -104,7 +87,7 @@ struct DataSection: View {
     var body: some View {
         Section {
             ForEach(items) { item in
-                MenuRouteButton(item: item, tint: themeColor) {
+                MenuRouteButton(item: item) {
                     onSelect(item.route)
                 }
             }
@@ -114,7 +97,77 @@ struct DataSection: View {
     }
 }
 
-struct OutgoingSection: View {
+struct AppsSection: View {
+    let themeColor: Color
+    let onSelect: (MainMenuDataRoute) -> Void
+    let onSelectRoute: (MainMenuFullscreenRoute) -> Void
+
+    private let items: [DataMenuItem] = [
+        DataMenuItem(
+            route: .expenses,
+            title: "Expenses",
+            subtitle: "Track spending",
+            systemImage: "creditcard.fill",
+            iconColor: .green
+        ),
+        DataMenuItem(
+            route: .tip,
+            title: "Tip Calculator",
+            subtitle: "Split a bill",
+            systemImage: "receipt.fill",
+            iconColor: .orange
+        ),
+        DataMenuItem(
+            route: .steps,
+            title: "Steps Today",
+            subtitle: "Count today's steps",
+            systemImage: "figure.walk.circle.fill",
+            iconColor: .red
+        )
+    ]
+
+    private var socialItems: [FullscreenMenuItem] {
+        #if DEBUG
+        [
+            FullscreenMenuItem(
+                route: .instagram,
+                title: "Instagram",
+                subtitle: "Social feed",
+                systemImage: "camera.circle.fill",
+                iconColor: .pink
+            ),
+            FullscreenMenuItem(
+                route: .tweet,
+                title: "Twitter",
+                subtitle: "Social feed",
+                systemImage: "text.bubble.fill",
+                iconColor: .blue
+            )
+        ]
+        #else
+        []
+        #endif
+    }
+
+    var body: some View {
+        Section {
+            ForEach(items) { item in
+                MenuRouteButton(item: item) {
+                    onSelect(item.route)
+                }
+            }
+            ForEach(socialItems) { item in
+                MenuRouteButton(item: item) {
+                    onSelectRoute(item.route)
+                }
+            }
+        } header: {
+            Text("Apps").foregroundStyle(themeColor)
+        }
+    }
+}
+
+struct ExploreSection: View {
     let themeColor: Color
     let onSelectRoute: (MainMenuFullscreenRoute) -> Void
 
@@ -124,19 +177,22 @@ struct OutgoingSection: View {
                 route: .geotify,
                 title: "Geotify",
                 subtitle: "Region monitoring",
-                systemImage: "mappin.and.ellipse"
+                systemImage: "mappin.and.ellipse",
+                iconColor: .red
             ),
             FullscreenMenuItem(
                 route: .places,
                 title: "Search Places",
                 subtitle: "Find a place nearby",
-                systemImage: "magnifyingglass.circle.fill"
+                systemImage: "magnifyingglass.circle.fill",
+                iconColor: .mint
             ),
             FullscreenMenuItem(
                 route: .weather,
                 title: "Weather",
                 subtitle: "Forecast and conditions",
-                systemImage: "cloud.sun.fill"
+                systemImage: "cloud.sun.fill",
+                iconColor: .cyan
             )
         ]
 
@@ -146,30 +202,20 @@ struct OutgoingSection: View {
                 route: .chart,
                 title: "Chart",
                 subtitle: "Analytics",
-                systemImage: "chart.bar.fill"
+                systemImage: "chart.bar.fill",
+                iconColor: .purple
             ),
             at: 0
         )
-        items.append(contentsOf: [
+        items.append(
             FullscreenMenuItem(
                 route: .stacks,
                 title: "Stacks",
                 subtitle: "Layout demos",
-                systemImage: "square.stack.3d.up.fill"
-            ),
-            FullscreenMenuItem(
-                route: .instagram,
-                title: "Instagram",
-                subtitle: "Social feed",
-                systemImage: "camera.circle.fill"
-            ),
-            FullscreenMenuItem(
-                route: .tweet,
-                title: "Twitter",
-                subtitle: "Social feed",
-                systemImage: "camera.circle.fill"
+                systemImage: "square.stack.3d.up.fill",
+                iconColor: .gray
             )
-        ])
+        )
         #endif
 
         return items
@@ -178,12 +224,12 @@ struct OutgoingSection: View {
     var body: some View {
         Section {
             ForEach(items) { item in
-                MenuRouteButton(item: item, tint: themeColor) {
+                MenuRouteButton(item: item) {
                     onSelectRoute(item.route)
                 }
             }
         } header: {
-            Text("Outgoing").foregroundStyle(themeColor)
+            Text("Explore").foregroundStyle(themeColor)
         }
     }
 }
@@ -193,6 +239,7 @@ private struct DataMenuItem: Identifiable, MenuRouteDisplaying {
     let title: String
     let subtitle: String?
     let systemImage: String
+    let iconColor: Color
 
     var id: MainMenuDataRoute { route }
 }
@@ -202,6 +249,20 @@ private struct FullscreenMenuItem: Identifiable, MenuRouteDisplaying {
     let title: String
     let subtitle: String?
     let systemImage: String
+    let iconColor: Color
 
     var id: MainMenuFullscreenRoute { route }
+}
+
+#Preview {
+    List {
+        DataSection(themeColor: .blue) { _ in }
+        ExploreSection(themeColor: .blue) { _ in }
+        AppsSection(
+            themeColor: .blue,
+            onSelect: { _ in },
+            onSelectRoute: { _ in }
+        )
+    }
+    .listStyle(.insetGrouped)
 }

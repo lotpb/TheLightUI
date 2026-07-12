@@ -78,6 +78,40 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         return request.identifier
     }
     
+    /// Posts a local notification for immediate delivery (no trigger).
+    /// - Parameters: title, body, categoryIdentifier
+    /// - Returns: The identifier of the delivered request.
+    @discardableResult
+    func postNotification(
+        title: String,
+        body: String,
+        categoryIdentifier: String
+    ) -> String {
+        let content = UNMutableNotificationContent()
+        content.title = "TheLight Software"
+        content.subtitle = title
+        content.body = body
+        content.categoryIdentifier = categoryIdentifier
+        content.sound = .default
+        
+        // A nil trigger delivers the notification immediately.
+        let request = UNNotificationRequest(
+            identifier: UUID().uuidString,
+            content: content,
+            trigger: nil
+        )
+        
+        Task {
+            do {
+                try await notificationCenter.add(request)
+            } catch {
+                print("Failed to post notification: \(error.localizedDescription)")
+            }
+        }
+        
+        return request.identifier
+    }
+    
     /// Debug helper to print next trigger dates for all pending calendar notifications.
     func printNotifications() {
         notificationCenter.getPendingNotificationRequests { requests in

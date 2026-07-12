@@ -91,6 +91,7 @@ struct SettingView: View {
                         .tag(option.rawValue)
                 }
             }
+            SettingsToggleRow(title: "Theme-Colored Menu Icons", isOn: $settings.useThemeMenuIcons)
         }
     }
 
@@ -105,6 +106,8 @@ struct SettingView: View {
         Section("Map") {
             settingsTextField("Latitude", text: $settings.latitude, keyboardType: .decimalPad)
             settingsTextField("Longitude", text: $settings.longitude, keyboardType: .numbersAndPunctuation)
+            SettingsToggleRow(title: "Geofence Alerts", isOn: $settings.isGeofenceAlerts)
+            SettingsToggleRow(title: "Show Geofences on Map", isOn: $settings.showGeofencePins)
         }
     }
 

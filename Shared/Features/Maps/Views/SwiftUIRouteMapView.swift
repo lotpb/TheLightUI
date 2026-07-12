@@ -25,6 +25,7 @@ struct SwiftUIRouteMapView: View {
     @State private var lastRouteOrigin: CLLocation?
     @State private var lastRouteDestinationAddress: String?
     @State private var routeService = MapRouteService()
+    @AppStorage(SettingsUI.showGeofencePinsKey) private var showGeofencePins = true
 
     private let geofenceManager = GeofenceManager.shared
     private let routeRecalculationDistance: CLLocationDistance = 100
@@ -71,12 +72,14 @@ struct SwiftUIRouteMapView: View {
                     .stroke(.blue, lineWidth: 6)
             }
 
-            ForEach(geofenceManager.geofences) { geofence in
-                MapCircle(center: geofence.center, radius: geofence.radius)
-                    .foregroundStyle(.orange.opacity(0.18))
-                    .stroke(.orange, lineWidth: 2)
-                Marker(geofence.id, systemImage: "circle.dashed", coordinate: geofence.center)
-                    .tint(.orange)
+            if showGeofencePins {
+                ForEach(geofenceManager.geofences) { geofence in
+                    MapCircle(center: geofence.center, radius: geofence.radius)
+                        .foregroundStyle(.orange.opacity(0.18))
+                        .stroke(.orange, lineWidth: 2)
+                    Marker(geofence.id, systemImage: "circle.dashed", coordinate: geofence.center)
+                        .tint(.orange)
+                }
             }
         }
         .mapStyle(mapStyle)

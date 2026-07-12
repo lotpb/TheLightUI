@@ -9,13 +9,16 @@ protocol MenuRouteDisplaying {
     var title: String { get }
     var subtitle: String? { get }
     var systemImage: String { get }
+    var iconColor: Color { get }
 }
 
 struct MenuRouteButton: View {
+    @AppStorage(SettingsUI.color) private var themeColorSetting: Int?
+    @AppStorage(SettingsUI.useThemeMenuIconsKey) private var useThemeMenuIcons = false
     var title: String
     var subtitle: String? = nil
     var systemImage: String = "mappin.and.ellipse"
-    var tint: Color = .accentColor
+    var iconColor: Color = .accentColor
     var isCompact = false
     var action: () -> Void
 
@@ -23,48 +26,52 @@ struct MenuRouteButton: View {
         title: String,
         subtitle: String? = nil,
         systemImage: String = "mappin.and.ellipse",
-        tint: Color = .accentColor,
+        iconColor: Color = .accentColor,
         isCompact: Bool = false,
         action: @escaping () -> Void
     ) {
         self.title = title
         self.subtitle = subtitle
         self.systemImage = systemImage
-        self.tint = tint
+        self.iconColor = iconColor
         self.isCompact = isCompact
         self.action = action
     }
 
-    init(item: MenuRouteDisplaying, tint: Color, action: @escaping () -> Void) {
+    init(item: MenuRouteDisplaying, action: @escaping () -> Void) {
         self.init(
             title: item.title,
             subtitle: item.subtitle,
             systemImage: item.systemImage,
-            tint: tint,
+            iconColor: item.iconColor,
             isCompact: true,
             action: action
         )
     }
 
     private var iconSize: CGFloat {
-        isCompact ? 32 : 40
+        isCompact ? 30 : 36
     }
 
     private var verticalPadding: CGFloat {
         isCompact ? 4 : 8
     }
 
+    private var resolvedIconColor: Color {
+        useThemeMenuIcons ? AppTheme.accentColor(for: themeColorSetting) : iconColor
+    }
+
     var body: some View {
         Button(action: action) {
-            HStack(spacing: isCompact ? 10 : 12) {
-                ZStack {
-                    Circle()
-                        .fill(tint.opacity(0.15))
-                        .frame(width: iconSize, height: iconSize)
-                    Image(systemName: systemImage)
-                        .foregroundStyle(tint)
-                        .imageScale(isCompact ? .medium : .large)
-                }
+            HStack(spacing: isCompact ? 12 : 14) {
+                RoundedRectangle(cornerRadius: isCompact ? 7 : 8)
+                    .fill(resolvedIconColor)
+                    .frame(width: iconSize, height: iconSize)
+                    .overlay {
+                        Image(systemName: systemImage)
+                            .font(.system(size: isCompact ? 16 : 19, weight: .medium))
+                            .foregroundStyle(.white)
+                    }
 
                 VStack(alignment: .leading, spacing: isCompact ? 1 : 2) {
                     Text(title)
@@ -93,4 +100,28 @@ struct MenuRouteButton: View {
         }
         return title
     }
+}
+
+#Preview {
+    List {
+        Section {
+            MenuRouteButton(
+                title: "Expenses",
+                subtitle: "Track spending",
+                systemImage: "creditcard.fill",
+                iconColor: .green,
+                isCompact: true
+            ) { }
+            MenuRouteButton(
+                title: "Tip Calculator",
+                subtitle: "Split a bill",
+                systemImage: "receipt.fill",
+                iconColor: .orange,
+                isCompact: true
+            ) { }
+        } header: {
+            Text("Apps")
+        }
+    }
+    .listStyle(.insetGrouped)
 }

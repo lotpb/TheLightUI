@@ -44,6 +44,11 @@ private struct AppRootView: View {
             ContentView(dependencies: dependencies)
                 .opacity(showLaunch ? 0 : 1)
                 .animation(.easeInOut(duration: 0.35), value: showLaunch)
+                .task {
+                    // Arm geofence monitoring for the whole session, not just
+                    // while the map screen is open.
+                    await GeofenceManager.shared.start()
+                }
 
             if showLaunch {
                 LaunchScreenView()

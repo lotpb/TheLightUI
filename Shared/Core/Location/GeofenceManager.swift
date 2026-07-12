@@ -37,13 +37,6 @@ final class GeofenceManager {
             case .exited(let name): return "Left \(name)"
             }
         }
-
-        var systemImage: String {
-            switch self {
-            case .entered: return "circle.dashed.inset.filled"
-            case .exited: return "circle.dashed"
-            }
-        }
     }
 
     static let shared = GeofenceManager()
@@ -54,7 +47,6 @@ final class GeofenceManager {
     private static let monitorName = "TheLightGeofenceMonitor"
 
     private(set) var geofences: [Geofence] = []
-    private(set) var latestEvent: GeofenceEvent?
 
     private var monitor: CLMonitor?
     private var eventTask: Task<Void, Never>?
@@ -74,6 +66,7 @@ final class GeofenceManager {
     /// Opens the shared monitor, restores persisted fences, and begins observing events.
     func start() async {
         guard monitor == nil else { return }
+        await NotificationManager.shared.requestAuthorization()
         let monitor = await CLMonitor(Self.monitorName)
         self.monitor = monitor
         await restoreGeofences(from: monitor)
@@ -104,11 +97,6 @@ final class GeofenceManager {
             await monitor.remove(geofence.id)
         }
         geofences.removeAll()
-        latestEvent = nil
-    }
-
-    func clearLatestEvent() {
-        latestEvent = nil
     }
 
     private func restoreGeofences(from monitor: CLMonitor) async {
@@ -133,17 +121,28 @@ final class GeofenceManager {
         }
     }
 
+    /// User-facing switch in Settings > Map; read live so toggling applies without a restart.
+    private var alertsEnabled: Bool {
+        UserDefaults.standard.object(forKey: SettingsUI.isGeofenceAlertsKey) as? Bool ?? true
+    }
+
     private func handle(_ event: CLMonitor.Event) {
+        guard alertsEnabled else { return }
+        let geofenceEvent: GeofenceEvent
         switch event.state {
         case .satisfied:
-            latestEvent = .entered(event.identifier)
-            playAlertSound()
+            geofenceEvent = .entered(event.identifier)
         case .unsatisfied:
-            latestEvent = .exited(event.identifier)
-            playAlertSound()
+            geofenceEvent = .exited(event.identifier)
         default:
-            break
+            return
         }
+        playAlertSound()
+        NotificationManager.shared.postNotification(
+            title: "Geofence",
+            body: geofenceEvent.message,
+            categoryIdentifier: "geofence"
+        )
     }
 
     /// Plays the Tornado alert from the asset catalog when a fence fires.

@@ -15,7 +15,6 @@ private enum MapLayout {
     static let bannerHorizontalContentPadding: CGFloat = 14
     static let bannerVerticalContentPadding: CGFloat = 10
     static let bannerStrokeOpacity: CGFloat = 0.06
-    static let geofenceEventDisplayDuration: Duration = .seconds(4)
 }
 
 @MainActor
@@ -75,7 +74,7 @@ struct MapUI: View {
                 mapType: $mapType
             )
             .zIndex(1)
-            // Route status and geofence event banners
+            // Route status banner
             statusBanners
                 .zIndex(2)
             // Bottom sheet with travel details
@@ -112,12 +111,8 @@ struct MapUI: View {
     }
 
     private var statusBanners: some View {
-        VStack(spacing: 8) {
-            routeStatusBanner
-            geofenceEventBanner
-        }
-        .padding(.top, MapLayout.bannerTopPadding)
-        .animation(.spring(response: 0.28, dampingFraction: 0.86), value: geofenceManager.latestEvent)
+        routeStatusBanner
+            .padding(.top, MapLayout.bannerTopPadding)
     }
 
     @ViewBuilder
@@ -129,18 +124,6 @@ struct MapUI: View {
             routeStatusContent(systemImage: "exclamationmark.triangle.fill", message: message)
         case .idle, .ready:
             EmptyView()
-        }
-    }
-
-    @ViewBuilder
-    private var geofenceEventBanner: some View {
-        if let event = geofenceManager.latestEvent {
-            routeStatusContent(systemImage: event.systemImage, message: event.message)
-                .task(id: event) {
-                    try? await Task.sleep(for: MapLayout.geofenceEventDisplayDuration)
-                    guard !Task.isCancelled else { return }
-                    geofenceManager.clearLatestEvent()
-                }
         }
     }
 

@@ -139,8 +139,13 @@ struct MainMenuUI: View {
             DataSection(themeColor: themeColor) { route in
                 path.append(route)
             }
-            OutgoingSection(
+            ExploreSection(
                 themeColor: themeColor,
+                onSelectRoute: showRoute
+            )
+            AppsSection(
+                themeColor: themeColor,
+                onSelect: { route in path.append(route) },
                 onSelectRoute: showRoute
             )
         }
