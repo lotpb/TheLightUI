@@ -38,6 +38,7 @@ enum MainMenuFullscreenRoute: Identifiable {
 }
 
 enum MainMenuDataRoute: Hashable {
+    case snapshot
     case leads
     case customers
     case vendors
@@ -89,6 +90,8 @@ struct MainMenuCoordinator {
     @ViewBuilder
     func dataDestination(_ route: MainMenuDataRoute) -> some View {
         switch route {
+        case .snapshot:
+            MacbookPro()
         case .leads:
             CustomerUI(
                 customerService: makeCustomerService(),
@@ -144,7 +147,11 @@ struct MainMenuCoordinator {
         case .tweet:
             TwitterUI()
         case .chart:
-            ChartView()
+            // ChartView no longer owns a NavigationStack (it can be pushed
+            // from the main menu), so standalone presentation wraps it here.
+            NavigationStack {
+                ChartView()
+            }
         }
     }
 }

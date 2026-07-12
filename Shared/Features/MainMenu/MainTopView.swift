@@ -171,11 +171,22 @@ struct MainTopView: View {
     private func applySteps(_ steps: Int?) {
         guard isActive else { return }
         guard let steps else {
-            currentStepsText = "Unavailable"
+            currentStepsText = stepsUnavailableText
             return
         }
 
         currentStepsText = steps.formatted(.number)
+    }
+
+    /// Distinguishes a permission problem (fixable in Settings) from missing
+    /// step-counting hardware, which both surface as a nil pedometer result.
+    private var stepsUnavailableText: String {
+        switch CMPedometer.authorizationStatus() {
+        case .denied, .restricted:
+            "Off in Settings"
+        default:
+            "Unavailable"
+        }
     }
 
     private func systemImage(for weather: API.CurrentWeather.Response.WeatherResponse?) -> String {

@@ -9,16 +9,18 @@ struct IncomingSection: View {
     @AppStorage(SettingsUI.useThemeMenuIconsKey) private var useThemeMenuIcons = false
     let themeColor: Color
     private let menuItems: [IncomingMenuItem] = [
-        IncomingMenuItem(title: "Snapshot", systemImage: "message", iconColor: .green, badge: "NEW ITEMS!"),
-        IncomingMenuItem(title: "Chart", systemImage: "chart.bar.fill", iconColor: .purple, badge: nil)
+        IncomingMenuItem(route: .snapshot, title: "Snapshot", systemImage: "message", iconColor: .green, badge: "NEW ITEMS!"),
+        IncomingMenuItem(route: .chart, title: "Chart", systemImage: "chart.bar.fill", iconColor: .purple, badge: nil)
     ]
 
     var body: some View {
         Section {
             ForEach(menuItems) { item in
-                NavigationLink {
-                    incomingDestination(for: item.title)
-                } label: {
+                // Value-based links are required here: the menu's
+                // NavigationStack uses a typed [MainMenuDataRoute] path, and
+                // pushing a view-destination link onto it traps with
+                // AnyNavigationPath.Error.comparisonTypeMismatch.
+                NavigationLink(value: item.route) {
                     incomingLabel(item)
                 }
                 // listItemTint only takes effect on the list item itself;
@@ -30,16 +32,6 @@ struct IncomingSection: View {
         }
     }
 
-    @ViewBuilder
-    private func incomingDestination(for message: String) -> some View {
-        switch message {
-        case "Chart":
-            ChartView()
-        default:
-            MacbookPro()
-        }
-    }
-
     private func incomingLabel(_ item: IncomingMenuItem) -> some View {
         Label(item.title, systemImage: item.systemImage)
             .badge(item.badge.map(Text.init))
@@ -47,6 +39,7 @@ struct IncomingSection: View {
 }
 
 private struct IncomingMenuItem: Identifiable {
+    let route: MainMenuDataRoute
     let title: String
     let systemImage: String
     let iconColor: Color

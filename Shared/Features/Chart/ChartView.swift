@@ -15,7 +15,6 @@ struct ChartView: View {
         static let sectionSpacing: CGFloat = 24
     }
 
-    @Environment(\.dismiss) private var dismiss
     @State private var viewModel: ChartViewModel
     @State private var selectedJob: String?
     @State private var selectedProduct: String?
@@ -27,13 +26,14 @@ struct ChartView: View {
         _viewModel = State(initialValue: ChartViewModel(customerService: customerService))
     }
 
+    // No NavigationStack here: this view is pushed onto the main menu's
+    // stack, and a nested stack inside a pushed destination is unsupported.
+    // Standalone presentations (fullscreen cover, previews) wrap it in a
+    // NavigationStack at the call site.
     var body: some View {
-        NavigationStack {
-            chartContent
-                .frame(maxWidth: Layout.maxContentWidth)
-                .navigationTitle("Charts")
-                .toolbar { toolbarContent }
-        }
+        chartContent
+            .frame(maxWidth: Layout.maxContentWidth)
+            .navigationTitle("Charts")
     }
 
     private var chartContent: some View {
@@ -122,21 +122,12 @@ struct ChartView: View {
             }
         }
     }
-
-    @ToolbarContentBuilder
-    private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .topBarLeading) {
-            Button(role: .cancel) {
-                dismiss()
-            } label: {
-                Label("Close", systemImage: "xmark.circle.fill")
-            }
-        }
-    }
 }
 
 // MARK: - Preview
 #Preview("Charts - Dark") {
-    ChartView(customerService: PreviewCustomerService())
-        .preferredColorScheme(.dark)
+    NavigationStack {
+        ChartView(customerService: PreviewCustomerService())
+    }
+    .preferredColorScheme(.dark)
 }
