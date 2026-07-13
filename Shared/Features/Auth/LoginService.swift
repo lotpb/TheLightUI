@@ -32,6 +32,7 @@ protocol LoginServicing: Sendable {
         phoneNumber: String,
         profileImageURL: URL
     ) async throws
+    func updateUserLocation(userId: String, latitude: Double, longitude: Double) async throws
 }
 
 struct FirebaseLoginService: LoginServicing {
@@ -105,6 +106,15 @@ struct FirebaseLoginService: LoginServicing {
         try await manager.firestore.collection(FirebaseConstants.users)
             .document(userId)
             .setData(userData)
+    }
+
+    func updateUserLocation(userId: String, latitude: Double, longitude: Double) async throws {
+        try await manager.firestore.collection(FirebaseConstants.users)
+            .document(userId)
+            .setData([
+                FirebaseConstants.latitude: latitude,
+                FirebaseConstants.longitude: longitude
+            ], merge: true)
     }
 }
 

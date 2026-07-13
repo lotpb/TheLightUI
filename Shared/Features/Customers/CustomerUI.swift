@@ -42,12 +42,13 @@ struct CustomerUI: View {
         customerService: CustomerServicing = FirebaseCustomerService(),
         formService: CustomerFormServicing = FirebaseCustomerFormService(),
         appBadgeManager: AppBadgeManaging = LiveAppBadgeManager(),
-        pickerviewModel: PickerDataModel = PickerDataModel()
+        pickerviewModel: PickerDataModel = PickerDataModel(),
+        categoryFilter: String? = nil
     ) {
         self.formService = formService
         self.appBadgeManager = appBadgeManager
         _viewModel = State(initialValue: CustomerData(customerService: customerService))
-        _listViewModel = State(initialValue: CustomerListViewModel())
+        _listViewModel = State(initialValue: CustomerListViewModel(categoryFilter: categoryFilter))
         _transferViewModel = State(initialValue: CustomerTransferViewModel(formService: formService))
         _pickerviewModel = State(initialValue: pickerviewModel)
     }
@@ -58,12 +59,13 @@ struct CustomerUI: View {
         viewModel: CustomerData,
         formService: CustomerFormServicing = FirebaseCustomerFormService(),
         appBadgeManager: AppBadgeManaging = LiveAppBadgeManager(),
-        pickerviewModel: PickerDataModel = PickerDataModel()
+        pickerviewModel: PickerDataModel = PickerDataModel(),
+        categoryFilter: String? = nil
     ) {
         self.formService = formService
         self.appBadgeManager = appBadgeManager
         _viewModel = State(initialValue: viewModel)
-        _listViewModel = State(initialValue: CustomerListViewModel())
+        _listViewModel = State(initialValue: CustomerListViewModel(categoryFilter: categoryFilter))
         _transferViewModel = State(initialValue: CustomerTransferViewModel(formService: formService))
         _pickerviewModel = State(initialValue: pickerviewModel)
     }

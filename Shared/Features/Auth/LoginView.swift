@@ -15,6 +15,7 @@ struct LoginView: View {
     @State private var selectedPhotoItem: PhotosPickerItem?
     @FocusState private var focusedField: LoginField?
     private let locationCaptureManager: LocationCaptureManaging
+    private let loginService: LoginServicing
 
     fileprivate enum Layout {
         static let maxContentWidth: CGFloat = 520
@@ -34,6 +35,7 @@ struct LoginView: View {
         didCompleteLoginProcess: @escaping () -> Void
     ) {
         self.locationCaptureManager = locationCaptureManager
+        self.loginService = loginService
         _viewModel = State(
             initialValue: LoginViewModel(
                 loginService: loginService,
@@ -313,6 +315,14 @@ struct LoginView: View {
         guard let coordinate = await locationCaptureManager.requestSingleLocation() else { return }
         SecureSettingsStore.saveString(String(coordinate.latitude), forKey: SettingsUI.latitudeKey)
         SecureSettingsStore.saveString(String(coordinate.longitude), forKey: SettingsUI.longitudeKey)
+
+        // Best effort: keep the local copy even if the Firestore write fails.
+        guard let userId = loginService.currentUserId else { return }
+        try? await loginService.updateUserLocation(
+            userId: userId,
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
+        )
     }
 }
 

@@ -87,6 +87,8 @@ struct PreviewLoginService: LoginServicing {
         phoneNumber: String,
         profileImageURL: URL
     ) async throws { }
+
+    func updateUserLocation(userId: String, latitude: Double, longitude: Double) async throws { }
 }
 
 struct PreviewCustomerService: CustomerServicing {

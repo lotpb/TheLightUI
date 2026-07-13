@@ -42,6 +42,9 @@ struct CustomerItem: Identifiable, Equatable {
     var salesIndex: Int
     var jobIndex: Int
     var productIndex: Int
+    // Legacy Firestore category value (e.g. "Customer"); defaulted so call
+    // sites and JSON imports without the field keep working.
+    var category: String = ""
 
     static var emptyCustomer: CustomerItem {
         CustomerItem(
@@ -91,6 +94,7 @@ struct CustomerItem: Identifiable, Equatable {
         salesIndex = 0
         jobIndex = 0
         productIndex = 0
+        category = ""
     }
 }
 // MARK: - Picker Data
@@ -101,4 +105,6 @@ class PickerDataModel {
     var pickProduct = ["", "Alside", "Andersen", "Ideal", "Marvin"]
     var pickContractor = ["", "A & S Home Improvement", "Islandwide Gutters", "Ashland Home Improvement", "John Kat Windows", "Jose Rosa", "Peter Balsamo"]
     var pickRate = ["5", "4", "3", "2", "1"]
+    // Values match the main-menu route filters (Leads/Customers/Vendors/Employee).
+    var pickCategory = ["", "Lead", "Customer", "Vendor", "Employee"]
 }

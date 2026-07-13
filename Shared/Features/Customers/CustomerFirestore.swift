@@ -43,6 +43,7 @@ enum CustomerFirestoreSchema {
         static let lastUpdate = "lastUpdate"
         static let creationDate = "creationDate"
         static let uid = "uid"
+        static let category = "category"
     }
 }
 
@@ -77,7 +78,8 @@ extension CustomerItem {
             quantity: document.intValue(for: fields.quantity),
             salesIndex: document.intValue(for: fields.salesNo),
             jobIndex: document.intValue(for: fields.jobNo),
-            productIndex: document.intValue(for: fields.prodNo)
+            productIndex: document.intValue(for: fields.prodNo),
+            category: document.stringValue(for: fields.category)
         )
     }
 }
@@ -133,6 +135,7 @@ struct CustomerFormPayload {
     var lastUpdateDate: Date
     var creationDate: Date
     var userId: String?
+    var category: String
 
     init(
         customer: CustomerItem,
@@ -169,6 +172,7 @@ struct CustomerFormPayload {
         self.lastUpdateDate = lastUpdateDate
         self.creationDate = creationDate
         self.userId = userId
+        self.category = customer.category
     }
 
     var firestoreData: [String: Any] {
@@ -200,6 +204,12 @@ struct CustomerFormPayload {
 
         if let userId {
             data[CustomerFirestoreSchema.Field.uid] = userId
+        }
+
+        // Only written when present so documents that never had the legacy
+        // field aren't given an empty one.
+        if !category.isEmpty {
+            data[CustomerFirestoreSchema.Field.category] = category
         }
 
         return data

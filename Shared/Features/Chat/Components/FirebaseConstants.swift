@@ -19,6 +19,8 @@ enum FirebaseConstants {
     static let lastName = "lastName"
     static let phone = "phone"
     static let profileImageUrl = "profileImageUrl"
+    static let latitude = "latitude"
+    static let longitude = "longitude"
     static let messages = "messages"
     static let users = "users"
     static let recentMessages = "recent_messages"

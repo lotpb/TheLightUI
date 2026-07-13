@@ -30,6 +30,14 @@ final class CustomerListViewModel {
         }
     }
 
+    // Route-level filter matched against the customer's Firestore category
+    // (e.g. the Leads menu route shows only "Customer" records). Nil shows all.
+    let categoryFilter: String?
+
+    init(categoryFilter: String? = nil) {
+        self.categoryFilter = categoryFilter
+    }
+
     // Inputs: any change recomputes the displayed collection.
     var allItems: [CustomerItem] = [] {
         didSet { recomputeDisplayedItems() }
@@ -67,6 +75,11 @@ final class CustomerListViewModel {
     }
 
     private func filteredItems(from items: [CustomerItem]) -> [CustomerItem] {
+        var items = items
+        if let categoryFilter {
+            items = items.filter { $0.category.caseInsensitiveCompare(categoryFilter) == .orderedSame }
+        }
+
         let activeFilteredItems = isActiveOnly ? items.filter(\.isActive) : items
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
 

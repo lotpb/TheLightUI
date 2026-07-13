@@ -101,6 +101,8 @@ struct FormUI: View {
         Form {
             // Section: profile image, first/last name, and created date.
             profileSection
+            // Section: category picklist (drives the main-menu route filters).
+            categorySection
             // Section: address, city, state/zip, phone, amount, email.
             customerInfoSection
             // Section: active toggle, pickers (salesman/job/product/contractor), quantity, and comments.
@@ -318,6 +320,34 @@ struct FormUI: View {
             TextField(placeholder, text: text)
                 .formStyle()
                 .keyboardType(keyboardType)
+        }
+    }
+
+    // Category picker in its own section, bound to the string value persisted
+    // on the model, unlike the index-based picklists below.
+    private var categorySection: some View {
+        Section {
+            categoryRow
+        }
+    }
+
+    private var categoryRow: some View {
+        HStack(spacing: 0) {
+            Text("Category:")
+                .formTextStyle()
+
+            Picker("Category:", selection: $viewModel.detail.category) {
+                ForEach(pickerviewModel.pickCategory, id: \.self) { value in
+                    Text(value.isEmpty ? "None" : value)
+                        .pickerTextStyle()
+                        .tag(value)
+                }
+            }
+            .labelsHidden()
+            .fixedSize()
+            .tint(Color.primary)
+
+            Spacer()
         }
     }
 

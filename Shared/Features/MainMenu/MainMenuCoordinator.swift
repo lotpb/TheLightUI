@@ -96,25 +96,29 @@ struct MainMenuCoordinator {
             CustomerUI(
                 customerService: makeCustomerService(),
                 formService: makeCustomerFormService(),
-                appBadgeManager: appBadgeManager
+                appBadgeManager: appBadgeManager,
+                categoryFilter: "Lead"
             )
         case .customers:
             CustomerUI(
                 customerService: makeCustomerService(),
                 formService: makeCustomerFormService(),
-                appBadgeManager: appBadgeManager
+                appBadgeManager: appBadgeManager,
+                categoryFilter: "Customer"
             )
         case .vendors:
             CustomerUI(
                 customerService: makeCustomerService(),
                 formService: makeCustomerFormService(),
-                appBadgeManager: appBadgeManager
+                appBadgeManager: appBadgeManager,
+                categoryFilter: "Vendor"
             )
         case .employee:
             CustomerUI(
                 customerService: makeCustomerService(),
                 formService: makeCustomerFormService(),
-                appBadgeManager: appBadgeManager
+                appBadgeManager: appBadgeManager,
+                categoryFilter: "Employee"
             )
         case .expenses:
             ExpenseTrackerView()
