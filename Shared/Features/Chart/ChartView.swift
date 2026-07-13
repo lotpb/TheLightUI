@@ -34,11 +34,29 @@ struct ChartView: View {
         chartContent
             .frame(maxWidth: Layout.maxContentWidth)
             .navigationTitle("Charts")
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    categoryFilterMenu
+                }
+            }
+    }
+
+    private var categoryFilterMenu: some View {
+        Menu {
+            Picker("Category", selection: $viewModel.categoryFilter) {
+                ForEach(viewModel.categoryOptions, id: \.self) { option in
+                    Text(option)
+                }
+            }
+        } label: {
+            Label("Category", systemImage: "line.3.horizontal.decrease.circle")
+        }
     }
 
     private var chartContent: some View {
         ScrollView {
             VStack(spacing: Layout.sectionSpacing) {
+                salesSummaryCell
                 customerSalesSection
                 jobChartSection
                 productChartSection
@@ -51,9 +69,34 @@ struct ChartView: View {
         }
     }
 
+    private var salesSummaryCell: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Sales")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(viewModel.formattedTotalAmount)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.orange)
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 4) {
+                Text("\(viewModel.categoryFilter)s")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("\(viewModel.customerCount)")
+                    .font(.title3.weight(.semibold))
+            }
+        }
+        .padding()
+        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 12))
+    }
+
     private var customerSalesSection: some View {
         ChartSection(
-            title: "Customer Sales · \(viewModel.formattedTotalAmount) · \(viewModel.customerCount) Customers",
+            title: "\(viewModel.categoryFilter) Sales",
             color: .orange
         ) {
             // Categorical month labels give evenly spaced, full-width bars;

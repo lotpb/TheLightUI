@@ -22,20 +22,34 @@ final class ChartViewModel {
         customerData.isLoading
     }
 
+    // Charts only reflect records matching the selected Firestore category
+    // (same case-insensitive match as CustomerListViewModel's route filter),
+    // so other categories and uncategorized docs are excluded from every chart.
+    var categoryFilter = "Customer"
+
+    // The non-empty category values from the customer form's picker.
+    var categoryOptions: [String] {
+        pickerData.pickCategory.filter { !$0.isEmpty }
+    }
+
+    private var customerItems: [CustomerItem] {
+        customerData.items.filter { $0.category.caseInsensitiveCompare(categoryFilter) == .orderedSame }
+    }
+
     var hasCustomers: Bool {
-        !customerData.items.isEmpty
+        !customerItems.isEmpty
     }
 
     var customerCount: Int {
-        customerData.items.count
+        customerItems.count
     }
 
     var formattedTotalAmount: String {
-        ChartFormatters.currency(customerData.items.reduce(0) { $0 + $1.amount })
+        ChartFormatters.currency(customerItems.reduce(0) { $0 + $1.amount })
     }
 
     var monthlySales: [CustomerSalesMonth] {
-        CustomerSalesMonth.monthlyTotals(from: customerData.items)
+        CustomerSalesMonth.monthlyTotals(from: customerItems)
     }
 
     var jobTotals: [ChartItem] {
@@ -56,7 +70,7 @@ final class ChartViewModel {
 
     // Customer amounts summed per category (picker index mapped through the picker's name list).
     private func amountTotals(groupedBy indexPath: KeyPath<CustomerItem, Int>, names: [String]) -> [ChartItem] {
-        Dictionary(grouping: customerData.items) { item -> String in
+        Dictionary(grouping: customerItems) { item -> String in
             let index = item[keyPath: indexPath]
             guard names.indices.contains(index), !names[index].isEmpty else {
                 return "None"

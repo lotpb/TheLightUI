@@ -40,7 +40,7 @@ struct BottomSheetUI: View {
     // iPad's bottom safe-area inset is smaller than iPhone's, so peek the
     // collapsed bar a little higher there to keep it easy to grab.
     private var collapsedVisibleHeight: CGFloat {
-        UIDevice.current.userInterfaceIdiom == .pad ? 52 : 16
+        UIDevice.current.userInterfaceIdiom == .pad ? 80 : 16
     }
     private let minimumExpandedTopInset: CGFloat = 150
     private let halfExpandedBottomInset: CGFloat = 60
