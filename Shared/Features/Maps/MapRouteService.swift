@@ -37,20 +37,26 @@ final class MapRouteService {
         currentDirections = nil
     }
 
+    /// Resolves a destination address to a coordinate without calculating a route.
+    func geocode(_ destination: MapDestination) async throws -> CLLocationCoordinate2D {
+        let placemarks = try await geocoder.geocodeAddressString(destination.address)
+        guard let location = placemarks.first?.location else {
+            throw MapRouteError.addressNotFound
+        }
+        return location.coordinate
+    }
+
     func calculateRoute(
         from sourceCoordinate: CLLocationCoordinate2D,
         to destination: MapDestination
     ) async throws -> MapRouteResult {
         cancel()
 
-        let placemarks = try await geocoder.geocodeAddressString(destination.address)
-        guard let location = placemarks.first?.location else {
-            throw MapRouteError.addressNotFound
-        }
+        let destinationCoordinate = try await geocode(destination)
 
         let request = MKDirections.Request()
         request.source = MKMapItem(placemark: MKPlacemark(coordinate: sourceCoordinate))
-        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: location.coordinate))
+        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: destinationCoordinate))
         request.transportType = .automobile
 
         let directions = MKDirections(request: request)
@@ -63,7 +69,7 @@ final class MapRouteService {
 
         return MapRouteResult(
             route: route,
-            destinationCoordinate: location.coordinate,
+            destinationCoordinate: destinationCoordinate,
             directions: route.steps.compactMap { step in
                 guard !step.instructions.isEmpty else { return nil }
 

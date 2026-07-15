@@ -24,6 +24,8 @@ final class LocationManager: NSObject {
     private(set) var locationStatus: CLAuthorizationStatus = .notDetermined
     /// The reverse-geocoded placemark for the latest location.
     private(set) var currentPlacemark: CLPlacemark?
+    /// The most recent Core Location failure, cleared on the next successful fix.
+    private(set) var lastLocationError: Error?
     /// Whether the map should follow the user's location.
     private(set) var isFollowingLocation = true
 
@@ -152,9 +154,14 @@ extension LocationManager: @preconcurrency CLLocationManagerDelegate {
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let latestLocation = locations.last else { return }
-        // Discard invalid or stale readings
-        guard latestLocation.horizontalAccuracy >= 0, abs(latestLocation.timestamp.timeIntervalSinceNow) < 10 else { return }
+        // Discard invalid readings. A stale (cached) fix is accepted only when
+        // we have none yet — Macs often report just a cached location, which
+        // would otherwise leave `location` nil forever.
+        let isFirstFix = location == nil
+        guard latestLocation.horizontalAccuracy >= 0,
+              isFirstFix || abs(latestLocation.timestamp.timeIntervalSinceNow) < 10 else { return }
 
+        lastLocationError = nil
         location = latestLocation
         if isFollowingLocation {
             updateRegion(with: latestLocation)
@@ -163,6 +170,7 @@ extension LocationManager: @preconcurrency CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        lastLocationError = error
         print("Error getting location: \(error.localizedDescription)")
     }
 }

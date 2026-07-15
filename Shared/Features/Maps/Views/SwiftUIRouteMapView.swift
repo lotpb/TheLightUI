@@ -120,7 +120,10 @@ struct SwiftUIRouteMapView: View {
         case .currentLocation:
             return "currentLocation"
         case .route(let destination):
-            return "\(destination.address)-\(lat)-\(lon)"
+            // Include authorization and failure state so the task re-runs when
+            // location becomes (un)available, not only when coordinates change.
+            let hasError = manager.lastLocationError != nil
+            return "\(destination.address)-\(lat)-\(lon)-\(manager.locationStatus.rawValue)-\(hasError)"
         }
     }
 
@@ -166,7 +169,8 @@ struct SwiftUIRouteMapView: View {
             return
         }
         guard let userLocation = manager.location else {
-            routeStatus = .loading
+            routeStatus = locationUnavailableStatus
+            await showDestinationWithoutRoute(destination)
             return
         }
 
@@ -204,6 +208,35 @@ struct SwiftUIRouteMapView: View {
             routeStatus = .failed(routeFailureMessage(for: error))
             travelTime = 0
             distance = 0
+        }
+    }
+
+    // Explains why no route can be calculated while we have no location fix.
+    private var locationUnavailableStatus: RouteStatus {
+        switch manager.locationStatus {
+        case .denied, .restricted:
+            return .failed("Enable Location Services for this app to calculate a route")
+        default:
+            return manager.lastLocationError == nil
+                ? .loading
+                : .failed("Couldn't determine your current location")
+        }
+    }
+
+    // Without a location fix we can't route, but we can still geocode the
+    // destination so the pin shows and the map centers somewhere useful.
+    private func showDestinationWithoutRoute(_ destination: MapDestination) async {
+        guard destinationCoordinate == nil else { return }
+        guard let coordinate = try? await routeService.geocode(destination) else { return }
+        destinationCoordinate = coordinate
+        if !cameraPosition.positionedByUser {
+            cameraPosition = .region(
+                MKCoordinateRegion(
+                    center: coordinate,
+                    latitudinalMeters: 2_000,
+                    longitudinalMeters: 2_000
+                )
+            )
         }
     }
 

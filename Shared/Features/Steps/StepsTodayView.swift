@@ -15,6 +15,7 @@ struct StepsTodayView: View {
     @State private var viewModel = StepsTodayViewModel()
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
+    @Environment(\.tabBarOverlap) private var tabBarOverlap
 
     private var themeColor: Color {
         AppTheme.accentColor(for: color)
@@ -24,8 +25,17 @@ struct StepsTodayView: View {
         List {
             summarySection
             detailsSection
+            yesterdaySection
         }
         .listStyle(.insetGrouped)
+        // The custom tab bar's safe-area inset is applied outside this
+        // screen's NavigationStack, which doesn't forward it to the List's
+        // scroll insets — re-apply it so the last row rests above the bar.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            Color.clear
+                .frame(height: tabBarOverlap)
+                .allowsHitTesting(false)
+        }
         .navigationTitle("Steps Today")
         .navigationBarTitleDisplayMode(.inline)
         .tint(themeColor)
@@ -143,6 +153,20 @@ struct StepsTodayView: View {
         }
     }
 
+    private var yesterdaySection: some View {
+        Section("Yesterday") {
+            LabeledContent("Steps") {
+                if let yesterdaySteps = viewModel.yesterdaySteps {
+                    Text(yesterdaySteps, format: .number)
+                        .monospacedDigit()
+                } else {
+                    Text("—")
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
     private func openSettings() {
         #if canImport(UIKit)
         if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -156,6 +180,7 @@ struct StepsTodayView: View {
 @Observable
 private final class StepsTodayViewModel {
     private(set) var steps = 0
+    private(set) var yesterdaySteps: Int?
     private(set) var distanceMeters: Double?
     private(set) var statusText = "Loading"
     private(set) var statusColor: Color = .secondary
@@ -233,6 +258,10 @@ private final class StepsTodayViewModel {
     }
 
     private func track() async {
+        // Yesterday's total is independent of live tracking, so a failure
+        // here just leaves the cell showing a placeholder.
+        yesterdaySteps = try? await yesterdaySample()?.steps
+
         // Seed with today's accumulated data, then stream live updates.
         do {
             if let sample = try await todaySample() {
@@ -254,6 +283,22 @@ private final class StepsTodayViewModel {
     private func todaySample() async throws -> StepsSample? {
         try await withCheckedThrowingContinuation { continuation in
             pedometer.queryPedometerData(from: startOfDay, to: .now) { @Sendable data, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: data.map(Self.sample(from:)))
+                }
+            }
+        }
+    }
+
+    private func yesterdaySample() async throws -> StepsSample? {
+        let startOfToday = startOfDay
+        guard let startOfYesterday = Calendar.current.date(byAdding: .day, value: -1, to: startOfToday) else {
+            return nil
+        }
+        return try await withCheckedThrowingContinuation { continuation in
+            pedometer.queryPedometerData(from: startOfYesterday, to: startOfToday) { @Sendable data, error in
                 if let error {
                     continuation.resume(throwing: error)
                 } else {

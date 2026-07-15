@@ -39,6 +39,7 @@ struct TipCalculation: Equatable {
 struct TipUI: View {
     @State private var calculation = TipCalculation()
     @FocusState private var isBillAmountFocused: Bool
+    @Environment(\.tabBarOverlap) private var tabBarOverlap
 
     private let presetTipPercents = [0.15, 0.18, 0.20, 0.25]
 
@@ -55,6 +56,14 @@ struct TipUI: View {
             breakdownSection
         }
         .listStyle(.insetGrouped)
+        // The custom tab bar's safe-area inset is applied outside this
+        // screen's NavigationStack, which doesn't forward it to the List's
+        // scroll insets — re-apply it so the last row rests above the bar.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            Color.clear
+                .frame(height: tabBarOverlap)
+                .allowsHitTesting(false)
+        }
         .navigationTitle("Tip Calculator")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
