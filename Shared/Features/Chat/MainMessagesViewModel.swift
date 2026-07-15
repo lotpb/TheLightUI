@@ -111,6 +111,24 @@ final class MainMessagesViewModel {
         recentMessages.removeAll()
     }
 
+    // Merge messages imported from a JSON backup into the inbox, replacing
+    // rows with matching ids. Returns counts for the import result alert.
+    func mergeImportedMessages(_ messages: [RecentMessage]) -> (inserted: Int, updated: Int) {
+        var inserted = 0
+        var updated = 0
+        for message in messages {
+            if message.id != nil, let index = recentMessages.firstIndex(where: { $0.id == message.id }) {
+                recentMessages[index] = message
+                updated += 1
+            } else {
+                recentMessages.append(message)
+                inserted += 1
+            }
+        }
+        recentMessages.sort { $0.timestamp > $1.timestamp }
+        return (inserted, updated)
+    }
+
     func chatUser(for recentMessage: RecentMessage) -> UserModel {
         let uid = currentUserId == recentMessage.fromId ? recentMessage.toId : recentMessage.fromId
         return UserModel(id: uid, uid: uid, email: recentMessage.email, profileImageUrl: recentMessage.profileImageUrl)

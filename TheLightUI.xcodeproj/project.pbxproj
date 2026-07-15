@@ -175,6 +175,11 @@
 		AF9CC6FB279B2CF10087E9FC /* NoItemsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF9CC6FA279B2CF10087E9FC /* NoItemsView.swift */; };
 		AFA9531C2FDF33150003ADD1 /* LocationCaptureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFA9531B2FDF33150003ADD1 /* LocationCaptureManager.swift */; };
 		AFA9531D2FDF33150003ADD1 /* LocationCaptureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFA9531B2FDF33150003ADD1 /* LocationCaptureManager.swift */; };
+		AFB4D0193007B19B0003650A /* MessageJSONTransfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB4D0183007B19B0003650A /* MessageJSONTransfer.swift */; };
+		AFB4D01A3007B19B0003650A /* MessageJSONTransfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB4D0183007B19B0003650A /* MessageJSONTransfer.swift */; };
+		AFB4D01C3007B1A30003650A /* MessageTransferViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB4D01B3007B1A30003650A /* MessageTransferViewModel.swift */; };
+		AFB4D01D3007B1A30003650A /* MessageTransferViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB4D01B3007B1A30003650A /* MessageTransferViewModel.swift */; };
+		AFB4D01F3007B4950003650A /* ToDoJSONTransfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB4D01E3007B4950003650A /* ToDoJSONTransfer.swift */; };
 		AFB7609F2FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB7609E2FE1F16B002D1A83 /* ImagePreprocessor.swift */; };
 		AFB760A02FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB7609E2FE1F16B002D1A83 /* ImagePreprocessor.swift */; };
 		AFB760A22FE22C78002D1A83 /* MainTopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB760A12FE22C78002D1A83 /* MainTopView.swift */; };
@@ -369,6 +374,9 @@
 		AF9CC6F8279B2CC50087E9FC /* AddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddView.swift; sourceTree = "<group>"; };
 		AF9CC6FA279B2CF10087E9FC /* NoItemsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoItemsView.swift; sourceTree = "<group>"; };
 		AFA9531B2FDF33150003ADD1 /* LocationCaptureManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationCaptureManager.swift; sourceTree = "<group>"; };
+		AFB4D0183007B19B0003650A /* MessageJSONTransfer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageJSONTransfer.swift; sourceTree = "<group>"; };
+		AFB4D01B3007B1A30003650A /* MessageTransferViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageTransferViewModel.swift; sourceTree = "<group>"; };
+		AFB4D01E3007B4950003650A /* ToDoJSONTransfer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoJSONTransfer.swift; sourceTree = "<group>"; };
 		AFB7609E2FE1F16B002D1A83 /* ImagePreprocessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePreprocessor.swift; sourceTree = "<group>"; };
 		AFB760A12FE22C78002D1A83 /* MainTopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTopView.swift; sourceTree = "<group>"; };
 		AFB760A42FE22CA2002D1A83 /* MainMenuSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuSections.swift; sourceTree = "<group>"; };
@@ -567,6 +575,8 @@
 				AF4F5DBF2FC742E40003B277 /* ChatRepository.swift */,
 				AF4F5DC82FC7430B0003B277 /* CreateNewMessageViewModel.swift */,
 				AF4F5DD12FC7468B0003B277 /* Components */,
+				AFB4D0183007B19B0003650A /* MessageJSONTransfer.swift */,
+				AFB4D01B3007B1A30003650A /* MessageTransferViewModel.swift */,
 			);
 			path = Chat;
 			sourceTree = "<group>";
@@ -796,6 +806,7 @@
 				AF9CC6F4279B2C6B0087E9FC /* ListViewModel.swift */,
 				AF9CC6F2279B2C440087E9FC /* ItemModel.swift */,
 				AF9CC6FA279B2CF10087E9FC /* NoItemsView.swift */,
+				AFB4D01E3007B4950003650A /* ToDoJSONTransfer.swift */,
 			);
 			path = ToDo;
 			sourceTree = "<group>";
@@ -1184,12 +1195,14 @@
 				AFD5D86C2FF4538C008934BE /* UserFormUI.swift in Sources */,
 				AF86C0642FDF1B3B00F450F9 /* CustomerListViewModel.swift in Sources */,
 				AF53737E2778BF36001F40B6 /* WeatherUI.swift in Sources */,
+				AFB4D0193007B19B0003650A /* MessageJSONTransfer.swift in Sources */,
 				AFDE91CC2793348D00302CF2 /* PlaceListViewModel.swift in Sources */,
 				AFB760A92FE22CA2002D1A83 /* MenuRouteButton.swift in Sources */,
 				AFDE91D32793361700302CF2 /* LandMarkCategoryView.swift in Sources */,
 				AF4F5DC12FC742E40003B277 /* ChatRepository.swift in Sources */,
 				AF92B8A62678157100729208 /* ExtensionUI.swift in Sources */,
 				AF892F592FFEFC86004D9563 /* ExpenseRowView.swift in Sources */,
+				AFB4D01F3007B4950003650A /* ToDoJSONTransfer.swift in Sources */,
 				AFBCC5E22765671E00F0B0A8 /* FirebaseConstants.swift in Sources */,
 				AF5373842778C099001F40B6 /* WeatherManager.swift in Sources */,
 				AFB760A62FE22CA2002D1A83 /* MainMenuSections.swift in Sources */,
@@ -1240,6 +1253,7 @@
 				AF92B8B3267816A600729208 /* Song.swift in Sources */,
 				AF9CC6FB279B2CF10087E9FC /* NoItemsView.swift in Sources */,
 				AF997FB22FE3244900797FD5 /* TipUI.swift in Sources */,
+				AFB4D01D3007B1A30003650A /* MessageTransferViewModel.swift in Sources */,
 				AF892F622FFEFC93004D9563 /* ExpensePreviewData.swift in Sources */,
 				AF4F5E0B2FC75DC40003B277 /* BottomSheetUI.swift in Sources */,
 				AF86C0662FDF1D7400F450F9 /* AppBadgeManager.swift in Sources */,
@@ -1278,6 +1292,7 @@
 				AF4F5DC92FC7430B0003B277 /* CreateNewMessageViewModel.swift in Sources */,
 				AF4F5DE62FC750A80003B277 /* CustomerService.swift in Sources */,
 				AFBCC5E027645EB800F0B0A8 /* MainMenuUI.swift in Sources */,
+				AFB4D01A3007B19B0003650A /* MessageJSONTransfer.swift in Sources */,
 				AF7DDB6827453E2D0072357C /* MainMessagesView.swift in Sources */,
 				AF3AC457268FF1FD00562D20 /* MediaFile.swift in Sources */,
 				AFE4AE092FC8678B00F86B2E /* FirebaseAsyncExtensions.swift in Sources */,
@@ -1356,6 +1371,7 @@
 				AF4F5DEF2FC758540003B277 /* CustomerFirestore.swift in Sources */,
 				AF2F674E2FF80DAA00741D30 /* InitialsAvatarView.swift in Sources */,
 				AF488F852FE02FF400E5F294 /* ExpenseTrackerView.swift in Sources */,
+				AFB4D01C3007B1A30003650A /* MessageTransferViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

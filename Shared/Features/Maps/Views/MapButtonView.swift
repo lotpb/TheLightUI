@@ -23,6 +23,12 @@ struct MapButtonView: View {
 
     private let geofenceManager = GeofenceManager.shared
 
+    // BottomSheetUI's collapsed bar peeks 80pt on iPad (vs 16 on iPhone),
+    // so lift the bottom buttons higher there to keep them clear of it.
+    private var bottomButtonPadding: CGFloat {
+        UIDevice.current.userInterfaceIdiom == .pad ? 114 : 50
+    }
+
     private var speedText: String {
         MapFormat.speed(manager.location?.speed ?? 0)
     }
@@ -57,7 +63,7 @@ struct MapButtonView: View {
             dismissButton
             Spacer()
             directionsButton
-                .padding(.bottom, 50)
+                .padding(.bottom, bottomButtonPadding)
         }
         .padding(.horizontal, 05)
     }
@@ -69,7 +75,7 @@ struct MapButtonView: View {
             geofenceButton
             Spacer()
             locationButton
-                .padding(.bottom, 50)
+                .padding(.bottom, bottomButtonPadding)
         }
         .padding(.horizontal, 05)
     }

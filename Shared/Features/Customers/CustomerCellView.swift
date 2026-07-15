@@ -10,7 +10,7 @@ import SwiftUI
 struct CustomerCellView: View, Equatable {
     // Layout constants for sizes used in the cell.
     fileprivate enum Layout {
-        static let avatarSize: CGFloat = 60
+        static let avatarSize: CGFloat = 50
         static let actionIconSize: CGFloat = 20
         static let summaryWidth: CGFloat = 90
         static let summaryHeight: CGFloat = 25
@@ -53,7 +53,7 @@ struct CustomerCellView: View, Equatable {
                 .font(.title3)
                 .fontWeight(.bold)
                 .foregroundStyle(.primary)
-                .customerCellScaledText()
+                .customerCellSingleLineText()
                 .padding(.top, 3)
                 .accessibilityLabel(Text("Customer name \(data.lastname)"))
 

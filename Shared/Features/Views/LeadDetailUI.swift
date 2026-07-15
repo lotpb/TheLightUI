@@ -18,13 +18,15 @@ import MessageUI
 // Layout constants for spacing and corner radius
 private enum LeadDetailLayout {
     static let containerSpacing: CGFloat = 16
+    static let rowSpacing: CGFloat = 10
     static let rowHorizontalPadding: CGFloat = 16
     static let rowVerticalPadding: CGFloat = 12
     static let containerCornerRadius: CGFloat = 14
     static let maxWidthForIpad: CGFloat = 700
 }
 
-// A reusable rounded list container with automatic bottom dividers between rows.
+// A reusable list where each row renders as its own rounded card with spacing
+// between rows, like Reminders, matching the spaced list style used app-wide.
 // Rows are identified by their element's stable id so state and animations survive updates.
 private struct RoundedContainerList<RowData: Identifiable, RowContent: View>: View {
     let rows: [RowData]
@@ -36,24 +38,20 @@ private struct RoundedContainerList<RowData: Identifiable, RowContent: View>: Vi
     }
 
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: LeadDetailLayout.rowSpacing) {
             ForEach(rows) { data in
                 rowContent(data)
                     .padding(.horizontal, LeadDetailLayout.rowHorizontalPadding)
                     .padding(.vertical, LeadDetailLayout.rowVerticalPadding)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(.secondarySystemGroupedBackground))
-                    .overlay(alignment: .bottom) {
-                        if data.id != rows.last?.id {
-                            Divider().padding(.leading, LeadDetailLayout.rowHorizontalPadding)
-                        }
-                    }
+                    .clipShape(RoundedRectangle(cornerRadius: LeadDetailLayout.containerCornerRadius, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: LeadDetailLayout.containerCornerRadius, style: .continuous)
+                            .strokeBorder(Color(.separator).opacity(0.2))
+                    )
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: LeadDetailLayout.containerCornerRadius, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: LeadDetailLayout.containerCornerRadius, style: .continuous)
-                .strokeBorder(Color(.separator).opacity(0.2))
-        )
     }
 }
 

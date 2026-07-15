@@ -15,6 +15,7 @@ import SwiftUI
 struct CustomerUI: View {
     // Persisted theme color choice.
     @AppStorage("color") private var color: Int?
+    @Environment(\.tabBarOverlap) private var tabBarOverlap
     // State-backed models: data source, list presentation state, JSON transfer,
     // and picklist values.
     @State private var viewModel: CustomerData
@@ -86,7 +87,18 @@ struct CustomerUI: View {
     var body: some View {
         // Main list content (loading/empty/states and rows).
         customerList
-            .listStyle(.plain)
+            // Inset-grouped with row spacing so each row renders as its own
+            // rounded card, like Reminders.
+            .listStyle(.insetGrouped)
+            .listRowSpacing(10)
+            // The custom tab bar's safe-area inset is applied outside this
+            // screen's NavigationStack, which doesn't forward it to the List's
+            // scroll insets — re-apply it so the last row rests above the bar.
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                Color.clear
+                    .frame(height: tabBarOverlap)
+                    .allowsHitTesting(false)
+            }
             .navigationTitle("Customers")
             .navigationBarTitleDisplayMode(.inline)
             .tint(themeColor)

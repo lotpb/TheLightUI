@@ -125,6 +125,26 @@ class ListViewModel {
         items.append(ItemModel(title: title, isCompleted: false))
     }
 
+    /// Merges items imported from a JSON backup, replacing items with
+    /// matching ids. Returns counts for the import result alert. Assigns
+    /// `items` once so the didSet persists the merged list in a single save.
+    func importItems(_ importedItems: [ItemModel]) -> (inserted: Int, updated: Int) {
+        var inserted = 0
+        var updated = 0
+        var merged = items
+        for item in importedItems {
+            if let index = merged.firstIndex(where: { $0.id == item.id }) {
+                merged[index] = item
+                updated += 1
+            } else {
+                merged.append(item)
+                inserted += 1
+            }
+        }
+        items = merged
+        return (inserted, updated)
+    }
+
     func updateItem(item: ItemModel) {
         if let index = items.firstIndex(where: { $0.id == item.id }) {
             items[index] = item.updateCompletion()

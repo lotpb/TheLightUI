@@ -9,6 +9,7 @@ import UniformTypeIdentifiers
 
 struct ExpenseTrackerView: View {
     @AppStorage("color") private var color: Int?
+    @Environment(\.tabBarOverlap) private var tabBarOverlap
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
     @State private var viewModel = ExpenseTrackerViewModel()
@@ -35,6 +36,20 @@ struct ExpenseTrackerView: View {
             expenseSection
         }
         .listStyle(.insetGrouped)
+        // Space the rows apart so each renders as its own rounded card,
+        // like Reminders.
+        .listRowSpacing(10)
+        // Let short rows (the filter strip) collapse below the standard
+        // 44pt row height.
+        .environment(\.defaultMinListRowHeight, 32)
+        // The custom tab bar's safe-area inset is applied outside this
+        // screen's NavigationStack, which doesn't forward it to the List's
+        // scroll insets — re-apply it so the last row rests above the bar.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            Color.clear
+                .frame(height: tabBarOverlap)
+                .allowsHitTesting(false)
+        }
         .navigationTitle("Expenses")
         .searchable(text: $viewModel.searchText, prompt: "Search expenses")
         .tint(themeColor)
@@ -218,7 +233,13 @@ struct ExpenseTrackerView: View {
                 }
             }
             .pickerStyle(.segmented)
+            // No vertical insets so the row hugs the segmented control and
+            // the filter reads as a slim control strip.
+            .listRowInsets(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
         }
+        // Pull the adjacent sections closer so the strip doesn't float in
+        // a large gap.
+        .listSectionSpacing(10)
     }
 
     @ViewBuilder
@@ -309,7 +330,8 @@ private struct SummaryMetricView: View {
             Spacer(minLength: 0)
         }
         .padding(10)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        // Soft tint of the accent color, matching TipUI's metric tiles.
+        .background(accentColor.opacity(0.10), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 }
 

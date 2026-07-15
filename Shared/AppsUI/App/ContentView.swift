@@ -63,6 +63,7 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("TheLight")
+            .navigationSplitViewColumnWidth(225)
         } detail: {
             selectedTabContent
         }
@@ -129,7 +130,11 @@ struct ContentView: View {
                 makeChatRepository: dependencies.makeChatRepository
             )
         case .ToDo:
-            ListView()
+            // ListView's toolbar (edit, import/export menu, add) needs a
+            // navigation bar to render in.
+            NavigationStack {
+                ListView()
+            }
         case .Expense:
             if #available(iOS 18.0, *) {
                 NavigationStack {

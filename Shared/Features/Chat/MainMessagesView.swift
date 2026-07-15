@@ -39,6 +39,9 @@ struct MainMessagesView: View {
     @State private var vm: MainMessagesViewModel
     @State private var chatLogViewModel: ChatLogViewModel
 
+    // JSON import/export state for the inbox (file pickers and result alert).
+    @State private var transferViewModel = MessageTransferViewModel()
+
     // Inject dependencies and initialize view models.
     init(
         isAuthenticated: Bool,
@@ -87,6 +90,25 @@ struct MainMessagesView: View {
             .navigationDestination(isPresented: $shouldNavigateToChatLogView) {
                 ChatLogView(vm: chatLogViewModel)
             }
+            // .data is included because fileExporter on some iOS versions saves the
+            // file without a .json extension, which the system then types as generic
+            // data and the picker would grey out.
+            .fileImporter(isPresented: $transferViewModel.isImporting, allowedContentTypes: [.json, .plainText, .data]) { result in
+                transferViewModel.handleImport(result) { messages in
+                    vm.mergeImportedMessages(messages)
+                }
+            }
+            .fileExporter(
+                isPresented: $transferViewModel.isExporting,
+                document: transferViewModel.exportDocument,
+                contentType: .json,
+                defaultFilename: "MessagesBackup.json"
+            ) { result in
+                transferViewModel.finishExport(result)
+            }
+            .alert(transferViewModel.alertMessage ?? "", isPresented: $transferViewModel.isShowingAlert) {
+                Button("OK", role: .cancel) {}
+            }
         }
         // Refresh or clear inbox based on authentication when the view appears.
         .onAppear(perform: updateForAuthenticationState)
@@ -121,7 +143,7 @@ struct MainMessagesView: View {
 
             Spacer()
 
-            // Settings button opens a confirmation dialog for sign out.
+            // Settings button opens a confirmation dialog with import/export and sign out.
             Button {
                 shouldShowLogOutOptions.toggle()
             } label: {
@@ -138,6 +160,12 @@ struct MainMessagesView: View {
         .padding(.bottom, 14)
         // Confirmation dialog for signing out.
         .confirmationDialog("Settings", isPresented: $shouldShowLogOutOptions, titleVisibility: .visible) {
+            Button("Import JSON") {
+                transferViewModel.isImporting = true
+            }
+            Button("Export JSON") {
+                transferViewModel.startExport(messages: vm.recentMessages)
+            }
             // Clear any local session state and notify parent to sign out.
             Button("Sign Out", role: .destructive) {
                 vm.clearSessionData()
