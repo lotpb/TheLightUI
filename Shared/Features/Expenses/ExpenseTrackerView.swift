@@ -20,6 +20,7 @@ struct ExpenseTrackerView: View {
     @State private var transferMessage: String?
     @State private var isShowingTransferAlert = false
     @State private var jsonPreview: ExpenseJSONPreview?
+    @State private var isSyncing = false
 
     private var visibleExpenses: [Expense] {
         viewModel.visibleExpenses(from: expenses)
@@ -56,6 +57,9 @@ struct ExpenseTrackerView: View {
                 .allowsHitTesting(false)
         }
         .navigationTitle("Expenses")
+        // No-op unless "Store Data in Firebase" is on in Settings.
+        .task { await viewModel.refreshFromFirebase(in: modelContext) }
+        .refreshable { await viewModel.refreshFromFirebase(in: modelContext) }
         .searchable(text: $viewModel.searchText, prompt: "Search expenses")
         .tint(themeColor)
         .toolbar {
@@ -91,6 +95,19 @@ struct ExpenseTrackerView: View {
                         Label("View JSON", systemImage: "doc.text.magnifyingglass")
                     }
                     .disabled(expenses.isEmpty)
+                    Divider()
+                    Button {
+                        backUpToFirebase()
+                    } label: {
+                        Label("Back Up to Firebase", systemImage: "icloud.and.arrow.up")
+                    }
+                    .disabled(expenses.isEmpty || isSyncing)
+                    Button {
+                        restoreFromFirebase()
+                    } label: {
+                        Label("Restore from Firebase", systemImage: "icloud.and.arrow.down")
+                    }
+                    .disabled(isSyncing)
                 } label: {
                     Image(systemName: viewModel.dateRange != .allTime ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
                 }
@@ -153,6 +170,40 @@ struct ExpenseTrackerView: View {
             isExporting = true
         } catch {
             showTransferMessage("Export failed: \(error.localizedDescription)")
+        }
+    }
+
+    private func backUpToFirebase() {
+        // The service is created here rather than stored on the view so
+        // previews, which never configure Firebase, don't touch Firestore.
+        let records = expenses.map(ExpenseRecord.init)
+        isSyncing = true
+        Task {
+            defer { isSyncing = false }
+            do {
+                try await ExpenseFirestoreService().backUp(records)
+                showTransferMessage("Backed up \(records.count) expense\(records.count == 1 ? "" : "s") to Firebase.")
+            } catch {
+                showTransferMessage("Backup failed: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func restoreFromFirebase() {
+        isSyncing = true
+        Task {
+            defer { isSyncing = false }
+            do {
+                let records = try await ExpenseFirestoreService().fetchAll()
+                guard !records.isEmpty else {
+                    showTransferMessage("No expenses found in Firebase.")
+                    return
+                }
+                let result = try viewModel.merge(records, into: modelContext)
+                showTransferMessage(importMessage(for: result))
+            } catch {
+                showTransferMessage("Restore failed: \(error.localizedDescription)")
+            }
         }
     }
 

@@ -19,6 +19,7 @@ enum SettingsUI {
     static let isCompanyNameKey = "isCompanyName"
     static let isSubscribedKey = "isSubscriber"
     static let backend = "backend"
+    static let isFirebaseDataKey = "isFirebaseData"
     static let isBackfetch = "isbackfetch"
     static let isAutolockKey = "isautolock"
 
@@ -78,6 +79,15 @@ enum SecureSettingsStore {
     }
 }
 
+/// Where the Expense tracker and To Do list persist their data. Read
+/// straight from defaults so feature view models can check it without
+/// holding an AppSettingsStore instance.
+enum AppDataStorage {
+    static var isFirebase: Bool {
+        UserDefaults.standard.bool(forKey: SettingsUI.isFirebaseDataKey)
+    }
+}
+
 @Observable
 final class AppSettingsStore {
     var firstName: String = "" { didSet { saveSecureString(firstName, forKey: SettingsUI.firstNameKey) } }
@@ -90,6 +100,7 @@ final class AppSettingsStore {
     var companyName: String = "TheLight Software" { didSet { defaults.set(companyName, forKey: SettingsUI.isCompanyNameKey) } }
     var isSubscriber: Bool = false { didSet { defaults.set(isSubscriber, forKey: SettingsUI.isSubscribedKey) } }
     var backend: String = "Firebase" { didSet { defaults.set(backend, forKey: SettingsUI.backend) } }
+    var isFirebaseData: Bool = false { didSet { defaults.set(isFirebaseData, forKey: SettingsUI.isFirebaseDataKey) } }
     var isBackfetch: Bool = false { didSet { defaults.set(isBackfetch, forKey: SettingsUI.isBackfetch) } }
     var color: Int = 0 { didSet { defaults.set(color, forKey: SettingsUI.color) } }
     var useThemeMenuIcons: Bool = false { didSet { defaults.set(useThemeMenuIcons, forKey: SettingsUI.useThemeMenuIconsKey) } }
@@ -129,6 +140,7 @@ final class AppSettingsStore {
         companyName = defaults.string(forKey: SettingsUI.isCompanyNameKey) ?? companyName
         isSubscriber = defaults.bool(forKey: SettingsUI.isSubscribedKey)
         backend = defaults.string(forKey: SettingsUI.backend) ?? backend
+        isFirebaseData = defaults.bool(forKey: SettingsUI.isFirebaseDataKey)
         isBackfetch = defaults.bool(forKey: SettingsUI.isBackfetch)
         color = defaults.object(forKey: SettingsUI.color) as? Int ?? color
         useThemeMenuIcons = defaults.bool(forKey: SettingsUI.useThemeMenuIconsKey)
@@ -143,8 +155,12 @@ final class AppSettingsStore {
         isGeofenceAlerts = defaults.object(forKey: SettingsUI.isGeofenceAlertsKey) as? Bool ?? isGeofenceAlerts
         showGeofencePins = defaults.object(forKey: SettingsUI.showGeofencePinsKey) as? Bool ?? showGeofencePins
 
-        event = defaults.string(forKey: SettingsUI.eventKey) ?? event
-        duration = defaults.string(forKey: SettingsUI.durationKey) ?? duration
+        // A whitespace-only stored value looks blank but suppresses the
+        // field's "None" placeholder, so it's treated as empty.
+        let storedEvent = defaults.string(forKey: SettingsUI.eventKey) ?? event
+        event = storedEvent.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "" : storedEvent
+        let storedDuration = defaults.string(forKey: SettingsUI.durationKey) ?? duration
+        duration = storedDuration.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "" : storedDuration
         areaCode = defaults.string(forKey: SettingsUI.areacodeKey) ?? areaCode
         emailTitle = defaults.string(forKey: SettingsUI.emailTitleKey) ?? emailTitle
         emailMessage = defaults.string(forKey: SettingsUI.emailMessageKey) ?? emailMessage

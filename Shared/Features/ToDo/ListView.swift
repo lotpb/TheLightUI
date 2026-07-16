@@ -17,6 +17,7 @@ struct ListView: View {
 
     // JSON import/export state (file pickers and result alert).
     @State private var transferViewModel = ToDoTransferViewModel()
+    @State private var isSyncing = false
 
     @MainActor
     init(listViewModel: ListViewModel? = nil) {
@@ -92,7 +93,10 @@ struct ListView: View {
                         // Space the rows apart so each renders as its own
                         // rounded card, like Reminders.
                         .listRowSpacing(10)
-                        .refreshable { listViewModel.getItems() }
+                        .refreshable {
+                            listViewModel.getItems()
+                            await listViewModel.refreshFromFirebase()
+                        }
                     }
                 }
             }
@@ -108,6 +112,8 @@ struct ListView: View {
         // No nav title — the header card already titles the screen; inline
         // mode keeps the bar compact instead of reserving large-title space.
         .navigationBarTitleDisplayMode(.inline)
+        // No-op unless "Store Data in Firebase" is on in Settings.
+        .task { await listViewModel.refreshFromFirebase() }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) { EditButton() }
             ToolbarItem(placement: .topBarTrailing) {
@@ -141,6 +147,19 @@ struct ListView: View {
                         Label("Export JSON", systemImage: "square.and.arrow.up")
                     }
                     .disabled(listViewModel.items.isEmpty)
+                    Divider()
+                    Button {
+                        backUpToFirebase()
+                    } label: {
+                        Label("Back Up to Firebase", systemImage: "icloud.and.arrow.up")
+                    }
+                    .disabled(listViewModel.items.isEmpty || isSyncing)
+                    Button {
+                        restoreFromFirebase()
+                    } label: {
+                        Label("Restore from Firebase", systemImage: "icloud.and.arrow.down")
+                    }
+                    .disabled(isSyncing)
                     Divider()
                     Button(role: .destructive) {
                         showingClearConfirmation = true
@@ -189,6 +208,40 @@ struct ListView: View {
                 AddView()
             }
             .environment(listViewModel)
+        }
+    }
+
+    private func backUpToFirebase() {
+        // The service is created here rather than stored on the view so
+        // previews, which never configure Firebase, don't touch Firestore.
+        let items = listViewModel.items
+        isSyncing = true
+        Task {
+            defer { isSyncing = false }
+            do {
+                try await ToDoFirestoreService().backUp(items)
+                transferViewModel.showSyncMessage("Backed up \(items.count) item\(items.count == 1 ? "" : "s") to Firebase.")
+            } catch {
+                transferViewModel.showSyncMessage("Backup failed: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func restoreFromFirebase() {
+        isSyncing = true
+        Task {
+            defer { isSyncing = false }
+            do {
+                let items = try await ToDoFirestoreService().fetchAll()
+                guard !items.isEmpty else {
+                    transferViewModel.showSyncMessage("No to-do items found in Firebase.")
+                    return
+                }
+                let counts = listViewModel.importItems(items)
+                transferViewModel.showMergeResult(inserted: counts.inserted, updated: counts.updated)
+            } catch {
+                transferViewModel.showSyncMessage("Restore failed: \(error.localizedDescription)")
+            }
         }
     }
 }

@@ -99,6 +99,7 @@ final class ExpenseTrackerViewModel {
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
 
+        let savedExpense: Expense
         if let editingExpense {
             editingExpense.title = trimmedTitle
             editingExpense.amount = amount
@@ -106,6 +107,8 @@ final class ExpenseTrackerViewModel {
             editingExpense.date = date
             editingExpense.notes = trimmedNotes
             editingExpense.isReimbursable = isReimbursable
+            editingExpense.lastUpdate = .now
+            savedExpense = editingExpense
         } else {
             let expense = Expense(
                 title: trimmedTitle,
@@ -116,22 +119,43 @@ final class ExpenseTrackerViewModel {
                 isReimbursable: isReimbursable
             )
             context.insert(expense)
+            savedExpense = expense
         }
 
         try? context.save()
+        pushToFirebaseIfEnabled([ExpenseRecord(savedExpense)])
     }
 
     func delete(_ expense: Expense, from context: ModelContext) {
+        let id = expense.id
         context.delete(expense)
         try? context.save()
+
+        if AppDataStorage.isFirebase {
+            Task { try? await ExpenseFirestoreService().delete(id: id) }
+        }
+    }
+
+    /// Pulls expenses from Firebase and merges them into the local store
+    /// when "Store Data in Firebase" is enabled in Settings.
+    func refreshFromFirebase(in context: ModelContext) async {
+        guard AppDataStorage.isFirebase else { return }
+        guard let records = try? await ExpenseFirestoreService().fetchAll(), !records.isEmpty else { return }
+        // Newest edit wins so a refresh racing a just-saved edit can't
+        // revert it.
+        _ = try? merge(records, into: context, newerWins: true)
+    }
+
+    /// Mirrors locally saved records to Firebase when "Store Data in
+    /// Firebase" is enabled. Failures are silent; the next screen-open
+    /// refresh or manual backup reconciles.
+    private func pushToFirebaseIfEnabled(_ records: [ExpenseRecord]) {
+        guard AppDataStorage.isFirebase else { return }
+        Task { try? await ExpenseFirestoreService().backUp(records) }
     }
 
     func exportData(for expenses: [Expense]) throws -> Data {
-        let records = expenses.map(ExpenseRecord.init)
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        return try encoder.encode(records)
+        try ExpenseRecord.exportData(expenses.map(ExpenseRecord.init))
     }
 
     /// Inserts decoded expenses, updating any whose id already exists so that
@@ -139,34 +163,27 @@ final class ExpenseTrackerViewModel {
     /// instead of silently skipping every record.
     /// Returns the number of inserted and updated expenses.
     func importExpenses(from data: Data, into context: ModelContext) throws -> (inserted: Int, updated: Int) {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let records = try decoder.decode([ExpenseRecord].self, from: data)
+        let records = try ExpenseRecord.decode(from: data)
+        let counts = try merge(records, into: context)
+        pushToFirebaseIfEnabled(records)
+        return counts
+    }
 
-        let existingExpenses = (try? context.fetch(FetchDescriptor<Expense>())) ?? []
-        let expensesByID = Dictionary(existingExpenses.map { ($0.id, $0) }) { first, _ in first }
-        var inserted = 0
-        var updated = 0
-        for record in records {
-            if let existing = expensesByID[record.id] {
-                if ExpenseRecord(existing) != record {
-                    record.apply(to: existing)
-                    updated += 1
-                }
-            } else {
-                context.insert(record.makeExpense())
-                inserted += 1
-            }
-        }
+    /// Shared merge used by both JSON import and Firebase restore: inserts
+    /// new records and updates existing ones matched by id.
+    func merge(
+        _ records: [ExpenseRecord],
+        into context: ModelContext,
+        newerWins: Bool = false
+    ) throws -> (inserted: Int, updated: Int) {
+        let counts = try ExpenseRecord.merge(records, into: context, newerWins: newerWins)
 
-        try context.save()
-
-        // Widen the date range if the current one would hide imported records,
+        // Widen the date range if the current one would hide merged records,
         // so a successful import is always visible in the list.
-        if inserted + updated > 0, records.contains(where: { !dateRange.includes($0.date) }) {
+        if counts.inserted + counts.updated > 0, records.contains(where: { !dateRange.includes($0.date) }) {
             dateRange = .allTime
         }
 
-        return (inserted, updated)
+        return counts
     }
 }

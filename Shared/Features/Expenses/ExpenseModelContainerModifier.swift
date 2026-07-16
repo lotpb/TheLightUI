@@ -37,9 +37,11 @@ private struct ExpenseModelContainerView<Content: View>: View {
     }
 }
 
+// Internal (not private) so the Settings backup section can reach the same
+// store the Expense screens use.
 @available(iOS 17.0, *)
 @MainActor
-private enum ExpenseModelContainerFactory {
+enum ExpenseModelContainerFactory {
     /// One container shared by every entry point (Expense tab and the main-menu
     /// route). Each entry point previously built its own container over the same
     /// store, so an import saved through one screen never reached the @Query of

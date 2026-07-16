@@ -25,6 +25,7 @@ struct GradientUI: View {
             VStack(spacing: Layout.stackSpacing) {
                 TitleText("TheLight")
                 SubtitleText("Software")
+                VersionText(AppSettingsStore().version)
             }
             .padding(.horizontal, Layout.titlePadding)
             .multilineTextAlignment(.center)
@@ -60,6 +61,18 @@ private struct SubtitleText: View {
             .foregroundStyle(.white.opacity(0.78))
             .textCase(.uppercase)
             .tracking(GradientUI.Layout.subtitleTracking)
+    }
+}
+
+private struct VersionText: View {
+    let text: String
+    init(_ text: String) { self.text = text }
+
+    var body: some View {
+        Text("Version \(text)")
+            .font(.footnote)
+            .fontWeight(.medium)
+            .foregroundStyle(.white.opacity(0.55))
     }
 }
 

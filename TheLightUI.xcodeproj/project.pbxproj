@@ -112,6 +112,9 @@
 		AF5CF3E5277B42150044B06E /* FurnitureDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF5CF3E4277B42150044B06E /* FurnitureDetail.swift */; };
 		AF5E019C2FCB9D1600945764 /* LeadDetailCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF5E019B2FCB9D1600945764 /* LeadDetailCoordinator.swift */; };
 		AF5E019D2FCB9D1600945764 /* LeadDetailCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF5E019B2FCB9D1600945764 /* LeadDetailCoordinator.swift */; };
+		AF5EBBA83009005D002FD8CE /* ExpenseFirestore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF5EBBA73009005D002FD8CE /* ExpenseFirestore.swift */; };
+		AF5EBBA93009005D002FD8CE /* ExpenseFirestore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF5EBBA73009005D002FD8CE /* ExpenseFirestore.swift */; };
+		AF5EBBAB3009019C002FD8CE /* ToDoFirestore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF5EBBAA3009019C002FD8CE /* ToDoFirestore.swift */; };
 		AF697E852778C93F00219026 /* LocationWeatherManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF697E842778C93F00219026 /* LocationWeatherManager.swift */; };
 		AF697E872778D1AE00219026 /* URL+.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF697E862778D1AE00219026 /* URL+.swift */; };
 		AF697E892778D1EC00219026 /* weatherData.json in Resources */ = {isa = PBXBuildFile; fileRef = AF697E882778D1EC00219026 /* weatherData.json */; };
@@ -316,6 +319,8 @@
 		AF5CF3E2277B40360044B06E /* FurnitureUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FurnitureUI.swift; sourceTree = "<group>"; };
 		AF5CF3E4277B42150044B06E /* FurnitureDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FurnitureDetail.swift; sourceTree = "<group>"; };
 		AF5E019B2FCB9D1600945764 /* LeadDetailCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeadDetailCoordinator.swift; sourceTree = "<group>"; };
+		AF5EBBA73009005D002FD8CE /* ExpenseFirestore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseFirestore.swift; sourceTree = "<group>"; };
+		AF5EBBAA3009019C002FD8CE /* ToDoFirestore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoFirestore.swift; sourceTree = "<group>"; };
 		AF697E842778C93F00219026 /* LocationWeatherManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationWeatherManager.swift; sourceTree = "<group>"; };
 		AF697E862778D1AE00219026 /* URL+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+.swift"; sourceTree = "<group>"; };
 		AF697E882778D1EC00219026 /* weatherData.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = weatherData.json; sourceTree = "<group>"; };
@@ -471,6 +476,7 @@
 				AF892F5A2FFEFC8A004D9563 /* ExpenseDetailView.swift */,
 				AF892F5D2FFEFC8F004D9563 /* ExpenseEditorView.swift */,
 				AF892F602FFEFC93004D9563 /* ExpensePreviewData.swift */,
+				AF5EBBA73009005D002FD8CE /* ExpenseFirestore.swift */,
 			);
 			path = Expenses;
 			sourceTree = "<group>";
@@ -777,6 +783,7 @@
 				AF9CC6F2279B2C440087E9FC /* ItemModel.swift */,
 				AF9CC6FA279B2CF10087E9FC /* NoItemsView.swift */,
 				AFB4D01E3007B4950003650A /* ToDoJSONTransfer.swift */,
+				AF5EBBAA3009019C002FD8CE /* ToDoFirestore.swift */,
 			);
 			path = ToDo;
 			sourceTree = "<group>";
@@ -1082,6 +1089,7 @@
 				AF108C0A276260C700084752 /* RecentMessage.swift in Sources */,
 				AF3AC459268FF39500562D20 /* InstagramHome.swift in Sources */,
 				AF9CC6F7279B2C9A0087E9FC /* ListView.swift in Sources */,
+				AF5EBBAB3009019C002FD8CE /* ToDoFirestore.swift in Sources */,
 				AF5E019C2FCB9D1600945764 /* LeadDetailCoordinator.swift in Sources */,
 				AF4F5DF72FC75C330003B277 /* LeadDetailHeaderView.swift in Sources */,
 				AFD5D8652FF450E8008934BE /* ChartView.swift in Sources */,
@@ -1184,6 +1192,7 @@
 				AF997FB22FE3244900797FD5 /* TipUI.swift in Sources */,
 				AFB4D01D3007B1A30003650A /* MessageTransferViewModel.swift in Sources */,
 				AF892F622FFEFC93004D9563 /* ExpensePreviewData.swift in Sources */,
+				AF5EBBA83009005D002FD8CE /* ExpenseFirestore.swift in Sources */,
 				AF4F5E0B2FC75DC40003B277 /* BottomSheetUI.swift in Sources */,
 				AF86C0662FDF1D7400F450F9 /* AppBadgeManager.swift in Sources */,
 				AFDE91D9279337C300302CF2 /* LocationManager.swift in Sources */,
@@ -1245,6 +1254,7 @@
 				AF4F5DE42FC750A70003B277 /* CustomerModels.swift in Sources */,
 				AFD5D86B2FF4538C008934BE /* UserFormUI.swift in Sources */,
 				AF86C0692FDF1E3A00F450F9 /* MainMenuCoordinator.swift in Sources */,
+				AF5EBBA93009005D002FD8CE /* ExpenseFirestore.swift in Sources */,
 				AF4F5DFA2FC75C340003B277 /* LeadDetailFieldRow.swift in Sources */,
 				AF997FB32FE3244900797FD5 /* TipUI.swift in Sources */,
 				AF892F5B2FFEFC8A004D9563 /* ExpenseDetailView.swift in Sources */,

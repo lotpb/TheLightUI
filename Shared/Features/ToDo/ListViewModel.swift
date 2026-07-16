@@ -46,8 +46,14 @@ class ListViewModel {
         didSet {
             recomputeVisibleItems()
             saveItems()
+            pushToFirebaseIfEnabled()
         }
     }
+
+    /// Suppresses the Firebase push while `items` is being set from a load
+    /// (local store or Firebase itself) rather than a user mutation, so
+    /// stale local data can't overwrite the remote list on screen open.
+    @ObservationIgnored private var isLoadingItems = false
 
     /// The active filter. Owned by the model so the filtered collection can be
     /// cached and recomputed only when an input changes, rather than on every
@@ -81,7 +87,28 @@ class ListViewModel {
 
     func getItems() {
         guard let savedItems = itemStore.loadItems() else { return }
+        isLoadingItems = true
         items = savedItems
+        isLoadingItems = false
+    }
+
+    /// Pulls items from Firebase and merges them into the list when
+    /// "Store Data in Firebase" is enabled in Settings.
+    func refreshFromFirebase() async {
+        guard AppDataStorage.isFirebase else { return }
+        guard let remoteItems = try? await ToDoFirestoreService().fetchAll(), !remoteItems.isEmpty else { return }
+        isLoadingItems = true
+        _ = importItems(remoteItems)
+        isLoadingItems = false
+    }
+
+    /// Mirrors the whole list (including deletions) to Firebase after a
+    /// user mutation when "Store Data in Firebase" is enabled. Failures are
+    /// silent; the next refresh or manual backup reconciles.
+    private func pushToFirebaseIfEnabled() {
+        guard AppDataStorage.isFirebase, !isLoadingItems else { return }
+        let snapshot = items
+        Task { try? await ToDoFirestoreService().replaceAll(snapshot) }
     }
 
     /// Deletes items by offsets into the visible (filtered) collection.

@@ -93,6 +93,16 @@ final class ToDoTransferViewModel {
         }
     }
 
+    // Present a Firebase back-up or restore outcome through the same alert
+    // used for JSON transfers.
+    func showSyncMessage(_ message: String) {
+        showAlert(message)
+    }
+
+    func showMergeResult(inserted: Int, updated: Int) {
+        showAlert(importMessage(inserted: inserted, updated: updated))
+    }
+
     private func importMessage(inserted: Int, updated: Int) -> String {
         switch (inserted, updated) {
         case (0, 0):

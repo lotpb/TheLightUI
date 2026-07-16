@@ -22,6 +22,11 @@ final class Expense {
     var date: Date
     var notes: String
     var isReimbursable: Bool
+    /// When this expense was last edited, used to resolve Firebase sync
+    /// conflicts (newest edit wins). The `.distantPast` default is what
+    /// rows saved before this property existed get on migration, so any
+    /// timestamped remote copy wins over them.
+    var lastUpdate: Date = Date.distantPast
 
     init(
         id: UUID = UUID(),
@@ -30,7 +35,8 @@ final class Expense {
         category: ExpenseCategory,
         date: Date = .now,
         notes: String = "",
-        isReimbursable: Bool = false
+        isReimbursable: Bool = false,
+        lastUpdate: Date = .now
     ) {
         self.id = id
         self.title = title
@@ -39,6 +45,7 @@ final class Expense {
         self.date = date
         self.notes = notes
         self.isReimbursable = isReimbursable
+        self.lastUpdate = lastUpdate
     }
 
     var category: ExpenseCategory {
@@ -56,6 +63,9 @@ struct ExpenseRecord: Codable, Equatable {
     var date: Date
     var notes: String
     var isReimbursable: Bool
+    /// Optional so JSON exports written before this field existed still
+    /// decode; nil sorts as older than any timestamped copy.
+    var lastUpdate: Date?
 
     init(_ expense: Expense) {
         id = expense.id
@@ -65,6 +75,7 @@ struct ExpenseRecord: Codable, Equatable {
         date = expense.date
         notes = expense.notes
         isReimbursable = expense.isReimbursable
+        lastUpdate = expense.lastUpdate
     }
 
     func makeExpense() -> Expense {
@@ -75,7 +86,8 @@ struct ExpenseRecord: Codable, Equatable {
             category: category,
             date: date,
             notes: notes,
-            isReimbursable: isReimbursable
+            isReimbursable: isReimbursable,
+            lastUpdate: lastUpdate ?? .now
         )
     }
 
@@ -86,6 +98,61 @@ struct ExpenseRecord: Codable, Equatable {
         expense.date = date
         expense.notes = notes
         expense.isReimbursable = isReimbursable
+        expense.lastUpdate = lastUpdate ?? .now
+    }
+}
+
+extension ExpenseRecord {
+    /// Inserts new records into the store and updates existing expenses
+    /// matched by id, leaving already-identical ones untouched. Shared by
+    /// the tracker's JSON import/Firebase restore and the Settings backup
+    /// section.
+    ///
+    /// With `newerWins` (the automatic Firebase refresh), an incoming record
+    /// only replaces an expense edited at the same time or earlier, so a
+    /// fetch that races a local edit can't revert it. Without it (explicit
+    /// imports and restores), the incoming record always wins.
+    static func merge(
+        _ records: [ExpenseRecord],
+        into context: ModelContext,
+        newerWins: Bool = false
+    ) throws -> (inserted: Int, updated: Int) {
+        let existingExpenses = (try? context.fetch(FetchDescriptor<Expense>())) ?? []
+        let expensesByID = Dictionary(existingExpenses.map { ($0.id, $0) }) { first, _ in first }
+        var inserted = 0
+        var updated = 0
+        for record in records {
+            if let existing = expensesByID[record.id] {
+                if newerWins, (record.lastUpdate ?? .distantPast) < existing.lastUpdate {
+                    continue
+                }
+                if ExpenseRecord(existing) != record {
+                    record.apply(to: existing)
+                    updated += 1
+                }
+            } else {
+                context.insert(record.makeExpense())
+                inserted += 1
+            }
+        }
+
+        try context.save()
+        return (inserted, updated)
+    }
+
+    /// JSON coding shared by the tracker's import/export and the Settings
+    /// backup section (pretty-printed output so exported files are readable).
+    static func exportData(_ records: [ExpenseRecord]) throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return try encoder.encode(records)
+    }
+
+    static func decode(from data: Data) throws -> [ExpenseRecord] {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode([ExpenseRecord].self, from: data)
     }
 }
 

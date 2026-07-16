@@ -9,13 +9,6 @@ import SwiftUI
 
 // MARK: - Settings Form
 struct SettingView: View {
-    private enum BackendOption: String, CaseIterable, Identifiable {
-        case firebase = "Firebase"
-        case parse = "Parse"
-
-        var id: Self { self }
-    }
-
     private enum ThemeOption: Int, CaseIterable, Identifiable {
         case purple = 0
         case orange = 1
@@ -57,6 +50,7 @@ struct SettingView: View {
             //soundsSection
             mapSection
             calendarSection
+            DataBackupSection(isFirebaseData: $settings.isFirebaseData, backend: $settings.backend)
             generalSection
         }
     }
@@ -76,7 +70,6 @@ struct SettingView: View {
         Section("Member Status") {
             settingsTextField("Company", text: $settings.companyName)
             SettingsToggleRow(title: "Subscriber", isOn: $settings.isSubscriber)
-            backendPicker
             //SettingsToggleRow(title: "Background Fetch", isOn: $settings.isBackfetch)
             //SettingsToggleRow(title: "Prevent Auto-Lock", isOn: $settings.isAutoLockDisabled)
             termsDisclosure
@@ -113,8 +106,8 @@ struct SettingView: View {
 
     private var calendarSection: some View {
         Section("Calendar") {
-            settingsTextField("Event", text: $settings.event)
-            settingsTextField("Duration", text: $settings.duration)
+            settingsTextField("Event", text: $settings.event, prompt: "None")
+            settingsTextField("Duration", text: $settings.duration, prompt: "None")
         }
     }
 
@@ -133,15 +126,6 @@ struct SettingView: View {
 
     // MARK: - Rows
 
-    private var backendPicker: some View {
-        Picker("Backend Data", selection: $settings.backend) {
-            ForEach(BackendOption.allCases) { option in
-                Text(option.rawValue)
-                    .tag(option.rawValue)
-            }
-        }
-    }
-
     private var termsDisclosure: some View {
         DisclosureGroup("Show Terms") {
             Text("By using our Services (website, app, or software), you agree to these Terms. If you don’t agree, stop using them.")
@@ -152,13 +136,14 @@ struct SettingView: View {
     private func settingsTextField(
         _ title: String,
         text: Binding<String>,
+        prompt: String? = nil,
         keyboardType: UIKeyboardType = .default,
         textInputAutocapitalization: TextInputAutocapitalization? = nil
     ) -> some View {
         HStack {
             Text(title)
             Spacer()
-            TextField(title, text: text)
+            TextField(prompt ?? title, text: text)
                 .settingsFieldStyle()
                 .keyboardType(keyboardType)
                 .textInputAutocapitalization(textInputAutocapitalization)
