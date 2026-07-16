@@ -262,6 +262,24 @@ struct ExpenseTrackerView: View {
                 }
             }
         } else {
+            let categoryTotals = viewModel.categoryTotals(for: visibleExpenses)
+            if !categoryTotals.isEmpty {
+                Section("By Category") {
+                    CategoryBreakdownChart(categoryTotals: categoryTotals)
+                        .frame(height: 220)
+                        .padding(.vertical, 4)
+
+                    ForEach(categoryTotals, id: \.category) { item in
+                        HStack {
+                            Label(item.category.rawValue, systemImage: item.category.systemImage)
+                            Spacer()
+                            Text(item.total, format: ExpenseFormat.currency)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+
             Section("Recent Expenses") {
                 ForEach(visibleExpenses) { expense in
                     // Value-based link: this screen can be pushed onto the
@@ -286,24 +304,6 @@ struct ExpenseTrackerView: View {
                             }
                         } label: {
                             Label("Delete", systemImage: "trash")
-                        }
-                    }
-                }
-            }
-
-            let categoryTotals = viewModel.categoryTotals(for: visibleExpenses)
-            if !categoryTotals.isEmpty {
-                Section("By Category") {
-                    CategoryBreakdownChart(categoryTotals: categoryTotals)
-                        .frame(height: 220)
-                        .padding(.vertical, 4)
-
-                    ForEach(categoryTotals, id: \.category) { item in
-                        HStack {
-                            Label(item.category.rawValue, systemImage: item.category.systemImage)
-                            Spacer()
-                            Text(item.total, format: ExpenseFormat.currency)
-                                .foregroundStyle(.secondary)
                         }
                     }
                 }

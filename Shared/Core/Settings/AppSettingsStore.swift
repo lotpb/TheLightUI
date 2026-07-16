@@ -32,7 +32,6 @@ enum SettingsUI {
     static let longitudeKey = "longitude"
     static let isGeofenceAlertsKey = "isGeofenceAlerts"
     static let showGeofencePinsKey = "showGeofencePins"
-    //static let legacyLongtitudeKey = "longtitude"
 
     static let eventKey = "event"
     static let durationKey = "120"
@@ -138,13 +137,6 @@ final class AppSettingsStore {
         //isSpeak = defaults.bool(forKey: SettingsUI.isSpeakKey)
         //isMusic = defaults.bool(forKey: SettingsUI.isMusicKey)
 
-        // Migrate legacy misspelled key "longtitude" to the corrected "longitude" key if present
-//        let legacyLongitude = SecureSettingsStore.loadString(forKey: SettingsUI.legacyLongtitudeKey, defaults: defaults, passwordStore: passwordStore)
-//        if !legacyLongitude.isEmpty {
-//            SecureSettingsStore.removeString(forKey: SettingsUI.legacyLongtitudeKey, defaults: defaults, passwordStore: passwordStore)
-//            saveSecureString(legacyLongitude, forKey: SettingsUI.longitudeKey)
-//        }
-        
         latitude = Self.loadSecureString(forKey: SettingsUI.latitudeKey, defaults: defaults, passwordStore: passwordStore)
         longitude = Self.loadSecureString(forKey: SettingsUI.longitudeKey, defaultValue: "-80.124528", defaults: defaults, passwordStore: passwordStore)
         // Defaults to true, so bool(forKey:) (false when unset) won't work here.
