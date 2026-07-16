@@ -87,6 +87,13 @@ struct CustomerUI: View {
     var body: some View {
         // Main list content (loading/empty/states and rows).
         customerList
+            // Destination for the row links; innermost in the chain so the
+            // pushed detail inherits the same tint and environment as rows.
+            .navigationDestination(for: CustomerItem.self) { item in
+                LeadDetailUI(detail: item, formService: formService)
+                    .environment(pickerviewModel)
+                    .navigationBarBackButtonHidden(true)
+            }
             // Inset-grouped with row spacing so each row renders as its own
             // rounded card, like Reminders.
             .listStyle(.insetGrouped)
@@ -190,11 +197,10 @@ struct CustomerUI: View {
     private func customerRows(items: [CustomerItem]) -> some View {
         ForEach(items) { item in
             // Navigate to detailed profile for the selected customer.
-            NavigationLink {
-                LeadDetailUI(detail: item, formService: formService)
-                    .environment(pickerviewModel)
-                    .navigationBarBackButtonHidden(true)
-            } label: {
+            // Value-based link: this screen is pushed onto the main menu's
+            // path-bound NavigationStack, where view-destination links trap
+            // with AnyNavigationPath.Error.comparisonTypeMismatch.
+            NavigationLink(value: item) {
                 CustomerCellView(data: item, showsComments: !item.comments.isEmpty, color: color)
                     .equatable()
             }

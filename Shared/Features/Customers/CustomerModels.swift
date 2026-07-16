@@ -17,7 +17,7 @@ enum CustomerFormMode: String, Equatable {
 }
 
 // MARK: - Customer Model
-struct CustomerItem: Identifiable, Equatable {
+struct CustomerItem: Identifiable, Equatable, Hashable {
     var id: String
     var isActive: Bool
     var first: String

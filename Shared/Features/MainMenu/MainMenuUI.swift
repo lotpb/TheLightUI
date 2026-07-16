@@ -21,7 +21,9 @@ struct MainMenuUI: View {
     @State private var showingLogOut = false
     @State private var activeSheet: MainMenuSheet?
     @State private var activeRoute: MainMenuFullscreenRoute?
-    @State private var path: [MainMenuDataRoute] = []
+    // NavigationPath (not a typed array) so pushed screens can push their own
+    // value types (e.g. CustomerItem, Expense) onto the same stack.
+    @State private var path = NavigationPath()
 
     init(
         onSignOut: @escaping () -> Void,

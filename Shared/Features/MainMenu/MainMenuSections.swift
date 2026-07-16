@@ -17,7 +17,7 @@ struct IncomingSection: View {
         Section {
             ForEach(menuItems) { item in
                 // Value-based links are required here: the menu's
-                // NavigationStack uses a typed [MainMenuDataRoute] path, and
+                // NavigationStack uses a path binding (NavigationPath), and
                 // pushing a view-destination link onto it traps with
                 // AnyNavigationPath.Error.comparisonTypeMismatch.
                 NavigationLink(value: item.route) {

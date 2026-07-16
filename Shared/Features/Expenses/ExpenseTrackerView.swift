@@ -35,6 +35,11 @@ struct ExpenseTrackerView: View {
             filterSection
             expenseSection
         }
+        // Destination for the expense row links; innermost in the chain so
+        // the pushed detail inherits the same tint as the list.
+        .navigationDestination(for: Expense.self) { expense in
+            ExpenseDetailView(expense: expense)
+        }
         .listStyle(.insetGrouped)
         // Space the rows apart so each renders as its own rounded card,
         // like Reminders.
@@ -259,9 +264,10 @@ struct ExpenseTrackerView: View {
         } else {
             Section("Recent Expenses") {
                 ForEach(visibleExpenses) { expense in
-                    NavigationLink {
-                        ExpenseDetailView(expense: expense)
-                    } label: {
+                    // Value-based link: this screen can be pushed onto the
+                    // main menu's path-bound NavigationStack, where
+                    // view-destination links trap on tap.
+                    NavigationLink(value: expense) {
                         ExpenseRowView(expense: expense, accentColor: themeColor)
                     }
                     .swipeActions(edge: .leading) {
