@@ -44,7 +44,7 @@ struct CustomerUI: View {
         formService: CustomerFormServicing = FirebaseCustomerFormService(),
         appBadgeManager: AppBadgeManaging = LiveAppBadgeManager(),
         pickerviewModel: PickerDataModel = PickerDataModel(),
-        categoryFilter: String? = nil
+        categoryFilter: CustomerItem.Category? = nil
     ) {
         self.formService = formService
         self.appBadgeManager = appBadgeManager
@@ -61,7 +61,7 @@ struct CustomerUI: View {
         formService: CustomerFormServicing = FirebaseCustomerFormService(),
         appBadgeManager: AppBadgeManaging = LiveAppBadgeManager(),
         pickerviewModel: PickerDataModel = PickerDataModel(),
-        categoryFilter: String? = nil
+        categoryFilter: CustomerItem.Category? = nil
     ) {
         self.formService = formService
         self.appBadgeManager = appBadgeManager
@@ -74,6 +74,12 @@ struct CustomerUI: View {
     // Derive theme color from AppStorage.
     private var themeColor: Color {
         AppTheme.accentColor(for: color)
+    }
+
+    // Title matches the main-menu route label the user tapped (Leads,
+    // Customers, Vendors, Employee); unfiltered lists default to Customers.
+    private var navigationTitle: String {
+        listViewModel.categoryFilter?.listTitle ?? "Customers"
     }
 
     // Basic phone validation/sanitization to ensure a safe tel: URL.
@@ -106,7 +112,7 @@ struct CustomerUI: View {
                     .frame(height: tabBarOverlap)
                     .allowsHitTesting(false)
             }
-            .navigationTitle("Customers")
+            .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .tint(themeColor)
             .toolbar { toolbarContent }
@@ -211,13 +217,12 @@ struct CustomerUI: View {
             // Trailing swipe: destructive delete.
             .swipeActions(edge: .trailing) { trailingSwipeActions(for: item) }
         }
-        // Support delete via standard list editing.
+        // Support delete via standard list editing. No onMove: the list order
+        // comes from the Firestore snapshot plus the selected sort, so a
+        // manual reorder would target the wrong rows while filtered and be
+        // overwritten by the next snapshot anyway.
         .onDelete { offsets in
             deleteItems(offsets.map { items[$0] })
-        }
-        // Allow manual reordering in edit mode.
-        .onMove { offsets, newOffset in
-            viewModel.items.move(fromOffsets: offsets, toOffset: newOffset)
         }
     }
 
@@ -289,6 +294,13 @@ struct CustomerUI: View {
                 Label("Export JSON", systemImage: "square.and.arrow.up")
             }
             .disabled(viewModel.items.isEmpty)
+            Divider()
+            Button {
+                transferViewModel.importLegacyLeads(existingItems: viewModel.items)
+            } label: {
+                Label("Import Legacy Leads", systemImage: "person.crop.rectangle.stack")
+            }
+            .disabled(transferViewModel.isTransferring)
         } label: {
             Label("Sort", systemImage: "line.3.horizontal.decrease.circle")
         }
@@ -296,8 +308,12 @@ struct CustomerUI: View {
 
     // Sheet content for adding a new customer using the shared form.
     private var addCustomerForm: some View {
-        FormUI(
-            detail: .emptyCustomer,
+        // Pre-select the route's category (Lead/Customer/Vendor/Employee) so
+        // new entries created from a filtered list stay in that list.
+        var newCustomer = CustomerItem.emptyCustomer
+        newCustomer.category = listViewModel.categoryFilter?.rawValue ?? ""
+        return FormUI(
+            detail: newCustomer,
             createDate: Date(),
             startDate: Date(),
             completeDate: Date(),

@@ -55,7 +55,11 @@ final class CustomerFormViewModel {
 
     func loadFormState() {
         if mode.isNew {
+            // Callers pre-select the category for new entries (e.g. the Leads
+            // route passes "Lead"), so restore it after the blank-form reset.
+            let presetCategory = detail.category
             detail.resetEditableFields()
+            detail.category = presetCategory
             detail.isActive = true
             pickDate = Date()
             shouldFocusFirstName = true

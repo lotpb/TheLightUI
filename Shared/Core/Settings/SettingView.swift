@@ -46,11 +46,11 @@ struct SettingView: View {
         Form {
             accountSection
             memberSection
+            DataBackupSection(isFirebaseData: $settings.isFirebaseData, backend: $settings.backend)
             themeSection
             //soundsSection
             mapSection
             calendarSection
-            DataBackupSection(isFirebaseData: $settings.isFirebaseData, backend: $settings.backend)
             generalSection
         }
     }

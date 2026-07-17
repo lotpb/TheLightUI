@@ -75,6 +75,31 @@ struct CustomerItem: Identifiable, Equatable, Hashable {
         )
     }
 
+    // Known values of the Firestore "category" field, shared by the main-menu
+    // routes, the list filter, the form picker, and the legacy-lead import so
+    // the literals live in one place. Raw values match the stored field.
+    enum Category: String, CaseIterable {
+        case lead = "Lead"
+        case customer = "Customer"
+        case vendor = "Vendor"
+        case employee = "Employee"
+
+        // Navigation title for the matching main-menu route.
+        var listTitle: String {
+            switch self {
+            case .lead: return "Leads"
+            case .customer: return "Customers"
+            case .vendor: return "Vendors"
+            case .employee: return "Employee"
+            }
+        }
+
+        // Stored values vary in casing, so match case-insensitively.
+        func matches(_ storedValue: String) -> Bool {
+            storedValue.caseInsensitiveCompare(rawValue) == .orderedSame
+        }
+    }
+
     mutating func resetEditableFields() {
         first = ""
         lastname = ""
@@ -106,5 +131,5 @@ class PickerDataModel {
     var pickContractor = ["", "A & S Home Improvement", "Islandwide Gutters", "Ashland Home Improvement", "John Kat Windows", "Jose Rosa", "Peter Balsamo"]
     var pickRate = ["5", "4", "3", "2", "1"]
     // Values match the main-menu route filters (Leads/Customers/Vendors/Employee).
-    var pickCategory = ["", "Lead", "Customer", "Vendor", "Employee"]
+    var pickCategory = [""] + CustomerItem.Category.allCases.map(\.rawValue)
 }
