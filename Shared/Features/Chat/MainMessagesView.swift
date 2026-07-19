@@ -1,10 +1,3 @@
-//
-//  MainMessagesView.swift
-//  TheLightUI
-//
-//  Created by Peter Balsamo on 11/17/21.
-//
-
 // Main messages screen showing inbox, navigation to chats, and new message flow.
 
 import SwiftUI
@@ -253,11 +246,12 @@ struct MainMessagesView: View {
         .padding(.trailing, 20)
         .padding(.bottom, Layout.floatingButtonBottomPadding)
         .fullScreenCover(isPresented: $shouldShowNewMessageScreen) {
-            // When a user is selected, navigate to the chat log and start fetching messages.
+            // Set chatUser before triggering navigation so the navigationDestination
+            // body always receives the correct value on its first render.
             CreateNewMessageView(
                 didSelectNewUser: { user in
-                    self.shouldNavigateToChatLogView.toggle()
                     self.chatLogViewModel.chatUser = user
+                    self.shouldNavigateToChatLogView = true
                 },
                 repository: makeChatRepository()
             )

@@ -8,14 +8,16 @@
 import Foundation
 import CoreLocation
 
-private let apiKey = "2fc60777eed08d159cb110705242160d"
+private var apiKey: String {
+    Bundle.main.object(forInfoDictionaryKey: "OPENWEATHER_API_KEY") as? String ?? ""
+}
 
 enum API {
     struct CurrentWeather {
         let latitude: CLLocationDegrees
         let longitude: CLLocationDegrees
         
-        func url() -> URL {
+        func url() throws -> URL {
             var components = URLComponents()
             components.scheme = "https"
             components.host = "api.openweathermap.org"
@@ -28,7 +30,7 @@ enum API {
             ]
             
             guard let url = components.url else {
-                fatalError("Missing weather URL")
+                throw URLError(.badURL)
             }
             return url
         }

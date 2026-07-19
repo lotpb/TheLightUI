@@ -19,7 +19,7 @@ final class WeatherManager: WeatherManaging {
 extension WeatherManager {
     // MARK: Public interface
     public func getCurrentWeather(latitude: CLLocationDegrees, longitude: CLLocationDegrees) async throws -> API.CurrentWeather.Response {
-        let url = API.CurrentWeather(latitude: latitude, longitude: longitude).url()
+        let url = try API.CurrentWeather(latitude: latitude, longitude: longitude).url()
         let request = URLRequest(url: url)
         let (data, response) = try await URLSession.shared.data(for: request)
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw Error.statusCode200 }

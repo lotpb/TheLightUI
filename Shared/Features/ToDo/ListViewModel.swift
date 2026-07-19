@@ -44,7 +44,7 @@ class ListViewModel {
 
     var items: [ItemModel] = [] {
         didSet {
-            recomputeVisibleItems()
+            recomputeDerivedState()
             saveItems()
             pushToFirebaseIfEnabled()
         }
@@ -55,34 +55,36 @@ class ListViewModel {
     /// stale local data can't overwrite the remote list on screen open.
     @ObservationIgnored private var isLoadingItems = false
 
-    /// The active filter. Owned by the model so the filtered collection can be
-    /// cached and recomputed only when an input changes, rather than on every
+    /// The active filter. Owned by the model so derived state can be cached
+    /// and recomputed only when an input changes, rather than on every
     /// `body` evaluation.
     var filter: ToDoFilter = .notCompleted {
-        didSet { recomputeVisibleItems() }
+        didSet { recomputeDerivedState() }
     }
 
     /// The items the list should display, prepared once per input change.
     private(set) var visibleItems: [ItemModel] = []
 
-    /// Number of completed items across the whole list (ignores the filter),
-    /// used to drive the header progress indicator.
-    var completedCount: Int {
-        items.filter(\.isCompleted).count
-    }
+    /// Number of completed items across the whole list (ignores the filter).
+    /// Cached so the view body reads a stored Int rather than re-filtering.
+    private(set) var completedCount: Int = 0
 
-    /// A plain-text summary of the list suitable for sharing.
-    var shareText: String {
-        guard !items.isEmpty else { return "My To Do List is empty." }
-        let lines = items.map { "\($0.isCompleted ? "✅" : "▢") \($0.title)" }
-        return (["My To Do List", ""] + lines).joined(separator: "\n")
-    }
+    /// Plain-text summary of the list suitable for sharing.
+    /// Cached so the view body reads a stored String rather than remapping.
+    private(set) var shareText: String = "My To Do List is empty."
 
     @ObservationIgnored private let itemStore: ItemStoring
+    /// Retained so it can be cancelled before a newer push supersedes it,
+    /// preventing stale snapshots from racing the latest write to Firestore.
+    @ObservationIgnored private var pushTask: Task<Void, Never>?
 
     init(itemStore: ItemStoring) {
         self.itemStore = itemStore
         getItems()
+    }
+
+    deinit {
+        pushTask?.cancel()
     }
 
     func getItems() {
@@ -103,12 +105,18 @@ class ListViewModel {
     }
 
     /// Mirrors the whole list (including deletions) to Firebase after a
-    /// user mutation when "Store Data in Firebase" is enabled. Failures are
-    /// silent; the next refresh or manual backup reconciles.
+    /// user mutation when "Store Data in Firebase" is enabled. A short debounce
+    /// collapses burst mutations (e.g. drag-to-reorder) into a single write,
+    /// and cancelling the prior task prevents stale snapshots from racing.
     private func pushToFirebaseIfEnabled() {
         guard AppDataStorage.isFirebase, !isLoadingItems else { return }
         let snapshot = items
-        Task { try? await ToDoFirestoreService().replaceAll(snapshot) }
+        pushTask?.cancel()
+        pushTask = Task {
+            try? await Task.sleep(for: .milliseconds(300))
+            guard !Task.isCancelled else { return }
+            try? await ToDoFirestoreService().replaceAll(snapshot)
+        }
     }
 
     /// Deletes items by offsets into the visible (filtered) collection.
@@ -178,8 +186,18 @@ class ListViewModel {
         }
     }
 
-    private func recomputeVisibleItems() {
+    /// Single recompute pass for all derived state. Called once per `items`
+    /// or `filter` change so the view body reads stored values rather than
+    /// re-running filter/map/join on every render.
+    private func recomputeDerivedState() {
         visibleItems = items.filter { filter.includes($0) }
+        completedCount = items.filter(\.isCompleted).count
+        if items.isEmpty {
+            shareText = "My To Do List is empty."
+        } else {
+            let lines = items.map { "\($0.isCompleted ? "✅" : "▢") \($0.title)" }
+            shareText = (["My To Do List", ""] + lines).joined(separator: "\n")
+        }
     }
 
     private func saveItems() {

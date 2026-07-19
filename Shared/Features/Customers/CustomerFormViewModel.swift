@@ -25,8 +25,12 @@ final class CustomerFormViewModel {
     @ObservationIgnored private let formService: CustomerFormServicing
     @ObservationIgnored private var saveTask: Task<Void, Never>?
 
+    // True while a Firestore save or update is in flight. Drives isButtonDisabled
+    // to prevent a second tap from launching a concurrent write.
+    private var isSaving = false
+
     var isButtonDisabled: Bool {
-        detail.first.isEmpty
+        detail.first.isEmpty || isSaving
     }
 
     var activeLabel: String {
@@ -109,6 +113,8 @@ final class CustomerFormViewModel {
         saveTask?.cancel()
         saveTask = Task { [weak self] in
             guard let self else { return }
+            isSaving = true
+            defer { isSaving = false }
             do {
                 let documentID = try await formService.addCustomer(payload)
                 guard !Task.isCancelled else { return }
@@ -136,6 +142,8 @@ final class CustomerFormViewModel {
         saveTask?.cancel()
         saveTask = Task { [weak self] in
             guard let self else { return }
+            isSaving = true
+            defer { isSaving = false }
             do {
                 try await formService.updateCustomer(id: detail.id, payload: payload)
                 guard !Task.isCancelled else { return }

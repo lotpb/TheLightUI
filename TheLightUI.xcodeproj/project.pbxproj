@@ -252,6 +252,10 @@
 		AFEE000A27285BB900D75C7C /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEE000927285BB900D75C7C /* LoginView.swift */; };
 		AFEFA4CC30027795004C61A5 /* CustomerCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEFA4CB30027795004C61A5 /* CustomerCellView.swift */; };
 		AFEFA4CD30027795004C61A5 /* CustomerCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEFA4CB30027795004C61A5 /* CustomerCellView.swift */; };
+		AFF04CFB300C24D300A6E9A5 /* GoogleService-Info.plist.example in Resources */ = {isa = PBXBuildFile; fileRef = AFF04CFA300C24D300A6E9A5 /* GoogleService-Info.plist.example */; };
+		AFF04CFC300C24D300A6E9A5 /* GoogleService-Info.plist.example in Resources */ = {isa = PBXBuildFile; fileRef = AFF04CFA300C24D300A6E9A5 /* GoogleService-Info.plist.example */; };
+		AFF04CFE300C290400A6E9A5 /* APIKeys.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = AFF04CFD300C290400A6E9A5 /* APIKeys.xcconfig */; };
+		AFF04CFF300C290400A6E9A5 /* APIKeys.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = AFF04CFD300C290400A6E9A5 /* APIKeys.xcconfig */; };
 		AFF95EF8274816EF00724250 /* UserModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFF95EF7274816EF00724250 /* UserModel.swift */; };
 		AFF9FE06279E4536006DB401 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AFF9FE05279E4536006DB401 /* Launch Screen.storyboard */; };
 /* End PBXBuildFile section */
@@ -411,6 +415,8 @@
 		AFEAAA9E300A57410064126D /* CustomerLegacyLeads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerLegacyLeads.swift; sourceTree = "<group>"; };
 		AFEE000927285BB900D75C7C /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		AFEFA4CB30027795004C61A5 /* CustomerCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerCellView.swift; sourceTree = "<group>"; };
+		AFF04CFA300C24D300A6E9A5 /* GoogleService-Info.plist.example */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "GoogleService-Info.plist.example"; sourceTree = "<group>"; };
+		AFF04CFD300C290400A6E9A5 /* APIKeys.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = APIKeys.xcconfig; sourceTree = "<group>"; };
 		AFF95EF7274816EF00724250 /* UserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModel.swift; sourceTree = "<group>"; };
 		AFF9FE05279E4536006DB401 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -710,6 +716,8 @@
 				AF92B859267812A100729208 /* Shared */,
 				AF92B862267812A300729208 /* Products */,
 				AF488F8A2FE0358700E5F294 /* PrivacyInfo.xcprivacy */,
+				AFF04CFA300C24D300A6E9A5 /* GoogleService-Info.plist.example */,
+				AFF04CFD300C290400A6E9A5 /* APIKeys.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1052,6 +1060,8 @@
 				AF00CE142691F7B3003F5CDF /* Reel1.mp4 in Resources */,
 				AF697E892778D1EC00219026 /* weatherData.json in Resources */,
 				AF92B880267812A400729208 /* Assets.xcassets in Resources */,
+				AFF04CFE300C290400A6E9A5 /* APIKeys.xcconfig in Resources */,
+				AFF04CFB300C24D300A6E9A5 /* GoogleService-Info.plist.example in Resources */,
 				AF0E0D98267BB63C00E6CC7D /* GoogleService-Info.plist in Resources */,
 				AF488F8B2FE0358700E5F294 /* PrivacyInfo.xcprivacy in Resources */,
 				AFF9FE06279E4536006DB401 /* Launch Screen.storyboard in Resources */,
@@ -1062,8 +1072,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AFF04CFF300C290400A6E9A5 /* APIKeys.xcconfig in Resources */,
 				AF92B881267812A400729208 /* Assets.xcassets in Resources */,
 				AF0E0D99267BB63C00E6CC7D /* GoogleService-Info.plist in Resources */,
+				AFF04CFC300C24D300A6E9A5 /* GoogleService-Info.plist.example in Resources */,
 				AF488F8C2FE0358700E5F294 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1441,6 +1453,7 @@
 		};
 		AF92B885267812A400729208 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AFF04CFD300C290400A6E9A5 /* APIKeys.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1495,6 +1508,7 @@
 		};
 		AF92B886267812A400729208 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AFF04CFD300C290400A6E9A5 /* APIKeys.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1550,6 +1564,7 @@
 		};
 		AF92B888267812A400729208 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AFF04CFD300C290400A6E9A5 /* APIKeys.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1581,6 +1596,7 @@
 		};
 		AF92B889267812A400729208 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AFF04CFD300C290400A6E9A5 /* APIKeys.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

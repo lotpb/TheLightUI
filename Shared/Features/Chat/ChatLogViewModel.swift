@@ -21,6 +21,9 @@ final class ChatLogViewModel {
     @ObservationIgnored private var listenerGeneration = UUID()
     @ObservationIgnored private var sendTask: Task<Void, Never>?
     @ObservationIgnored private var uploadTask: Task<Void, Never>?
+    // Incremented each time handleSend() starts a new send, so cancelled tasks
+    // can detect they've been superseded before attempting error recovery.
+    @ObservationIgnored private var sendGeneration = 0
 
     var currentUserId: String? {
         repository.currentUserId
@@ -98,6 +101,9 @@ final class ChatLogViewModel {
         chatText = ""
 
         sendTask?.cancel()
+        sendGeneration += 1
+        let generation = sendGeneration
+
         sendTask = Task { [weak self] in
             guard let self else { return }
             do {
@@ -105,6 +111,10 @@ final class ChatLogViewModel {
             } catch is CancellationError {
                 return
             } catch {
+                // A newer send has already taken ownership of chatText; don't
+                // restore the stale draft or it overwrites the field for the
+                // new message.
+                guard sendGeneration == generation else { return }
                 if chatText.isEmpty {
                     chatText = draftText
                 }

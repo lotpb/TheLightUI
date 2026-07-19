@@ -1,0 +1,23 @@
+# API secrets — never commit the real values
+APIKeys.xcconfig
+# Download the real file from the Firebase Console (Project Settings → Your apps → iOS app).
+# See GoogleService-Info.plist.example for the required keys.
+GoogleService-Info.plist
+
+# Xcode
+*.xcuserstate
+xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# macOS
+.DS_Store
