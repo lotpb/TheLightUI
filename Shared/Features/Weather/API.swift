@@ -18,6 +18,9 @@ enum API {
         let longitude: CLLocationDegrees
         
         func url() throws -> URL {
+            guard !apiKey.isEmpty else {
+                throw URLError(.userAuthenticationRequired)
+            }
             var components = URLComponents()
             components.scheme = "https"
             components.host = "api.openweathermap.org"
@@ -28,7 +31,7 @@ enum API {
                 URLQueryItem(name: "appid", value: apiKey),
                 URLQueryItem(name: "units", value: "imperial")
             ]
-            
+
             guard let url = components.url else {
                 throw URLError(.badURL)
             }

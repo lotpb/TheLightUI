@@ -107,27 +107,14 @@ final class CustomerFormViewModel {
             errorMessage = "Sign in before saving a new customer."
             return
         }
-
         let payload = makePayload(userId: uid)
-
-        saveTask?.cancel()
-        saveTask = Task { [weak self] in
-            guard let self else { return }
-            isSaving = true
-            defer { isSaving = false }
-            do {
-                let documentID = try await formService.addCustomer(payload)
-                guard !Task.isCancelled else { return }
-                detail.resetEditableFields()
-                showAlertUpdate = true
-                errorMessage = ""
-                print("Document added with ID: \(documentID)")
-            } catch is CancellationError {
-                return
-            } catch {
-                errorMessage = error.localizedDescription
-                print("Error adding document: \(error)")
-            }
+        performSave {
+            let documentID = try await self.formService.addCustomer(payload)
+            guard !Task.isCancelled else { return }
+            self.detail.resetEditableFields()
+            self.showAlertUpdate = true
+            self.errorMessage = ""
+            print("Document added with ID: \(documentID)")
         }
     }
 
@@ -136,25 +123,28 @@ final class CustomerFormViewModel {
             errorMessage = "Cannot update a customer without a document ID."
             return
         }
-
         let payload = makePayload()
+        performSave {
+            try await self.formService.updateCustomer(id: self.detail.id, payload: payload)
+            guard !Task.isCancelled else { return }
+            self.detail.resetEditableFields()
+            self.showAlertUpdate = true
+            self.errorMessage = ""
+        }
+    }
 
+    private func performSave(_ work: @escaping () async throws -> Void) {
         saveTask?.cancel()
         saveTask = Task { [weak self] in
             guard let self else { return }
             isSaving = true
             defer { isSaving = false }
             do {
-                try await formService.updateCustomer(id: detail.id, payload: payload)
-                guard !Task.isCancelled else { return }
-                detail.resetEditableFields()
-                showAlertUpdate = true
-                errorMessage = ""
+                try await work()
             } catch is CancellationError {
                 return
             } catch {
                 errorMessage = error.localizedDescription
-                print(error.localizedDescription)
             }
         }
     }

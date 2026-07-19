@@ -12,10 +12,14 @@ final class ChartViewModel {
     private let customerData: CustomerData
     // Same job/product/salesman/contractor lists the customer form's pickers use,
     // so chart labels match CustomerUI.
-    @ObservationIgnored private let pickerData = PickerDataModel()
+    @ObservationIgnored private let pickerData: PickerDataModel
     @ObservationIgnored private var observationTask: Task<Void, Never>?
+    let categoryOptions: [String]
 
     init(customerService: CustomerServicing = FirebaseCustomerService()) {
+        let picker = PickerDataModel()
+        pickerData = picker
+        categoryOptions = picker.pickCategory.filter { !$0.isEmpty }
         customerData = CustomerData(customerService: customerService)
         startObservingData()
     }
@@ -33,11 +37,6 @@ final class ChartViewModel {
     // so other categories and uncategorized docs are excluded from every chart.
     var categoryFilter = "Customer" {
         didSet { recomputeCustomerItems() }
-    }
-
-    // The non-empty category values from the customer form's picker.
-    var categoryOptions: [String] {
-        pickerData.pickCategory.filter { !$0.isEmpty }
     }
 
     // Cached filtered slice of customerData.items. Recomputed once whenever

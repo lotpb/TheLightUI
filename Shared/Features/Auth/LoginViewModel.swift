@@ -204,6 +204,7 @@ final class LoginViewModel {
         }
 
         do {
+            try loginService.validateRegistration(firstName: firstName, lastName: lastName, email: email, phoneNumber: phoneNumber)
             let uid = try await loginService.createUser(email: email, password: password)
             guard !Task.isCancelled else { return }
             loginStatusMessage = "Successfully created user: \(uid)"

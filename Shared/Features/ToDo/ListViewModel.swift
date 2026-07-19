@@ -45,7 +45,7 @@ class ListViewModel {
     var items: [ItemModel] = [] {
         didSet {
             recomputeDerivedState()
-            saveItems()
+            enqueueSave()
             pushToFirebaseIfEnabled()
         }
     }
@@ -77,6 +77,9 @@ class ListViewModel {
     /// Retained so it can be cancelled before a newer push supersedes it,
     /// preventing stale snapshots from racing the latest write to Firestore.
     @ObservationIgnored private var pushTask: Task<Void, Never>?
+    /// Debounces the UserDefaults write so burst mutations (e.g. rapid toggles,
+    /// large imports) coalesce into a single encode+write instead of one per item.
+    @ObservationIgnored private var saveTask: Task<Void, Never>?
 
     init(itemStore: ItemStoring) {
         self.itemStore = itemStore
@@ -85,6 +88,7 @@ class ListViewModel {
 
     deinit {
         pushTask?.cancel()
+        saveTask?.cancel()
     }
 
     func getItems() {
@@ -112,7 +116,7 @@ class ListViewModel {
         guard AppDataStorage.isFirebase, !isLoadingItems else { return }
         let snapshot = items
         pushTask?.cancel()
-        pushTask = Task {
+        pushTask = Task.detached {
             try? await Task.sleep(for: .milliseconds(300))
             guard !Task.isCancelled else { return }
             try? await ToDoFirestoreService().replaceAll(snapshot)
@@ -190,18 +194,28 @@ class ListViewModel {
     /// or `filter` change so the view body reads stored values rather than
     /// re-running filter/map/join on every render.
     private func recomputeDerivedState() {
-        visibleItems = items.filter { filter.includes($0) }
-        completedCount = items.filter(\.isCompleted).count
-        if items.isEmpty {
-            shareText = "My To Do List is empty."
-        } else {
-            let lines = items.map { "\($0.isCompleted ? "✅" : "▢") \($0.title)" }
-            shareText = (["My To Do List", ""] + lines).joined(separator: "\n")
+        var visible: [ItemModel] = []
+        var completed = 0
+        var lines: [String] = []
+        for item in items {
+            if filter.includes(item) { visible.append(item) }
+            if item.isCompleted { completed += 1 }
+            lines.append("\(item.isCompleted ? "✅" : "▢") \(item.title)")
         }
+        visibleItems = visible
+        completedCount = completed
+        shareText = items.isEmpty ? "My To Do List is empty."
+            : (["My To Do List", ""] + lines).joined(separator: "\n")
     }
 
-    private func saveItems() {
-        itemStore.saveItems(items)
+    private func enqueueSave() {
+        let snapshot = items
+        saveTask?.cancel()
+        saveTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(100))
+            guard !Task.isCancelled else { return }
+            self?.itemStore.saveItems(snapshot)
+        }
     }
 }
 

@@ -283,7 +283,7 @@ struct MainMessagesView: View {
     // Compute chat user from a recent message and navigate to the chat log.
     private func openChat(for recentMessage: RecentMessage) {
         chatLogViewModel.chatUser = vm.chatUser(for: recentMessage)
-        shouldNavigateToChatLogView.toggle()
+        shouldNavigateToChatLogView = true
     }
 
     // Display name derived from email (customize as needed).

@@ -79,6 +79,8 @@ struct PreviewLoginService: LoginServicing {
         URL(string: "https://example.com/profile.jpg") ?? URL(fileURLWithPath: "/dev/null")
     }
 
+    func validateRegistration(firstName: String, lastName: String, email: String, phoneNumber: String) throws { }
+
     func storeUserInformation(
         email: String,
         userId: String,

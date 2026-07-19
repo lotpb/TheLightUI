@@ -24,6 +24,7 @@ protocol LoginServicing: Sendable {
     func sendEmailVerification() async throws
     func fetchUserSettings(userId: String) async throws -> LoginUserSettings
     func uploadProfileImage(_ imageData: Data, userId: String) async throws -> URL
+    func validateRegistration(firstName: String, lastName: String, email: String, phoneNumber: String) throws
     func storeUserInformation(
         email: String,
         userId: String,
@@ -126,6 +127,10 @@ struct FirebaseLoginService: LoginServicing {
             ], merge: true)
     }
 
+    func validateRegistration(firstName: String, lastName: String, email: String, phoneNumber: String) throws {
+        try validate(firstName: firstName, lastName: lastName, email: email, phoneNumber: phoneNumber)
+    }
+
     // MARK: Private validation
 
     private func validate(
@@ -140,10 +145,18 @@ struct FirebaseLoginService: LoginServicing {
         guard firstName.count <= 100 else {
             throw LoginServiceError.fieldTooLong("First name", limit: 100)
         }
+        guard !lastName.isEmpty else {
+            throw LoginServiceError.emptyLastName
+        }
         guard lastName.count <= 100 else {
             throw LoginServiceError.fieldTooLong("Last name", limit: 100)
         }
-        guard !email.isEmpty, email.contains("@") else {
+        let emailParts = email.components(separatedBy: "@")
+        guard emailParts.count == 2,
+              !emailParts[0].isEmpty,
+              !emailParts[1].isEmpty,
+              emailParts[1].contains("."),
+              !emailParts[1].hasSuffix(".") else {
             throw LoginServiceError.invalidEmail
         }
         guard email.count <= 254 else {
@@ -158,6 +171,7 @@ struct FirebaseLoginService: LoginServicing {
 enum LoginServiceError: LocalizedError {
     case missingCurrentUser
     case emptyFirstName
+    case emptyLastName
     case invalidEmail
     case fieldTooLong(String, limit: Int)
     case invalidLatitude
@@ -169,6 +183,8 @@ enum LoginServiceError: LocalizedError {
             "Could not find the authenticated user."
         case .emptyFirstName:
             "First name is required."
+        case .emptyLastName:
+            "Last name is required."
         case .invalidEmail:
             "Please enter a valid email address."
         case .fieldTooLong(let field, let limit):
