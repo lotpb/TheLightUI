@@ -9,7 +9,7 @@ import Observation
 @MainActor
 @Observable
 final class ChartViewModel {
-    private let customerData: CustomerData
+    private let customerData: CustomerStore
     // Same job/product/salesman/contractor lists the customer form's pickers use,
     // so chart labels match CustomerUI.
     @ObservationIgnored private let pickerData: PickerDataModel
@@ -20,7 +20,7 @@ final class ChartViewModel {
         let picker = PickerDataModel()
         pickerData = picker
         categoryOptions = picker.pickCategory.filter { !$0.isEmpty }
-        customerData = CustomerData(customerService: customerService)
+        customerData = CustomerStore(customerService: customerService)
         startObservingData()
     }
 

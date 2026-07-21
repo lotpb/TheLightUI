@@ -29,7 +29,24 @@ enum CustomerLabels {
     static let start = "Start"
     static let complete = "Complete"
     static let saleDate = "Sale Date:"
+    static let callback = "Callback"
+    static let adNo = "Advertiser"
+    static let aptDate = "Apt Date"
+    static let startDate = "Start Date"
     static let customerNews = "Check our new line of fabulous windows and siding."
+    // Employee-specific labels (fields are stored in repurposed CustomerItem slots).
+    static let title = "Title"
+    static let department = "Department"
+    static let manager = "Manager"
+    static let middle = "Middle"
+    static let company = "Company"
+    static let socialSecurity = "Social Security"
+    // Vendor-specific labels (fields are stored in repurposed CustomerItem slots).
+    static let vendorName = "Vendor"
+    static let website = "Web Page"
+    static let profession = "Profession"
+    static let assistant = "Assistant"
+    static let vendorCategory = "Category"
 }
 
 extension CustomerItem {

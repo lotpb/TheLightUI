@@ -49,13 +49,13 @@ struct CustomerCellView: View, Equatable {
     // Name, address, and row-level actions.
     private var customerSummary: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(data.lastname)
+            Text(CustomerItem.Category.vendor.matches(data.category) ? data.first : data.lastname)
                 .font(.title3)
                 .fontWeight(.bold)
                 .foregroundStyle(.primary)
                 .customerCellSingleLineText()
                 .padding(.top, 3)
-                .accessibilityLabel(Text("Customer name \(data.lastname)"))
+                .accessibilityLabel(Text("Customer name \(CustomerItem.Category.vendor.matches(data.category) ? data.first : data.lastname)"))
 
             Text(data.address)
                 .font(.subheadline)

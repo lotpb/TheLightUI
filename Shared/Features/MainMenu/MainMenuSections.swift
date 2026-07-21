@@ -28,7 +28,7 @@ struct IncomingSection: View {
                 .listItemTint(useThemeMenuIcons ? themeColor : item.iconColor)
             }
         } header: {
-            Text("Incoming").foregroundStyle(themeColor)
+            Text("Statistics").foregroundStyle(themeColor)
         }
     }
 

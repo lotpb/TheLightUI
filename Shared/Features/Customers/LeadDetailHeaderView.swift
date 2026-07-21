@@ -44,7 +44,7 @@ struct LeadDetailHeaderView: View {
     private var profileRow: some View {
         HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 6) {
-                Text(detail.lastname)
+                Text(CustomerItem.Category.vendor.matches(detail.category) ? detail.first : detail.lastname)
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
@@ -112,11 +112,12 @@ struct LeadDetailHeaderView: View {
     private var saleSummaryRow: some View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(detail.formattedAmount)
+                let isVendorOrEmployee = CustomerItem.Category.vendor.matches(detail.category) || CustomerItem.Category.employee.matches(detail.category)
+                Text(isVendorOrEmployee ? detail.category : detail.formattedAmount)
                     .font(.title2)
                     .fontWeight(.semibold)
                     .lineLimit(1)
-                Text(CustomerLabels.saleDate)
+                Text(isVendorOrEmployee ? CustomerLabels.vendorCategory : CustomerLabels.saleDate)
                     .font(.caption)
                     .foregroundStyle(Color.secondary)
                 Text(detail.formattedCreationDate)

@@ -63,6 +63,8 @@ private struct RoundedContainerList<RowData: Identifiable, RowContent: View>: Vi
 struct LeadDetailUI: View {
     // Shared picklist data used to resolve indices into human-readable values.
     @Environment(PickerDataModel.self) private var pickerviewModel
+    // Live customer list — used to sync detail after the edit form saves to Firestore.
+    @Environment(CustomerStore.self) private var customerStore
     // User-configurable settings stored in AppStorage (theme color and default calendar settings).
     @AppStorage("color") private var color: Int?
     @AppStorage("activeColor") private var activeColor: Int?
@@ -101,10 +103,26 @@ struct LeadDetailUI: View {
         AppTheme.accentColor(for: color)
     }
 
+    private var isLead: Bool {
+        CustomerItem.Category.lead.matches(detail.category)
+    }
+
+    private var isEmployee: Bool {
+        CustomerItem.Category.employee.matches(detail.category)
+    }
+
+    private var isVendor: Bool {
+        CustomerItem.Category.vendor.matches(detail.category)
+    }
+
     // Flatten the domain model into label/value rows for display.
+    // Employees and vendors get dedicated field sets with their own labels.
+    // For leads, contractor and completion date are hidden (not applicable to the lead lifecycle).
     private var detailFields: [CustomerDetailField] {
-        [
-            // Map indices (contractor, salesman, job, product) to strings using pickerviewModel.
+        if isEmployee { return employeeDetailFields }
+        if isVendor { return vendorDetailFields }
+
+        var fields = [
             CustomerDetailField(name: detail.first, label: CustomerLabels.first),
             CustomerDetailField(name: detail.phone, label: CustomerLabels.phone),
             CustomerDetailField(name: pickerValue(pickerviewModel.pickContractor, at: detail.contractorIndex), label: CustomerLabels.contractor),
@@ -116,9 +134,50 @@ struct LeadDetailUI: View {
             CustomerDetailField(name: pickerValue(pickerviewModel.pickJob, at: detail.jobIndex), label: CustomerLabels.job),
             CustomerDetailField(name: pickerValue(pickerviewModel.pickProduct, at: detail.productIndex), label: CustomerLabels.product),
             CustomerDetailField(name: "\(detail.quantity)", label: CustomerLabels.quantity),
-            CustomerDetailField(name: detail.formattedStartDate, label: CustomerLabels.start),
+            CustomerDetailField(name: detail.formattedStartDate, label: isLead ? CustomerLabels.aptDate : CustomerLabels.startDate),
             CustomerDetailField(name: detail.formattedCompletionDate, label: CustomerLabels.complete),
-            CustomerDetailField(name: "\(detail.id)", label: CustomerLabels.photo)
+            CustomerDetailField(name: detail.callback, label: CustomerLabels.callback),
+            CustomerDetailField(name: detail.adNo, label: CustomerLabels.adNo),
+            CustomerDetailField(name: detail.photo, label: CustomerLabels.photo)
+        ]
+        if isLead {
+            fields.removeAll { $0.label == CustomerLabels.contractor || $0.label == CustomerLabels.complete }
+        }
+        return fields
+    }
+
+    // Employee records store their specific data in repurposed CustomerItem fields;
+    // this list uses the correct labels for each slot.
+    private var employeeDetailFields: [CustomerDetailField] {
+        [
+            CustomerDetailField(name: detail.first, label: CustomerLabels.first),
+            CustomerDetailField(name: detail.phone, label: CustomerLabels.phone),
+            CustomerDetailField(name: detail.spouse, label: CustomerLabels.socialSecurity),
+            CustomerDetailField(name: detail.email, label: CustomerLabels.email),
+            CustomerDetailField(name: detail.rate, label: CustomerLabels.rating),
+            CustomerDetailField(name: detail.adNo, label: CustomerLabels.department),
+            CustomerDetailField(name: detail.callback, label: CustomerLabels.middle),
+            CustomerDetailField(name: detail.formattedStartDate, label: CustomerLabels.startDate),
+            CustomerDetailField(name: detail.formattedCompletionDate, label: CustomerLabels.complete),
+            CustomerDetailField(name: detail.formattedLastUpdateDate, label: CustomerLabels.lastUpdated),
+            CustomerDetailField(name: detail.photo, label: CustomerLabels.photo)
+        ]
+    }
+
+    // Vendor records store their specific data in repurposed CustomerItem fields;
+    // first holds the company/vendor name (schema has no first/lastname).
+    private var vendorDetailFields: [CustomerDetailField] {
+        [
+            CustomerDetailField(name: detail.first, label: CustomerLabels.vendorName),
+            CustomerDetailField(name: detail.phone, label: CustomerLabels.phone),
+            CustomerDetailField(name: detail.category, label: CustomerLabels.vendorCategory),
+            CustomerDetailField(name: detail.email, label: CustomerLabels.email),
+            CustomerDetailField(name: detail.spouse, label: CustomerLabels.website),
+            CustomerDetailField(name: detail.lastname, label: CustomerLabels.profession),
+            CustomerDetailField(name: detail.callback, label: CustomerLabels.manager),
+            CustomerDetailField(name: detail.rate, label: CustomerLabels.rating),
+            CustomerDetailField(name: detail.formattedLastUpdateDate, label: CustomerLabels.lastUpdated),
+            CustomerDetailField(name: detail.photo, label: CustomerLabels.photo)
         ]
     }
 
@@ -167,6 +226,13 @@ struct LeadDetailUI: View {
         .onAppear(perform: syncActiveColor)
         .onChange(of: detail.isActive) {
             syncActiveColor()
+        }
+        // Keep detail in sync with the store so edits saved via the form sheet
+        // (which writes to Firestore) are reflected immediately without reopening.
+        .onChange(of: customerStore.items) { _, items in
+            if let updated = items.first(where: { $0.id == detail.id }) {
+                detail = updated
+            }
         }
         // Apply theme color to foreground and accent (tint).
         .foregroundStyle(themeColor)
@@ -255,7 +321,7 @@ struct LeadDetailUI: View {
         switch sheet {
         // Edit customer in-place using shared form.
         case .edit:
-            FormUI(
+            CustomerFormUI(
                 detail: detail,
                 createDate: detail.creationDate,
                 startDate: detail.startDate,
@@ -473,7 +539,7 @@ struct LeadDetailUI: View {
             jobIndex: 1,
             productIndex: 1
         ))
-        .environment(CustomerData())
+        .environment(CustomerStore())
         .environment(PickerDataModel())
     }
     .preferredColorScheme(.dark)

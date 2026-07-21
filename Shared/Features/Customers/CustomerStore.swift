@@ -1,5 +1,5 @@
 //
-//  CustomerData.swift
+//  CustomerStore.swift
 //  TheLightUI
 //
 
@@ -8,7 +8,7 @@ import Observation
 
 @MainActor
 @Observable
-final class CustomerData {
+final class CustomerStore {
     var items = [CustomerItem]()
     var isLoading = false
     var errorMessage = ""

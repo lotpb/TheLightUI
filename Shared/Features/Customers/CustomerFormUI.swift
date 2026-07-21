@@ -1,5 +1,5 @@
 //
-//  FormUI.swift
+//  CustomerFormUI.swift
 //  TheLightUI (iOS)
 //
 //  Created by Peter Balsamo on 12/22/21.
@@ -10,11 +10,11 @@
 import SwiftUI
 
 ///
-// FormUI
+// CustomerFormUI
 // Presents a multi-section form for creating or editing a customer record.
 // Uses a view model to manage form state, validation, and persistence.
 ///
-struct FormUI: View {
+struct CustomerFormUI: View {
     // Layout constants for sizing fields and controls.
     fileprivate enum Layout {
         static let avatarSize: CGFloat = 75
@@ -41,6 +41,18 @@ struct FormUI: View {
     // Derive the active theme color from settings.
     private var themeColor: Color {
         AppTheme.accentColor(for: color)
+    }
+
+    private var isLead: Bool {
+        CustomerItem.Category.lead.matches(viewModel.detail.category)
+    }
+
+    private var isVendor: Bool {
+        CustomerItem.Category.vendor.matches(viewModel.detail.category)
+    }
+
+    private var isEmployee: Bool {
+        CustomerItem.Category.employee.matches(viewModel.detail.category)
     }
 
     // Initialize the view model and configure UISegmentedControl appearance.
@@ -147,8 +159,10 @@ struct FormUI: View {
                         .formStyle()
                         .focused($firstNameInFocus)
 
-                    TextField("last", text: $viewModel.detail.lastname)
-                        .formStyle()
+                    if !isVendor {
+                        TextField("last", text: $viewModel.detail.lastname)
+                            .formStyle()
+                    }
 
                     Divider()
 
@@ -195,34 +209,98 @@ struct FormUI: View {
             // Inherits the theme tint applied via `.tint(themeColor)`.
             .toggleStyle(.switch)
 
-            // Salesman picklist.
-            pickerRow("Salesman:", selection: $viewModel.detail.salesIndex, items: pickerviewModel.pickSalesman)
+            // Middle, Department, and Rating (employees only).
+            if isEmployee {
+                labeledTextField("Middle:", placeholder: "middle", text: $viewModel.detail.callback)
+                labeledTextField("Department:", placeholder: "department", text: $viewModel.detail.adNo)
+                ratingRow
+            }
 
-            // Job type picklist.
-            pickerRow("Job:", selection: $viewModel.detail.jobIndex, items: pickerviewModel.pickJob)
+            // Salesman picklist (vendors use a free-text Manager field instead; hidden for employees).
+            if isVendor {
+                labeledTextField("Manager:", placeholder: "manager", text: $viewModel.detail.callback)
+            } else if !isEmployee {
+                pickerRow("Salesman:", selection: $viewModel.detail.salesIndex, items: pickerviewModel.pickSalesman)
+            }
 
-            // Product picklist.
-            pickerRow("Product:", selection: $viewModel.detail.productIndex, items: pickerviewModel.pickProduct)
+            // Job type picklist (vendors use a free-text Profession field instead; hidden for employees).
+            if isVendor {
+                labeledTextField("Profession:", placeholder: "profession", text: $viewModel.detail.lastname)
+                ratingRow
+            } else if !isEmployee {
+                pickerRow("Job:", selection: $viewModel.detail.jobIndex, items: pickerviewModel.pickJob)
+            }
 
-            // Quantity stepper.
-            quantityRow
+            // Product picklist (not shown for employees or vendors).
+            if !isEmployee && !isVendor {
+                pickerRow("Product:", selection: $viewModel.detail.productIndex, items: pickerviewModel.pickProduct)
+            }
 
-            // Contractor picklist.
-            pickerRow("Contractor:", selection: $viewModel.detail.contractorIndex, items: pickerviewModel.pickContractor)
+            // Quantity stepper (not shown for employees or vendors).
+            if !isEmployee && !isVendor {
+                quantityRow
+            }
+
+            // Contractor picklist (not shown for leads, employees, or vendors).
+            if !isLead && !isEmployee && !isVendor {
+                pickerRow("Contractor:", selection: $viewModel.detail.contractorIndex, items: pickerviewModel.pickContractor)
+            }
 
             // Free-form comments.
             commentsRow
+
+            // Callback disposition (not shown for employees or vendors).
+            if !isEmployee && !isVendor {
+                HStack(spacing: 0) {
+                    Text("Callback:")
+                        .formTextStyle()
+                    Picker("Callback:", selection: $viewModel.detail.callback) {
+                        ForEach(pickerviewModel.pickCallback, id: \.self) { value in
+                            Text(value.isEmpty ? "None" : value)
+                                .pickerTextStyle()
+                                .tag(value)
+                        }
+                    }
+                    .labelsHidden()
+                    .fixedSize()
+                    .tint(Color.primary)
+                    Spacer()
+                }
+            }
         }
     }
 
     private var miscSection: some View {
         // Section: spouse, rating, start/complete dates, and photo URL/name.
         Section("Misc") {
-            labeledTextField("Spouse:", placeholder: "spouse", text: $viewModel.detail.spouse)
-            ratingRow
-            dateRow("Start:", title: "Start", selection: $viewModel.pickStartDate)
-            dateRow("Complete:", title: "Complete", selection: $viewModel.pickCompleteDate)
+            labeledTextField(isVendor ? "Web Page:" : isEmployee ? "Social Security:" : "Spouse:", placeholder: isVendor ? "web page" : isEmployee ? "social security" : "spouse", text: $viewModel.detail.spouse)
+            if !isEmployee && !isVendor {
+                ratingRow
+            }
+            if !isVendor {
+                dateRow("Start:", title: "Start", selection: $viewModel.pickStartDate)
+            }
+            if !isLead && !isVendor {
+                dateRow("Complete:", title: "Complete", selection: $viewModel.pickCompleteDate)
+            }
             labeledTextField("Photo:", placeholder: "photo", text: $viewModel.detail.photo)
+            if !isEmployee && !isVendor {
+                HStack(spacing: 0) {
+                    Text("Advertiser:")
+                        .formTextStyle()
+                    Picker("Advertiser:", selection: $viewModel.detail.adNo) {
+                        ForEach(pickerviewModel.pickAdvertiser, id: \.self) { value in
+                            Text(value.isEmpty ? "None" : value)
+                                .pickerTextStyle()
+                                .tag(value)
+                        }
+                    }
+                    .labelsHidden()
+                    .fixedSize()
+                    .tint(Color.primary)
+                    Spacer()
+                }
+            }
         }
     }
 
@@ -482,7 +560,7 @@ private extension Text {
             .bold()
             .lineLimit(1)
             .minimumScaleFactor(0.5)
-            .frame(width: FormUI.Layout.labelWidth, alignment: .leading)
+            .frame(width: CustomerFormUI.Layout.labelWidth, alignment: .leading)
             .textSelection(.enabled)
     }
 
@@ -500,7 +578,7 @@ private extension Text {
 // Preview: form in dark mode with sample environment objects.
 #Preview("Form - Dark") {
     NavigationStack {
-        FormUI(
+        CustomerFormUI(
             detail: .emptyCustomer,
             createDate: Date(),
             startDate: Date(),
@@ -508,7 +586,7 @@ private extension Text {
             mode: .new,
             formService: PreviewCustomerFormService()
         )
-        .environment(CustomerData(customerService: PreviewCustomerService()))
+        .environment(CustomerStore(customerService: PreviewCustomerService()))
         .environment(PickerDataModel())
     }
     .preferredColorScheme(.dark)

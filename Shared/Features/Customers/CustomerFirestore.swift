@@ -44,6 +44,8 @@ enum CustomerFirestoreSchema {
         static let creationDate = "creationDate"
         static let uid = "uid"
         static let category = "category"
+        static let callback = "callback"
+        static let adNo = "adNo"
     }
 }
 
@@ -53,13 +55,21 @@ extension CustomerItem {
     init(document: QueryDocumentSnapshot) {
         let fields = CustomerFirestoreSchema.Field.self
         let fallbackDate = Date()
+        let rawStreet = document.stringValue(for: fields.street)
+        let street = rawStreet.isEmpty ? document.stringValue(for: "address") : rawStreet
+        // adNo may be stored as Int (legacy numeric ad source) or String (picker value).
+        let adNoValue: String = {
+            if let s = document.get(fields.adNo) as? String { return s }
+            if let n = document.get(fields.adNo) as? NSNumber { return n.stringValue }
+            return ""
+        }()
 
         self.init(
             id: document.documentID,
             isActive: document.stringValue(for: fields.active) == "1",
             first: document.stringValue(for: fields.first),
             lastname: document.stringValue(for: fields.lastname),
-            street: document.stringValue(for: fields.street),
+            street: street,
             city: document.stringValue(for: fields.city),
             state: document.stringValue(for: fields.state),
             zip: document.stringValue(for: fields.zip),
@@ -79,7 +89,9 @@ extension CustomerItem {
             salesIndex: document.intValue(for: fields.salesNo),
             jobIndex: document.intValue(for: fields.jobNo),
             productIndex: document.intValue(for: fields.prodNo),
-            category: document.stringValue(for: fields.category)
+            category: document.stringValue(for: fields.category),
+            callback: document.stringValue(for: fields.callback),
+            adNo: adNoValue
         )
     }
 }
@@ -136,6 +148,8 @@ struct CustomerFormPayload {
     var creationDate: Date
     var userId: String?
     var category: String
+    var callback: String
+    var adNo: String
 
     init(
         customer: CustomerItem,
@@ -173,6 +187,8 @@ struct CustomerFormPayload {
         self.creationDate = creationDate
         self.userId = userId
         self.category = customer.category
+        self.callback = customer.callback
+        self.adNo = customer.adNo
     }
 
     var firestoreData: [String: Any] {
@@ -199,7 +215,9 @@ struct CustomerFormPayload {
             CustomerFirestoreSchema.Field.start: Timestamp(date: startDate),
             CustomerFirestoreSchema.Field.completion: Timestamp(date: completionDate),
             CustomerFirestoreSchema.Field.lastUpdate: Timestamp(date: lastUpdateDate),
-            CustomerFirestoreSchema.Field.creationDate: Timestamp(date: creationDate)
+            CustomerFirestoreSchema.Field.creationDate: Timestamp(date: creationDate),
+            CustomerFirestoreSchema.Field.callback: callback,
+            CustomerFirestoreSchema.Field.adNo: adNo
         ]
 
         if let userId {

@@ -5,39 +5,25 @@
 //  Created by Peter Balsamo on 12/22/21.
 //
 
-// Customer list screen with search, filtering, sorting, and quick actions.
-
 import SwiftUI
 
-// CustomerUI
-// Displays a list of customers with search, Active-only filter, and multiple sort modes.
-// Provides navigation to detail, swipe/context actions, and a sheet to add new customers.
 struct CustomerUI: View {
-    // Persisted theme color choice.
     @AppStorage("color") private var color: Int?
     @Environment(\.tabBarOverlap) private var tabBarOverlap
-    // State-backed models: data source, list presentation state, JSON transfer,
-    // and picklist values.
-    @State private var viewModel: CustomerData
+    @State private var viewModel: CustomerStore
     @State private var listViewModel: CustomerListViewModel
     @State private var transferViewModel: CustomerTransferViewModel
     @State private var pickerviewModel: PickerDataModel
-    // Helper to open tel: and other URLs.
     @Environment(\.openURL) private var openURL
 
-    // Singleton used to schedule/cancel local notifications.
     private let notificationManager = NotificationManager.shared
-    // Injected services for customer forms and app badge state.
     private let formService: CustomerFormServicing
     private let appBadgeManager: AppBadgeManaging
 
-    // UI state: add-sheet visibility.
     @State private var isAddingCustomer = false
-    // Confirmation dialog state for destructive/side-effectful actions.
     @State private var confirmMarkContacted = false
     @State private var pendingContactItem: CustomerItem? = nil
 
-    // Primary initializer for production: creates its own data sources.
     @MainActor
     init(
         customerService: CustomerServicing = FirebaseCustomerService(),
@@ -48,16 +34,15 @@ struct CustomerUI: View {
     ) {
         self.formService = formService
         self.appBadgeManager = appBadgeManager
-        _viewModel = State(initialValue: CustomerData(customerService: customerService))
+        _viewModel = State(initialValue: CustomerStore(customerService: customerService))
         _listViewModel = State(initialValue: CustomerListViewModel(categoryFilter: categoryFilter))
         _transferViewModel = State(initialValue: CustomerTransferViewModel(formService: formService))
         _pickerviewModel = State(initialValue: pickerviewModel)
     }
 
-    // Convenience initializer for previews/tests: accepts an existing view model.
     @MainActor
     init(
-        viewModel: CustomerData,
+        viewModel: CustomerStore,
         formService: CustomerFormServicing = FirebaseCustomerFormService(),
         appBadgeManager: AppBadgeManaging = LiveAppBadgeManager(),
         pickerviewModel: PickerDataModel = PickerDataModel(),
@@ -71,7 +56,6 @@ struct CustomerUI: View {
         _pickerviewModel = State(initialValue: pickerviewModel)
     }
 
-    // Derive theme color from AppStorage.
     private var themeColor: Color {
         AppTheme.accentColor(for: color)
     }
@@ -82,7 +66,6 @@ struct CustomerUI: View {
         listViewModel.categoryFilter?.listTitle ?? "Customers"
     }
 
-    // Basic phone validation/sanitization to ensure a safe tel: URL.
     private func sanitizedPhone(_ raw: String) -> String? {
         let allowed = CharacterSet(charactersIn: "+0123456789 -().")
         guard raw.unicodeScalars.allSatisfy({ allowed.contains($0) }) else { return nil }
@@ -91,22 +74,17 @@ struct CustomerUI: View {
     }
 
     var body: some View {
-        // Main list content (loading/empty/states and rows).
         customerList
-            // Destination for the row links; innermost in the chain so the
-            // pushed detail inherits the same tint and environment as rows.
             .navigationDestination(for: CustomerItem.self) { item in
                 LeadDetailUI(detail: item, formService: formService)
                     .environment(pickerviewModel)
+                    .environment(viewModel)
                     .navigationBarBackButtonHidden(true)
             }
-            // Inset-grouped with row spacing so each row renders as its own
-            // rounded card, like Reminders.
             .listStyle(.insetGrouped)
             .listRowSpacing(10)
-            // The custom tab bar's safe-area inset is applied outside this
-            // screen's NavigationStack, which doesn't forward it to the List's
-            // scroll insets — re-apply it so the last row rests above the bar.
+            // The custom tab bar's safe-area inset doesn't reach Lists inside per-tab
+            // NavigationStacks — re-apply it so the last row rests above the bar.
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 Color.clear
                     .frame(height: tabBarOverlap)
@@ -116,25 +94,19 @@ struct CustomerUI: View {
             .navigationBarTitleDisplayMode(.inline)
             .tint(themeColor)
             .toolbar { toolbarContent }
-            // Built-in search field with sample completions.
             .searchable(text: $listViewModel.searchText, placement: .navigationBarDrawer(displayMode: .always)) {
                 Text("Balsamo").searchCompletion("Balsamo")
                 Text("Rosch").searchCompletion("Rosch")
             }
-            // Pull-to-refresh to re-fetch customer data.
             .refreshable {
                 viewModel.fetchData()
             }
-            // Present the add-customer form.
             .sheet(isPresented: $isAddingCustomer) {
                 addCustomerForm
             }
-            // Clear app badge when entering the list.
             .onAppear {
                 appBadgeManager.clearBadge()
             }
-            // Keep the list view model's source collection in sync with the
-            // data source; filtering/sorting recomputes inside the model.
             .onChange(of: viewModel.items, initial: true) {
                 listViewModel.allItems = viewModel.items
             }
@@ -152,9 +124,8 @@ struct CustomerUI: View {
             } message: { item in
                 Text("This will remove any pending reminders for \(item.lastname).")
             }
-            // .data is included because fileExporter on some iOS versions saves the
-            // file without a .json extension, which the system then types as generic
-            // data and the picker would grey out.
+            // .data is included because fileExporter on some iOS versions saves without
+            // a .json extension, which the system types as generic data (greying it out).
             .fileImporter(isPresented: $transferViewModel.isImporting, allowedContentTypes: [.json, .plainText, .data]) { result in
                 transferViewModel.handleImport(result, existingItems: viewModel.items)
             }
@@ -169,20 +140,15 @@ struct CustomerUI: View {
             .alert(transferViewModel.alertMessage ?? "", isPresented: $transferViewModel.isShowingAlert) {
                 Button("OK", role: .cancel) {}
             }
-            // Inject shared models into subtree.
             .environment(viewModel)
     }
 
-    // Top-level list container that handles loading/empty states and shows content.
     private var customerList: some View {
         List {
-            // Loading state.
             if viewModel.isLoading {
                 ProgressView("Loading Customers...")
-            // Empty state.
             } else if viewModel.items.isEmpty {
                 Text("No Customers")
-            // Content state.
             } else {
                 activeOnlyToggle(count: listViewModel.displayedItems.count)
                 customerRows(items: listViewModel.displayedItems)
@@ -190,43 +156,32 @@ struct CustomerUI: View {
         }
     }
 
-    // Toggle to filter the list to only active customers.
     private func activeOnlyToggle(count: Int) -> some View {
         Toggle(isOn: $listViewModel.isActiveOnly) {
             Text("\(count) Active Only")
         }
-        // Inherits the theme tint applied to the list via `.tint(themeColor)`.
         .toggleStyle(.switch)
     }
 
-    // Rows: navigation to detail, context menu, and swipe actions.
     private func customerRows(items: [CustomerItem]) -> some View {
         ForEach(items) { item in
-            // Navigate to detailed profile for the selected customer.
-            // Value-based link: this screen is pushed onto the main menu's
-            // path-bound NavigationStack, where view-destination links trap
-            // with AnyNavigationPath.Error.comparisonTypeMismatch.
+            // Value-based link: view-destination links trap with
+            // AnyNavigationPath.Error.comparisonTypeMismatch on path-bound stacks.
             NavigationLink(value: item) {
                 CustomerCellView(data: item, showsComments: !item.comments.isEmpty, color: color)
                     .equatable()
             }
-            // Long-press context menu.
             .contextMenu { rowContextMenu(for: item) }
-            // Leading swipe: quick actions.
             .swipeActions(edge: .leading) { leadingSwipeActions(for: item) }
-            // Trailing swipe: destructive delete.
             .swipeActions(edge: .trailing) { trailingSwipeActions(for: item) }
         }
-        // Support delete via standard list editing. No onMove: the list order
-        // comes from the Firestore snapshot plus the selected sort, so a
-        // manual reorder would target the wrong rows while filtered and be
-        // overwritten by the next snapshot anyway.
+        // No onMove: list order comes from the Firestore snapshot + selected sort;
+        // a manual reorder targets wrong rows while filtered and is overwritten by the next snapshot.
         .onDelete { offsets in
             deleteItems(offsets.map { items[$0] })
         }
     }
 
-    // Context menu actions for a row (call and schedule reminder).
     @ViewBuilder
     private func rowContextMenu(for item: CustomerItem) -> some View {
         Button {
@@ -243,7 +198,6 @@ struct CustomerUI: View {
         }
     }
 
-    // Leading swipe actions: mark contacted (clears notifications) and schedule a reminder.
     @ViewBuilder
     private func leadingSwipeActions(for item: CustomerItem) -> some View {
         Button {
@@ -262,7 +216,6 @@ struct CustomerUI: View {
         .tint(.orange)
     }
 
-    // Trailing swipe action: delete the item.
     @ViewBuilder
     private func trailingSwipeActions(for item: CustomerItem) -> some View {
         Button(role: .destructive) {
@@ -272,8 +225,6 @@ struct CustomerUI: View {
         }
     }
 
-    // Sort menu anchored in the toolbar with a Picker over all SortType cases,
-    // plus JSON import/export actions.
     private var sortMenu: some View {
         Menu {
             Picker("Sorting options", selection: $listViewModel.selectedSort) {
@@ -301,18 +252,28 @@ struct CustomerUI: View {
                 Label("Import Legacy Leads", systemImage: "person.crop.rectangle.stack")
             }
             .disabled(transferViewModel.isTransferring)
+            Button {
+                transferViewModel.importLegacyEmployees(existingItems: viewModel.items)
+            } label: {
+                Label("Import Legacy Employees", systemImage: "person.2.badge.gearshape")
+            }
+            .disabled(transferViewModel.isTransferring)
+            Button {
+                transferViewModel.importLegacyVendors(existingItems: viewModel.items)
+            } label: {
+                Label("Import Legacy Vendors", systemImage: "building.2")
+            }
+            .disabled(transferViewModel.isTransferring)
         } label: {
             Label("Sort", systemImage: "line.3.horizontal.decrease.circle")
         }
     }
 
-    // Sheet content for adding a new customer using the shared form.
     private var addCustomerForm: some View {
-        // Pre-select the route's category (Lead/Customer/Vendor/Employee) so
-        // new entries created from a filtered list stay in that list.
+        // Pre-select the route's category so new entries created from a filtered list stay in it.
         var newCustomer = CustomerItem.emptyCustomer
         newCustomer.category = listViewModel.categoryFilter?.rawValue ?? ""
-        return FormUI(
+        return CustomerFormUI(
             detail: newCustomer,
             createDate: Date(),
             startDate: Date(),
@@ -324,15 +285,12 @@ struct CustomerUI: View {
         .environment(pickerviewModel)
     }
 
-    // Toolbar: edit mode toggle, add new customer, and sort menu.
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        // Enable list editing (delete/reorder).
         ToolbarItem(placement: .topBarLeading) {
             EditButton()
         }
 
-        // Actions: open sort menu and add new customer (trailing edge).
         ToolbarItemGroup(placement: .topBarTrailing) {
             sortMenu
 
@@ -342,7 +300,6 @@ struct CustomerUI: View {
         }
     }
 
-    // Schedule a repeating 8:30 AM reminder to contact the customer.
     private func scheduleReminder(for item: CustomerItem) {
         var dateComponents = DateComponents()
         dateComponents.hour = 8
@@ -356,17 +313,15 @@ struct CustomerUI: View {
         )
     }
 
-    // Delegate deletion to the view model.
     private func deleteItems(_ items: [CustomerItem]) {
         viewModel.deleteItems(items)
     }
 }
 
-// Preview: customers list in dark mode.
 #Preview("Customers - Dark") {
     NavigationStack {
         CustomerUI(
-            viewModel: CustomerData(customerService: PreviewCustomerService()),
+            viewModel: CustomerStore(customerService: PreviewCustomerService()),
             formService: PreviewCustomerFormService(),
             appBadgeManager: PreviewAppBadgeManager()
         )
