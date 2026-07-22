@@ -193,7 +193,9 @@ struct CustomerFormUI: View {
             stateZipRow(state: $viewModel.detail.state, zip: $viewModel.detail.zip)
 
             labeledTextField("Phone:", placeholder: "phone", text: $viewModel.detail.phone)
-            amountRow
+            if !isVendor && !isEmployee {
+                amountRow
+            }
             labeledTextField("Email:", placeholder: "email", text: $viewModel.detail.email, keyboardType: .emailAddress)
         }
     }
@@ -249,8 +251,8 @@ struct CustomerFormUI: View {
             // Free-form comments.
             commentsRow
 
-            // Callback disposition (not shown for employees or vendors).
-            if !isEmployee && !isVendor {
+            // Callback disposition (leads only).
+            if isLead {
                 HStack(spacing: 0) {
                     Text("Callback:")
                         .formTextStyle()

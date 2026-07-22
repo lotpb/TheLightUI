@@ -134,10 +134,10 @@ class PickerDataModel {
     // Vendor profession picker — static so the data layer can look up an index without a view model instance.
     static let defaultPickProfession = ["", "Auto"]
     var pickProfession = PickerDataModel.defaultPickProfession
-    var pickProduct = ["", "Alside", "Andersen", "Ideal", "Marvin"]
+    var pickProduct = ["", "Alside", "Andersen", "Ideal", "Marvin", "Pella"]
     var pickContractor = ["", "A & S Home Improvement", "Islandwide Gutters", "Ashland Home Improvement", "John Kat Windows", "Jose Rosa", "Peter Balsamo"]
     var pickRate = ["5", "4", "3", "2", "1"]
-    var pickAdvertiser = ["", "Reco", "Web"]
+    var pickAdvertiser = ["", "Reco", "Web", "Return Customer", "Social Media"]
     var pickCallback = ["", "Yes"]
     // Values match the main-menu route filters (Leads/Customers/Vendors/Employee).
     var pickCategory = [""] + CustomerItem.Category.allCases.map(\.rawValue)

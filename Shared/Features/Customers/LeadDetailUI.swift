@@ -142,6 +142,8 @@ struct LeadDetailUI: View {
         ]
         if isLead {
             fields.removeAll { $0.label == CustomerLabels.contractor || $0.label == CustomerLabels.complete }
+        } else {
+            fields.removeAll { $0.label == CustomerLabels.callback }
         }
         return fields
     }
