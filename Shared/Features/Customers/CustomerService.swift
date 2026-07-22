@@ -12,7 +12,7 @@ protocol CustomerListener: Sendable {
 
 protocol CustomerServicing: Sendable {
     @discardableResult
-    func listenForCustomers(onChange: @escaping (Result<[CustomerItem], Error>) -> Void) -> CustomerListener
+    func listenForCustomers(onChange: @escaping @Sendable (Result<[CustomerItem], Error>) -> Void) -> CustomerListener
     func deleteCustomer(id: String) async throws
 }
 
@@ -34,7 +34,7 @@ final class FirebaseCustomerService: CustomerServicing, @unchecked Sendable {
         self.firestore = firestore
     }
 
-    func listenForCustomers(onChange: @escaping (Result<[CustomerItem], Error>) -> Void) -> CustomerListener {
+    func listenForCustomers(onChange: @escaping @Sendable (Result<[CustomerItem], Error>) -> Void) -> CustomerListener {
         let registration = firestore.collection(CustomerFirestoreSchema.collection)
             .order(by: CustomerFirestoreSchema.Field.creationDate, descending: true)
             .addSnapshotListener { snapshot, error in

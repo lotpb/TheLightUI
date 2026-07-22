@@ -48,7 +48,7 @@ protocol LegacyLeadServicing: Sendable {
     func fetchLeads() async throws -> [CustomerItem]
 }
 
-final class FirebaseLegacyLeadService: LegacyLeadServicing {
+final class FirebaseLegacyLeadService: LegacyLeadServicing, @unchecked Sendable {
     // GoogleService-Info.plist carries no DATABASE_URL, so the instance URL
     // must be passed explicitly.
     private static let databaseURL = "https://thelightui-default-rtdb.firebaseio.com"
@@ -131,7 +131,7 @@ protocol LegacyEmployeeServicing: Sendable {
     func fetchEmployees() async throws -> [CustomerItem]
 }
 
-final class FirebaseLegacyEmployeeService: LegacyEmployeeServicing {
+final class FirebaseLegacyEmployeeService: LegacyEmployeeServicing, @unchecked Sendable {
     private static let databaseURL = "https://thelightui-default-rtdb.firebaseio.com"
     private static let employeeNode = "Employee"
     private static let fetchTimeout: TimeInterval = 15
@@ -224,7 +224,7 @@ protocol LegacyVendorServicing: Sendable {
     func fetchVendors() async throws -> [CustomerItem]
 }
 
-final class FirebaseLegacyVendorService: LegacyVendorServicing {
+final class FirebaseLegacyVendorService: LegacyVendorServicing, @unchecked Sendable {
     private static let databaseURL = "https://thelightui-default-rtdb.firebaseio.com"
     private static let vendorNode = "Vendor"
     private static let fetchTimeout: TimeInterval = 15

@@ -14,7 +14,8 @@ final class CustomerStore {
     var errorMessage = ""
 
     @ObservationIgnored private let customerService: CustomerServicing
-    @ObservationIgnored private var listener: CustomerListener?
+    // nonisolated(unsafe): accessed in nonisolated deinit; only written on @MainActor otherwise.
+    @ObservationIgnored private nonisolated(unsafe) var listener: CustomerListener?
 
     init(customerService: CustomerServicing = FirebaseCustomerService()) {
         self.customerService = customerService

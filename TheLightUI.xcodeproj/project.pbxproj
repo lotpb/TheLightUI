@@ -638,6 +638,8 @@
 			isa = PBXGroup;
 			children = (
 				AF54E4E02773B27D0062B1F4 /* CustomerUI.swift */,
+				AF54E4E22773B2B80062B1F4 /* CustomerFormUI.swift */,
+				AF54E4DE2773B22E0062B1F4 /* LeadDetailUI.swift */,
 				AF4F5DE82FC750B60003B277 /* CustomerStore.swift */,
 				AF4F5DE22FC750A70003B277 /* CustomerModels.swift */,
 				AF4F5DE52FC750A80003B277 /* CustomerService.swift */,
@@ -650,8 +652,6 @@
 				AFD7D8D23002744E00EF9101 /* CustomerTransferViewModel.swift */,
 				AFEFA4CB30027795004C61A5 /* CustomerCellView.swift */,
 				AFEAAA9E300A57410064126D /* CustomerLegacyImport.swift */,
-				AF54E4E22773B2B80062B1F4 /* CustomerFormUI.swift */,
-				AF54E4DE2773B22E0062B1F4 /* LeadDetailUI.swift */,
 				AF4F5DF52FC75C330003B277 /* LeadDetailHeaderView.swift */,
 				AF4F5DF82FC75C340003B277 /* LeadDetailFieldRow.swift */,
 				AF4F5DFB2FC75C350003B277 /* LeadDetailCommentsView.swift */,

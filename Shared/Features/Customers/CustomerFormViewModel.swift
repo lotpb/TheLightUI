@@ -23,7 +23,8 @@ final class CustomerFormViewModel {
     private(set) var shouldFocusFirstName = false
 
     @ObservationIgnored private let formService: CustomerFormServicing
-    @ObservationIgnored private var saveTask: Task<Void, Never>?
+    // nonisolated(unsafe): accessed in nonisolated deinit; only written on @MainActor otherwise.
+    @ObservationIgnored private nonisolated(unsafe) var saveTask: Task<Void, Never>?
 
     // True while a Firestore save or update is in flight. Drives isButtonDisabled
     // to prevent a second tap from launching a concurrent write.

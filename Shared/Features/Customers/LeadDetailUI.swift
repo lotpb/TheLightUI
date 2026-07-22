@@ -80,7 +80,7 @@ struct LeadDetailUI: View {
     private let locationProvider: WeatherLocationProviding
 
     // Mutable customer model being displayed/edited.
-    @State var detail: CustomerItem
+    @State private var detail: CustomerItem
     // Orchestrates sheets, alerts, and side-effects for this screen.
     @State private var coordinator: LeadDetailCoordinator
     // EventKit store used when creating/editing calendar events.
@@ -312,9 +312,6 @@ struct LeadDetailUI: View {
                 Label("Send Message", systemImage: "message")
             }
         }
-        //Button("Add to Customer") { }
-        //Button("$ pay") { }
-        //Button("Web Page") { }
     }
 
     // Conditionally render the correct sheet content for the active action.

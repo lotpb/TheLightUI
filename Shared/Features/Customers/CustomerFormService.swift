@@ -16,7 +16,7 @@ protocol CustomerFormServicing: Sendable {
     func upsertCustomersBatch(_ entries: [(id: String, payload: CustomerFormPayload)]) async throws
 }
 
-final class FirebaseCustomerFormService: CustomerFormServicing {
+final class FirebaseCustomerFormService: CustomerFormServicing, @unchecked Sendable {
     private let manager: FirebaseManager
 
     init(manager: FirebaseManager = .shared) {
