@@ -108,6 +108,13 @@ struct ExpenseTrackerView: View {
                         Label("Restore from Firebase", systemImage: "icloud.and.arrow.down")
                     }
                     .disabled(isSyncing)
+                    Divider()
+                    Button {
+                        printExpenses()
+                    } label: {
+                        Label("Print", systemImage: "printer")
+                    }
+                    .disabled(visibleExpenses.isEmpty)
                 } label: {
                     Image(systemName: viewModel.dateRange != .allTime ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
                 }
@@ -240,6 +247,89 @@ struct ExpenseTrackerView: View {
     private func showTransferMessage(_ message: String) {
         transferMessage = message
         isShowingTransferAlert = true
+    }
+
+    private var printableHTML: String {
+        let dateLabel = viewModel.dateRange.rawValue
+        let total = viewModel.totalAmount(of: visibleExpenses)
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        let totalString = formatter.string(from: NSNumber(value: total)) ?? "$\(total)"
+
+        var rows = ""
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .medium
+        dateFormatter.timeStyle = .none
+        for expense in visibleExpenses {
+            let name = expense.title
+                .replacingOccurrences(of: "&", with: "&amp;")
+                .replacingOccurrences(of: "<", with: "&lt;")
+                .replacingOccurrences(of: ">", with: "&gt;")
+            let amount = formatter.string(from: NSNumber(value: expense.amount)) ?? "\(expense.amount)"
+            let date = dateFormatter.string(from: expense.date)
+            let category = expense.category.rawValue
+            let reimbursable = expense.isReimbursable ? "Yes" : "No"
+            rows += """
+            <tr>
+              <td>\(date)</td>
+              <td>\(name)</td>
+              <td>\(category)</td>
+              <td class="amount">\(amount)</td>
+              <td>\(reimbursable)</td>
+            </tr>
+            """
+        }
+
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: -apple-system, Helvetica Neue, Arial, sans-serif; margin: 40px; color: #1c1c1e; }
+          .header { border-bottom: 2px solid #007aff; padding-bottom: 14px; margin-bottom: 24px; }
+          .title { font-size: 26px; font-weight: 700; color: #007aff; }
+          .subtitle { font-size: 14px; color: #6e6e73; margin-top: 4px; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+          th { background: #007aff; color: #fff; padding: 8px 12px; font-size: 13px; text-align: left; }
+          tr:nth-child(even) { background-color: #f2f2f7; }
+          td { padding: 8px 12px; font-size: 13px; vertical-align: top; }
+          .amount { text-align: right; font-weight: 600; }
+          .total-row { font-weight: 700; background: #e5e5ea; }
+          .footer { margin-top: 32px; font-size: 11px; color: #aeaeb2; text-align: right; }
+        </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="title">Expense Report</div>
+            <div class="subtitle">\(dateLabel) &bull; \(visibleExpenses.count) expense\(visibleExpenses.count == 1 ? "" : "s")</div>
+          </div>
+          <table>
+            <tr><th>Date</th><th>Description</th><th>Category</th><th>Amount</th><th>Reimburse</th></tr>
+            \(rows)
+            <tr class="total-row">
+              <td colspan="3">Total</td>
+              <td class="amount">\(totalString)</td>
+              <td></td>
+            </tr>
+          </table>
+          <div class="footer">Printed from The Light &bull; \(Date().formatted(date: .long, time: .omitted))</div>
+        </body>
+        </html>
+        """
+    }
+
+    private func printExpenses() {
+        #if canImport(UIKit)
+        let printInfo = UIPrintInfo.printInfo()
+        printInfo.outputType = .general
+        printInfo.jobName = "Expense Report"
+        let controller = UIPrintInteractionController.shared
+        controller.printInfo = printInfo
+        let formatter = UIMarkupTextPrintFormatter(markupText: printableHTML)
+        controller.printFormatter = formatter
+        controller.present(animated: true)
+        #endif
     }
 
     private var summarySection: some View {

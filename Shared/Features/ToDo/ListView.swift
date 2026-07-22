@@ -160,6 +160,12 @@ struct ListView: View {
                         Label("Restore from Firebase", systemImage: "icloud.and.arrow.down")
                     }
                     .disabled(isSyncing)
+                    Button {
+                        printList()
+                    } label: {
+                        Label("Print", systemImage: "printer")
+                    }
+                    .disabled(listViewModel.items.isEmpty)
                     Divider()
                     Button(role: .destructive) {
                         showingClearConfirmation = true
@@ -209,6 +215,62 @@ struct ListView: View {
             }
             .environment(listViewModel)
         }
+    }
+
+    private var printableHTML: String {
+        let items = listViewModel.items
+        let completed = items.filter { $0.isCompleted }.count
+        var rows = ""
+        for item in items {
+            let status = item.isCompleted ? "&#10003;" : ""
+            let title = item.title
+                .replacingOccurrences(of: "&", with: "&amp;")
+                .replacingOccurrences(of: "<", with: "&lt;")
+                .replacingOccurrences(of: ">", with: "&gt;")
+            let rowClass = item.isCompleted ? " class=\"done\"" : ""
+            rows += "<tr\(rowClass)><td class=\"check\">\(status)</td><td>\(title)</td></tr>\n"
+        }
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: -apple-system, Helvetica Neue, Arial, sans-serif; margin: 40px; color: #1c1c1e; }
+          .header { border-bottom: 2px solid #007aff; padding-bottom: 14px; margin-bottom: 24px; }
+          .title { font-size: 26px; font-weight: 700; color: #007aff; }
+          .subtitle { font-size: 14px; color: #6e6e73; margin-top: 4px; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+          tr:nth-child(even) { background-color: #f2f2f7; }
+          td { padding: 8px 12px; font-size: 14px; vertical-align: top; }
+          .check { width: 32px; text-align: center; color: #34c759; font-weight: 700; }
+          .done td { color: #aeaeb2; text-decoration: line-through; }
+          .footer { margin-top: 32px; font-size: 11px; color: #aeaeb2; text-align: right; }
+        </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="title">To-Do List</div>
+            <div class="subtitle">\(items.count) item\(items.count == 1 ? "" : "s") &bull; \(completed) completed</div>
+          </div>
+          <table>\(rows)</table>
+          <div class="footer">Printed from The Light &bull; \(Date().formatted(date: .long, time: .omitted))</div>
+        </body>
+        </html>
+        """
+    }
+
+    private func printList() {
+        #if canImport(UIKit)
+        let printInfo = UIPrintInfo.printInfo()
+        printInfo.outputType = .general
+        printInfo.jobName = "To-Do List"
+        let controller = UIPrintInteractionController.shared
+        controller.printInfo = printInfo
+        let formatter = UIMarkupTextPrintFormatter(markupText: printableHTML)
+        controller.printFormatter = formatter
+        controller.present(animated: true)
+        #endif
     }
 
     private func backUpToFirebase() {

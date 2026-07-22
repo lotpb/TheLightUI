@@ -48,9 +48,91 @@ struct ChartView: View {
                     Text(option)
                 }
             }
+            Divider()
+            Button {
+                printChart()
+            } label: {
+                Label("Print", systemImage: "printer")
+            }
+            .disabled(!viewModel.hasCustomers)
         } label: {
             Label("Category", systemImage: "line.3.horizontal.decrease.circle")
         }
+    }
+
+    private var printableHTML: String {
+        func tableSection(title: String, items: [ChartItem]) -> String {
+            guard !items.isEmpty else { return "" }
+            let rows = items.map { item in
+                "<tr><td>\(item.type)</td><td class=\"amount\">\(ChartFormatters.currency(item.value))</td></tr>"
+            }.joined(separator: "\n")
+            return """
+            <h3>\(title)</h3>
+            <table>
+              <tr><th>Name</th><th>Amount</th></tr>
+              \(rows)
+            </table>
+            """
+        }
+
+        let monthlyRows = viewModel.monthlySales.map { entry in
+            "<tr><td>\(entry.label)</td><td class=\"amount\">\(ChartFormatters.currency(entry.total))</td></tr>"
+        }.joined(separator: "\n")
+
+        let monthlySection = viewModel.monthlySales.isEmpty ? "" : """
+        <h3>\(viewModel.categoryFilter) Sales by Month</h3>
+        <table>
+          <tr><th>Month</th><th>Amount</th></tr>
+          \(monthlyRows)
+        </table>
+        """
+
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: -apple-system, Helvetica Neue, Arial, sans-serif; margin: 40px; color: #1c1c1e; }
+          .header { border-bottom: 2px solid #ff9500; padding-bottom: 14px; margin-bottom: 24px; }
+          .title { font-size: 26px; font-weight: 700; color: #ff9500; }
+          .subtitle { font-size: 14px; color: #6e6e73; margin-top: 4px; }
+          h3 { font-size: 15px; font-weight: 700; color: #3a3a3c; margin: 24px 0 8px; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+          th { background: #ff9500; color: #fff; padding: 7px 12px; font-size: 13px; text-align: left; }
+          tr:nth-child(even) { background-color: #f2f2f7; }
+          td { padding: 7px 12px; font-size: 13px; }
+          .amount { text-align: right; font-weight: 600; }
+          .footer { margin-top: 32px; font-size: 11px; color: #aeaeb2; text-align: right; }
+        </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="title">Sales Report — \(viewModel.categoryFilter)s</div>
+            <div class="subtitle">\(viewModel.customerCount) record\(viewModel.customerCount == 1 ? "" : "s") &bull; Total \(viewModel.formattedTotalAmount)</div>
+          </div>
+          \(monthlySection)
+          \(tableSection(title: "By Job", items: viewModel.jobTotals))
+          \(tableSection(title: "By Product", items: viewModel.productTotals))
+          \(tableSection(title: "By Salesman", items: viewModel.salesmanTotals))
+          \(tableSection(title: "By Contractor", items: viewModel.contractorTotals))
+          <div class="footer">Printed from The Light &bull; \(Date().formatted(date: .long, time: .omitted))</div>
+        </body>
+        </html>
+        """
+    }
+
+    private func printChart() {
+        #if canImport(UIKit)
+        let printInfo = UIPrintInfo.printInfo()
+        printInfo.outputType = .general
+        printInfo.jobName = "\(viewModel.categoryFilter) Sales Report"
+        let controller = UIPrintInteractionController.shared
+        controller.printInfo = printInfo
+        let formatter = UIMarkupTextPrintFormatter(markupText: printableHTML)
+        controller.printFormatter = formatter
+        controller.present(animated: true)
+        #endif
     }
 
     private var chartContent: some View {

@@ -164,6 +164,7 @@ enum ExpenseCategory: String, CaseIterable, Identifiable, Codable {
     case software = "Software"
     case supplies = "Supplies"
     case utilities = "Utilities"
+    case tithes = "Tithes"
     case other = "Other"
 
     var id: String { rawValue }
@@ -184,6 +185,8 @@ enum ExpenseCategory: String, CaseIterable, Identifiable, Codable {
             "shippingbox.fill"
         case .utilities:
             "bolt.fill"
+        case .tithes:
+            "hands.and.sparkles.fill"
         case .other:
             "tag.fill"
         }
