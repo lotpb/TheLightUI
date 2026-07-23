@@ -28,6 +28,24 @@
 		AF1B37AB27935EAB00374C0F /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1B37AA27935EAB00374C0F /* NotificationManager.swift */; };
 		AF219A9B30011A4700A90D4A /* MapModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF219A9A30011A4700A90D4A /* MapModels.swift */; };
 		AF219A9D30011A4D00A90D4A /* MapFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF219A9C30011A4D00A90D4A /* MapFormatting.swift */; };
+		AF2E4B953011D00800D77F40 /* CustomerFormPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4B943011D00800D77F40 /* CustomerFormPickerSheet.swift */; };
+		AF2E4B963011D00800D77F40 /* CustomerFormPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4B943011D00800D77F40 /* CustomerFormPickerSheet.swift */; };
+		AF2E4B983011D01100D77F40 /* CustomerFormStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4B973011D01100D77F40 /* CustomerFormStyles.swift */; };
+		AF2E4B993011D01100D77F40 /* CustomerFormStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4B973011D01100D77F40 /* CustomerFormStyles.swift */; };
+		AF2E4B9B3011D02500D77F40 /* CustomerFormComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4B9A3011D02500D77F40 /* CustomerFormComponents.swift */; };
+		AF2E4B9C3011D02500D77F40 /* CustomerFormComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4B9A3011D02500D77F40 /* CustomerFormComponents.swift */; };
+		AF2E4B9E3011D04E00D77F40 /* CustomerFormSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4B9D3011D04E00D77F40 /* CustomerFormSections.swift */; };
+		AF2E4B9F3011D04E00D77F40 /* CustomerFormSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4B9D3011D04E00D77F40 /* CustomerFormSections.swift */; };
+		AF2E4BA13011D2AF00D77F40 /* RoundedContainerList.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4BA03011D2AF00D77F40 /* RoundedContainerList.swift */; };
+		AF2E4BA23011D2AF00D77F40 /* RoundedContainerList.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4BA03011D2AF00D77F40 /* RoundedContainerList.swift */; };
+		AF2E4BA43011D2C200D77F40 /* LeadDetailFieldData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4BA33011D2C200D77F40 /* LeadDetailFieldData.swift */; };
+		AF2E4BA53011D2C200D77F40 /* LeadDetailFieldData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4BA33011D2C200D77F40 /* LeadDetailFieldData.swift */; };
+		AF2E4BA73011D2D200D77F40 /* LeadDetailContactHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4BA63011D2D200D77F40 /* LeadDetailContactHelpers.swift */; };
+		AF2E4BA83011D2D200D77F40 /* LeadDetailContactHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4BA63011D2D200D77F40 /* LeadDetailContactHelpers.swift */; };
+		AF2E4BAA3011D2DC00D77F40 /* LeadDetailCalendarHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4BA93011D2DC00D77F40 /* LeadDetailCalendarHelpers.swift */; };
+		AF2E4BAB3011D2DC00D77F40 /* LeadDetailCalendarHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4BA93011D2DC00D77F40 /* LeadDetailCalendarHelpers.swift */; };
+		AF2E4BAD3011D2EC00D77F40 /* LeadDetailPrint.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4BAC3011D2EC00D77F40 /* LeadDetailPrint.swift */; };
+		AF2E4BAE3011D2EC00D77F40 /* LeadDetailPrint.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2E4BAC3011D2EC00D77F40 /* LeadDetailPrint.swift */; };
 		AF2F67402FF7F20400741D30 /* LaunchScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F67362FF7F20400741D30 /* LaunchScreenView.swift */; };
 		AF2F674A2FF7F6CD00741D30 /* UserFormModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F67492FF7F6CD00741D30 /* UserFormModel.swift */; };
 		AF2F674B2FF7F6CD00741D30 /* UserFormModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2F67492FF7F6CD00741D30 /* UserFormModel.swift */; };
@@ -277,6 +295,15 @@
 		AF1B37AA27935EAB00374C0F /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		AF219A9A30011A4700A90D4A /* MapModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapModels.swift; sourceTree = "<group>"; };
 		AF219A9C30011A4D00A90D4A /* MapFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapFormatting.swift; sourceTree = "<group>"; };
+		AF2E4B943011D00800D77F40 /* CustomerFormPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerFormPickerSheet.swift; sourceTree = "<group>"; };
+		AF2E4B973011D01100D77F40 /* CustomerFormStyles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerFormStyles.swift; sourceTree = "<group>"; };
+		AF2E4B9A3011D02500D77F40 /* CustomerFormComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerFormComponents.swift; sourceTree = "<group>"; };
+		AF2E4B9D3011D04E00D77F40 /* CustomerFormSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerFormSections.swift; sourceTree = "<group>"; };
+		AF2E4BA03011D2AF00D77F40 /* RoundedContainerList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundedContainerList.swift; sourceTree = "<group>"; };
+		AF2E4BA33011D2C200D77F40 /* LeadDetailFieldData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeadDetailFieldData.swift; sourceTree = "<group>"; };
+		AF2E4BA63011D2D200D77F40 /* LeadDetailContactHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeadDetailContactHelpers.swift; sourceTree = "<group>"; };
+		AF2E4BA93011D2DC00D77F40 /* LeadDetailCalendarHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeadDetailCalendarHelpers.swift; sourceTree = "<group>"; };
+		AF2E4BAC3011D2EC00D77F40 /* LeadDetailPrint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeadDetailPrint.swift; sourceTree = "<group>"; };
 		AF2F67362FF7F20400741D30 /* LaunchScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreenView.swift; sourceTree = "<group>"; };
 		AF2F67492FF7F6CD00741D30 /* UserFormModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserFormModel.swift; sourceTree = "<group>"; };
 		AF2F674C2FF80DAA00741D30 /* InitialsAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialsAvatarView.swift; sourceTree = "<group>"; };
@@ -652,10 +679,19 @@
 				AFD7D8D23002744E00EF9101 /* CustomerTransferViewModel.swift */,
 				AFEFA4CB30027795004C61A5 /* CustomerCellView.swift */,
 				AFEAAA9E300A57410064126D /* CustomerLegacyImport.swift */,
+				AF2E4B943011D00800D77F40 /* CustomerFormPickerSheet.swift */,
+				AF2E4B973011D01100D77F40 /* CustomerFormStyles.swift */,
+				AF2E4B9A3011D02500D77F40 /* CustomerFormComponents.swift */,
+				AF2E4B9D3011D04E00D77F40 /* CustomerFormSections.swift */,
 				AF4F5DF52FC75C330003B277 /* LeadDetailHeaderView.swift */,
 				AF4F5DF82FC75C340003B277 /* LeadDetailFieldRow.swift */,
 				AF4F5DFB2FC75C350003B277 /* LeadDetailCommentsView.swift */,
 				AF5E019B2FCB9D1600945764 /* LeadDetailCoordinator.swift */,
+				AF2E4BA33011D2C200D77F40 /* LeadDetailFieldData.swift */,
+				AF2E4BA63011D2D200D77F40 /* LeadDetailContactHelpers.swift */,
+				AF2E4BA93011D2DC00D77F40 /* LeadDetailCalendarHelpers.swift */,
+				AF2E4BAC3011D2EC00D77F40 /* LeadDetailPrint.swift */,
+				AF2E4BA03011D2AF00D77F40 /* RoundedContainerList.swift */,
 			);
 			path = Customers;
 			sourceTree = "<group>";
@@ -1085,6 +1121,7 @@
 				AFA9531D2FDF33150003ADD1 /* LocationCaptureManager.swift in Sources */,
 				AF9CC6F5279B2C6B0087E9FC /* ListViewModel.swift in Sources */,
 				AF2F67402FF7F20400741D30 /* LaunchScreenView.swift in Sources */,
+				AF2E4BA13011D2AF00D77F40 /* RoundedContainerList.swift in Sources */,
 				AF5CF3E5277B42150044B06E /* FurnitureDetail.swift in Sources */,
 				AFE2C80C2FE08CA80086C5C8 /* SwiftUIRouteMapView.swift in Sources */,
 				AF4F5E082FC75D870003B277 /* MapButtonView.swift in Sources */,
@@ -1129,6 +1166,7 @@
 				AF488F882FE0300200E5F294 /* ExpenseModelContainerModifier.swift in Sources */,
 				AF3AC45C268FF5E400562D20 /* ReelsView.swift in Sources */,
 				AFC9D931300170D400786FB5 /* ChartModels.swift in Sources */,
+				AF2E4B9C3011D02500D77F40 /* CustomerFormComponents.swift in Sources */,
 				AFC9D935300170E800786FB5 /* ChartSectionViews.swift in Sources */,
 				AFD5D8A92FF458B7008934BE /* InstagramFeedViews.swift in Sources */,
 				AFD5D8AD2FF458C7008934BE /* InstagramDiscoverViews.swift in Sources */,
@@ -1138,6 +1176,7 @@
 				AFD5D88B2FF4552F008934BE /* ContactAddView.swift in Sources */,
 				AFD5D88E2FF4552F008934BE /* AppTheme.swift in Sources */,
 				AF219A9B30011A4700A90D4A /* MapModels.swift in Sources */,
+				AF2E4BA53011D2C200D77F40 /* LeadDetailFieldData.swift in Sources */,
 				AFD5D88F2FF4552F008934BE /* ImagePreparation.swift in Sources */,
 				AFD5D8902FF4552F008934BE /* CustomCorners.swift in Sources */,
 				AFD5D8912FF4552F008934BE /* MessageComposeView.swift in Sources */,
@@ -1145,12 +1184,14 @@
 				AFD5D8932FF4552F008934BE /* GradientUI.swift in Sources */,
 				AFD5D86C2FF4538C008934BE /* UserFormUI.swift in Sources */,
 				AF86C0642FDF1B3B00F450F9 /* CustomerListViewModel.swift in Sources */,
+				AF2E4B9E3011D04E00D77F40 /* CustomerFormSections.swift in Sources */,
 				AF53737E2778BF36001F40B6 /* WeatherUI.swift in Sources */,
 				AFB4D0193007B19B0003650A /* MessageJSONTransfer.swift in Sources */,
 				AFEAAAA0300A57410064126D /* CustomerLegacyImport.swift in Sources */,
 				AFDE91CC2793348D00302CF2 /* PlaceListViewModel.swift in Sources */,
 				AFB760A92FE22CA2002D1A83 /* MenuRouteButton.swift in Sources */,
 				AFDE91D32793361700302CF2 /* LandMarkCategoryView.swift in Sources */,
+				AF2E4BA83011D2D200D77F40 /* LeadDetailContactHelpers.swift in Sources */,
 				AF4F5DC12FC742E40003B277 /* ChatRepository.swift in Sources */,
 				AF92B8A62678157100729208 /* ExtensionUI.swift in Sources */,
 				AF892F592FFEFC86004D9563 /* ExpenseRowView.swift in Sources */,
@@ -1187,11 +1228,13 @@
 				AF85283E2787930700E7F8D8 /* ImageSaver.swift in Sources */,
 				AF697E872778D1AE00219026 /* URL+.swift in Sources */,
 				AF54E4E32773B2B80062B1F4 /* CustomerFormUI.swift in Sources */,
+				AF2E4BAA3011D2DC00D77F40 /* LeadDetailCalendarHelpers.swift in Sources */,
 				AF92B8B1267816A600729208 /* SpotifyUI.swift in Sources */,
 				AF4F5DF32FC759CE0003B277 /* KeychainPasswordStore.swift in Sources */,
 				AF5373802778C000001F40B6 /* WeatherView.swift in Sources */,
 				AF9CC6F3279B2C440087E9FC /* ItemModel.swift in Sources */,
 				AF77D6532FC7A661008D456A /* SessionViewModel.swift in Sources */,
+				AF2E4B963011D00800D77F40 /* CustomerFormPickerSheet.swift in Sources */,
 				AF2F674D2FF80DAA00741D30 /* InitialsAvatarView.swift in Sources */,
 				AFE4AE102FC873DE00F86B2E /* AppSettingsStore.swift in Sources */,
 				AF54E4E12773B27D0062B1F4 /* CustomerUI.swift in Sources */,
@@ -1200,6 +1243,7 @@
 				AF54E4D927739F4A0062B1F4 /* Double.swift in Sources */,
 				AF105A0D27741204001F3F74 /* MapUI.swift in Sources */,
 				AF34848A274568BE0091BA5A /* FirebaseManager.swift in Sources */,
+				AF2E4BAE3011D2EC00D77F40 /* LeadDetailPrint.swift in Sources */,
 				AF92B8B3267816A600729208 /* Song.swift in Sources */,
 				AF9CC6FB279B2CF10087E9FC /* NoItemsView.swift in Sources */,
 				AF997FB22FE3244900797FD5 /* TipUI.swift in Sources */,
@@ -1216,6 +1260,7 @@
 				AF4F5DF92FC75C340003B277 /* LeadDetailFieldRow.swift in Sources */,
 				AF54E4DF2773B22E0062B1F4 /* LeadDetailUI.swift in Sources */,
 				AF4F5DC42FC742F30003B277 /* MainMessagesViewModel.swift in Sources */,
+				AF2E4B983011D01100D77F40 /* CustomerFormStyles.swift in Sources */,
 				AF48266B2FC72514005A8C42 /* PhoneNumber.swift in Sources */,
 				AFEE000A27285BB900D75C7C /* LoginView.swift in Sources */,
 				AF8CA0A8277688C400142D38 /* SettingView.swift in Sources */,
@@ -1244,6 +1289,7 @@
 				AFBCC5E027645EB800F0B0A8 /* MainMenuUI.swift in Sources */,
 				AFB4D01A3007B19B0003650A /* MessageJSONTransfer.swift in Sources */,
 				AF7DDB6827453E2D0072357C /* MainMessagesView.swift in Sources */,
+				AF2E4B993011D01100D77F40 /* CustomerFormStyles.swift in Sources */,
 				AF3AC457268FF1FD00562D20 /* MediaFile.swift in Sources */,
 				AF997FB62FE32ABD00797FD5 /* StepsTodayView.swift in Sources */,
 				AF77D64F2FC7A3FA008D456A /* CustomerFormViewModel.swift in Sources */,
@@ -1256,6 +1302,7 @@
 				AFEFA4CC30027795004C61A5 /* CustomerCellView.swift in Sources */,
 				AFB760A22FE22C78002D1A83 /* MainTopView.swift in Sources */,
 				AFE4AE0C2FC8698F00F86B2E /* AppDependencies.swift in Sources */,
+				AF2E4BA23011D2AF00D77F40 /* RoundedContainerList.swift in Sources */,
 				AF3AC45D268FF5E400562D20 /* ReelsView.swift in Sources */,
 				AFC519522FC89A98003A4AEA /* MessageDateFormatting.swift in Sources */,
 				AFB760A52FE22CA2002D1A83 /* MainMenuSections.swift in Sources */,
@@ -1265,6 +1312,7 @@
 				AF5E019D2FCB9D1600945764 /* LeadDetailCoordinator.swift in Sources */,
 				AF4F5E0A2FC75DC40003B277 /* BottomSheetUI.swift in Sources */,
 				AF4F5DE42FC750A70003B277 /* CustomerModels.swift in Sources */,
+				AF2E4B9F3011D04E00D77F40 /* CustomerFormSections.swift in Sources */,
 				AFD5D86B2FF4538C008934BE /* UserFormUI.swift in Sources */,
 				AF86C0692FDF1E3A00F450F9 /* MainMenuCoordinator.swift in Sources */,
 				AF5EBBA93009005D002FD8CE /* ExpenseFirestore.swift in Sources */,
@@ -1276,10 +1324,12 @@
 				AF4F5DEA2FC750B60003B277 /* CustomerStore.swift in Sources */,
 				AF4F5DDD2FC74EDA0003B277 /* LoginService.swift in Sources */,
 				AF92B8B6267816A600729208 /* SideTabViewUI.swift in Sources */,
+				AF2E4BAD3011D2EC00D77F40 /* LeadDetailPrint.swift in Sources */,
 				AFD5D8AA2FF458B7008934BE /* InstagramFeedViews.swift in Sources */,
 				AF488F802FE02FAF00E5F294 /* ExpenseModels.swift in Sources */,
 				AF92B87D267812A400729208 /* TheLightUIApp.swift in Sources */,
 				AF3AC45A268FF39500562D20 /* InstagramHome.swift in Sources */,
+				AF2E4BAB3011D2DC00D77F40 /* LeadDetailCalendarHelpers.swift in Sources */,
 				AFB760A02FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */,
 				AF2F674B2FF7F6CD00741D30 /* UserFormModel.swift in Sources */,
 				AF92B8B2267816A600729208 /* SpotifyUI.swift in Sources */,
@@ -1294,6 +1344,7 @@
 				AFD5D8AC2FF458C7008934BE /* InstagramDiscoverViews.swift in Sources */,
 				AF892F5F2FFEFC8F004D9563 /* ExpenseEditorView.swift in Sources */,
 				AFD5D89E2FF4552F008934BE /* AppTheme.swift in Sources */,
+				AF2E4BA43011D2C200D77F40 /* LeadDetailFieldData.swift in Sources */,
 				AFD5D89F2FF4552F008934BE /* ImagePreparation.swift in Sources */,
 				AFD5D8A02FF4552F008934BE /* CustomCorners.swift in Sources */,
 				AFD5D8A12FF4552F008934BE /* MessageComposeView.swift in Sources */,
@@ -1302,6 +1353,7 @@
 				AF15AA2E275C5B2C0098CB04 /* ChatBubble.swift in Sources */,
 				AF4F5DF62FC75C330003B277 /* LeadDetailHeaderView.swift in Sources */,
 				AF34848B274568BE0091BA5A /* FirebaseManager.swift in Sources */,
+				AF2E4BA73011D2D200D77F40 /* LeadDetailContactHelpers.swift in Sources */,
 				AFEAAA9F300A57410064126D /* CustomerLegacyImport.swift in Sources */,
 				AF0A234A274C33E700B18BBF /* CreateNewMessageView.swift in Sources */,
 				AF892F612FFEFC93004D9563 /* ExpensePreviewData.swift in Sources */,
@@ -1312,10 +1364,12 @@
 				AFD7D8D43002744E00EF9101 /* CustomerTransferViewModel.swift in Sources */,
 				AF792F452690047C0011D787 /* Reel.swift in Sources */,
 				AF4F5DC32FC742F30003B277 /* MainMessagesViewModel.swift in Sources */,
+				AF2E4B9B3011D02500D77F40 /* CustomerFormComponents.swift in Sources */,
 				AF4F5DEF2FC758540003B277 /* CustomerFirestore.swift in Sources */,
 				AF2F674E2FF80DAA00741D30 /* InitialsAvatarView.swift in Sources */,
 				AF488F852FE02FF400E5F294 /* ExpenseTrackerView.swift in Sources */,
 				AFB4D01C3007B1A30003650A /* MessageTransferViewModel.swift in Sources */,
+				AF2E4B953011D00800D77F40 /* CustomerFormPickerSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
