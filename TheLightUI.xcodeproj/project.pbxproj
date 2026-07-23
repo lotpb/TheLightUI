@@ -264,6 +264,22 @@
 		AFE4AE0C2FC8698F00F86B2E /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE4AE0B2FC8698F00F86B2E /* AppDependencies.swift */; };
 		AFE4AE0D2FC8698F00F86B2E /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE4AE0B2FC8698F00F86B2E /* AppDependencies.swift */; };
 		AFE4AE102FC873DE00F86B2E /* AppSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE4AE0F2FC873DE00F86B2E /* AppSettingsStore.swift */; };
+		AFE7120F3012348200B9D6A7 /* BottomSheetFavorite.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE7120E3012348200B9D6A7 /* BottomSheetFavorite.swift */; };
+		AFE712103012348200B9D6A7 /* BottomSheetFavorite.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE7120E3012348200B9D6A7 /* BottomSheetFavorite.swift */; };
+		AFE712123012348300B9D6A7 /* BottomSheetLocationInfoRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE712113012348300B9D6A7 /* BottomSheetLocationInfoRow.swift */; };
+		AFE712133012348300B9D6A7 /* BottomSheetLocationInfoRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE712113012348300B9D6A7 /* BottomSheetLocationInfoRow.swift */; };
+		AFE712153012348500B9D6A7 /* BottomSheetShareButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE712143012348500B9D6A7 /* BottomSheetShareButton.swift */; };
+		AFE712163012348500B9D6A7 /* BottomSheetShareButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE712143012348500B9D6A7 /* BottomSheetShareButton.swift */; };
+		AFE712183012348C00B9D6A7 /* BottomSheetRouteSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE712173012348C00B9D6A7 /* BottomSheetRouteSummaryView.swift */; };
+		AFE712193012348C00B9D6A7 /* BottomSheetRouteSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE712173012348C00B9D6A7 /* BottomSheetRouteSummaryView.swift */; };
+		AFE7121B3012349100B9D6A7 /* BottomSheetFavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE7121A3012349100B9D6A7 /* BottomSheetFavoritesView.swift */; };
+		AFE7121C3012349100B9D6A7 /* BottomSheetFavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE7121A3012349100B9D6A7 /* BottomSheetFavoritesView.swift */; };
+		AFE7121E3012349700B9D6A7 /* BottomSheetLocationCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE7121D3012349700B9D6A7 /* BottomSheetLocationCardView.swift */; };
+		AFE7121F3012349700B9D6A7 /* BottomSheetLocationCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE7121D3012349700B9D6A7 /* BottomSheetLocationCardView.swift */; };
+		AFE71221301234A000B9D6A7 /* BottomSheetLocationSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE71220301234A000B9D6A7 /* BottomSheetLocationSectionView.swift */; };
+		AFE71222301234A000B9D6A7 /* BottomSheetLocationSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE71220301234A000B9D6A7 /* BottomSheetLocationSectionView.swift */; };
+		AFE71224301234A700B9D6A7 /* BottomSheetContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE71223301234A700B9D6A7 /* BottomSheetContentView.swift */; };
+		AFE71225301234A700B9D6A7 /* BottomSheetContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE71223301234A700B9D6A7 /* BottomSheetContentView.swift */; };
 		AFEAAA9D30099D6D0064126D /* DataBackupSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEAAA9C30099D6D0064126D /* DataBackupSection.swift */; };
 		AFEAAA9F300A57410064126D /* CustomerLegacyImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEAAA9E300A57410064126D /* CustomerLegacyImport.swift */; };
 		AFEAAAA0300A57410064126D /* CustomerLegacyImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEAAA9E300A57410064126D /* CustomerLegacyImport.swift */; };
@@ -438,6 +454,14 @@
 		AFE2C80E2FE0906B0086C5C8 /* MapRouteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapRouteService.swift; sourceTree = "<group>"; };
 		AFE4AE0B2FC8698F00F86B2E /* AppDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
 		AFE4AE0F2FC873DE00F86B2E /* AppSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsStore.swift; sourceTree = "<group>"; };
+		AFE7120E3012348200B9D6A7 /* BottomSheetFavorite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetFavorite.swift; sourceTree = "<group>"; };
+		AFE712113012348300B9D6A7 /* BottomSheetLocationInfoRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetLocationInfoRow.swift; sourceTree = "<group>"; };
+		AFE712143012348500B9D6A7 /* BottomSheetShareButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetShareButton.swift; sourceTree = "<group>"; };
+		AFE712173012348C00B9D6A7 /* BottomSheetRouteSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetRouteSummaryView.swift; sourceTree = "<group>"; };
+		AFE7121A3012349100B9D6A7 /* BottomSheetFavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetFavoritesView.swift; sourceTree = "<group>"; };
+		AFE7121D3012349700B9D6A7 /* BottomSheetLocationCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetLocationCardView.swift; sourceTree = "<group>"; };
+		AFE71220301234A000B9D6A7 /* BottomSheetLocationSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetLocationSectionView.swift; sourceTree = "<group>"; };
+		AFE71223301234A700B9D6A7 /* BottomSheetContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetContentView.swift; sourceTree = "<group>"; };
 		AFEAAA9C30099D6D0064126D /* DataBackupSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataBackupSection.swift; sourceTree = "<group>"; };
 		AFEAAA9E300A57410064126D /* CustomerLegacyImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerLegacyImport.swift; sourceTree = "<group>"; };
 		AFEE000927285BB900D75C7C /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -723,6 +747,14 @@
 				AF4F5E092FC75DC40003B277 /* BottomSheetUI.swift */,
 				AFE2C80B2FE08CA80086C5C8 /* SwiftUIRouteMapView.swift */,
 				AF38E46C300036B800090C03 /* GeofenceEditorSheet.swift */,
+				AFE7120E3012348200B9D6A7 /* BottomSheetFavorite.swift */,
+				AFE712113012348300B9D6A7 /* BottomSheetLocationInfoRow.swift */,
+				AFE712143012348500B9D6A7 /* BottomSheetShareButton.swift */,
+				AFE712173012348C00B9D6A7 /* BottomSheetRouteSummaryView.swift */,
+				AFE7121A3012349100B9D6A7 /* BottomSheetFavoritesView.swift */,
+				AFE7121D3012349700B9D6A7 /* BottomSheetLocationCardView.swift */,
+				AFE71220301234A000B9D6A7 /* BottomSheetLocationSectionView.swift */,
+				AFE71223301234A700B9D6A7 /* BottomSheetContentView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1138,6 +1170,7 @@
 				AF3AC459268FF39500562D20 /* InstagramHome.swift in Sources */,
 				AF9CC6F7279B2C9A0087E9FC /* ListView.swift in Sources */,
 				AF5EBBAB3009019C002FD8CE /* ToDoFirestore.swift in Sources */,
+				AFE7121C3012349100B9D6A7 /* BottomSheetFavoritesView.swift in Sources */,
 				AF5E019C2FCB9D1600945764 /* LeadDetailCoordinator.swift in Sources */,
 				AF4F5DF72FC75C330003B277 /* LeadDetailHeaderView.swift in Sources */,
 				AFD5D8652FF450E8008934BE /* ChartView.swift in Sources */,
@@ -1147,16 +1180,19 @@
 				AF4F5DE02FC74EDA0003B277 /* LoginViewModel.swift in Sources */,
 				AF4F5DF02FC758540003B277 /* CustomerFirestore.swift in Sources */,
 				AF4F5DDC2FC74EDA0003B277 /* LoginService.swift in Sources */,
+				AFE7121F3012349700B9D6A7 /* BottomSheetLocationCardView.swift in Sources */,
 				AF792F47269009250011D787 /* CustomVideoPlayer.swift in Sources */,
 				AF4F5DEC2FC751950003B277 /* CustomerFormService.swift in Sources */,
 				AFEAAA9D30099D6D0064126D /* DataBackupSection.swift in Sources */,
 				AF38E46E300036B800090C03 /* GeofenceEditorSheet.swift in Sources */,
+				AFE71222301234A000B9D6A7 /* BottomSheetLocationSectionView.swift in Sources */,
 				AFD5D8622FF450DA008934BE /* WebUI.swift in Sources */,
 				AF488F7F2FE02FAF00E5F294 /* ExpenseModels.swift in Sources */,
 				AFEFA4CD30027795004C61A5 /* CustomerCellView.swift in Sources */,
 				AF03D36C27886D720021493A /* ColorOptions.swift in Sources */,
 				AFDE91D52793364D00302CF2 /* LandMarkListView.swift in Sources */,
 				AF892F5C2FFEFC8A004D9563 /* ExpenseDetailView.swift in Sources */,
+				AFE7120F3012348200B9D6A7 /* BottomSheetFavorite.swift in Sources */,
 				AF2F674A2FF7F6CD00741D30 /* UserFormModel.swift in Sources */,
 				AFB7609F2FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */,
 				AFC519532FC89A98003A4AEA /* MessageDateFormatting.swift in Sources */,
@@ -1195,6 +1231,7 @@
 				AF4F5DC12FC742E40003B277 /* ChatRepository.swift in Sources */,
 				AF92B8A62678157100729208 /* ExtensionUI.swift in Sources */,
 				AF892F592FFEFC86004D9563 /* ExpenseRowView.swift in Sources */,
+				AFE712153012348500B9D6A7 /* BottomSheetShareButton.swift in Sources */,
 				AFB4D01F3007B4950003650A /* ToDoJSONTransfer.swift in Sources */,
 				AFBCC5E22765671E00F0B0A8 /* FirebaseConstants.swift in Sources */,
 				AF5373842778C099001F40B6 /* WeatherManager.swift in Sources */,
@@ -1218,6 +1255,7 @@
 				AF108C0D2762681200084752 /* ChatMessage.swift in Sources */,
 				AF92B8B5267816A600729208 /* SideTabViewUI.swift in Sources */,
 				AF54E4DB2773AD4F0062B1F4 /* ContentView.swift in Sources */,
+				AFE712133012348300B9D6A7 /* BottomSheetLocationInfoRow.swift in Sources */,
 				AFD7D8D33002744E00EF9101 /* CustomerTransferViewModel.swift in Sources */,
 				AF92B87C267812A400729208 /* TheLightUIApp.swift in Sources */,
 				AF5373882778C1EA001F40B6 /* WeatherRow.swift in Sources */,
@@ -1228,6 +1266,7 @@
 				AF85283E2787930700E7F8D8 /* ImageSaver.swift in Sources */,
 				AF697E872778D1AE00219026 /* URL+.swift in Sources */,
 				AF54E4E32773B2B80062B1F4 /* CustomerFormUI.swift in Sources */,
+				AFE71224301234A700B9D6A7 /* BottomSheetContentView.swift in Sources */,
 				AF2E4BAA3011D2DC00D77F40 /* LeadDetailCalendarHelpers.swift in Sources */,
 				AF92B8B1267816A600729208 /* SpotifyUI.swift in Sources */,
 				AF4F5DF32FC759CE0003B277 /* KeychainPasswordStore.swift in Sources */,
@@ -1254,6 +1293,7 @@
 				AF86C0662FDF1D7400F450F9 /* AppBadgeManager.swift in Sources */,
 				AFDE91D9279337C300302CF2 /* LocationManager.swift in Sources */,
 				AFDE91D72793367300302CF2 /* RecenterButton.swift in Sources */,
+				AFE712193012348C00B9D6A7 /* BottomSheetRouteSummaryView.swift in Sources */,
 				AFD5D8A62FF458A4008934BE /* InstagramModels.swift in Sources */,
 				AF745F1027513D4F00E9DB74 /* ChatLogView.swift in Sources */,
 				AF892F522FFEFC75004D9563 /* ExpenseJSONTransfer.swift in Sources */,
@@ -1297,6 +1337,7 @@
 				AF892F532FFEFC75004D9563 /* ExpenseJSONTransfer.swift in Sources */,
 				AF892F582FFEFC86004D9563 /* ExpenseRowView.swift in Sources */,
 				AF4F5DC02FC742E40003B277 /* ChatRepository.swift in Sources */,
+				AFE712183012348C00B9D6A7 /* BottomSheetRouteSummaryView.swift in Sources */,
 				AF4A670827565F40005D1D8B /* AuthenticationService.swift in Sources */,
 				AF745F1127513D4F00E9DB74 /* ChatLogView.swift in Sources */,
 				AFEFA4CC30027795004C61A5 /* CustomerCellView.swift in Sources */,
@@ -1306,6 +1347,7 @@
 				AF3AC45D268FF5E400562D20 /* ReelsView.swift in Sources */,
 				AFC519522FC89A98003A4AEA /* MessageDateFormatting.swift in Sources */,
 				AFB760A52FE22CA2002D1A83 /* MainMenuSections.swift in Sources */,
+				AFE712123012348300B9D6A7 /* BottomSheetLocationInfoRow.swift in Sources */,
 				AFB760A82FE22CA2002D1A83 /* MenuRouteButton.swift in Sources */,
 				AF92B8A72678157100729208 /* ExtensionUI.swift in Sources */,
 				AF4F5DFC2FC75C350003B277 /* LeadDetailCommentsView.swift in Sources */,
@@ -1331,6 +1373,8 @@
 				AF3AC45A268FF39500562D20 /* InstagramHome.swift in Sources */,
 				AF2E4BAB3011D2DC00D77F40 /* LeadDetailCalendarHelpers.swift in Sources */,
 				AFB760A02FE1F16B002D1A83 /* ImagePreprocessor.swift in Sources */,
+				AFE712163012348500B9D6A7 /* BottomSheetShareButton.swift in Sources */,
+				AFE71225301234A700B9D6A7 /* BottomSheetContentView.swift in Sources */,
 				AF2F674B2FF7F6CD00741D30 /* UserFormModel.swift in Sources */,
 				AF92B8B2267816A600729208 /* SpotifyUI.swift in Sources */,
 				AF4F5DED2FC751950003B277 /* CustomerFormService.swift in Sources */,
@@ -1341,13 +1385,16 @@
 				AF892F552FFEFC7D004D9563 /* CategoryBreakdownChart.swift in Sources */,
 				AFD5D8992FF4552F008934BE /* CalendarEventEditView.swift in Sources */,
 				AFD5D89B2FF4552F008934BE /* ContactAddView.swift in Sources */,
+				AFE71221301234A000B9D6A7 /* BottomSheetLocationSectionView.swift in Sources */,
 				AFD5D8AC2FF458C7008934BE /* InstagramDiscoverViews.swift in Sources */,
+				AFE712103012348200B9D6A7 /* BottomSheetFavorite.swift in Sources */,
 				AF892F5F2FFEFC8F004D9563 /* ExpenseEditorView.swift in Sources */,
 				AFD5D89E2FF4552F008934BE /* AppTheme.swift in Sources */,
 				AF2E4BA43011D2C200D77F40 /* LeadDetailFieldData.swift in Sources */,
 				AFD5D89F2FF4552F008934BE /* ImagePreparation.swift in Sources */,
 				AFD5D8A02FF4552F008934BE /* CustomCorners.swift in Sources */,
 				AFD5D8A12FF4552F008934BE /* MessageComposeView.swift in Sources */,
+				AFE7121E3012349700B9D6A7 /* BottomSheetLocationCardView.swift in Sources */,
 				AFD5D8A22FF4552F008934BE /* MailUI.swift in Sources */,
 				AFD5D8A32FF4552F008934BE /* GradientUI.swift in Sources */,
 				AF15AA2E275C5B2C0098CB04 /* ChatBubble.swift in Sources */,
@@ -1368,6 +1415,7 @@
 				AF4F5DEF2FC758540003B277 /* CustomerFirestore.swift in Sources */,
 				AF2F674E2FF80DAA00741D30 /* InitialsAvatarView.swift in Sources */,
 				AF488F852FE02FF400E5F294 /* ExpenseTrackerView.swift in Sources */,
+				AFE7121B3012349100B9D6A7 /* BottomSheetFavoritesView.swift in Sources */,
 				AFB4D01C3007B1A30003650A /* MessageTransferViewModel.swift in Sources */,
 				AF2E4B953011D00800D77F40 /* CustomerFormPickerSheet.swift in Sources */,
 			);

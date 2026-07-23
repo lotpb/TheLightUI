@@ -137,11 +137,11 @@ class PickerDataModel {
     private static let advertiserKey  = "picker.advertiser"
     private static let contractorKey  = "picker.contractor"
 
-    private static let defaultSalesman: [String]    = ["", "Peter Balsamo", "Adam Monteleone", "John Pellegrino", "Mike Agunzo"]
-    private static let defaultJob: [String]          = ["", "Windows", "Siding", "Doors", "Roofing"]
-    private static let defaultProduct: [String]      = ["", "Alside", "Andersen", "Ideal", "Marvin", "Pella"]
-    private static let defaultAdvertiser: [String]   = ["", "Reco", "Web", "Return Customer", "Social Media"]
-    private static let defaultContractor: [String]   = ["", "A & S Home Improvement", "Islandwide Gutters", "Ashland Home Improvement", "John Kat Windows", "Jose Rosa", "Peter Balsamo"]
+    private static let defaultSalesman: [String]    = ["", "Peter Balsamo"]
+    private static let defaultJob: [String]          = ["", "Windows"]
+    private static let defaultProduct: [String]      = ["", "Alside"]
+    private static let defaultAdvertiser: [String]   = ["", "Reco"]
+    private static let defaultContractor: [String]   = ["", "A & S Home Improvement"]
 
     var pickSalesman: [String]
     var pickJob: [String]
