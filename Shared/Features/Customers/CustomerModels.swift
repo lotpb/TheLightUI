@@ -126,19 +126,111 @@ struct CustomerItem: Identifiable, Equatable, Hashable {
         adNo = ""
     }
 }
+
 // MARK: - Picker Data
 @Observable
 class PickerDataModel {
-    var pickSalesman = ["", "Peter Balsamo", "Adam Monteleone", "John Pellegrino", "Mike Agunzo"]
-    var pickJob = ["", "Windows", "Siding", "Doors", "Roofing"]
+    // UserDefaults keys for the five editable picker lists.
+    private static let salesmanKey    = "picker.salesman"
+    private static let jobKey         = "picker.job"
+    private static let productKey     = "picker.product"
+    private static let advertiserKey  = "picker.advertiser"
+    private static let contractorKey  = "picker.contractor"
+
+    private static let defaultSalesman: [String]    = ["", "Peter Balsamo", "Adam Monteleone", "John Pellegrino", "Mike Agunzo"]
+    private static let defaultJob: [String]          = ["", "Windows", "Siding", "Doors", "Roofing"]
+    private static let defaultProduct: [String]      = ["", "Alside", "Andersen", "Ideal", "Marvin", "Pella"]
+    private static let defaultAdvertiser: [String]   = ["", "Reco", "Web", "Return Customer", "Social Media"]
+    private static let defaultContractor: [String]   = ["", "A & S Home Improvement", "Islandwide Gutters", "Ashland Home Improvement", "John Kat Windows", "Jose Rosa", "Peter Balsamo"]
+
+    var pickSalesman: [String]
+    var pickJob: [String]
+    var pickProduct: [String]
+    var pickAdvertiser: [String]
+    var pickContractor: [String]
+
     // Vendor profession picker — static so the data layer can look up an index without a view model instance.
     static let defaultPickProfession = ["", "Auto"]
-    var pickProfession = PickerDataModel.defaultPickProfession
-    var pickProduct = ["", "Alside", "Andersen", "Ideal", "Marvin", "Pella"]
-    var pickContractor = ["", "A & S Home Improvement", "Islandwide Gutters", "Ashland Home Improvement", "John Kat Windows", "Jose Rosa", "Peter Balsamo"]
-    var pickRate = ["5", "4", "3", "2", "1"]
-    var pickAdvertiser = ["", "Reco", "Web", "Return Customer", "Social Media"]
-    var pickCallback = ["", "Yes"]
+    var pickProfession  = PickerDataModel.defaultPickProfession
+    var pickRate        = ["5", "4", "3", "2", "1"]
+    var pickCallback    = ["", "Yes"]
     // Values match the main-menu route filters (Leads/Customers/Vendors/Employee).
-    var pickCategory = [""] + CustomerItem.Category.allCases.map(\.rawValue)
+    var pickCategory    = [""] + CustomerItem.Category.allCases.map(\.rawValue)
+
+    init() {
+        pickSalesman   = Self.load(key: Self.salesmanKey,   default: Self.defaultSalesman)
+        pickJob        = Self.load(key: Self.jobKey,        default: Self.defaultJob)
+        pickProduct    = Self.load(key: Self.productKey,    default: Self.defaultProduct)
+        pickAdvertiser = Self.load(key: Self.advertiserKey, default: Self.defaultAdvertiser)
+        pickContractor = Self.load(key: Self.contractorKey, default: Self.defaultContractor)
+    }
+
+    // MARK: Salesman
+    func addSalesman(_ name: String) {
+        pickSalesman.append(name)
+        persist(pickSalesman, key: Self.salesmanKey)
+    }
+
+    func deleteSalesman(at offsets: IndexSet) {
+        pickSalesman.remove(atOffsets: offsets)
+        persist(pickSalesman, key: Self.salesmanKey)
+    }
+
+    // MARK: Job
+    func addJob(_ name: String) {
+        pickJob.append(name)
+        persist(pickJob, key: Self.jobKey)
+    }
+
+    func deleteJob(at offsets: IndexSet) {
+        pickJob.remove(atOffsets: offsets)
+        persist(pickJob, key: Self.jobKey)
+    }
+
+    // MARK: Product
+    func addProduct(_ name: String) {
+        pickProduct.append(name)
+        persist(pickProduct, key: Self.productKey)
+    }
+
+    func deleteProduct(at offsets: IndexSet) {
+        pickProduct.remove(atOffsets: offsets)
+        persist(pickProduct, key: Self.productKey)
+    }
+
+    // MARK: Advertiser
+    func addAdvertiser(_ name: String) {
+        pickAdvertiser.append(name)
+        persist(pickAdvertiser, key: Self.advertiserKey)
+    }
+
+    func deleteAdvertiser(at offsets: IndexSet) {
+        pickAdvertiser.remove(atOffsets: offsets)
+        persist(pickAdvertiser, key: Self.advertiserKey)
+    }
+
+    // MARK: Contractor
+    func addContractor(_ name: String) {
+        pickContractor.append(name)
+        persist(pickContractor, key: Self.contractorKey)
+    }
+
+    func deleteContractor(at offsets: IndexSet) {
+        pickContractor.remove(atOffsets: offsets)
+        persist(pickContractor, key: Self.contractorKey)
+    }
+
+    // MARK: Private helpers
+    private static func load(key: String, default defaultValue: [String]) -> [String] {
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let saved = try? JSONDecoder().decode([String].self, from: data)
+        else { return defaultValue }
+        return saved
+    }
+
+    private func persist(_ items: [String], key: String) {
+        if let data = try? JSONEncoder().encode(items) {
+            UserDefaults.standard.set(data, forKey: key)
+        }
+    }
 }

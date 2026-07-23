@@ -269,11 +269,15 @@ struct CustomerUI: View {
         }
     }
 
+    @ViewBuilder
     private var addCustomerForm: some View {
         // Pre-select the route's category so new entries created from a filtered list stay in it.
-        var newCustomer = CustomerItem.emptyCustomer
-        newCustomer.category = listViewModel.categoryFilter?.rawValue ?? ""
-        return CustomerFormUI(
+        let newCustomer: CustomerItem = {
+            var c = CustomerItem.emptyCustomer
+            c.category = listViewModel.categoryFilter?.rawValue ?? ""
+            return c
+        }()
+        let form = CustomerFormUI(
             detail: newCustomer,
             createDate: Date(),
             startDate: Date(),
@@ -283,6 +287,7 @@ struct CustomerUI: View {
         )
         .environment(viewModel)
         .environment(pickerviewModel)
+        form.presentationSizing(.page)
     }
 
     @ToolbarContentBuilder

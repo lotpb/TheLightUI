@@ -34,6 +34,9 @@ struct CustomerJSONRecord: Codable, Equatable {
     var salesIndex: Int
     var jobIndex: Int
     var productIndex: Int
+    var category: String
+    var callback: String
+    var adNo: String
 
     init(_ item: CustomerItem) {
         id = item.id
@@ -60,6 +63,42 @@ struct CustomerJSONRecord: Codable, Equatable {
         salesIndex = item.salesIndex
         jobIndex = item.jobIndex
         productIndex = item.productIndex
+        category = item.category
+        callback = item.callback
+        adNo = item.adNo
+    }
+
+    // Custom decoder so JSON files exported before category/callback/adNo was
+    // added still import without error.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id              = try c.decode(String.self, forKey: .id)
+        isActive        = try c.decode(Bool.self,   forKey: .isActive)
+        first           = try c.decode(String.self, forKey: .first)
+        lastname        = try c.decode(String.self, forKey: .lastname)
+        street          = try c.decode(String.self, forKey: .street)
+        city            = try c.decode(String.self, forKey: .city)
+        state           = try c.decode(String.self, forKey: .state)
+        zip             = try c.decode(String.self, forKey: .zip)
+        amount          = try c.decode(Int.self,    forKey: .amount)
+        creationDate    = try c.decode(Date.self,   forKey: .creationDate)
+        rate            = try c.decode(String.self, forKey: .rate)
+        phone           = try c.decode(String.self, forKey: .phone)
+        comments        = try c.decode(String.self, forKey: .comments)
+        spouse          = try c.decode(String.self, forKey: .spouse)
+        email           = try c.decode(String.self, forKey: .email)
+        contractorIndex = try c.decode(Int.self,    forKey: .contractorIndex)
+        photo           = try c.decode(String.self, forKey: .photo)
+        lastUpdateDate  = try c.decode(Date.self,   forKey: .lastUpdateDate)
+        startDate       = try c.decode(Date.self,   forKey: .startDate)
+        completionDate  = try c.decode(Date.self,   forKey: .completionDate)
+        quantity        = try c.decode(Int.self,    forKey: .quantity)
+        salesIndex      = try c.decode(Int.self,    forKey: .salesIndex)
+        jobIndex        = try c.decode(Int.self,    forKey: .jobIndex)
+        productIndex    = try c.decode(Int.self,    forKey: .productIndex)
+        category        = try c.decodeIfPresent(String.self, forKey: .category) ?? ""
+        callback        = try c.decodeIfPresent(String.self, forKey: .callback) ?? ""
+        adNo            = try c.decodeIfPresent(String.self, forKey: .adNo)     ?? ""
     }
 
     var customerItem: CustomerItem {
@@ -87,7 +126,10 @@ struct CustomerJSONRecord: Codable, Equatable {
             quantity: quantity,
             salesIndex: salesIndex,
             jobIndex: jobIndex,
-            productIndex: productIndex
+            productIndex: productIndex,
+            category: category,
+            callback: callback,
+            adNo: adNo
         )
     }
 }

@@ -8,29 +8,171 @@
 import SwiftUI
 import WebKit
 
-// MARK: - Bookmarks
+// MARK: - Model
+struct WebBookmark: Identifiable, Hashable, Codable {
+    var id: UUID
+    let title: String
+    let url: URL
+    let systemImage: String
+
+    var host: String {
+        url.host(percentEncoded: false) ?? url.absoluteString
+    }
+
+    init(id: UUID = UUID(), title: String, url: URL, systemImage: String = "globe") {
+        self.id = id
+        self.title = title
+        self.url = url
+        self.systemImage = systemImage
+    }
+}
+
+// MARK: - Store
+@Observable
+final class BookmarkStore {
+    private static let defaultsKey = "web.bookmarks"
+
+    var bookmarks: [WebBookmark]
+
+    init() {
+        if let data = UserDefaults.standard.data(forKey: Self.defaultsKey),
+           let saved = try? JSONDecoder().decode([WebBookmark].self, from: data) {
+            bookmarks = saved
+        } else {
+            bookmarks = Self.defaultBookmarks
+        }
+    }
+
+    func add(_ bookmark: WebBookmark) {
+        bookmarks.append(bookmark)
+        persist()
+    }
+
+    func delete(at offsets: IndexSet) {
+        bookmarks.remove(atOffsets: offsets)
+        persist()
+    }
+
+    func delete(id: UUID) {
+        bookmarks.removeAll { $0.id == id }
+        persist()
+    }
+
+    private func persist() {
+        if let data = try? JSONEncoder().encode(bookmarks) {
+            UserDefaults.standard.set(data, forKey: Self.defaultsKey)
+        }
+    }
+
+    private static let defaultBookmarks: [WebBookmark] = [
+        ("Apple",         "https://apple.com",               "apple.logo"),
+        ("Google News",   "https://news.google.com",         "newspaper"),
+        ("Bongino Report","https://bonginoreport.com",        "newspaper"),
+        ("Blaze",         "https://www.theblaze.com",        "newspaper"),
+        ("Drudge Report", "https://www.drudgereport.com",    "newspaper"),
+        ("CNN",           "https://www.cnn.com",             "newspaper"),
+    ].compactMap { title, urlString, icon in
+        guard let url = URL(string: urlString) else { return nil }
+        return WebBookmark(title: title, url: url, systemImage: icon)
+    }
+}
+
+// MARK: - WebUI
 struct WebUI: View {
     /// Called when a bookmark's web page opens, so the iPad root layout can
     /// collapse its sidebar and give the page the full width.
     var onOpenPage: (() -> Void)? = nil
 
-    private let bookmarks = WebBookmark.defaultBookmarks
+    @State private var store = BookmarkStore()
+    @State private var showingAddSheet = false
 
-    // A plain stack rather than a split view: WebUI sits inside the root
-    // sidebar's detail column on iPad, where nested split views render oddly.
     var body: some View {
         NavigationStack {
-            List(bookmarks) { bookmark in
-                NavigationLink(value: bookmark) {
-                    BookmarkRow(bookmark: bookmark)
+            List {
+                ForEach(store.bookmarks) { bookmark in
+                    NavigationLink(value: bookmark) {
+                        BookmarkRow(bookmark: bookmark)
+                    }
+                    .contextMenu {
+                        Button(role: .destructive) {
+                            store.delete(id: bookmark.id)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
+                }
+                .onDelete { offsets in
+                    store.delete(at: offsets)
+                }
+
+                Button {
+                    showingAddSheet = true
+                } label: {
+                    Label("Add Bookmark", systemImage: "plus")
                 }
             }
             .navigationTitle("Bookmarks")
             .navigationDestination(for: WebBookmark.self) { bookmark in
-                WebBookmarkDetail(bookmark: bookmark)
+                WebBookmarkDetail(bookmark: bookmark, store: store)
                     .onAppear { onOpenPage?() }
             }
+            .sheet(isPresented: $showingAddSheet) {
+                AddBookmarkSheet { bookmark in
+                    store.add(bookmark)
+                }
+            }
         }
+    }
+}
+
+// MARK: - Add Bookmark Sheet
+private struct AddBookmarkSheet: View {
+    let onAdd: (WebBookmark) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var title = ""
+    @State private var urlText = ""
+    @State private var showingURLError = false
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Bookmark") {
+                    TextField("Title", text: $title)
+                    TextField("URL (e.g. https://example.com)", text: $urlText)
+                        .keyboardType(.URL)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                }
+            }
+            .navigationTitle("Add Bookmark")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Add") { addBookmark() }
+                        .disabled(title.isEmpty || urlText.isEmpty)
+                }
+            }
+            .alert("Invalid URL", isPresented: $showingURLError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Enter a valid web address such as https://example.com")
+            }
+        }
+    }
+
+    private func addBookmark() {
+        var raw = urlText.trimmingCharacters(in: .whitespaces)
+        if !raw.lowercased().hasPrefix("http") { raw = "https://\(raw)" }
+        guard let url = URL(string: raw), url.host != nil else {
+            showingURLError = true
+            return
+        }
+        onAdd(WebBookmark(title: title.trimmingCharacters(in: .whitespaces), url: url))
+        dismiss()
     }
 }
 
@@ -58,6 +200,9 @@ private struct BookmarkRow: View {
 
 private struct WebBookmarkDetail: View {
     let bookmark: WebBookmark
+    let store: BookmarkStore
+
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         Group {
@@ -76,7 +221,18 @@ private struct WebBookmarkDetail: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                ShareLink(item: bookmark.url)
+                Menu {
+                    ShareLink(item: bookmark.url)
+                    Divider()
+                    Button(role: .destructive) {
+                        store.delete(id: bookmark.id)
+                        dismiss()
+                    } label: {
+                        Label("Remove Bookmark", systemImage: "bookmark.slash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
             }
         }
     }
@@ -97,31 +253,6 @@ private struct LegacyWebView: UIViewRepresentable {
     func updateUIView(_ webView: WKWebView, context: Context) {
         guard webView.url != url else { return }
         webView.load(URLRequest(url: url))
-    }
-}
-
-// MARK: - Model
-private struct WebBookmark: Identifiable, Hashable {
-    let title: String
-    let url: URL
-    let systemImage: String
-
-    var id: URL { url }
-
-    var host: String {
-        url.host(percentEncoded: false) ?? url.absoluteString
-    }
-
-    static let defaultBookmarks: [WebBookmark] = [
-        ("Apple", "https://apple.com", "apple.logo"),
-        ("Google News", "https://news.google.com", "newspaper"),
-        ("Bongino Report", "https://bonginoreport.com", "newspaper"),
-        ("Blaze", "https://www.theblaze.com", "newspaper"),
-        ("Drudge Report", "https://www.drudgereport.com", "newspaper"),
-        ("CNN", "https://www.cnn.com", "newspaper")
-    ].compactMap { title, urlString, systemImage in
-        guard let url = URL(string: urlString) else { return nil }
-        return WebBookmark(title: title, url: url, systemImage: systemImage)
     }
 }
 

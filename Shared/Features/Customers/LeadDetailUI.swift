@@ -323,7 +323,7 @@ struct LeadDetailUI: View {
         switch sheet {
         // Edit customer in-place using shared form.
         case .edit:
-            CustomerFormUI(
+            let editForm = CustomerFormUI(
                 detail: detail,
                 createDate: detail.creationDate,
                 startDate: detail.startDate,
@@ -331,6 +331,7 @@ struct LeadDetailUI: View {
                 mode: .edit,
                 formService: formService
             )
+            editForm.presentationSizing(.page)
         // Compose email with parsed recipients.
         case .email:
             let recipients = parsedEmailRecipients(from: detail.email)

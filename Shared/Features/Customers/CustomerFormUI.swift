@@ -9,6 +9,12 @@
 
 import SwiftUI
 
+// Which editable picker list to manage; used as sheet(item:) identity.
+fileprivate enum PickerType: String, Identifiable {
+    case salesman, job, product, advertiser, contractor
+    var id: String { rawValue }
+}
+
 ///
 // CustomerFormUI
 // Presents a multi-section form for creating or editing a customer record.
@@ -37,6 +43,8 @@ struct CustomerFormUI: View {
 
     // View model that holds all form data and business logic.
     @State private var viewModel: CustomerFormViewModel
+    // Which editable picker sheet is open (nil = none).
+    @State private var managingPickerType: PickerType? = nil
 
     // Derive the active theme color from settings.
     private var themeColor: Color {
@@ -51,9 +59,15 @@ struct CustomerFormUI: View {
         CustomerItem.Category.vendor.matches(viewModel.detail.category)
     }
 
+    private var isCustomer: Bool {
+        CustomerItem.Category.customer.matches(viewModel.detail.category)
+    }
+
     private var isEmployee: Bool {
         CustomerItem.Category.employee.matches(viewModel.detail.category)
     }
+
+    private var canEditPickers: Bool { isLead || isCustomer }
 
     // Initialize the view model and configure UISegmentedControl appearance.
     init(
@@ -125,6 +139,10 @@ struct CustomerFormUI: View {
         .font(.system(size: 20.0))
         // Load initial state and optionally focus the first name field.
         .onAppear(perform: loadFormState)
+        // Picker list management sheet — shown when a pencil button is tapped on a Lead record.
+        .sheet(item: $managingPickerType) { pickerType in
+            PickerManagementSheet(pickerType: pickerType, model: pickerviewModel)
+        }
     }
 
     private var profileSection: some View {
@@ -222,7 +240,13 @@ struct CustomerFormUI: View {
             if isVendor {
                 labeledTextField("Manager:", placeholder: "manager", text: $viewModel.detail.callback)
             } else if !isEmployee {
-                pickerRow("Salesman:", selection: $viewModel.detail.salesIndex, items: pickerviewModel.pickSalesman)
+                if canEditPickers {
+                    editablePickerRow("Salesman:", selection: $viewModel.detail.salesIndex, items: pickerviewModel.pickSalesman) {
+                        managingPickerType = .salesman
+                    }
+                } else {
+                    pickerRow("Salesman:", selection: $viewModel.detail.salesIndex, items: pickerviewModel.pickSalesman)
+                }
             }
 
             // Job type picklist (vendors use a free-text Profession field instead; hidden for employees).
@@ -230,12 +254,24 @@ struct CustomerFormUI: View {
                 labeledTextField("Profession:", placeholder: "profession", text: $viewModel.detail.lastname)
                 ratingRow
             } else if !isEmployee {
-                pickerRow("Job:", selection: $viewModel.detail.jobIndex, items: pickerviewModel.pickJob)
+                if canEditPickers {
+                    editablePickerRow("Job:", selection: $viewModel.detail.jobIndex, items: pickerviewModel.pickJob) {
+                        managingPickerType = .job
+                    }
+                } else {
+                    pickerRow("Job:", selection: $viewModel.detail.jobIndex, items: pickerviewModel.pickJob)
+                }
             }
 
             // Product picklist (not shown for employees or vendors).
             if !isEmployee && !isVendor {
-                pickerRow("Product:", selection: $viewModel.detail.productIndex, items: pickerviewModel.pickProduct)
+                if canEditPickers {
+                    editablePickerRow("Product:", selection: $viewModel.detail.productIndex, items: pickerviewModel.pickProduct) {
+                        managingPickerType = .product
+                    }
+                } else {
+                    pickerRow("Product:", selection: $viewModel.detail.productIndex, items: pickerviewModel.pickProduct)
+                }
             }
 
             // Quantity stepper (not shown for employees or vendors).
@@ -245,7 +281,13 @@ struct CustomerFormUI: View {
 
             // Contractor picklist (not shown for leads, employees, or vendors).
             if !isLead && !isEmployee && !isVendor {
-                pickerRow("Contractor:", selection: $viewModel.detail.contractorIndex, items: pickerviewModel.pickContractor)
+                if isCustomer {
+                    editablePickerRow("Contractor:", selection: $viewModel.detail.contractorIndex, items: pickerviewModel.pickContractor) {
+                        managingPickerType = .contractor
+                    }
+                } else {
+                    pickerRow("Contractor:", selection: $viewModel.detail.contractorIndex, items: pickerviewModel.pickContractor)
+                }
             }
 
             // Free-form comments.
@@ -301,6 +343,15 @@ struct CustomerFormUI: View {
                     .fixedSize()
                     .tint(Color.primary)
                     Spacer()
+                    if canEditPickers {
+                        Button {
+                            managingPickerType = .advertiser
+                        } label: {
+                            Image(systemName: "pencil.circle")
+                                .foregroundStyle(themeColor)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
         }
@@ -330,14 +381,15 @@ struct CustomerFormUI: View {
 
     // Multiline text editor for comments.
     private var commentsRow: some View {
-        HStack {
+        HStack(alignment: .top) {
             Text("Comments:")
                 .formTextStyle()
             Spacer()
 
-            TextField("Comments", text: $viewModel.detail.comments, axis: .vertical)
+            TextField("comments", text: $viewModel.detail.comments, axis: .vertical)
                 .foregroundStyle(Color.primary)
                 .lineLimit(2...)
+                .textInputAutocapitalization(.never)
         }
     }
 
@@ -458,6 +510,38 @@ struct CustomerFormUI: View {
         }
     }
 
+    // Picker row with an inline pencil button to manage the list options.
+    // Shown on Lead records for Salesman, Job, and Product.
+    private func editablePickerRow(
+        _ title: String,
+        selection: Binding<Int>,
+        items: [String],
+        onEdit: @escaping () -> Void
+    ) -> some View {
+        HStack(spacing: 0) {
+            Text(title)
+                .formTextStyle()
+
+            Picker(title, selection: selection) {
+                ForEach(items.indices, id: \.self) { index in
+                    Text(items[index])
+                        .pickerTextStyle()
+                }
+            }
+            .labelsHidden()
+            .fixedSize()
+            .tint(Color.primary)
+
+            Spacer()
+
+            Button(action: onEdit) {
+                Image(systemName: "pencil.circle")
+                    .foregroundStyle(themeColor)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
     // Reusable date row with a hidden label.
     private func dateRow(_ label: String, title: String, selection: Binding<Date>) -> some View {
         HStack {
@@ -536,6 +620,86 @@ struct CustomerFormUI: View {
             firstNameInFocus = true
             viewModel.consumeFirstNameFocusRequest()
         }
+    }
+}
+
+// MARK: - Picker Management Sheet
+// Lets the user add and delete items from one of the editable picker lists.
+private struct PickerManagementSheet: View {
+    let pickerType: PickerType
+    let model: PickerDataModel
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var newItem = ""
+
+    private var title: String {
+        switch pickerType {
+        case .salesman:   "Salesmen"
+        case .job:        "Jobs"
+        case .product:    "Products"
+        case .advertiser: "Advertisers"
+        case .contractor: "Contractors"
+        }
+    }
+
+    // Items to display — excludes the empty "None" placeholder at index 0.
+    private var displayItems: [String] {
+        switch pickerType {
+        case .salesman:   Array(model.pickSalesman.dropFirst())
+        case .job:        Array(model.pickJob.dropFirst())
+        case .product:    Array(model.pickProduct.dropFirst())
+        case .advertiser: Array(model.pickAdvertiser.dropFirst())
+        case .contractor: Array(model.pickContractor.dropFirst())
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(displayItems.indices, id: \.self) { i in
+                    Text(displayItems[i])
+                        .foregroundStyle(Color.primary)
+                }
+                .onDelete { offsets in
+                    // Shift by 1 to skip the protected empty "None" entry at index 0.
+                    let shifted = IndexSet(offsets.map { $0 + 1 })
+                    switch pickerType {
+                    case .salesman:   model.deleteSalesman(at: shifted)
+                    case .job:        model.deleteJob(at: shifted)
+                    case .product:    model.deleteProduct(at: shifted)
+                    case .advertiser: model.deleteAdvertiser(at: shifted)
+                    case .contractor: model.deleteContractor(at: shifted)
+                    }
+                }
+
+                HStack {
+                    TextField("New item", text: $newItem)
+                        .onSubmit(addItem)
+                    Button("Add", action: addItem)
+                        .disabled(newItem.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func addItem() {
+        let trimmed = newItem.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        switch pickerType {
+        case .salesman:   model.addSalesman(trimmed)
+        case .job:        model.addJob(trimmed)
+        case .product:    model.addProduct(trimmed)
+        case .advertiser: model.addAdvertiser(trimmed)
+        case .contractor: model.addContractor(trimmed)
+        }
+        newItem = ""
     }
 }
 

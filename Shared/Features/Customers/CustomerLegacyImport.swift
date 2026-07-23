@@ -36,9 +36,8 @@ private func rtdbSnapshot(from reference: DatabaseReference, timeout: TimeInterv
         } withCancel: { error in
             resumeOnce(with: .failure(error))
         }
-        nonisolated(unsafe) let timeoutRef = reference
-        DispatchQueue.global().asyncAfter(deadline: .now() + timeout) {
-            timeoutRef.removeAllObservers()
+        Task {
+            try? await Task.sleep(for: .seconds(timeout))
             resumeOnce(with: .failure(LegacyLeadFetchError.timedOut))
         }
     }
@@ -48,7 +47,7 @@ protocol LegacyLeadServicing: Sendable {
     func fetchLeads() async throws -> [CustomerItem]
 }
 
-final class FirebaseLegacyLeadService: LegacyLeadServicing, @unchecked Sendable {
+final class FirebaseLegacyLeadService: LegacyLeadServicing, Sendable {
     // GoogleService-Info.plist carries no DATABASE_URL, so the instance URL
     // must be passed explicitly.
     private static let databaseURL = "https://thelightui-default-rtdb.firebaseio.com"
@@ -131,7 +130,7 @@ protocol LegacyEmployeeServicing: Sendable {
     func fetchEmployees() async throws -> [CustomerItem]
 }
 
-final class FirebaseLegacyEmployeeService: LegacyEmployeeServicing, @unchecked Sendable {
+final class FirebaseLegacyEmployeeService: LegacyEmployeeServicing, Sendable {
     private static let databaseURL = "https://thelightui-default-rtdb.firebaseio.com"
     private static let employeeNode = "Employee"
     private static let fetchTimeout: TimeInterval = 15
@@ -224,7 +223,7 @@ protocol LegacyVendorServicing: Sendable {
     func fetchVendors() async throws -> [CustomerItem]
 }
 
-final class FirebaseLegacyVendorService: LegacyVendorServicing, @unchecked Sendable {
+final class FirebaseLegacyVendorService: LegacyVendorServicing, Sendable {
     private static let databaseURL = "https://thelightui-default-rtdb.firebaseio.com"
     private static let vendorNode = "Vendor"
     private static let fetchTimeout: TimeInterval = 15

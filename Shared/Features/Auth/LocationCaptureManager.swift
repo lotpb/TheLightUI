@@ -6,16 +6,14 @@ protocol LocationCaptureManaging: Sendable {
     func requestSingleLocation() async -> CLLocationCoordinate2D?
 }
 
-/// Marked `@unchecked Sendable` because all mutable state is confined to the main
-/// thread: the instance is created on the main actor, and both the CoreLocation
-/// delegate callbacks and the timeout `Timer` fire on the main run loop.
-final class LocationCaptureManager: NSObject, LocationCaptureManaging, @unchecked Sendable {
-    private let locationManager = CLLocationManager()
+@MainActor
+final class LocationCaptureManager: NSObject, LocationCaptureManaging {
+    nonisolated(unsafe) private let locationManager = CLLocationManager()
     private var completion: ((CLLocationCoordinate2D?) -> Void)?
-    private var timeoutTimer: Timer?
+    private var timeoutTask: Task<Void, Never>?
     private var isUpdatingLocation = false
 
-    override init() {
+    nonisolated override init() {
         super.init()
         locationManager.delegate = self
     }
@@ -36,9 +34,7 @@ final class LocationCaptureManager: NSObject, LocationCaptureManaging, @unchecke
         }
         self.completion = completion
 
-        let authorizationStatus = locationManager.authorizationStatus
-
-        switch authorizationStatus {
+        switch locationManager.authorizationStatus {
         case .notDetermined:
             locationManager.requestWhenInUseAuthorization()
         case .authorizedAlways, .authorizedWhenInUse:
@@ -52,17 +48,18 @@ final class LocationCaptureManager: NSObject, LocationCaptureManaging, @unchecke
 
     private func startLocationUpdates() {
         guard !isUpdatingLocation else { return }
-
         isUpdatingLocation = true
         locationManager.startUpdatingLocation()
-        timeoutTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { [weak self] _ in
+        timeoutTask?.cancel()
+        timeoutTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(10))
             self?.complete(with: nil)
         }
     }
 
     private func complete(with coordinate: CLLocationCoordinate2D?) {
-        timeoutTimer?.invalidate()
-        timeoutTimer = nil
+        timeoutTask?.cancel()
+        timeoutTask = nil
         isUpdatingLocation = false
         locationManager.stopUpdatingLocation()
         if let completion = self.completion {
@@ -73,25 +70,33 @@ final class LocationCaptureManager: NSObject, LocationCaptureManaging, @unchecke
 }
 
 extension LocationCaptureManager: CLLocationManagerDelegate {
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        switch manager.authorizationStatus {
-        case .authorizedAlways, .authorizedWhenInUse:
-            if completion != nil {
-                startLocationUpdates()
+    nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        let status = manager.authorizationStatus
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            switch status {
+            case .authorizedAlways, .authorizedWhenInUse:
+                if self.completion != nil {
+                    self.startLocationUpdates()
+                }
+            case .denied, .restricted:
+                self.complete(with: nil)
+            default:
+                break
             }
-        case .denied, .restricted:
-            complete(with: nil)
-        default:
-            break
         }
     }
 
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.last else { return }
-        complete(with: location.coordinate)
+    nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        let coordinate = locations.last?.coordinate
+        Task { @MainActor [weak self] in
+            self?.complete(with: coordinate)
+        }
     }
 
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        complete(with: nil)
+    nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        Task { @MainActor [weak self] in
+            self?.complete(with: nil)
+        }
     }
 }
