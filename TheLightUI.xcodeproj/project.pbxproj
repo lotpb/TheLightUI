@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 70;
+	objectVersion = 110;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -473,7 +473,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		AF997FB92FE3309800797FD5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		AF997FB92FE3309800797FD5 /* Exceptions for "Sample Apps" folder in "TheLightUI (macOS)" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				WaveUI.swift,
@@ -483,13 +483,19 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		AF997FB82FE3307100797FD5 /* Sample Apps */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (AF997FB92FE3309800797FD5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = "Sample Apps"; sourceTree = "<group>"; };
+		AF997FB82FE3307100797FD5 /* Sample Apps */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				AF997FB92FE3309800797FD5 /* Exceptions for "Sample Apps" folder in "TheLightUI (macOS)" target */,
+			);
+			path = "Sample Apps";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		AF92B85E267812A300729208 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				AF53CD0A2774C591008B78F6 /* FirebaseAuth in Frameworks */,
 				AF34848E27457B8C0091BA5A /* SDWebImageSwiftUI in Frameworks */,
@@ -498,14 +504,11 @@
 				AF53CD142774C591008B78F6 /* FirebaseStorage in Frameworks */,
 				AF852841278799C100E7F8D8 /* CodeScanner in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		AF92B864267812A300729208 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -1033,8 +1036,6 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			fileSystemSynchronizedGroups = (
 				AF997FB82FE3307100797FD5 /* Sample Apps */,
 			);
@@ -1061,8 +1062,6 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			name = "TheLightUI (macOS)";
 			productName = "TheLightUI (macOS)";
 			productReference = AF03796B2FFBEF7B00F6E1AF /* TheLightUI.app */;
@@ -1087,7 +1086,6 @@
 				};
 			};
 			buildConfigurationList = AF92B858267812A100729208 /* Build configuration list for PBXProject "TheLightUI" */;
-			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -1100,6 +1098,7 @@
 				AF53CD082774C591008B78F6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				AF85283F278799C100E7F8D8 /* XCRemoteSwiftPackageReference "CodeScanner" */,
 			);
+			preferredProjectObjectVersion = 110;
 			productRefGroup = AF92B862267812A300729208 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -1113,7 +1112,6 @@
 /* Begin PBXResourcesBuildPhase section */
 		AF92B85F267812A300729208 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				AF00CE162691FCF7003F5CDF /* Reel3.mp4 in Resources */,
 				AF00CE132691F7B3003F5CDF /* Reel2.mp4 in Resources */,
@@ -1126,11 +1124,9 @@
 				AF488F8B2FE0358700E5F294 /* PrivacyInfo.xcprivacy in Resources */,
 				AFF9FE06279E4536006DB401 /* Launch Screen.storyboard in Resources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		AF92B865267812A300729208 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				AFF04CFF300C290400A6E9A5 /* APIKeys.xcconfig in Resources */,
 				AF92B881267812A400729208 /* Assets.xcassets in Resources */,
@@ -1138,14 +1134,12 @@
 				AFF04CFC300C24D300A6E9A5 /* GoogleService-Info.plist.example in Resources */,
 				AF488F8C2FE0358700E5F294 /* PrivacyInfo.xcprivacy in Resources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		AF92B85D267812A300729208 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				AF892F562FFEFC7D004D9563 /* CategoryBreakdownChart.swift in Sources */,
 				AF4F5DCA2FC7430B0003B277 /* CreateNewMessageViewModel.swift in Sources */,
@@ -1310,11 +1304,9 @@
 				AF697E8B277909D100219026 /* MapAnnotationView.swift in Sources */,
 				AFD5D8682FF450FE008934BE /* DirectionsUI.swift in Sources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		AF92B863267812A300729208 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				AFD5D8A72FF458A4008934BE /* InstagramModels.swift in Sources */,
 				AF0EAE9730001D6900A7247D /* CustomerJSONTransfer.swift in Sources */,
@@ -1419,12 +1411,11 @@
 				AFB4D01C3007B1A30003650A /* MessageTransferViewModel.swift in Sources */,
 				AF2E4B953011D00800D77F40 /* CustomerFormPickerSheet.swift in Sources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		AF92B882267812A400729208 /* Debug */ = {
+		AF92B882267812A400729208 /* Debug configuration for PBXProject "TheLightUI" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -1488,7 +1479,7 @@
 			};
 			name = Debug;
 		};
-		AF92B883267812A400729208 /* Release */ = {
+		AF92B883267812A400729208 /* Release configuration for PBXProject "TheLightUI" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -1545,7 +1536,7 @@
 			};
 			name = Release;
 		};
-		AF92B885267812A400729208 /* Debug */ = {
+		AF92B885267812A400729208 /* Debug configuration for PBXNativeTarget "TheLightUI (iOS)" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = AFF04CFD300C290400A6E9A5 /* APIKeys.xcconfig */;
 			buildSettings = {
@@ -1600,7 +1591,7 @@
 			};
 			name = Debug;
 		};
-		AF92B886267812A400729208 /* Release */ = {
+		AF92B886267812A400729208 /* Release configuration for PBXNativeTarget "TheLightUI (iOS)" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = AFF04CFD300C290400A6E9A5 /* APIKeys.xcconfig */;
 			buildSettings = {
@@ -1656,7 +1647,7 @@
 			};
 			name = Release;
 		};
-		AF92B888267812A400729208 /* Debug */ = {
+		AF92B888267812A400729208 /* Debug configuration for PBXNativeTarget "TheLightUI (macOS)" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = AFF04CFD300C290400A6E9A5 /* APIKeys.xcconfig */;
 			buildSettings = {
@@ -1688,7 +1679,7 @@
 			};
 			name = Debug;
 		};
-		AF92B889267812A400729208 /* Release */ = {
+		AF92B889267812A400729208 /* Release configuration for PBXNativeTarget "TheLightUI (macOS)" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = AFF04CFD300C290400A6E9A5 /* APIKeys.xcconfig */;
 			buildSettings = {
@@ -1726,28 +1717,25 @@
 		AF92B858267812A100729208 /* Build configuration list for PBXProject "TheLightUI" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AF92B882267812A400729208 /* Debug */,
-				AF92B883267812A400729208 /* Release */,
+				AF92B882267812A400729208 /* Debug configuration for PBXProject "TheLightUI" */,
+				AF92B883267812A400729208 /* Release configuration for PBXProject "TheLightUI" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
 		AF92B884267812A400729208 /* Build configuration list for PBXNativeTarget "TheLightUI (iOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AF92B885267812A400729208 /* Debug */,
-				AF92B886267812A400729208 /* Release */,
+				AF92B885267812A400729208 /* Debug configuration for PBXNativeTarget "TheLightUI (iOS)" */,
+				AF92B886267812A400729208 /* Release configuration for PBXNativeTarget "TheLightUI (iOS)" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
 		AF92B887267812A400729208 /* Build configuration list for PBXNativeTarget "TheLightUI (macOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AF92B888267812A400729208 /* Debug */,
-				AF92B889267812A400729208 /* Release */,
+				AF92B888267812A400729208 /* Debug configuration for PBXNativeTarget "TheLightUI (macOS)" */,
+				AF92B889267812A400729208 /* Release configuration for PBXNativeTarget "TheLightUI (macOS)" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */

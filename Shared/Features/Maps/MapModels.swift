@@ -11,12 +11,29 @@ struct MapDestination: Equatable {
     let state: String
     let zip: String
 
+    // Convenience init for a free-form address string (e.g. from a saved favorite).
+    init(rawAddress: String) {
+        self.street = rawAddress
+        self.city = ""
+        self.state = ""
+        self.zip = ""
+    }
+
+    init(street: String, city: String, state: String, zip: String) {
+        self.street = street
+        self.city = city
+        self.state = state
+        self.zip = zip
+    }
+
     var address: String {
-        "\(street) \(city), \(state) \(zip)"
+        // When created from a raw address string the other fields are empty.
+        if city.isEmpty && state.isEmpty && zip.isEmpty { return street }
+        return "\(street) \(city), \(state) \(zip)"
     }
 
     var displayName: String {
-        "\(street), \(city)"
+        city.isEmpty ? street : "\(street), \(city)"
     }
 }
 

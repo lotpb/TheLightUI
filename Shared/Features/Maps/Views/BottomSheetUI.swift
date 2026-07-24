@@ -11,6 +11,7 @@ struct BottomSheetUI: View {
     let destination: MapDestination?
     @Binding var travelTime: Double
     @Binding var distance: Double
+    var onRouteToAddress: ((MapDestination) -> Void)? = nil
 
     @State private var selection = 0
     @State private var offset: CGFloat = 0
@@ -157,7 +158,13 @@ struct BottomSheetUI: View {
                 destinationAddressText: destinationAddressText,
                 locationRows: locationRows,
                 destinationMapsURL: destinationMapsURL,
-                onSelectionChange: { impact(.light) }
+                onSelectionChange: { impact(.light) },
+                onFavoriteRoute: { destination in
+                    onRouteToAddress?(destination)
+                    withAnimation(.spring(response: 0.34, dampingFraction: 0.88, blendDuration: 0.12)) {
+                        offset = collapsedOffset
+                    }
+                }
             )
         }
         .padding(.top, 2)

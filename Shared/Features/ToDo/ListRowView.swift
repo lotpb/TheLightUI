@@ -12,7 +12,23 @@ struct ListRowView: View {
     let item: ItemModel
 
     var body: some View {
-        HStack(spacing: 14) {
+        HStack(alignment: .top, spacing: 14) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(item.title)
+                    .font(.headline)
+                    .strikethrough(item.isCompleted, color: .secondary)
+                    .foregroundStyle(item.isCompleted ? .secondary : .primary)
+
+                if !item.notes.isEmpty {
+                    Text(item.notes)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
+            Spacer()
+
             Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
                 .font(.title2)
                 .foregroundStyle(item.isCompleted ? Color.green : .clear)
@@ -23,13 +39,6 @@ struct ListRowView: View {
                     )
                 )
                 .contentTransition(.symbolEffect(.replace))
-
-            Text(item.title)
-                .font(.body)
-                .strikethrough(item.isCompleted, color: .secondary)
-                .foregroundStyle(item.isCompleted ? .secondary : .primary)
-
-            Spacer()
         }
         .padding(.vertical, 8)
     }

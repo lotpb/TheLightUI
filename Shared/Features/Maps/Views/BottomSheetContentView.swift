@@ -16,6 +16,7 @@ struct BottomSheetContentView: View {
     let locationRows: [BottomSheetLocationInfoRow]
     let destinationMapsURL: URL?
     let onSelectionChange: () -> Void
+    var onFavoriteRoute: ((MapDestination) -> Void)? = nil
 
     var body: some View {
         VStack(spacing: 8) {
@@ -44,7 +45,7 @@ struct BottomSheetContentView: View {
         ScrollView(.vertical, showsIndicators: false) {
             LazyVStack(alignment: .leading, spacing: 12) {
                 if selection == 0 {
-                    BottomSheetFavoritesView(favorites: favorites)
+                    BottomSheetFavoritesView(favorites: favorites, onFavoriteRoute: onFavoriteRoute)
                     BottomSheetLocationCardView(
                         currentAddressText: currentAddressText,
                         speedText: speedText,

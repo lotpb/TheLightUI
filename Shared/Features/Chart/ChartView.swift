@@ -15,6 +15,7 @@ struct ChartView: View {
         static let sectionSpacing: CGFloat = 24
     }
 
+    @Environment(\.tabBarOverlap) private var tabBarOverlap
     @State private var viewModel: ChartViewModel
     @State private var selectedJob: String?
     @State private var selectedProduct: String?
@@ -148,6 +149,9 @@ struct ChartView: View {
                 areaChartSection
             }
             .padding()
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            Color.clear.frame(height: tabBarOverlap)
         }
     }
 

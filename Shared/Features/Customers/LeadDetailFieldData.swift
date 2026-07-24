@@ -66,7 +66,6 @@ extension LeadDetailUI {
     // first holds the company/vendor name (schema has no first/lastname).
     var vendorDetailFields: [CustomerDetailField] {
         [
-            CustomerDetailField(name: detail.first, label: CustomerLabels.vendorName),
             CustomerDetailField(name: detail.phone, label: CustomerLabels.phone),
             CustomerDetailField(name: detail.category, label: CustomerLabels.vendorCategory),
             CustomerDetailField(name: detail.email, label: CustomerLabels.email),

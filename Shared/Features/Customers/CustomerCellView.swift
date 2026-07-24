@@ -95,12 +95,12 @@ struct CustomerCellView: View, Equatable {
                 .padding(.top, 3)
                 .accessibilityLabel(Text("Created on \(data.formattedCreationDate)"))
 
-            Text(data.formattedAmount)
+            Text(CustomerItem.Category.vendor.matches(data.category) ? data.lastname : CustomerItem.Category.employee.matches(data.category) ? data.adNo : data.formattedAmount)
                 .frame(width: Layout.summaryWidth, height: Layout.summaryHeight)
                 .customerCellSingleLineText()
                 .foregroundStyle(.primary)
                 .font(.headline)
-                .accessibilityLabel(Text("Amount \(data.formattedAmount)"))
+                .accessibilityLabel(Text(CustomerItem.Category.vendor.matches(data.category) ? "Profession \(data.lastname)" : CustomerItem.Category.employee.matches(data.category) ? "Department \(data.adNo)" : "Amount \(data.formattedAmount)"))
         }
     }
 

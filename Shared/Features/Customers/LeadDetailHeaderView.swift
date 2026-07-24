@@ -112,12 +112,13 @@ struct LeadDetailHeaderView: View {
     private var saleSummaryRow: some View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 4) {
-                let isVendorOrEmployee = CustomerItem.Category.vendor.matches(detail.category) || CustomerItem.Category.employee.matches(detail.category)
-                Text(isVendorOrEmployee ? detail.category : detail.formattedAmount)
+                let isVendor = CustomerItem.Category.vendor.matches(detail.category)
+                let isEmployee = CustomerItem.Category.employee.matches(detail.category)
+                Text(isVendor ? detail.lastname : isEmployee ? detail.adNo : detail.formattedAmount)
                     .font(.title2)
                     .fontWeight(.semibold)
                     .lineLimit(1)
-                Text(isVendorOrEmployee ? CustomerLabels.vendorCategory : CustomerLabels.saleDate)
+                Text(isVendor ? CustomerLabels.profession : isEmployee ? CustomerLabels.department : CustomerLabels.saleDate)
                     .font(.caption)
                     .foregroundStyle(Color.secondary)
                 Text(detail.formattedCreationDate)

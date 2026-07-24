@@ -160,8 +160,8 @@ class ListViewModel {
         items = items.map { visibleIDs.contains($0.id) ? (iterator.next() ?? $0) : $0 }
     }
 
-    func addItem(title: String) {
-        items.append(ItemModel(title: title, isCompleted: false))
+    func addItem(title: String, notes: String = "") {
+        items.append(ItemModel(title: title, notes: notes, isCompleted: false))
     }
 
     /// Merges items imported from a JSON backup, replacing items with
@@ -182,6 +182,12 @@ class ListViewModel {
         }
         items = merged
         return (inserted, updated)
+    }
+
+    func updateItemContent(_ item: ItemModel, title: String, notes: String) {
+        if let index = items.firstIndex(where: { $0.id == item.id }) {
+            items[index] = item.updatingContent(title: title, notes: notes)
+        }
     }
 
     func updateItem(item: ItemModel) {

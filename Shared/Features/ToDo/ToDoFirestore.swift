@@ -14,6 +14,7 @@ enum ToDoFirestoreSchema {
 
     enum Field {
         static let title = "title"
+        static let notes = "notes"
         static let isCompleted = "isCompleted"
         static let position = "position"
         static let lastUpdate = "lastUpdate"
@@ -26,6 +27,7 @@ extension ItemModel {
         self.init(
             id: document.documentID,
             title: document.get(fields.title) as? String ?? "",
+            notes: document.get(fields.notes) as? String ?? "",
             isCompleted: document.get(fields.isCompleted) as? Bool ?? false
         )
     }
@@ -35,6 +37,7 @@ extension ItemModel {
     func firestoreData(position: Int) -> [String: Any] {
         [
             ToDoFirestoreSchema.Field.title: title,
+            ToDoFirestoreSchema.Field.notes: notes,
             ToDoFirestoreSchema.Field.isCompleted: isCompleted,
             ToDoFirestoreSchema.Field.position: position,
             ToDoFirestoreSchema.Field.lastUpdate: Timestamp(date: Date())

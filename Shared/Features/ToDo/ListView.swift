@@ -14,6 +14,7 @@ struct ListView: View {
     @State private var listViewModel: ListViewModel
     @State private var showingAddSheet = false
     @State private var showingClearConfirmation = false
+    @State private var editingItem: ItemModel?
 
     // JSON import/export state (file pickers and result alert).
     @State private var transferViewModel = ToDoTransferViewModel()
@@ -70,6 +71,14 @@ struct ListView: View {
                                             withAnimation(.snappy) {
                                                 listViewModel.updateItem(item: item)
                                             }
+                                        }
+                                        .swipeActions(edge: .leading) {
+                                            Button {
+                                                editingItem = item
+                                            } label: {
+                                                Label("Edit", systemImage: "pencil")
+                                            }
+                                            .tint(.blue)
                                         }
                                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                             Button(role: .destructive) {
@@ -212,6 +221,12 @@ struct ListView: View {
         .sheet(isPresented: $showingAddSheet) {
             NavigationStack {
                 AddView()
+            }
+            .environment(listViewModel)
+        }
+        .sheet(item: $editingItem) { item in
+            NavigationStack {
+                EditItemView(item: item)
             }
             .environment(listViewModel)
         }

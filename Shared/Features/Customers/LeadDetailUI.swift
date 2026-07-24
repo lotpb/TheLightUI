@@ -44,6 +44,7 @@ struct LeadDetailUI: View {
     // Environment utilities for dismissing and opening URLs.
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
+    @Environment(\.tabBarOverlap) private var tabBarOverlap
 
     // Service used to load/save customer forms (DI for testability).
     private let formService: CustomerFormServicing
@@ -95,6 +96,9 @@ struct LeadDetailUI: View {
                         .padding(.horizontal)
                         .padding(.bottom, 24)
                 }
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                Color.clear.frame(height: tabBarOverlap)
             }
         }
         .navigationTitle("Profile")
@@ -159,9 +163,24 @@ struct LeadDetailUI: View {
         }
     }
 
+    // Normalizes the vendor's web page string into a URL, prefixing https:// if needed.
+    private var websiteURL: URL? {
+        guard isVendor, !detail.spouse.isEmpty else { return nil }
+        let raw = detail.spouse
+        if raw.hasPrefix("http://") || raw.hasPrefix("https://") {
+            return URL(string: raw)
+        }
+        return URL(string: "https://\(raw)")
+    }
+
     // Action menu items for contact/calendar/email/message/phone and location sharing.
     @ViewBuilder
     private var actionMenuButtons: some View {
+        if let url = websiteURL {
+            Button { openURL(url) } label: {
+                Label("Open Website", systemImage: "safari")
+            }
+        }
         Button { coordinator.presentContact() } label: {
             Label("Add to Contacts", systemImage: "person.crop.circle.badge.plus")
         }

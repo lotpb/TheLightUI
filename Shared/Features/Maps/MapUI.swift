@@ -24,8 +24,8 @@ struct MapUI: View {
     @State private var directions: [MapRouteStep] = []
     @State private var mapType: MKMapType = .standard
     @State private var routeStatus: RouteStatus = .idle
+    @State private var activeMode: MapMode
 
-    private let mode: MapMode
     private let geofenceManager = GeofenceManager.shared
 
     @State var travelTime: Double
@@ -36,7 +36,7 @@ struct MapUI: View {
         travelTime: Double,
         distance: Double
     ) {
-        self.mode = mode
+        self._activeMode = State(initialValue: mode)
         self._travelTime = State(initialValue: travelTime)
         self._distance = State(initialValue: distance)
     }
@@ -55,7 +55,7 @@ struct MapUI: View {
             state: mapstate,
             zip: mapzip
         )
-        self.mode = .route(destination: destination)
+        self._activeMode = State(initialValue: .route(destination: destination))
         self._travelTime = State(initialValue: travelTime)
         self._distance = State(initialValue: distance)
     }
@@ -102,7 +102,7 @@ struct MapUI: View {
             distance: $distance,
             directions: $directions,
             routeStatus: $routeStatus,
-            mode: mode,
+            mode: activeMode,
             region: $manager.region,
             mapType: $mapType,
             onUserInteraction: { manager.pauseFollowingLocation() }
@@ -158,12 +158,15 @@ struct MapUI: View {
             profileImageURL: userViewModel.chatUser?.profileImageUrl,
             destination: routeDestination,
             travelTime: $travelTime,
-            distance: $distance
+            distance: $distance,
+            onRouteToAddress: { destination in
+                activeMode = .route(destination: destination)
+            }
         )
     }
 
     private var routeDestination: MapDestination? {
-        guard case .route(let destination) = mode else { return nil }
+        guard case .route(let destination) = activeMode else { return nil }
         return destination
     }
 }
