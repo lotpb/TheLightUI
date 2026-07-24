@@ -17,7 +17,7 @@ struct LoginView: View {
     private let locationCaptureManager: LocationCaptureManaging
     private let loginService: LoginServicing
 
-    fileprivate enum Layout {
+    enum Layout {
         static let maxContentWidth: CGFloat = 520
         static let contentSpacing: CGFloat = 18
         static let sectionSpacing: CGFloat = 24
@@ -70,9 +70,7 @@ struct LoginView: View {
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button("Done") {
-                        focusedField = nil
-                    }
+                    Button("Done") { focusedField = nil }
                 }
             }
         }
@@ -105,13 +103,11 @@ struct LoginView: View {
     private var formContent: some View {
         VStack(spacing: Layout.contentSpacing) {
             modePicker
-
             if !viewModel.isLoginMode {
                 profilePhotoPicker
                 accountFields
                     .transition(.opacity.combined(with: .move(edge: .top)))
             }
-
             credentialsFields
             actionButtons
             statusMessage
@@ -123,10 +119,8 @@ struct LoginView: View {
 
     private var modePicker: some View {
         Picker("Mode", selection: $viewModel.isLoginMode) {
-            Text("Login")
-                .tag(true)
-            Text("Create")
-                .tag(false)
+            Text("Login").tag(true)
+            Text("Create").tag(false)
         }
         .pickerStyle(.segmented)
         .disabled(viewModel.isProcessing)
@@ -147,7 +141,6 @@ struct LoginView: View {
                             .background(.blue, in: Circle())
                             .overlay(Circle().stroke(Color(.secondarySystemGroupedBackground), lineWidth: 3))
                     }
-
                 Text(title)
                     .font(.subheadline.weight(.semibold))
             }
@@ -169,7 +162,6 @@ struct LoginView: View {
                 focusedField: $focusedField,
                 field: .firstName
             )
-
             LoginTextField(
                 title: "Last Name",
                 systemImage: "person.text.rectangle.fill",
@@ -178,7 +170,6 @@ struct LoginView: View {
                 focusedField: $focusedField,
                 field: .lastName
             )
-
             LoginTextField(
                 title: "Phone Number",
                 systemImage: "phone.fill",
@@ -208,7 +199,6 @@ struct LoginView: View {
                 field: .email
             )
             .autocorrectionDisabled()
-
             LoginSecureField(
                 title: "Password",
                 systemImage: "key.fill",
@@ -225,12 +215,10 @@ struct LoginView: View {
             Button(action: viewModel.handlePrimaryAction) {
                 HStack(spacing: 10) {
                     if viewModel.isProcessing {
-                        ProgressView()
-                            .tint(.white)
+                        ProgressView().tint(.white)
                     } else {
                         Image(systemName: viewModel.isLoginMode ? "arrow.right.circle.fill" : "person.badge.plus.fill")
                     }
-
                     Text(viewModel.isProcessing ? "Working" : viewModel.primaryActionTitle)
                 }
                 .font(.headline)
@@ -294,16 +282,16 @@ struct LoginView: View {
         viewModel.loginStatusMessage.localizedCaseInsensitiveContains("success") ? "checkmark.circle.fill" : "exclamationmark.triangle.fill"
     }
 
+    // MARK: - Helpers
+
     private func loadSelectedProfilePhoto() async {
         guard let selectedPhotoItem else { return }
-
         do {
             guard let imageData = try await selectedPhotoItem.loadTransferable(type: Data.self),
                   let image = UIImage(data: imageData) else {
                 viewModel.loginStatusMessage = "Could not load the selected photo."
                 return
             }
-
             viewModel.image = image
             viewModel.loginStatusMessage = ""
         } catch {
@@ -315,8 +303,6 @@ struct LoginView: View {
         guard let coordinate = await locationCaptureManager.requestSingleLocation() else { return }
         SecureSettingsStore.saveString(String(coordinate.latitude), forKey: SettingsUI.latitudeKey)
         SecureSettingsStore.saveString(String(coordinate.longitude), forKey: SettingsUI.longitudeKey)
-
-        // Best effort: keep the local copy even if the Firestore write fails.
         guard let userId = loginService.currentUserId else { return }
         try? await loginService.updateUserLocation(
             userId: userId,
@@ -326,104 +312,8 @@ struct LoginView: View {
     }
 }
 
-// MARK: - Supporting Views
-private struct AvatarView: View {
-    let image: UIImage?
-
-    var body: some View {
-        if let image {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFill()
-                .frame(width: LoginView.Layout.avatarSize, height: LoginView.Layout.avatarSize)
-                .clipShape(Circle())
-        } else {
-            Image(systemName: "person.fill")
-                .font(.system(size: LoginView.Layout.avatarPlaceholderSize, weight: .medium))
-                .foregroundStyle(.secondary)
-                .frame(width: LoginView.Layout.avatarSize, height: LoginView.Layout.avatarSize)
-                .background(Color(.tertiarySystemGroupedBackground), in: Circle())
-        }
-    }
-}
-
-private enum LoginField: Hashable {
-    case firstName
-    case lastName
-    case phoneNumber
-    case email
-    case password
-}
-
-private struct LoginTextField: View {
-    let title: String
-    let systemImage: String
-    @Binding var text: String
-    var keyboardType: UIKeyboardType = .default
-    var textContentType: UITextContentType?
-    var textInputAutocapitalization: TextInputAutocapitalization? = .sentences
-    var focusedField: FocusState<LoginField?>.Binding
-    let field: LoginField
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: systemImage)
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(.secondary)
-                .frame(width: 20)
-
-            TextField(title, text: $text)
-                .keyboardType(keyboardType)
-                .textContentType(textContentType)
-                .textInputAutocapitalization(textInputAutocapitalization)
-                .submitLabel(.next)
-                .focused(focusedField, equals: field)
-        }
-        .loginFieldStyle(isFocused: focusedField.wrappedValue == field)
-    }
-}
-
-private struct LoginSecureField: View {
-    let title: String
-    let systemImage: String
-    @Binding var text: String
-    var focusedField: FocusState<LoginField?>.Binding
-    let field: LoginField
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: systemImage)
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(.secondary)
-                .frame(width: 20)
-
-            SecureField(title, text: $text)
-                .textContentType(.password)
-                .submitLabel(.go)
-                .focused(focusedField, equals: field)
-        }
-        .loginFieldStyle(isFocused: focusedField.wrappedValue == field)
-    }
-}
-
-// MARK: - Styles
-private extension View {
-    func loginFieldStyle(isFocused: Bool) -> some View {
-        self
-            .padding(LoginView.Layout.fieldPadding)
-            .background(Color(.tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: LoginView.Layout.cornerRadius, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: LoginView.Layout.cornerRadius, style: .continuous)
-                    .stroke(isFocused ? Color.blue : Color.clear, lineWidth: 1.5)
-            }
-            .contentShape(Rectangle())
-            .foregroundStyle(Color.primary)
-    }
-}
-
 // MARK: - Preview
 #Preview("Login - Dark") {
     LoginView(didCompleteLoginProcess: { })
         .preferredColorScheme(.dark)
 }
-

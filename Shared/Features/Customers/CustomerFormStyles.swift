@@ -35,9 +35,9 @@ extension Text {
             .textSelection(.enabled)
     }
 
-    func pickerTextStyle() -> some View {
+    func pickerTextStyle(color: Color = Color.primary) -> some View {
         self
-            .foregroundStyle(Color.primary)
+            .foregroundStyle(color)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 10)
             .lineLimit(1)

@@ -48,26 +48,34 @@ func stateZipRow(state: Binding<String>, zip: Binding<String>) -> some View {
     }
 }
 
-// Picker row bound to an index; picklists use Int indices as their persisted identity.
+// Picker row bound to an index; uses Menu for reliable selected-label color control.
 @MainActor
 func pickerRow(
     _ title: String,
     selection: Binding<Int>,
     items: [String]
 ) -> some View {
-    HStack(spacing: 0) {
+    let isNone = items.indices.contains(selection.wrappedValue) && items[selection.wrappedValue].isEmpty
+    let labelText = items.indices.contains(selection.wrappedValue) ? (items[selection.wrappedValue].isEmpty ? "none" : items[selection.wrappedValue]) : ""
+    return HStack {
         Text(title)
             .formTextStyle()
-        Picker(title, selection: selection) {
-            ForEach(items.indices, id: \.self) { index in
-                Text(items[index])
-                    .pickerTextStyle()
-            }
-        }
-        .labelsHidden()
-        .fixedSize()
-        .tint(Color.primary)
         Spacer()
+        Menu {
+            ForEach(items.indices, id: \.self) { index in
+                Button { selection.wrappedValue = index } label: {
+                    Text(items[index].isEmpty ? "none" : items[index])
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Text(labelText)
+                Image(systemName: "chevron.up.chevron.down")
+                    .imageScale(.small)
+            }
+            .foregroundStyle(isNone ? Color.gray : Color.primary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -80,19 +88,27 @@ func editablePickerRow(
     themeColor: Color,
     onEdit: @escaping () -> Void
 ) -> some View {
-    HStack(spacing: 0) {
+    let isNone = items.indices.contains(selection.wrappedValue) && items[selection.wrappedValue].isEmpty
+    let labelText = items.indices.contains(selection.wrappedValue) ? (items[selection.wrappedValue].isEmpty ? "none" : items[selection.wrappedValue]) : ""
+    return HStack {
         Text(title)
             .formTextStyle()
-        Picker(title, selection: selection) {
-            ForEach(items.indices, id: \.self) { index in
-                Text(items[index])
-                    .pickerTextStyle()
-            }
-        }
-        .labelsHidden()
-        .fixedSize()
-        .tint(Color.primary)
         Spacer()
+        Menu {
+            ForEach(items.indices, id: \.self) { index in
+                Button { selection.wrappedValue = index } label: {
+                    Text(items[index].isEmpty ? "none" : items[index])
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Text(labelText)
+                Image(systemName: "chevron.up.chevron.down")
+                    .imageScale(.small)
+            }
+            .foregroundStyle(isNone ? Color.gray : Color.primary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
         Button(action: onEdit) {
             Image(systemName: "pencil.circle")
                 .foregroundStyle(themeColor)

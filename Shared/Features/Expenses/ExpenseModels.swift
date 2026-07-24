@@ -55,7 +55,10 @@ final class Expense {
 }
 
 /// Codable snapshot of an Expense used for JSON import/export.
-struct ExpenseRecord: Codable, Equatable {
+/// Explicit Sendable conformance: all stored properties are value types,
+/// so this struct crosses actor boundaries safely (e.g. from @MainActor
+/// into Task closures that call actor methods on ExpenseFirestoreService).
+struct ExpenseRecord: Codable, Equatable, Sendable {
     var id: UUID
     var title: String
     var amount: Double
@@ -112,6 +115,10 @@ extension ExpenseRecord {
     /// only replaces an expense edited at the same time or earlier, so a
     /// fetch that races a local edit can't revert it. Without it (explicit
     /// imports and restores), the incoming record always wins.
+    ///
+    /// @MainActor because ModelContext is non-Sendable and must be accessed
+    /// on the actor that owns it (the main context is always @MainActor).
+    @MainActor
     static func merge(
         _ records: [ExpenseRecord],
         into context: ModelContext,
@@ -156,7 +163,7 @@ extension ExpenseRecord {
     }
 }
 
-enum ExpenseCategory: String, CaseIterable, Identifiable, Codable {
+enum ExpenseCategory: String, CaseIterable, Identifiable, Codable, Sendable {
     case food = "Food"
     case meals = "Meals"
     case travel = "Travel"
@@ -193,7 +200,7 @@ enum ExpenseCategory: String, CaseIterable, Identifiable, Codable {
     }
 }
 
-enum ExpenseSortOrder: String, CaseIterable, Identifiable {
+enum ExpenseSortOrder: String, CaseIterable, Identifiable, Sendable {
     case date = "Date"
     case name = "Name"
 
@@ -209,7 +216,7 @@ enum ExpenseSortOrder: String, CaseIterable, Identifiable {
     }
 }
 
-enum ExpenseDateRange: String, CaseIterable, Identifiable {
+enum ExpenseDateRange: String, CaseIterable, Identifiable, Sendable {
     case thisMonth = "This Month"
     case lastMonth = "Last Month"
     case allTime = "All Time"
@@ -242,7 +249,7 @@ enum ExpenseDateRange: String, CaseIterable, Identifiable {
     }
 }
 
-enum ExpenseFilter: String, CaseIterable, Identifiable {
+enum ExpenseFilter: String, CaseIterable, Identifiable, Sendable {
     case all = "All"
     case reimbursable = "Reimbursable"
     case personal = "Personal"

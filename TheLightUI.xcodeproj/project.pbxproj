@@ -12,6 +12,8 @@
 		AF00CE162691FCF7003F5CDF /* Reel3.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AF00CE152691FCF7003F5CDF /* Reel3.mp4 */; };
 		AF03D36C27886D720021493A /* ColorOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF03D36B27886D720021493A /* ColorOptions.swift */; };
 		AF051E3F279B31610012012B /* ListRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF051E3E279B31610012012B /* ListRowView.swift */; };
+		AF0712503013E9CE00A14A60 /* LoginComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF07124F3013E9CE00A14A60 /* LoginComponents.swift */; };
+		AF0712513013E9CE00A14A60 /* LoginComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF07124F3013E9CE00A14A60 /* LoginComponents.swift */; };
 		AF0A2349274C33E700B18BBF /* CreateNewMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF0A2348274C33E700B18BBF /* CreateNewMessageView.swift */; };
 		AF0A234A274C33E700B18BBF /* CreateNewMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF0A2348274C33E700B18BBF /* CreateNewMessageView.swift */; };
 		AF0E0D98267BB63C00E6CC7D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AF0E0D97267BB63C00E6CC7D /* GoogleService-Info.plist */; };
@@ -301,6 +303,7 @@
 		AF03796B2FFBEF7B00F6E1AF /* TheLightUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TheLightUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF03D36B27886D720021493A /* ColorOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorOptions.swift; sourceTree = "<group>"; };
 		AF051E3E279B31610012012B /* ListRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListRowView.swift; sourceTree = "<group>"; };
+		AF07124F3013E9CE00A14A60 /* LoginComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginComponents.swift; sourceTree = "<group>"; };
 		AF0A2348274C33E700B18BBF /* CreateNewMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateNewMessageView.swift; sourceTree = "<group>"; };
 		AF0E0D97267BB63C00E6CC7D /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		AF0EAE9530001D6900A7247D /* CustomerJSONTransfer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerJSONTransfer.swift; sourceTree = "<group>"; };
@@ -684,6 +687,7 @@
 				AF4A670627565F40005D1D8B /* AuthenticationService.swift */,
 				AFA9531B2FDF33150003ADD1 /* LocationCaptureManager.swift */,
 				AFB7609E2FE1F16B002D1A83 /* ImagePreprocessor.swift */,
+				AF07124F3013E9CE00A14A60 /* LoginComponents.swift */,
 			);
 			path = Auth;
 			sourceTree = "<group>";
@@ -970,12 +974,12 @@
 			isa = PBXGroup;
 			children = (
 				AF53737D2778BF36001F40B6 /* WeatherUI.swift */,
+				AF5373892778C5C6001F40B6 /* WelcomeView.swift */,
 				AF5373832778C099001F40B6 /* WeatherManager.swift */,
-				AF5373812778C060001F40B6 /* API.swift */,
-				AF697E862778D1AE00219026 /* URL+.swift */,
 				AF53737F2778C000001F40B6 /* WeatherView.swift */,
 				AF5373872778C1EA001F40B6 /* WeatherRow.swift */,
-				AF5373892778C5C6001F40B6 /* WelcomeView.swift */,
+				AF5373812778C060001F40B6 /* API.swift */,
+				AF697E862778D1AE00219026 /* URL+.swift */,
 				AF53738B2778C643001F40B6 /* LoadingView.swift */,
 				AF697E882778D1EC00219026 /* weatherData.json */,
 			);
@@ -1256,6 +1260,7 @@
 				AFE4AE0D2FC8698F00F86B2E /* AppDependencies.swift in Sources */,
 				AF86C0682FDF1E3A00F450F9 /* MainMenuCoordinator.swift in Sources */,
 				AF997FB72FE32ABD00797FD5 /* StepsTodayView.swift in Sources */,
+				AF0712513013E9CE00A14A60 /* LoginComponents.swift in Sources */,
 				AFB760A32FE22C78002D1A83 /* MainTopView.swift in Sources */,
 				AF85283E2787930700E7F8D8 /* ImageSaver.swift in Sources */,
 				AF697E872778D1AE00219026 /* URL+.swift in Sources */,
@@ -1378,6 +1383,7 @@
 				AFD5D8992FF4552F008934BE /* CalendarEventEditView.swift in Sources */,
 				AFD5D89B2FF4552F008934BE /* ContactAddView.swift in Sources */,
 				AFE71221301234A000B9D6A7 /* BottomSheetLocationSectionView.swift in Sources */,
+				AF0712503013E9CE00A14A60 /* LoginComponents.swift in Sources */,
 				AFD5D8AC2FF458C7008934BE /* InstagramDiscoverViews.swift in Sources */,
 				AFE712103012348200B9D6A7 /* BottomSheetFavorite.swift in Sources */,
 				AF892F5F2FFEFC8F004D9563 /* ExpenseEditorView.swift in Sources */,

@@ -56,7 +56,7 @@ extension ExpenseRecord {
     }
 }
 
-final class ExpenseFirestoreService: @unchecked Sendable {
+actor ExpenseFirestoreService {
     private let firestore: Firestore
 
     init(firestore: Firestore = Firestore.firestore()) {
