@@ -159,6 +159,7 @@ struct CustomerUI: View {
     private func activeOnlyToggle(count: Int) -> some View {
         Toggle(isOn: $listViewModel.isActiveOnly) {
             Text("\(count) Active Only")
+                .foregroundStyle(themeColor)
         }
         .toggleStyle(.switch)
     }
@@ -294,14 +295,17 @@ struct CustomerUI: View {
     private var toolbarContent: some ToolbarContent {
         ToolbarItem(placement: .topBarLeading) {
             EditButton()
+                .tint(themeColor)
         }
 
         ToolbarItemGroup(placement: .topBarTrailing) {
             sortMenu
+                .tint(themeColor)
 
             Button(action: { isAddingCustomer = true }) {
                 Label("New", systemImage: "plus")
             }
+            .tint(themeColor)
         }
     }
 

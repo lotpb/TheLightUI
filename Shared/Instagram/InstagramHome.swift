@@ -58,6 +58,7 @@ struct InstagramHome: View {
             .navigationTitle(currentTab.navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbarContent }
+            .tint(.primary)
             .task { await viewModel.fetchCurrentUser() }
         }
     }

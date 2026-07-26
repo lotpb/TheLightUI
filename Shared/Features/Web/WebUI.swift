@@ -203,25 +203,39 @@ private struct WebBookmarkDetail: View {
     let store: BookmarkStore
 
     @Environment(\.dismiss) private var dismiss
+    @State private var pageZoom: Double = 1.0
 
     var body: some View {
-        Group {
-            if #available(iOS 26.0, *) {
-                WebView(url: bookmark.url)
-                    .webViewBackForwardNavigationGestures(.enabled)
-                    .webViewMagnificationGestures(.enabled)
-                    .webViewTextSelection(.enabled)
-                    .webViewLinkPreviews(.enabled)
-            } else {
-                LegacyWebView(url: bookmark.url)
-            }
-        }
+        LegacyWebView(url: bookmark.url, zoom: pageZoom)
         .ignoresSafeArea(edges: .bottom)
         .navigationTitle(bookmark.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
+                    Button {
+                        pageZoom = min(pageZoom + 0.25, 2.0)
+                    } label: {
+                        Label("Zoom In", systemImage: "plus.magnifyingglass")
+                    }
+                    .disabled(pageZoom >= 2.0)
+
+                    Button {
+                        pageZoom = max(pageZoom - 0.25, 0.5)
+                    } label: {
+                        Label("Zoom Out", systemImage: "minus.magnifyingglass")
+                    }
+                    .disabled(pageZoom <= 0.5)
+
+                    if pageZoom != 1.0 {
+                        Button {
+                            pageZoom = 1.0
+                        } label: {
+                            Label("Reset Zoom", systemImage: "arrow.uturn.backward")
+                        }
+                    }
+
+                    Divider()
                     ShareLink(item: bookmark.url)
                     Divider()
                     Button(role: .destructive) {
@@ -238,10 +252,10 @@ private struct WebBookmarkDetail: View {
     }
 }
 
-/// Renders web content on the project's iOS 16 deployment floor, where the SwiftUI
-/// `WebView` (iOS 26+) isn't available, by bridging a `WKWebView`.
+/// Renders web content by bridging a `WKWebView`, supporting `pageZoom` for menu-driven zoom.
 private struct LegacyWebView: UIViewRepresentable {
     let url: URL
+    var zoom: Double = 1.0
 
     func makeUIView(context: Context) -> WKWebView {
         let webView = WKWebView()
@@ -251,8 +265,10 @@ private struct LegacyWebView: UIViewRepresentable {
     }
 
     func updateUIView(_ webView: WKWebView, context: Context) {
-        guard webView.url != url else { return }
-        webView.load(URLRequest(url: url))
+        if webView.url != url {
+            webView.load(URLRequest(url: url))
+        }
+        webView.pageZoom = zoom
     }
 }
 

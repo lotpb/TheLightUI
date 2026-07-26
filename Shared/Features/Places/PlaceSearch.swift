@@ -16,8 +16,11 @@ enum DisplayType {
 struct PlaceSearch: View {
     
     @Environment(\.dismiss) var dismiss
+    @AppStorage("color") private var color: Int?
     @State private var viewModel: PlaceListViewModel
     @State private var locationManager = LocationManager()
+
+    private var themeColor: Color { AppTheme.accentColor(for: color) }
     
     @State private var searchText: String = ""
     @State private var displayType: DisplayType = .map
@@ -125,6 +128,26 @@ struct PlaceSearch: View {
     }
     
     
+    private var selectedLandmark: LandMark? {
+        guard let id = selectedLandmarkID else { return nil }
+        return viewModel.landMarks.first { $0.id == id }
+    }
+
+    private var shareTitle: String {
+        selectedLandmark?.name ?? (searchText.isEmpty ? "Places" : searchText)
+    }
+
+    private var shareURL: URL {
+        if let lm = selectedLandmark {
+            let q = lm.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+            let lat = lm.coordinate.latitude
+            let lon = lm.coordinate.longitude
+            return URL(string: "https://maps.apple.com/?q=\(q)&ll=\(lat),\(lon)") ?? URL(string: "https://maps.apple.com")!
+        }
+        let q = searchText.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        return URL(string: "https://maps.apple.com/?q=\(q)") ?? URL(string: "https://maps.apple.com")!
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -191,11 +214,22 @@ struct PlaceSearch: View {
                     } label: {
                         Image(systemName: "xmark")
                             .font(.system(size: 13, weight: .bold))
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(themeColor)
                             .frame(width: 32, height: 32)
                             .background(.regularMaterial, in: Circle())
                     }
                     .buttonStyle(.plain)
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        ShareLink(
+                            item: shareURL,
+                            preview: SharePreview(shareTitle, image: Image(systemName: "mappin.circle.fill"))
+                        )
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
                 }
             }
         }

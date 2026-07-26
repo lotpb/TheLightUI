@@ -59,6 +59,7 @@ struct TwitterUI: View {
             .toolbar { toolbarContent }
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
+            .tint(.primary)
             .ignoresSafeArea(.all, edges: .top)
             .task { await viewModel.fetchCurrentUser() }
         }

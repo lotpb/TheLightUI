@@ -172,6 +172,8 @@ func ratingRow(
         .formTextStyle()
         .imageScale(.small)
 
+        Spacer()
+
         Picker("Pick rating here", selection: rate) {
             ForEach(items, id: \.self) {
                 Text($0)
@@ -179,5 +181,6 @@ func ratingRow(
         }
         .pickerStyle(.segmented)
         .foregroundStyle(themeColor)
+        .frame(maxWidth: UIDevice.current.userInterfaceIdiom == .pad ? 300: .infinity)
     }
 }

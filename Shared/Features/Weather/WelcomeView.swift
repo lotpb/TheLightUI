@@ -29,7 +29,8 @@ struct WelcomeView: View {
             }
             .symbolVariant(.fill)
             .labelStyle(.titleAndIcon)
-            .foregroundStyle(.white)
+            .tint(.white)
+            .foregroundStyle(.blue)
             .clipShape(Capsule())
 
             Text("Your location is only used to fetch the local forecast.")

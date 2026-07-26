@@ -44,6 +44,7 @@ struct StacksView: View {
                 .navigationTitle("Stacks")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar { toolbarContent }
+                .tint(.primary)
         }
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
         .frame(maxWidth: Layout.maxContentWidth)

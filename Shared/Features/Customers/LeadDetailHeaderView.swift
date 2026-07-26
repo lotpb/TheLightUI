@@ -7,6 +7,7 @@ import SwiftUI
 
 struct LeadDetailHeaderView: View {
     @AppStorage("activeColor") private var activeColor: Int?
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @Binding var detail: CustomerItem
     @Binding var showFullscreen: Bool
@@ -50,11 +51,11 @@ struct LeadDetailHeaderView: View {
                     .minimumScaleFactor(0.6)
 
                 Text(detail.street)
-                    .font(.subheadline)
+                    .font(horizontalSizeClass == .regular ? .callout : .subheadline)
                     .foregroundStyle(Color.secondary)
                     .lineLimit(1)
                 Text(detail.address)
-                    .font(.subheadline)
+                    .font(horizontalSizeClass == .regular ? .callout : .subheadline)
                     .foregroundStyle(Color.secondary)
                     .lineLimit(1)
             }
@@ -84,8 +85,12 @@ struct LeadDetailHeaderView: View {
                 toggleActive()
             } label: {
                 HStack(spacing: 6) {
-                    Text(detail.isActive ? "Following" : "Follow")
-                        .foregroundStyle(Color.accentColor)
+                    if horizontalSizeClass == .regular {
+                        Text(detail.isActive ? "Following" : "Follow")
+                    } else {
+                        Text(detail.isActive ? "Following" : "Follow")
+                            .foregroundStyle(Color.accentColor)
+                    }
                     Image(systemName: detail.isActive ? "star.fill" : "star")
                         .foregroundStyle(detail.isActive ? Color.yellow : Color.secondary)
                 }
@@ -102,10 +107,11 @@ struct LeadDetailHeaderView: View {
                 Label("Map", systemImage: "map")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.white)
+                    .padding(.horizontal, 13)
+                    .padding(.vertical, 6)
+                    .background(Color.blue.opacity(0.9), in: Capsule())
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.blue)
-            .controlSize(.mini)
+            .buttonStyle(.plain)
         }
     }
 

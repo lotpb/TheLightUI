@@ -58,10 +58,8 @@ struct WeatherUI: View {
                     }
                 }
             }
-            
-            
         }
-
+        .tint(.primary)
     }
 }
 
