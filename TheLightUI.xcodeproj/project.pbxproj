@@ -111,6 +111,10 @@
 		AF4F5E082FC75D870003B277 /* MapButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4F5E062FC75D870003B277 /* MapButtonView.swift */; };
 		AF4F5E0A2FC75DC40003B277 /* BottomSheetUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4F5E092FC75DC40003B277 /* BottomSheetUI.swift */; };
 		AF4F5E0B2FC75DC40003B277 /* BottomSheetUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4F5E092FC75DC40003B277 /* BottomSheetUI.swift */; };
+		AF51F4EE30178CD500E5F37B /* Content - Dark.png in Resources */ = {isa = PBXBuildFile; fileRef = AF51F4ED30178CD500E5F37B /* Content - Dark.png */; };
+		AF51F4EF30178CD500E5F37B /* Content - Dark.png in Resources */ = {isa = PBXBuildFile; fileRef = AF51F4ED30178CD500E5F37B /* Content - Dark.png */; };
+		AF51F4F130178CE300E5F37B /* Expenses (Dark Appearance).png in Resources */ = {isa = PBXBuildFile; fileRef = AF51F4F030178CE300E5F37B /* Expenses (Dark Appearance).png */; };
+		AF51F4F230178CE300E5F37B /* Expenses (Dark Appearance).png in Resources */ = {isa = PBXBuildFile; fileRef = AF51F4F030178CE300E5F37B /* Expenses (Dark Appearance).png */; };
 		AF53737E2778BF36001F40B6 /* WeatherUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF53737D2778BF36001F40B6 /* WeatherUI.swift */; };
 		AF5373802778C000001F40B6 /* WeatherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF53737F2778C000001F40B6 /* WeatherView.swift */; };
 		AF5373822778C060001F40B6 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF5373812778C060001F40B6 /* API.swift */; };
@@ -354,6 +358,8 @@
 		AF4F5DFB2FC75C350003B277 /* LeadDetailCommentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeadDetailCommentsView.swift; sourceTree = "<group>"; };
 		AF4F5E062FC75D870003B277 /* MapButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapButtonView.swift; sourceTree = "<group>"; };
 		AF4F5E092FC75DC40003B277 /* BottomSheetUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetUI.swift; sourceTree = "<group>"; };
+		AF51F4ED30178CD500E5F37B /* Content - Dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Content - Dark.png"; sourceTree = "<group>"; };
+		AF51F4F030178CE300E5F37B /* Expenses (Dark Appearance).png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Expenses (Dark Appearance).png"; sourceTree = "<group>"; };
 		AF53737D2778BF36001F40B6 /* WeatherUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherUI.swift; sourceTree = "<group>"; };
 		AF53737F2778C000001F40B6 /* WeatherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherView.swift; sourceTree = "<group>"; };
 		AF5373812778C060001F40B6 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
@@ -778,6 +784,8 @@
 				AF92B859267812A100729208 /* Shared */,
 				AF92B862267812A300729208 /* Products */,
 				AF488F8A2FE0358700E5F294 /* PrivacyInfo.xcprivacy */,
+				AF51F4F030178CE300E5F37B /* Expenses (Dark Appearance).png */,
+				AF51F4ED30178CD500E5F37B /* Content - Dark.png */,
 				AFF04CFA300C24D300A6E9A5 /* GoogleService-Info.plist.example */,
 				AFF04CFD300C290400A6E9A5 /* APIKeys.xcconfig */,
 			);
@@ -1116,6 +1124,8 @@
 				AF00CE162691FCF7003F5CDF /* Reel3.mp4 in Resources */,
 				AF00CE132691F7B3003F5CDF /* Reel2.mp4 in Resources */,
 				AF00CE142691F7B3003F5CDF /* Reel1.mp4 in Resources */,
+				AF51F4F130178CE300E5F37B /* Expenses (Dark Appearance).png in Resources */,
+				AF51F4EF30178CD500E5F37B /* Content - Dark.png in Resources */,
 				AF697E892778D1EC00219026 /* weatherData.json in Resources */,
 				AF92B880267812A400729208 /* Assets.xcassets in Resources */,
 				AFF04CFE300C290400A6E9A5 /* APIKeys.xcconfig in Resources */,
@@ -1128,11 +1138,13 @@
 		AF92B865267812A300729208 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
+				AF51F4F230178CE300E5F37B /* Expenses (Dark Appearance).png in Resources */,
 				AFF04CFF300C290400A6E9A5 /* APIKeys.xcconfig in Resources */,
 				AF92B881267812A400729208 /* Assets.xcassets in Resources */,
 				AF0E0D99267BB63C00E6CC7D /* GoogleService-Info.plist in Resources */,
 				AFF04CFC300C24D300A6E9A5 /* GoogleService-Info.plist.example in Resources */,
 				AF488F8C2FE0358700E5F294 /* PrivacyInfo.xcprivacy in Resources */,
+				AF51F4EE30178CD500E5F37B /* Content - Dark.png in Resources */,
 			);
 		};
 /* End PBXResourcesBuildPhase section */

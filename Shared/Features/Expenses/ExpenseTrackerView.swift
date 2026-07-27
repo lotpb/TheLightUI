@@ -65,56 +65,7 @@ struct ExpenseTrackerView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    Picker("Date Range", selection: $viewModel.dateRange) {
-                        ForEach(ExpenseDateRange.allCases) { range in
-                            Label(range.rawValue, systemImage: range.systemImage)
-                                .tag(range)
-                        }
-                    }
-                    Picker("Sort By", selection: $viewModel.sortOrder) {
-                        ForEach(ExpenseSortOrder.allCases) { order in
-                            Label(order.rawValue, systemImage: order.systemImage)
-                                .tag(order)
-                        }
-                    }
-                    Divider()
-                    Button {
-                        isImporting = true
-                    } label: {
-                        Label("Import JSON", systemImage: "square.and.arrow.down")
-                    }
-                    Button {
-                        startExport()
-                    } label: {
-                        Label("Export JSON", systemImage: "square.and.arrow.up")
-                    }
-                    .disabled(expenses.isEmpty)
-                    Button {
-                        showJSONPreview()
-                    } label: {
-                        Label("View JSON", systemImage: "doc.text.magnifyingglass")
-                    }
-                    .disabled(expenses.isEmpty)
-                    Divider()
-                    Button {
-                        backUpToFirebase()
-                    } label: {
-                        Label("Back Up to Firebase", systemImage: "icloud.and.arrow.up")
-                    }
-                    .disabled(expenses.isEmpty || isSyncing)
-                    Button {
-                        restoreFromFirebase()
-                    } label: {
-                        Label("Restore from Firebase", systemImage: "icloud.and.arrow.down")
-                    }
-                    .disabled(isSyncing)
-                    Divider()
-                    Button {
-                        printExpenses()
-                    } label: {
-                        Label("Print", systemImage: "printer")
-                    }
-                    .disabled(visibleExpenses.isEmpty)
+                    filterMenuContent
                 } label: {
                     Image(systemName: viewModel.dateRange != .allTime ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
                 }
@@ -160,6 +111,62 @@ struct ExpenseTrackerView: View {
         .sheet(item: $jsonPreview) { preview in
             ExpenseJSONPreviewView(jsonText: preview.text)
         }
+    }
+
+    // Extracted so the preview compiler can type-check the menu content as a
+    // discrete unit; the inline version exceeded the type-checker time limit.
+    @ViewBuilder
+    private var filterMenuContent: some View {
+        Picker("Date Range", selection: $viewModel.dateRange) {
+            ForEach(ExpenseDateRange.allCases) { range in
+                Label(range.rawValue, systemImage: range.systemImage)
+                    .tag(range)
+            }
+        }
+        Picker("Sort By", selection: $viewModel.sortOrder) {
+            ForEach(ExpenseSortOrder.allCases) { order in
+                Label(order.rawValue, systemImage: order.systemImage)
+                    .tag(order)
+            }
+        }
+        Divider()
+        Button {
+            isImporting = true
+        } label: {
+            Label("Import JSON", systemImage: "square.and.arrow.down")
+        }
+        Button {
+            startExport()
+        } label: {
+            Label("Export JSON", systemImage: "square.and.arrow.up")
+        }
+        .disabled(expenses.isEmpty)
+        Button {
+            showJSONPreview()
+        } label: {
+            Label("View JSON", systemImage: "doc.text.magnifyingglass")
+        }
+        .disabled(expenses.isEmpty)
+        Divider()
+        Button {
+            backUpToFirebase()
+        } label: {
+            Label("Back Up to Firebase", systemImage: "icloud.and.arrow.up")
+        }
+        .disabled(expenses.isEmpty || isSyncing)
+        Button {
+            restoreFromFirebase()
+        } label: {
+            Label("Restore from Firebase", systemImage: "icloud.and.arrow.down")
+        }
+        .disabled(isSyncing)
+        Divider()
+        Button {
+            printExpenses()
+        } label: {
+            Label("Print", systemImage: "printer")
+        }
+        .disabled(visibleExpenses.isEmpty)
     }
 
     private func showJSONPreview() {
