@@ -18,7 +18,16 @@ struct TheLightUIApp: App {
         // `.live` eagerly constructs FirebaseSessionService, which calls
         // `Auth.auth()`, and Auth traps if the default app isn't configured yet.
         if FirebaseApp.app() == nil {
-            FirebaseApp.configure()
+            // Load the plist whose name matches the FIREBASE_CLIENT build setting
+            // (injected into Info.plist as FirebaseClientName). Fall back to the
+            // default GoogleService-Info.plist if no named plist is found.
+            let clientName = Bundle.main.infoDictionary?["FirebaseClientName"] as? String ?? "TheLightUI"
+            if let path = Bundle.main.path(forResource: "GoogleService-Info-\(clientName)", ofType: "plist"),
+               let options = FirebaseOptions(contentsOfFile: path) {
+                FirebaseApp.configure(options: options)
+            } else {
+                FirebaseApp.configure()
+            }
         }
         dependencies = .live
     }

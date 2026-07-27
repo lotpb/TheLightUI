@@ -9,7 +9,7 @@ struct IncomingSection: View {
     @AppStorage(SettingsUI.useThemeMenuIconsKey) private var useThemeMenuIcons = false
     let themeColor: Color
     private let menuItems: [IncomingMenuItem] = [
-        IncomingMenuItem(route: .snapshot, title: "Snapshot", systemImage: "message", iconColor: .green, badge: "NEW ITEMS!"),
+        IncomingMenuItem(route: .snapshot, title: "Snapshot", systemImage: "camera.viewfinder", iconColor: .green, badge: "NEW ITEMS!"),
         IncomingMenuItem(route: .chart, title: "Chart", systemImage: "chart.bar.fill", iconColor: .purple, badge: nil)
     ]
 

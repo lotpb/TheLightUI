@@ -3,6 +3,7 @@
 //  TheLightUI
 //
 
+import Charts
 import CoreMotion
 import Observation
 import SwiftUI
@@ -24,6 +25,7 @@ struct StepsTodayView: View {
     var body: some View {
         List {
             summarySection
+            weeklyChartSection
             detailsSection
             yesterdaySection
         }
@@ -115,6 +117,60 @@ struct StepsTodayView: View {
         .accessibilityValue("\(viewModel.steps) steps, \(viewModel.goalPercentText) of daily goal")
     }
 
+    private var weeklyChartSection: some View {
+        Section("This Week") {
+            if viewModel.weeklySteps.isEmpty {
+                HStack {
+                    Spacer()
+                    ProgressView()
+                    Spacer()
+                }
+                .frame(height: 160)
+            } else {
+                Chart {
+                    ForEach(viewModel.weeklySteps) { day in
+                        BarMark(
+                            x: .value("Day", day.date, unit: .day),
+                            y: .value("Steps", day.steps)
+                        )
+                        .foregroundStyle(
+                            Calendar.current.isDateInToday(day.date)
+                                ? themeColor
+                                : themeColor.opacity(0.45)
+                        )
+                        .cornerRadius(4)
+                    }
+                    RuleMark(y: .value("Goal", viewModel.dailyGoal))
+                        .foregroundStyle(.secondary.opacity(0.5))
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 3]))
+                        .annotation(position: .top, alignment: .trailing) {
+                            Text("Goal")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                }
+                .chartXAxis {
+                    AxisMarks(values: .stride(by: .day)) { _ in
+                        AxisValueLabel(format: .dateTime.weekday(.narrow), centered: true)
+                    }
+                }
+                .chartYAxis {
+                    AxisMarks { value in
+                        AxisGridLine()
+                        AxisValueLabel {
+                            if let n = value.as(Int.self) {
+                                Text(n >= 1000 ? "\(n / 1000)k" : "\(n)")
+                                    .font(.caption2)
+                            }
+                        }
+                    }
+                }
+                .frame(height: 160)
+                .padding(.vertical, 8)
+            }
+        }
+    }
+
     private var detailsSection: some View {
         Section("Today") {
             LabeledContent("Since") {
@@ -184,11 +240,18 @@ private final class StepsTodayViewModel {
     private(set) var distanceMeters: Double?
     private(set) var statusText = "Loading"
     private(set) var statusColor: Color = .secondary
+    private(set) var weeklySteps: [DailySteps] = []
 
     let dailyGoal = 10_000
 
     @ObservationIgnored private let pedometer = CMPedometer()
     @ObservationIgnored private var trackingTask: Task<Void, Never>?
+
+    struct DailySteps: Identifiable {
+        let date: Date
+        let steps: Int
+        var id: Date { date }
+    }
 
     /// A `Sendable` snapshot of pedometer readings, so values can cross from
     /// CoreMotion's background queue to the main actor without passing the
@@ -275,8 +338,37 @@ private final class StepsTodayViewModel {
             return
         }
 
+        await loadWeeklySteps()
+
         for await sample in pedometerUpdates() {
             apply(sample)
+        }
+    }
+
+    private func loadWeeklySteps() async {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: .now)
+        var results: [DailySteps] = []
+
+        for dayOffset in stride(from: 6, through: 0, by: -1) {
+            guard let start = calendar.date(byAdding: .day, value: -dayOffset, to: today) else { continue }
+            let end = dayOffset == 0 ? Date.now : (calendar.date(byAdding: .day, value: 1, to: start) ?? start)
+            let count = (try? await queryDaySteps(from: start, to: end)) ?? 0
+            results.append(DailySteps(date: start, steps: count))
+        }
+
+        weeklySteps = results
+    }
+
+    private func queryDaySteps(from start: Date, to end: Date) async throws -> Int {
+        try await withCheckedThrowingContinuation { continuation in
+            pedometer.queryPedometerData(from: start, to: end) { @Sendable data, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: data.map { $0.numberOfSteps.intValue } ?? 0)
+                }
+            }
         }
     }
 

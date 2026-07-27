@@ -14,6 +14,8 @@
 		AF051E3F279B31610012012B /* ListRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF051E3E279B31610012012B /* ListRowView.swift */; };
 		AF0712503013E9CE00A14A60 /* LoginComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF07124F3013E9CE00A14A60 /* LoginComponents.swift */; };
 		AF0712513013E9CE00A14A60 /* LoginComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF07124F3013E9CE00A14A60 /* LoginComponents.swift */; };
+		AF093965301810F1000C7201 /* GoogleService-Info-TheLightUI.plist in Resources */ = {isa = PBXBuildFile; fileRef = AF093964301810F1000C7201 /* GoogleService-Info-TheLightUI.plist */; };
+		AF093966301810F1000C7201 /* GoogleService-Info-TheLightUI.plist in Resources */ = {isa = PBXBuildFile; fileRef = AF093964301810F1000C7201 /* GoogleService-Info-TheLightUI.plist */; };
 		AF0A2349274C33E700B18BBF /* CreateNewMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF0A2348274C33E700B18BBF /* CreateNewMessageView.swift */; };
 		AF0A234A274C33E700B18BBF /* CreateNewMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF0A2348274C33E700B18BBF /* CreateNewMessageView.swift */; };
 		AF0E0D98267BB63C00E6CC7D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AF0E0D97267BB63C00E6CC7D /* GoogleService-Info.plist */; };
@@ -302,6 +304,7 @@
 		AF03D36B27886D720021493A /* ColorOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorOptions.swift; sourceTree = "<group>"; };
 		AF051E3E279B31610012012B /* ListRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListRowView.swift; sourceTree = "<group>"; };
 		AF07124F3013E9CE00A14A60 /* LoginComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginComponents.swift; sourceTree = "<group>"; };
+		AF093964301810F1000C7201 /* GoogleService-Info-TheLightUI.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info-TheLightUI.plist"; sourceTree = "<group>"; };
 		AF0A2348274C33E700B18BBF /* CreateNewMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateNewMessageView.swift; sourceTree = "<group>"; };
 		AF0E0D97267BB63C00E6CC7D /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		AF0EAE9530001D6900A7247D /* CustomerJSONTransfer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerJSONTransfer.swift; sourceTree = "<group>"; };
@@ -780,6 +783,7 @@
 				AF488F8A2FE0358700E5F294 /* PrivacyInfo.xcprivacy */,
 				AFF04CFA300C24D300A6E9A5 /* GoogleService-Info.plist.example */,
 				AFF04CFD300C290400A6E9A5 /* APIKeys.xcconfig */,
+				AF093964301810F1000C7201 /* GoogleService-Info-TheLightUI.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1114,6 +1118,7 @@
 			isa = PBXResourcesBuildPhase;
 			files = (
 				AF00CE162691FCF7003F5CDF /* Reel3.mp4 in Resources */,
+				AF093966301810F1000C7201 /* GoogleService-Info-TheLightUI.plist in Resources */,
 				AF00CE132691F7B3003F5CDF /* Reel2.mp4 in Resources */,
 				AF00CE142691F7B3003F5CDF /* Reel1.mp4 in Resources */,
 				AF697E892778D1EC00219026 /* weatherData.json in Resources */,
@@ -1132,6 +1137,7 @@
 				AF92B881267812A400729208 /* Assets.xcassets in Resources */,
 				AF0E0D99267BB63C00E6CC7D /* GoogleService-Info.plist in Resources */,
 				AFF04CFC300C24D300A6E9A5 /* GoogleService-Info.plist.example in Resources */,
+				AF093965301810F1000C7201 /* GoogleService-Info-TheLightUI.plist in Resources */,
 				AF488F8C2FE0358700E5F294 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 		};
@@ -1557,14 +1563,18 @@
 				INFOPLIST_KEY_CFBundleVersion = 1;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
-				INFOPLIST_KEY_NSCameraUsageDescription = "we need to scan QR code";
-				INFOPLIST_KEY_NSContactsUsageDescription = "Can we use your contacts?";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "Can we use your face ID?";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "TheLight uses Calendar to let you add customer appointment events when you choose.";
+				INFOPLIST_KEY_NSCalendarsWriteOnlyAccessUsageDescription = "TheLight uses Calendar to create customer appointment events when you choose.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "TheLight uses the camera to scan membership QR codes when you choose.";
+				INFOPLIST_KEY_NSContactsUsageDescription = "TheLight uses Contacts to let you add customer contact cards when you choose.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "TheLight uses Face ID to unlock your existing signed-in session when you choose biometric sign-in.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "TheLight uses your location to show maps, get weather, and monitor geofence regions you have set up.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "TheLight uses your location in the background to monitor geofence regions you have set up.";
 				INFOPLIST_KEY_NSLocationUsageDescription = "TheLight uses your location to show maps, get weather, and monitor geofence regions you have set up.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "If you only allow access to your location while you are using the app, some features may not work in the background";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "we want to save your QR code";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "TheLight uses your location to show maps, get weather, and share your current location when you choose.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "TheLight uses motion data to show your step count for today.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "TheLight saves generated QR codes to your photo library when you choose Save to Photos.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "TheLight uses your photo library to let you select profile and chat images when you choose.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -1612,14 +1622,18 @@
 				INFOPLIST_KEY_CFBundleVersion = 1;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
-				INFOPLIST_KEY_NSCameraUsageDescription = "we need to scan QR code";
-				INFOPLIST_KEY_NSContactsUsageDescription = "Can we use your contacts?";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "Can we use your face ID?";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "TheLight uses Calendar to let you add customer appointment events when you choose.";
+				INFOPLIST_KEY_NSCalendarsWriteOnlyAccessUsageDescription = "TheLight uses Calendar to create customer appointment events when you choose.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "TheLight uses the camera to scan membership QR codes when you choose.";
+				INFOPLIST_KEY_NSContactsUsageDescription = "TheLight uses Contacts to let you add customer contact cards when you choose.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "TheLight uses Face ID to unlock your existing signed-in session when you choose biometric sign-in.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "TheLight uses your location to show maps, get weather, and monitor geofence regions you have set up.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "TheLight uses your location in the background to monitor geofence regions you have set up.";
 				INFOPLIST_KEY_NSLocationUsageDescription = "TheLight uses your location to show maps, get weather, and monitor geofence regions you have set up.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "If you only allow access to your location while you are using the app, some features may not work in the background";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "we want to save your QR code";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "TheLight uses your location to show maps, get weather, and share your current location when you choose.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "TheLight uses motion data to show your step count for today.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "TheLight saves generated QR codes to your photo library when you choose Save to Photos.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "TheLight uses your photo library to let you select profile and chat images when you choose.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

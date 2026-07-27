@@ -4,11 +4,13 @@
 //
 
 import SwiftUI
+import Charts
 import SwiftData
 import UniformTypeIdentifiers
 
 struct ExpenseTrackerView: View {
     @AppStorage("color") private var color: Int?
+    @AppStorage("expenseWeeklyChartVisible") private var weeklyChartVisible = true
     @Environment(\.tabBarOverlap) private var tabBarOverlap
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
@@ -30,9 +32,56 @@ struct ExpenseTrackerView: View {
         AppTheme.accentColor(for: color)
     }
 
+    private var weeklyDays: [(day: String, total: Double, isToday: Bool)] {
+        let cal = Calendar.current
+        let startOfWeek = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: .now)) ?? .now
+        let fmt = DateFormatter()
+        fmt.dateFormat = "EEE"
+        return (0..<7).map { offset in
+            let date = cal.date(byAdding: .day, value: offset, to: startOfWeek) ?? startOfWeek
+            let total = expenses
+                .filter { cal.isDate($0.date, inSameDayAs: date) }
+                .reduce(0) { $0 + $1.amount }
+            return (fmt.string(from: date), total, cal.isDateInToday(date))
+        }
+    }
+
+    private var weeklyChartSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .firstTextBaseline) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("This Week")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Text(weeklyDays.reduce(0) { $0 + $1.total }, format: ExpenseFormat.currency)
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(themeColor)
+                            .contentTransition(.numericText())
+                    }
+                    Spacer()
+                    Image(systemName: "calendar.badge.clock")
+                        .font(.title3)
+                        .foregroundStyle(themeColor)
+                }
+                Chart(weeklyDays, id: \.day) { item in
+                    BarMark(
+                        x: .value("Day", item.day),
+                        y: .value("Amount", item.total)
+                    )
+                    .foregroundStyle(themeColor.gradient)
+                    .opacity(item.isToday ? 1.0 : 0.45)
+                }
+                .frame(height: 120)
+            }
+            .padding(.vertical, 6)
+        }
+    }
+
     var body: some View {
         List {
             summarySection
+            if weeklyChartVisible { weeklyChartSection }
             filterSection
             expenseSection
         }
@@ -113,53 +162,84 @@ struct ExpenseTrackerView: View {
         }
     }
 
-    // Extracted so the preview compiler can type-check the menu content as a
-    // discrete unit; the inline version exceeded the type-checker time limit.
+    // Split into two sub-properties so neither exceeds the 10-item @ViewBuilder limit.
     @ViewBuilder
     private var filterMenuContent: some View {
-        Picker("Date Range", selection: $viewModel.dateRange) {
-            ForEach(ExpenseDateRange.allCases) { range in
-                Label(range.rawValue, systemImage: range.systemImage)
-                    .tag(range)
+        filterDateSortItems
+        filterTransferItems
+    }
+
+    @ViewBuilder
+    private var filterDateSortItems: some View {
+        Menu {
+            Button { viewModel.dateRange = .thisMonth } label: {
+                Label("This Month", systemImage: viewModel.dateRange == .thisMonth ? "checkmark" : "calendar")
             }
+            Button { viewModel.dateRange = .lastMonth } label: {
+                Label("Last Month", systemImage: viewModel.dateRange == .lastMonth ? "checkmark" : "calendar.badge.clock")
+            }
+            Button { viewModel.dateRange = .allTime } label: {
+                Label("All Time", systemImage: viewModel.dateRange == .allTime ? "checkmark" : "infinity")
+            }
+        } label: {
+            Label("Date Range", systemImage: "arrow.up.arrow.down")
         }
-        Picker("Sort By", selection: $viewModel.sortOrder) {
-            ForEach(ExpenseSortOrder.allCases) { order in
-                Label(order.rawValue, systemImage: order.systemImage)
-                    .tag(order)
+        Menu {
+            Button { viewModel.sortOrder = .date } label: {
+                Label("Date", systemImage: viewModel.sortOrder == .date ? "checkmark" : "calendar")
             }
+            Button { viewModel.sortOrder = .name } label: {
+                Label("Name", systemImage: viewModel.sortOrder == .name ? "checkmark" : "textformat")
+            }
+        } label: {
+            Label("Sort By", systemImage: "arrow.up.arrow.down.circle")
         }
         Divider()
         Button {
-            isImporting = true
+            weeklyChartVisible.toggle()
         } label: {
-            Label("Import JSON", systemImage: "square.and.arrow.down")
+            Label(weeklyChartVisible ? "Hide Weekly Chart" : "Show Weekly Chart",
+                  systemImage: "chart.bar.xaxis")
         }
-        Button {
-            startExport()
-        } label: {
-            Label("Export JSON", systemImage: "square.and.arrow.up")
-        }
-        .disabled(expenses.isEmpty)
-        Button {
-            showJSONPreview()
-        } label: {
-            Label("View JSON", systemImage: "doc.text.magnifyingglass")
-        }
-        .disabled(expenses.isEmpty)
+    }
+
+    @ViewBuilder
+    private var filterTransferItems: some View {
         Divider()
-        Button {
-            backUpToFirebase()
+        Menu {
+            Button {
+                isImporting = true
+            } label: {
+                Label("Import JSON", systemImage: "square.and.arrow.down")
+            }
+            Button {
+                startExport()
+            } label: {
+                Label("Export JSON", systemImage: "square.and.arrow.up")
+            }
+            .disabled(expenses.isEmpty)
+            Button {
+                showJSONPreview()
+            } label: {
+                Label("View JSON", systemImage: "doc.text.magnifyingglass")
+            }
+            .disabled(expenses.isEmpty)
+            Divider()
+            Button {
+                backUpToFirebase()
+            } label: {
+                Label("Back Up to Firebase", systemImage: "icloud.and.arrow.up")
+            }
+            .disabled(expenses.isEmpty || isSyncing)
+            Button {
+                restoreFromFirebase()
+            } label: {
+                Label("Restore from Firebase", systemImage: "icloud.and.arrow.down")
+            }
+            .disabled(isSyncing)
         } label: {
-            Label("Back Up to Firebase", systemImage: "icloud.and.arrow.up")
+            Label("Backup", systemImage: "externaldrive.badge.icloud")
         }
-        .disabled(expenses.isEmpty || isSyncing)
-        Button {
-            restoreFromFirebase()
-        } label: {
-            Label("Restore from Firebase", systemImage: "icloud.and.arrow.down")
-        }
-        .disabled(isSyncing)
         Divider()
         Button {
             printExpenses()

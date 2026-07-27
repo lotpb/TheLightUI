@@ -206,22 +206,22 @@ struct ChartView: View {
     }
 
     private var jobChartSection: some View {
-        CategoryBarSection(title: "Sales by Job", color: .red, categoryLabel: "Job",
+        CategoryBarSection(title: "\(viewModel.categoryFilter) by Job", color: .red, categoryLabel: "Job",
                            items: viewModel.jobTotals, selection: $selectedJob)
     }
 
     private var productChartSection: some View {
-        CategoryBarSection(title: "Sales by Product", color: .purple, categoryLabel: "Product",
+        CategoryBarSection(title: "\(viewModel.categoryFilter) by Product", color: .purple, categoryLabel: "Product",
                            items: viewModel.productTotals, selection: $selectedProduct)
     }
 
     private var salesmanChartSection: some View {
-        CategoryBarSection(title: "Sales by Salesman", color: .teal, categoryLabel: "Salesman",
+        CategoryBarSection(title: "\(viewModel.categoryFilter) by Salesman", color: .teal, categoryLabel: "Salesman",
                            items: viewModel.salesmanTotals, selection: $selectedSalesman)
     }
 
     private var contractorChartSection: some View {
-        CategoryBarSection(title: "Sales by Contractor", color: .indigo, categoryLabel: "Contractor",
+        CategoryBarSection(title: "\(viewModel.categoryFilter) by Contractor", color: .indigo, categoryLabel: "Contractor",
                            items: viewModel.contractorTotals, selection: $selectedContractor)
     }
 
