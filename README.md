@@ -1,7 +1,8 @@
 # TheLight Software
 
 
-<img width="295" height="640" alt="Screenshot 2026-06-14 at 10 14 07 PM Medium" src="https://github.com/user-attachments/assets/b00c724d-c7f1-41c3-bec5-40d5a1c98410" />
+
+<img width="295" height="640" alt="Content - Dark" src="https://github.com/user-attachments/assets/c0ea5142-ca59-415b-aa60-cf3450993032" />
 <img width="295" height="640" alt="Screenshot 2026-06-14 at 10 15 05 PM Medium" src="https://github.com/user-attachments/assets/39ec09a9-ef92-4c1e-8c7f-195a561b0964" />
 <img width="295" height="640" alt="Screenshot 2026-06-14 at 10 18 52 PM Medium" src="https://github.com/user-attachments/assets/4a9f1e67-54c5-4134-a7e7-8b30dd4085f9" />
 
