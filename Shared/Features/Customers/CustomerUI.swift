@@ -248,26 +248,56 @@ struct CustomerUI: View {
             .disabled(viewModel.items.isEmpty)
             Divider()
             Button {
-                transferViewModel.importLegacyLeads(existingItems: viewModel.items)
+                printList()
             } label: {
-                Label("Import Legacy Leads", systemImage: "person.crop.rectangle.stack")
+                Label("Print", systemImage: "printer")
             }
-            .disabled(transferViewModel.isTransferring)
-            Button {
-                transferViewModel.importLegacyEmployees(existingItems: viewModel.items)
-            } label: {
-                Label("Import Legacy Employees", systemImage: "person.2.badge.gearshape")
-            }
-            .disabled(transferViewModel.isTransferring)
-            Button {
-                transferViewModel.importLegacyVendors(existingItems: viewModel.items)
-            } label: {
-                Label("Import Legacy Vendors", systemImage: "building.2")
-            }
-            .disabled(transferViewModel.isTransferring)
+            .disabled(listViewModel.displayedItems.isEmpty)
+
         } label: {
             Label("Sort", systemImage: "line.3.horizontal.decrease.circle")
         }
+    }
+
+    private func printList() {
+        #if canImport(UIKit)
+        let title = navigationTitle
+        let items = listViewModel.displayedItems
+        func escape(_ s: String) -> String {
+            s.replacingOccurrences(of: "&", with: "&amp;")
+             .replacingOccurrences(of: "<", with: "&lt;")
+             .replacingOccurrences(of: ">", with: "&gt;")
+        }
+        var rows = ""
+        for item in items {
+            let name = [item.first, item.lastname].filter { !$0.isEmpty }.joined(separator: " ")
+            let amount = item.amount == 0 ? "" : "$\(item.amount)"
+            rows += "<tr><td>\(escape(name))</td><td>\(escape(item.phone))</td><td>\(escape(item.city))</td><td>\(amount)</td></tr>\n"
+        }
+        let html = """
+        <!DOCTYPE html><html><head><meta charset="utf-8">
+        <style>
+          body { font-family: -apple-system, Helvetica Neue, Arial, sans-serif; margin: 40px; color: #1c1c1e; }
+          h1 { font-size: 22px; font-weight: 700; color: #007aff; border-bottom: 2px solid #007aff; padding-bottom: 10px; margin-bottom: 20px; }
+          table { width: 100%; border-collapse: collapse; }
+          th { text-align: left; padding: 8px 10px; font-size: 13px; color: #6e6e73; border-bottom: 1px solid #c7c7cc; }
+          td { padding: 8px 10px; font-size: 13px; vertical-align: top; }
+          tr:nth-child(even) { background-color: #f2f2f7; }
+          .footer { margin-top: 28px; font-size: 11px; color: #aeaeb2; text-align: right; }
+        </style></head><body>
+          <h1>\(escape(title))</h1>
+          <table><tr><th>Name</th><th>Phone</th><th>City</th><th>Amount</th></tr>\(rows)</table>
+          <div class="footer">Printed from The Light &bull; \(Date().formatted(date: .long, time: .omitted)) &bull; \(items.count) record\(items.count == 1 ? "" : "s")</div>
+        </body></html>
+        """
+        let printInfo = UIPrintInfo.printInfo()
+        printInfo.outputType = .general
+        printInfo.jobName = title
+        let controller = UIPrintInteractionController.shared
+        controller.printInfo = printInfo
+        controller.printFormatter = UIMarkupTextPrintFormatter(markupText: html)
+        controller.present(animated: true)
+        #endif
     }
 
     @ViewBuilder

@@ -6,7 +6,7 @@
 import Foundation
 import Observation
 
-// Handles JSON backup import/export and legacy RTDB imports for the customer list.
+// Handles JSON backup import/export for the customer list.
 @MainActor
 @Observable
 final class CustomerTransferViewModel {
@@ -73,61 +73,6 @@ final class CustomerTransferViewModel {
         }
         let data = try Data(contentsOf: url)
         return try CustomerJSONTransfer.decodeRecords(from: data)
-    }
-
-    func importLegacyLeads(
-        existingItems: [CustomerItem],
-        leadService: LegacyLeadServicing = FirebaseLegacyLeadService()
-    ) {
-        performLegacyImport(existingItems: existingItems, noun: "lead") {
-            try await leadService.fetchLeads()
-        }
-    }
-
-    func importLegacyEmployees(
-        existingItems: [CustomerItem],
-        employeeService: LegacyEmployeeServicing = FirebaseLegacyEmployeeService()
-    ) {
-        performLegacyImport(existingItems: existingItems, noun: "employee") {
-            try await employeeService.fetchEmployees()
-        }
-    }
-
-    func importLegacyVendors(
-        existingItems: [CustomerItem],
-        vendorService: LegacyVendorServicing = FirebaseLegacyVendorService()
-    ) {
-        performLegacyImport(existingItems: existingItems, noun: "vendor") {
-            try await vendorService.fetchVendors()
-        }
-    }
-
-    // Shared pattern for all legacy RTDB imports: sign-in guard, isTransferring flag
-    // (set synchronously so double-taps can't slip past), fetch, then upsert.
-    private func performLegacyImport(
-        existingItems: [CustomerItem],
-        noun: String,
-        fetch: @escaping @Sendable () async throws -> [CustomerItem]
-    ) {
-        guard !isTransferring else { return }
-        guard let userId = formService.currentUserId else {
-            showAlert("Sign in before importing \(noun)s.")
-            return
-        }
-        isTransferring = true
-        Task {
-            defer { isTransferring = false }
-            do {
-                let items = try await fetch()
-                guard !items.isEmpty else {
-                    showAlert("No \(noun)s found.")
-                    return
-                }
-                await upsertItems(items, existingIDs: Set(existingItems.map(\.id)), userId: userId, noun: noun)
-            } catch {
-                showAlert("\(noun.capitalized) import failed: \(error.localizedDescription)")
-            }
-        }
     }
 
     // Firestore caps write batches at 500 operations.

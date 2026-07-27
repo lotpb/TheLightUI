@@ -283,8 +283,6 @@
 		AFE71224301234A700B9D6A7 /* BottomSheetContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE71223301234A700B9D6A7 /* BottomSheetContentView.swift */; };
 		AFE71225301234A700B9D6A7 /* BottomSheetContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE71223301234A700B9D6A7 /* BottomSheetContentView.swift */; };
 		AFEAAA9D30099D6D0064126D /* DataBackupSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEAAA9C30099D6D0064126D /* DataBackupSection.swift */; };
-		AFEAAA9F300A57410064126D /* CustomerLegacyImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEAAA9E300A57410064126D /* CustomerLegacyImport.swift */; };
-		AFEAAAA0300A57410064126D /* CustomerLegacyImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEAAA9E300A57410064126D /* CustomerLegacyImport.swift */; };
 		AFEE000A27285BB900D75C7C /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEE000927285BB900D75C7C /* LoginView.swift */; };
 		AFEFA4CC30027795004C61A5 /* CustomerCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEFA4CB30027795004C61A5 /* CustomerCellView.swift */; };
 		AFEFA4CD30027795004C61A5 /* CustomerCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEFA4CB30027795004C61A5 /* CustomerCellView.swift */; };
@@ -466,7 +464,6 @@
 		AFE71220301234A000B9D6A7 /* BottomSheetLocationSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetLocationSectionView.swift; sourceTree = "<group>"; };
 		AFE71223301234A700B9D6A7 /* BottomSheetContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetContentView.swift; sourceTree = "<group>"; };
 		AFEAAA9C30099D6D0064126D /* DataBackupSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataBackupSection.swift; sourceTree = "<group>"; };
-		AFEAAA9E300A57410064126D /* CustomerLegacyImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerLegacyImport.swift; sourceTree = "<group>"; };
 		AFEE000927285BB900D75C7C /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		AFEFA4CB30027795004C61A5 /* CustomerCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerCellView.swift; sourceTree = "<group>"; };
 		AFF04CFA300C24D300A6E9A5 /* GoogleService-Info.plist.example */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "GoogleService-Info.plist.example"; sourceTree = "<group>"; };
@@ -709,7 +706,6 @@
 				AF0EAE9530001D6900A7247D /* CustomerJSONTransfer.swift */,
 				AFD7D8D23002744E00EF9101 /* CustomerTransferViewModel.swift */,
 				AFEFA4CB30027795004C61A5 /* CustomerCellView.swift */,
-				AFEAAA9E300A57410064126D /* CustomerLegacyImport.swift */,
 				AF2E4B943011D00800D77F40 /* CustomerFormPickerSheet.swift */,
 				AF2E4B973011D01100D77F40 /* CustomerFormStyles.swift */,
 				AF2E4B9A3011D02500D77F40 /* CustomerFormComponents.swift */,
@@ -1221,7 +1217,6 @@
 				AF2E4B9E3011D04E00D77F40 /* CustomerFormSections.swift in Sources */,
 				AF53737E2778BF36001F40B6 /* WeatherUI.swift in Sources */,
 				AFB4D0193007B19B0003650A /* MessageJSONTransfer.swift in Sources */,
-				AFEAAAA0300A57410064126D /* CustomerLegacyImport.swift in Sources */,
 				AFDE91CC2793348D00302CF2 /* PlaceListViewModel.swift in Sources */,
 				AFB760A92FE22CA2002D1A83 /* MenuRouteButton.swift in Sources */,
 				AFDE91D32793361700302CF2 /* LandMarkCategoryView.swift in Sources */,
@@ -1399,7 +1394,6 @@
 				AF4F5DF62FC75C330003B277 /* LeadDetailHeaderView.swift in Sources */,
 				AF34848B274568BE0091BA5A /* FirebaseManager.swift in Sources */,
 				AF2E4BA73011D2D200D77F40 /* LeadDetailContactHelpers.swift in Sources */,
-				AFEAAA9F300A57410064126D /* CustomerLegacyImport.swift in Sources */,
 				AF0A234A274C33E700B18BBF /* CreateNewMessageView.swift in Sources */,
 				AF892F612FFEFC93004D9563 /* ExpensePreviewData.swift in Sources */,
 				AF108C0E2762681200084752 /* ChatMessage.swift in Sources */,
