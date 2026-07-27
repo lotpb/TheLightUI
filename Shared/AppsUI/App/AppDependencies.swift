@@ -148,7 +148,8 @@ extension CustomerItem {
         amount: Int,
         daysAgo: Int,
         comments: String = "",
-        isActive: Bool = true
+        isActive: Bool = true,
+        category: String = CustomerItem.Category.customer.rawValue
     ) -> CustomerItem {
         var item = CustomerItem.emptyCustomer
         item.id = id
@@ -166,6 +167,7 @@ extension CustomerItem {
         item.comments = comments
         item.email = "\(first.lowercased())@example.com"
         item.quantity = 1
+        item.category = category
         return item
     }
 }
