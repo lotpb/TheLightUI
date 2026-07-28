@@ -61,29 +61,26 @@ final class ChartViewModel {
     }
 
     var jobTotals: [ChartItem] {
-        amountTotals(groupedBy: \.jobIndex, names: pickerData.pickJob)
+        amountTotals(groupedBy: \.job)
     }
 
     var productTotals: [ChartItem] {
-        amountTotals(groupedBy: \.productIndex, names: pickerData.pickProduct)
+        amountTotals(groupedBy: \.product)
     }
 
     var salesmanTotals: [ChartItem] {
-        amountTotals(groupedBy: \.salesIndex, names: pickerData.pickSalesman)
+        amountTotals(groupedBy: \.salesman)
     }
 
     var contractorTotals: [ChartItem] {
-        amountTotals(groupedBy: \.contractorIndex, names: pickerData.pickContractor)
+        amountTotals(groupedBy: \.contractor)
     }
 
-    // Customer amounts summed per category (picker index mapped through the picker's name list).
-    private func amountTotals(groupedBy indexPath: KeyPath<CustomerItem, Int>, names: [String]) -> [ChartItem] {
+    // Customer amounts summed per picker value stored on the record.
+    private func amountTotals(groupedBy keyPath: KeyPath<CustomerItem, String>) -> [ChartItem] {
         Dictionary(grouping: customerItems) { item -> String in
-            let index = item[keyPath: indexPath]
-            guard names.indices.contains(index), !names[index].isEmpty else {
-                return "None"
-            }
-            return names[index]
+            let value = item[keyPath: keyPath]
+            return value.isEmpty ? "None" : value
         }
         .map { name, items in
             ChartItem(type: name, value: Double(items.reduce(0) { $0 + $1.amount }))

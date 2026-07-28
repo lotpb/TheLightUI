@@ -25,15 +25,15 @@ struct CustomerJSONRecord: Codable, Equatable {
     var comments: String
     var spouse: String
     var email: String
-    var contractorIndex: Int
+    var contractor: String
     var photo: String
     var lastUpdateDate: Date
     var startDate: Date
     var completionDate: Date
     var quantity: Int
-    var salesIndex: Int
-    var jobIndex: Int
-    var productIndex: Int
+    var salesman: String
+    var job: String
+    var product: String
     var category: String
     var callback: String
     var adNo: String
@@ -54,51 +54,51 @@ struct CustomerJSONRecord: Codable, Equatable {
         comments = item.comments
         spouse = item.spouse
         email = item.email
-        contractorIndex = item.contractorIndex
+        contractor = item.contractor
         photo = item.photo
         lastUpdateDate = item.lastUpdateDate
         startDate = item.startDate
         completionDate = item.completionDate
         quantity = item.quantity
-        salesIndex = item.salesIndex
-        jobIndex = item.jobIndex
-        productIndex = item.productIndex
+        salesman = item.salesman
+        job = item.job
+        product = item.product
         category = item.category
         callback = item.callback
         adNo = item.adNo
     }
 
-    // Custom decoder so JSON files exported before category/callback/adNo was
-    // added still import without error.
+    // Custom decoder so JSON files exported before the string-picker migration
+    // (or before category/callback/adNo was added) still import without error.
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
-        id              = try c.decode(String.self, forKey: .id)
-        isActive        = try c.decode(Bool.self,   forKey: .isActive)
-        first           = try c.decode(String.self, forKey: .first)
-        lastname        = try c.decode(String.self, forKey: .lastname)
-        street          = try c.decode(String.self, forKey: .street)
-        city            = try c.decode(String.self, forKey: .city)
-        state           = try c.decode(String.self, forKey: .state)
-        zip             = try c.decode(String.self, forKey: .zip)
-        amount          = try c.decode(Int.self,    forKey: .amount)
-        creationDate    = try c.decode(Date.self,   forKey: .creationDate)
-        rate            = try c.decode(String.self, forKey: .rate)
-        phone           = try c.decode(String.self, forKey: .phone)
-        comments        = try c.decode(String.self, forKey: .comments)
-        spouse          = try c.decode(String.self, forKey: .spouse)
-        email           = try c.decode(String.self, forKey: .email)
-        contractorIndex = try c.decode(Int.self,    forKey: .contractorIndex)
-        photo           = try c.decode(String.self, forKey: .photo)
-        lastUpdateDate  = try c.decode(Date.self,   forKey: .lastUpdateDate)
-        startDate       = try c.decode(Date.self,   forKey: .startDate)
-        completionDate  = try c.decode(Date.self,   forKey: .completionDate)
-        quantity        = try c.decode(Int.self,    forKey: .quantity)
-        salesIndex      = try c.decode(Int.self,    forKey: .salesIndex)
-        jobIndex        = try c.decode(Int.self,    forKey: .jobIndex)
-        productIndex    = try c.decode(Int.self,    forKey: .productIndex)
-        category        = try c.decodeIfPresent(String.self, forKey: .category) ?? ""
-        callback        = try c.decodeIfPresent(String.self, forKey: .callback) ?? ""
-        adNo            = try c.decodeIfPresent(String.self, forKey: .adNo)     ?? ""
+        id             = try c.decode(String.self, forKey: .id)
+        isActive       = try c.decode(Bool.self,   forKey: .isActive)
+        first          = try c.decode(String.self, forKey: .first)
+        lastname       = try c.decode(String.self, forKey: .lastname)
+        street         = try c.decode(String.self, forKey: .street)
+        city           = try c.decode(String.self, forKey: .city)
+        state          = try c.decode(String.self, forKey: .state)
+        zip            = try c.decode(String.self, forKey: .zip)
+        amount         = try c.decode(Int.self,    forKey: .amount)
+        creationDate   = try c.decode(Date.self,   forKey: .creationDate)
+        rate           = try c.decode(String.self, forKey: .rate)
+        phone          = try c.decode(String.self, forKey: .phone)
+        comments       = try c.decode(String.self, forKey: .comments)
+        spouse         = try c.decode(String.self, forKey: .spouse)
+        email          = try c.decode(String.self, forKey: .email)
+        contractor     = try c.decodeIfPresent(String.self, forKey: .contractor) ?? ""
+        photo          = try c.decode(String.self, forKey: .photo)
+        lastUpdateDate = try c.decode(Date.self,   forKey: .lastUpdateDate)
+        startDate      = try c.decode(Date.self,   forKey: .startDate)
+        completionDate = try c.decode(Date.self,   forKey: .completionDate)
+        quantity       = try c.decode(Int.self,    forKey: .quantity)
+        salesman       = try c.decodeIfPresent(String.self, forKey: .salesman)  ?? ""
+        job            = try c.decodeIfPresent(String.self, forKey: .job)       ?? ""
+        product        = try c.decodeIfPresent(String.self, forKey: .product)   ?? ""
+        category       = try c.decodeIfPresent(String.self, forKey: .category)  ?? ""
+        callback       = try c.decodeIfPresent(String.self, forKey: .callback)  ?? ""
+        adNo           = try c.decodeIfPresent(String.self, forKey: .adNo)      ?? ""
     }
 
     var customerItem: CustomerItem {
@@ -118,15 +118,15 @@ struct CustomerJSONRecord: Codable, Equatable {
             comments: comments,
             spouse: spouse,
             email: email,
-            contractorIndex: contractorIndex,
+            contractor: contractor,
             photo: photo,
             lastUpdateDate: lastUpdateDate,
             startDate: startDate,
             completionDate: completionDate,
             quantity: quantity,
-            salesIndex: salesIndex,
-            jobIndex: jobIndex,
-            productIndex: productIndex,
+            salesman: salesman,
+            job: job,
+            product: product,
             category: category,
             callback: callback,
             adNo: adNo

@@ -21,14 +21,14 @@ extension LeadDetailUI {
         var fields = [
             CustomerDetailField(name: detail.first, label: CustomerLabels.first),
             CustomerDetailField(name: detail.phone, label: CustomerLabels.phone),
-            CustomerDetailField(name: pickerValue(pickerviewModel.pickContractor, at: detail.contractorIndex), label: CustomerLabels.contractor),
+            CustomerDetailField(name: detail.contractor, label: CustomerLabels.contractor),
             CustomerDetailField(name: detail.spouse, label: CustomerLabels.spouse),
             CustomerDetailField(name: detail.email, label: CustomerLabels.email),
             CustomerDetailField(name: detail.formattedLastUpdateDate, label: CustomerLabels.lastUpdated),
             CustomerDetailField(name: detail.rate, label: CustomerLabels.rating),
-            CustomerDetailField(name: pickerValue(pickerviewModel.pickSalesman, at: detail.salesIndex), label: CustomerLabels.salesman),
-            CustomerDetailField(name: pickerValue(pickerviewModel.pickJob, at: detail.jobIndex), label: CustomerLabels.job),
-            CustomerDetailField(name: pickerValue(pickerviewModel.pickProduct, at: detail.productIndex), label: CustomerLabels.product),
+            CustomerDetailField(name: detail.salesman, label: CustomerLabels.salesman),
+            CustomerDetailField(name: detail.job, label: CustomerLabels.job),
+            CustomerDetailField(name: detail.product, label: CustomerLabels.product),
             CustomerDetailField(name: "\(detail.quantity)", label: CustomerLabels.quantity),
             CustomerDetailField(name: detail.formattedStartDate, label: isLead ? CustomerLabels.aptDate : CustomerLabels.startDate),
             CustomerDetailField(name: detail.formattedCompletionDate, label: CustomerLabels.complete),
@@ -76,11 +76,5 @@ extension LeadDetailUI {
             CustomerDetailField(name: detail.formattedLastUpdateDate, label: CustomerLabels.lastUpdated),
             CustomerDetailField(name: detail.photo, label: CustomerLabels.photo)
         ]
-    }
-
-    // Safely look up a value by index in a picklist.
-    func pickerValue(_ values: [String], at index: Int) -> String {
-        guard values.indices.contains(index) else { return "" }
-        return values[index]
     }
 }

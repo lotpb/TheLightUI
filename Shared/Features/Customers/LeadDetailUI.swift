@@ -31,8 +31,6 @@ enum LeadDetailLayout {
 // and integrates with Contacts, EventKit, and location sharing via a Coordinator.
 
 struct LeadDetailUI: View {
-    // Shared picklist data — internal so extension files can build field rows.
-    @Environment(PickerDataModel.self) var pickerviewModel
     // Live customer list — used to sync detail after the edit form saves to Firestore.
     @Environment(CustomerStore.self) private var customerStore
     // User-configurable settings stored in AppStorage.
@@ -322,15 +320,15 @@ struct LeadDetailUI: View {
             comments: "Hello",
             spouse: "Janet",
             email: "eunitedws@icloud.com",
-            contractorIndex: 5,
+            contractor: "",
             photo: "none",
             lastUpdateDate: Date(),
             startDate: Date(),
             completionDate: Date(),
             quantity: 5,
-            salesIndex: 1,
-            jobIndex: 1,
-            productIndex: 1
+            salesman: "",
+            job: "",
+            product: ""
         ))
         .environment(CustomerStore())
         .environment(PickerDataModel())

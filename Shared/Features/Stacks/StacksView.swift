@@ -111,6 +111,10 @@ struct StacksView: View {
             SpotifyUI()
         case .wave:
             WaveUI()
+        case .instagram:
+            InstagramHome()
+        case .twitter:
+            TwitterUI()
         }
     }
 
@@ -139,6 +143,8 @@ private enum StackDestination {
     case iMac
     case spotify
     case wave
+    case instagram
+    case twitter
 }
 
 private struct StackSection: Identifiable {
@@ -156,8 +162,8 @@ private struct StackSection: Identifiable {
             StackCard(title: "Wave", imageName: "chair_2", color: .blue, destination: .wave)
         ]),
         StackSection(title: "Browse all", cards: [
-            StackCard(title: "Products", imageName: "profile-rabbit-toy", color: .red, destination: .chart),
-            StackCard(title: "Made for\nyou", imageName: "IMG_3408", color: .indigo, destination: .chart)
+            StackCard(title: "Instagram", imageName: "profile-rabbit-toy", color: .red, destination: .instagram),
+            StackCard(title: "Twitter", imageName: "IMG_3408", color: .indigo, destination: .twitter)
         ])
     ]
 }

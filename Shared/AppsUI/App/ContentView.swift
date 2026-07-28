@@ -114,6 +114,7 @@ struct ContentView: View {
         switch selection {
         case .home:
             MainMenuUI(
+                isAuthenticated: session.isAuthenticated,
                 onSignOut: session.signOut,
                 makeCustomerService: dependencies.makeCustomerService,
                 makeCustomerFormService: dependencies.makeCustomerFormService,
@@ -180,7 +181,7 @@ private enum RootTab: CaseIterable, Identifiable {
         #if DEBUG
         return allCases
         #else
-        return [.home, .chat, .ToDo]
+        return [.home, .chat, .ToDo, .Expense, .tip, .web]
         #endif
     }
 
@@ -291,4 +292,3 @@ private struct TabBarItem: View {
     TabBarView(selection: .constant(.home))
         .preferredColorScheme(.dark)
 }
-

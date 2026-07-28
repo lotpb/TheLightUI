@@ -33,6 +33,7 @@ enum MainMenuFullscreenRoute: Identifiable {
     case instagram
     case tweet
     case chart
+    case chat
 
     var id: Self { self }
 }
@@ -47,6 +48,7 @@ enum MainMenuDataRoute: Hashable {
     case tip
     case steps
     case chart
+    case todo
 }
 
 @MainActor
@@ -57,6 +59,8 @@ struct MainMenuCoordinator {
     let makeWeatherLocationProvider: () -> WeatherLocationProviding
     let appBadgeManager: AppBadgeManaging
     let dismissSheet: () -> Void
+    let isAuthenticated: Bool
+    let onSignOut: () -> Void
 
     @ViewBuilder
     func sheetContent(_ sheet: MainMenuSheet) -> some View {
@@ -129,6 +133,8 @@ struct MainMenuCoordinator {
             StepsTodayView()
         case .chart:
             ChartView()
+        case .todo:
+            ListView()
         }
     }
 
@@ -156,6 +162,11 @@ struct MainMenuCoordinator {
             NavigationStack {
                 ChartView()
             }
+        case .chat:
+            MainMessagesView(
+                isAuthenticated: isAuthenticated,
+                onSignOut: onSignOut
+            )
         }
     }
 }

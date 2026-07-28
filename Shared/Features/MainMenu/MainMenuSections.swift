@@ -70,7 +70,6 @@ struct DataSection: View {
             )
         ]
 
-        #if DEBUG
         items.append(contentsOf: [
             DataMenuItem(
                 route: .vendors,
@@ -87,7 +86,6 @@ struct DataSection: View {
                 iconColor: .teal
             )
         ])
-        #endif
 
         return items
     }
@@ -111,6 +109,13 @@ struct AppsSection: View {
     let onSelectRoute: (MainMenuFullscreenRoute) -> Void
 
     private let items: [DataMenuItem] = [
+        DataMenuItem(
+            route: .todo,
+            title: "To Do",
+            subtitle: "Tasks and reminders",
+            systemImage: "wave.3.left",
+            iconColor: .purple
+        ),
         DataMenuItem(
             route: .expenses,
             title: "Expenses",
@@ -204,7 +209,6 @@ struct ExploreSection: View {
             )
         ]
 
-        #if DEBUG
         items.append(
             FullscreenMenuItem(
                 route: .stacks,
@@ -214,7 +218,6 @@ struct ExploreSection: View {
                 iconColor: .gray
             )
         )
-        #endif
 
         return items
     }

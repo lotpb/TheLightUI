@@ -48,23 +48,23 @@ func stateZipRow(state: Binding<String>, zip: Binding<String>) -> some View {
     }
 }
 
-// Picker row bound to an index; uses Menu for reliable selected-label color control.
+// Picker row bound to a string value; uses Menu for reliable selected-label color control.
 @MainActor
 func pickerRow(
     _ title: String,
-    selection: Binding<Int>,
+    selection: Binding<String>,
     items: [String]
 ) -> some View {
-    let isNone = items.indices.contains(selection.wrappedValue) && items[selection.wrappedValue].isEmpty
-    let labelText = items.indices.contains(selection.wrappedValue) ? (items[selection.wrappedValue].isEmpty ? "none" : items[selection.wrappedValue]) : ""
+    let isNone = selection.wrappedValue.isEmpty
+    let labelText = isNone ? "none" : selection.wrappedValue
     return HStack {
         Text(title)
             .formTextStyle()
         Spacer()
         Menu {
-            ForEach(items.indices, id: \.self) { index in
-                Button { selection.wrappedValue = index } label: {
-                    Text(items[index].isEmpty ? "none" : items[index])
+            ForEach(items, id: \.self) { item in
+                Button { selection.wrappedValue = item } label: {
+                    Text(item.isEmpty ? "none" : item)
                 }
             }
         } label: {
@@ -83,21 +83,21 @@ func pickerRow(
 @MainActor
 func editablePickerRow(
     _ title: String,
-    selection: Binding<Int>,
+    selection: Binding<String>,
     items: [String],
     themeColor: Color,
     onEdit: @escaping () -> Void
 ) -> some View {
-    let isNone = items.indices.contains(selection.wrappedValue) && items[selection.wrappedValue].isEmpty
-    let labelText = items.indices.contains(selection.wrappedValue) ? (items[selection.wrappedValue].isEmpty ? "none" : items[selection.wrappedValue]) : ""
+    let isNone = selection.wrappedValue.isEmpty
+    let labelText = isNone ? "none" : selection.wrappedValue
     return HStack {
         Text(title)
             .formTextStyle()
         Spacer()
         Menu {
-            ForEach(items.indices, id: \.self) { index in
-                Button { selection.wrappedValue = index } label: {
-                    Text(items[index].isEmpty ? "none" : items[index])
+            ForEach(items, id: \.self) { item in
+                Button { selection.wrappedValue = item } label: {
+                    Text(item.isEmpty ? "none" : item)
                 }
             }
         } label: {

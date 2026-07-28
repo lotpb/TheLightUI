@@ -191,11 +191,11 @@ struct CustomerFormJobSection: View {
                 labeledTextField("Manager:", placeholder: "manager", text: $viewModel.detail.callback)
             } else if !isEmployee {
                 if canEditPickers {
-                    editablePickerRow("Salesman:", selection: $viewModel.detail.salesIndex, items: pickerviewModel.pickSalesman, themeColor: themeColor) {
+                    editablePickerRow("Salesman:", selection: $viewModel.detail.salesman, items: pickerviewModel.pickSalesman, themeColor: themeColor) {
                         managingPickerType = .salesman
                     }
                 } else {
-                    pickerRow("Salesman:", selection: $viewModel.detail.salesIndex, items: pickerviewModel.pickSalesman)
+                    pickerRow("Salesman:", selection: $viewModel.detail.salesman, items: pickerviewModel.pickSalesman)
                 }
             }
 
@@ -205,22 +205,22 @@ struct CustomerFormJobSection: View {
                 ratingRow(rate: $viewModel.detail.rate, items: pickerviewModel.pickRate, themeColor: themeColor)
             } else if !isEmployee {
                 if canEditPickers {
-                    editablePickerRow("Job:", selection: $viewModel.detail.jobIndex, items: pickerviewModel.pickJob, themeColor: themeColor) {
+                    editablePickerRow("Job:", selection: $viewModel.detail.job, items: pickerviewModel.pickJob, themeColor: themeColor) {
                         managingPickerType = .job
                     }
                 } else {
-                    pickerRow("Job:", selection: $viewModel.detail.jobIndex, items: pickerviewModel.pickJob)
+                    pickerRow("Job:", selection: $viewModel.detail.job, items: pickerviewModel.pickJob)
                 }
             }
 
             // Product picklist (not shown for employees or vendors).
             if !isEmployee && !isVendor {
                 if canEditPickers {
-                    editablePickerRow("Product:", selection: $viewModel.detail.productIndex, items: pickerviewModel.pickProduct, themeColor: themeColor) {
+                    editablePickerRow("Product:", selection: $viewModel.detail.product, items: pickerviewModel.pickProduct, themeColor: themeColor) {
                         managingPickerType = .product
                     }
                 } else {
-                    pickerRow("Product:", selection: $viewModel.detail.productIndex, items: pickerviewModel.pickProduct)
+                    pickerRow("Product:", selection: $viewModel.detail.product, items: pickerviewModel.pickProduct)
                 }
             }
 
@@ -283,11 +283,11 @@ struct CustomerFormJobSection: View {
             // Contractor picklist (not shown for leads, employees, or vendors).
             if !isLead && !isEmployee && !isVendor {
                 if isCustomer {
-                    editablePickerRow("Contractor:", selection: $viewModel.detail.contractorIndex, items: pickerviewModel.pickContractor, themeColor: themeColor) {
+                    editablePickerRow("Contractor:", selection: $viewModel.detail.contractor, items: pickerviewModel.pickContractor, themeColor: themeColor) {
                         managingPickerType = .contractor
                     }
                 } else {
-                    pickerRow("Contractor:", selection: $viewModel.detail.contractorIndex, items: pickerviewModel.pickContractor)
+                    pickerRow("Contractor:", selection: $viewModel.detail.contractor, items: pickerviewModel.pickContractor)
                 }
             }
 

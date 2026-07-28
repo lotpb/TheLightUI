@@ -23,6 +23,9 @@ enum CustomerFirestoreSchema {
         static let first = "first"
         static let lastname = "lastname"
         static let contractor = "contractor"
+        static let salesman = "salesman"
+        static let job = "job"
+        static let product = "product"
         static let street = "street"
         static let city = "city"
         static let state = "state"
@@ -31,9 +34,6 @@ enum CustomerFirestoreSchema {
         static let amount = "amount"
         static let email = "email"
         static let rate = "rate"
-        static let salesNo = "salesNo"
-        static let jobNo = "jobNo"
-        static let prodNo = "prodNo"
         static let quantity = "quan"
         static let comments = "comments"
         static let spouse = "spouse"
@@ -80,15 +80,15 @@ extension CustomerItem {
             comments: document.stringValue(for: fields.comments),
             spouse: document.stringValue(for: fields.spouse),
             email: document.stringValue(for: fields.email),
-            contractorIndex: document.intStringValue(for: fields.contractor),
+            contractor: document.stringValue(for: fields.contractor),
             photo: document.stringValue(for: fields.photo),
             lastUpdateDate: document.dateValue(for: fields.lastUpdate) ?? fallbackDate,
             startDate: document.dateValue(for: fields.start) ?? fallbackDate,
             completionDate: document.dateValue(for: fields.completion) ?? fallbackDate,
             quantity: document.intValue(for: fields.quantity),
-            salesIndex: document.intValue(for: fields.salesNo),
-            jobIndex: document.intValue(for: fields.jobNo),
-            productIndex: document.intValue(for: fields.prodNo),
+            salesman: document.stringValue(for: fields.salesman),
+            job: document.stringValue(for: fields.job),
+            product: document.stringValue(for: fields.product),
             category: document.stringValue(for: fields.category),
             callback: document.stringValue(for: fields.callback),
             adNo: adNoValue
@@ -113,10 +113,6 @@ private extension QueryDocumentSnapshot {
         return 0
     }
 
-    func intStringValue(for field: String) -> Int {
-        Int(stringValue(for: field)) ?? 0
-    }
-
     func dateValue(for field: String) -> Date? {
         (get(field) as? Timestamp)?.dateValue()
     }
@@ -126,7 +122,7 @@ struct CustomerFormPayload {
     var isActive: Bool
     var first: String
     var lastname: String
-    var contractorIndex: Int
+    var contractor: String
     var street: String
     var city: String
     var state: String
@@ -135,9 +131,9 @@ struct CustomerFormPayload {
     var amount: Int
     var email: String
     var rate: String
-    var salesIndex: Int
-    var jobIndex: Int
-    var productIndex: Int
+    var salesman: String
+    var job: String
+    var product: String
     var quantity: Int
     var comments: String
     var spouse: String
@@ -165,7 +161,7 @@ struct CustomerFormPayload {
         self.isActive = customer.isActive
         self.first = customer.first
         self.lastname = customer.lastname
-        self.contractorIndex = customer.contractorIndex
+        self.contractor = customer.contractor
         self.street = customer.street
         self.city = customer.city
         self.state = customer.state
@@ -174,9 +170,9 @@ struct CustomerFormPayload {
         self.amount = amount
         self.email = customer.email
         self.rate = rate
-        self.salesIndex = customer.salesIndex
-        self.jobIndex = customer.jobIndex
-        self.productIndex = customer.productIndex
+        self.salesman = customer.salesman
+        self.job = customer.job
+        self.product = customer.product
         self.quantity = quantity
         self.comments = customer.comments
         self.spouse = customer.spouse
@@ -196,7 +192,10 @@ struct CustomerFormPayload {
             CustomerFirestoreSchema.Field.active: CustomerFirestoreFieldValues.activeValue(isActive),
             CustomerFirestoreSchema.Field.first: first,
             CustomerFirestoreSchema.Field.lastname: lastname,
-            CustomerFirestoreSchema.Field.contractor: "\(contractorIndex)",
+            CustomerFirestoreSchema.Field.contractor: contractor,
+            CustomerFirestoreSchema.Field.salesman: salesman,
+            CustomerFirestoreSchema.Field.job: job,
+            CustomerFirestoreSchema.Field.product: product,
             CustomerFirestoreSchema.Field.street: street,
             CustomerFirestoreSchema.Field.city: city,
             CustomerFirestoreSchema.Field.state: state,
@@ -205,9 +204,6 @@ struct CustomerFormPayload {
             CustomerFirestoreSchema.Field.amount: amount,
             CustomerFirestoreSchema.Field.email: email,
             CustomerFirestoreSchema.Field.rate: rate,
-            CustomerFirestoreSchema.Field.salesNo: salesIndex,
-            CustomerFirestoreSchema.Field.jobNo: jobIndex,
-            CustomerFirestoreSchema.Field.prodNo: productIndex,
             CustomerFirestoreSchema.Field.quantity: quantity,
             CustomerFirestoreSchema.Field.comments: comments,
             CustomerFirestoreSchema.Field.spouse: spouse,

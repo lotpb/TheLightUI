@@ -12,6 +12,7 @@ import SwiftUI
 struct MainMenuUI: View {
     @AppStorage("color") private var color: Int?
     @Environment(\.tabBarOverlap) private var tabBarOverlap
+    let isAuthenticated: Bool
     let onSignOut: () -> Void
     private let makeCustomerService: () -> CustomerServicing
     private let makeCustomerFormService: () -> CustomerFormServicing
@@ -26,6 +27,7 @@ struct MainMenuUI: View {
     @State private var path = NavigationPath()
 
     init(
+        isAuthenticated: Bool,
         onSignOut: @escaping () -> Void,
         makeCustomerService: @escaping () -> CustomerServicing = { FirebaseCustomerService() },
         makeCustomerFormService: @escaping () -> CustomerFormServicing = { FirebaseCustomerFormService() },
@@ -33,6 +35,7 @@ struct MainMenuUI: View {
         makeWeatherLocationProvider: @escaping () -> WeatherLocationProviding = { LocationWeatherManager() },
         appBadgeManager: AppBadgeManaging = LiveAppBadgeManager()
     ) {
+        self.isAuthenticated = isAuthenticated
         self.onSignOut = onSignOut
         self.makeCustomerService = makeCustomerService
         self.makeCustomerFormService = makeCustomerFormService
@@ -52,7 +55,9 @@ struct MainMenuUI: View {
             makeWeatherManager: makeWeatherManager,
             makeWeatherLocationProvider: makeWeatherLocationProvider,
             appBadgeManager: appBadgeManager,
-            dismissSheet: { activeSheet = nil }
+            dismissSheet: { activeSheet = nil },
+            isAuthenticated: isAuthenticated,
+            onSignOut: onSignOut
         )
     }
 
@@ -165,9 +170,7 @@ struct MainMenuUI: View {
 
     private var listContent: some View {
         List {
-            #if DEBUG
             IncomingSection(themeColor: themeColor)
-            #endif
             DataSection(themeColor: themeColor) { route in
                 path.append(route)
             }
@@ -200,6 +203,7 @@ struct MainMenuUI: View {
 // MARK: - Preview
 #Preview {
     MainMenuUI(
+        isAuthenticated: true,
         onSignOut: { },
         makeCustomerService: { PreviewCustomerService() },
         makeCustomerFormService: { PreviewCustomerFormService() },
