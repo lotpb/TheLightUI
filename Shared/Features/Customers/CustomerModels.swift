@@ -139,10 +139,10 @@ class PickerDataModel {
     private static let contractorKey  = "picker.contractor"
 
     private static let defaultSalesman: [String]    = [""]
-    private static let defaultJob: [String]          = [""]
-    private static let defaultProduct: [String]      = [""]
-    private static let defaultAdvertiser: [String]   = [""]
-    private static let defaultContractor: [String]   = [""]
+    private static let defaultJob: [String]         = [""]
+    private static let defaultProduct: [String]     = [""]
+    private static let defaultAdvertiser: [String]  = [""]
+    private static let defaultContractor: [String]  = [""]
 
     // Firestore path: settings/pickerLists
     private static let fsCollection = "settings"

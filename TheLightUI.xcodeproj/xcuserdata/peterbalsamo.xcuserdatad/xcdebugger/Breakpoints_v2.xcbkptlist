@@ -92,8 +92,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "142"
             endingLineNumber = "142"
-            landmarkName = "settingsTextField(_:text:prompt:keyboardType:textInputAutocapitalization:)"
-            landmarkType = "7">
+            landmarkName = "SettingView"
+            landmarkType = "14">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy

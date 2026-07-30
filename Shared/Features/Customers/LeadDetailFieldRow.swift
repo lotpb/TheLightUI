@@ -42,6 +42,32 @@ struct LeadDetailFieldRow: View {
                 .foregroundStyle(Color.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
+        } else if formData.label == CustomerLabels.photo {
+            let hasPhoto = !trimmedValue.isEmpty && trimmedValue.lowercased() != "none"
+            HStack(spacing: 6) {
+                Image(systemName: hasPhoto ? "photo.fill" : "camera.badge.ellipsis")
+                    .font(.body)
+                    .foregroundStyle(hasPhoto ? Color.primary : Color.secondary)
+                Text(hasPhoto ? trimmedValue : "Add Photo")
+                    .font(.body)
+                    .foregroundStyle(hasPhoto ? Color.primary : Color.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .accessibilityLabel(hasPhoto ? "Photo: \(trimmedValue)" : "Add Photo")
+        } else if formData.label == CustomerLabels.callback {
+            let isYes = trimmedValue.caseInsensitiveCompare("YES") == .orderedSame
+            HStack(spacing: 6) {
+                Image(systemName: "phone.arrow.up.right.fill")
+                    .font(.body)
+                    .foregroundStyle(isYes ? Color.green : Color.secondary)
+                Text(trimmedValue.isEmpty ? "No" : formData.name)
+                    .font(.body)
+                    .foregroundStyle(isYes ? Color.primary : Color.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .accessibilityLabel("Callback: \(trimmedValue.isEmpty ? "No" : formData.name)")
         } else {
             Text(formData.name)
                 .font(.body)

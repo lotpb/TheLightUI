@@ -55,6 +55,10 @@ struct LeadDetailUI: View {
     @State private var coordinator: LeadDetailCoordinator
     // Internal so calendar extension can create EKEvents.
     @State var calendarEventStore = EKEventStore()
+    @State private var ssnUnlocked = false
+    @State private var showSSNPasswordPrompt = false
+    @State private var ssnPasswordEntry = ""
+    @AppStorage("adminPassword") private var adminPassword: String = "admin"
 
     init(
         detail: CustomerItem,
@@ -108,6 +112,18 @@ struct LeadDetailUI: View {
         } message: {
             Text(coordinator.locationAlertMessage ?? "")
         }
+        .alert("Admin Access Required", isPresented: $showSSNPasswordPrompt) {
+            SecureField("Password", text: $ssnPasswordEntry)
+            Button("Unlock") {
+                if ssnPasswordEntry == adminPassword {
+                    ssnUnlocked = true
+                }
+                ssnPasswordEntry = ""
+            }
+            Button("Cancel", role: .cancel) { ssnPasswordEntry = "" }
+        } message: {
+            Text("Enter administrator password to view Social Security Number.")
+        }
         // Mirror the customer's active state into AppStorage to drive theme accents.
         .onAppear(perform: syncActiveColor)
         .onChange(of: detail.isActive) {
@@ -129,10 +145,47 @@ struct LeadDetailUI: View {
 
     // Reusable list of labeled customer fields with rounded card containers.
     private var detailFieldList: some View {
-        RoundedContainerList(detailFields) { customer in
-            LeadDetailFieldRow(formData: customer)
+        RoundedContainerList(detailFields) { field in
+            if isEmployee && field.label == CustomerLabels.socialSecurity {
+                ssnDetailRow(field: field)
+            } else {
+                LeadDetailFieldRow(formData: field)
+            }
         }
         .padding(.horizontal)
+    }
+
+    @ViewBuilder
+    private func ssnDetailRow(field: CustomerDetailField) -> some View {
+        HStack(spacing: 12) {
+            Text(field.label)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.secondary)
+            Spacer()
+            if ssnUnlocked {
+                Text(field.name)
+                    .font(.body)
+                    .foregroundStyle(Color.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            } else {
+                HStack(spacing: 8) {
+                    if !field.name.isEmpty {
+                        Text("•••-••-••••")
+                            .font(.body)
+                            .foregroundStyle(Color.secondary)
+                    }
+                    Button {
+                        ssnPasswordEntry = ""
+                        showSSNPasswordPrompt = true
+                    } label: {
+                        Image(systemName: "lock.fill")
+                            .foregroundStyle(themeColor)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
     }
 
     // Toolbar: close, actions menu, and edit entry point.

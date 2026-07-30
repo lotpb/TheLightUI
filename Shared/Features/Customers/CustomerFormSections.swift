@@ -296,28 +296,26 @@ struct CustomerFormJobSection: View {
                 commentsRow
             }
 
-            // Callback disposition (leads only).
-            if isLead {
-                HStack {
-                    Text("Callback:")
-                        .formTextStyle()
-                    Spacer()
-                    Menu {
-                        ForEach(pickerviewModel.pickCallback, id: \.self) { value in
-                            Button { viewModel.detail.callback = value } label: {
-                                Text(value.isEmpty ? "none" : value)
-                            }
+            // Callback disposition — shown for all categories.
+            HStack {
+                Text("Callback:")
+                    .formTextStyle()
+                Spacer()
+                Menu {
+                    ForEach(pickerviewModel.pickCallback, id: \.self) { value in
+                        Button { viewModel.detail.callback = value } label: {
+                            Text(value.isEmpty ? "none" : value)
                         }
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text(viewModel.detail.callback.isEmpty ? "none" : viewModel.detail.callback)
-                            Image(systemName: "chevron.up.chevron.down")
-                                .imageScale(.small)
-                        }
-                        .foregroundStyle(viewModel.detail.callback.isEmpty ? Color.gray : Color.primary)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(viewModel.detail.callback.isEmpty ? "none" : viewModel.detail.callback)
+                        Image(systemName: "chevron.up.chevron.down")
+                            .imageScale(.small)
+                    }
+                    .foregroundStyle(viewModel.detail.callback.isEmpty ? Color.gray : Color.primary)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
@@ -350,18 +348,30 @@ struct CustomerFormMiscSection: View {
     private var isCustomer: Bool { CustomerItem.Category.customer.matches(viewModel.detail.category) }
     private var canEditPickers: Bool { isLead || isCustomer }
 
+    @State private var ssnUnlocked = false
+    @State private var showPasswordPrompt = false
+    @State private var passwordEntry = ""
+    @AppStorage("adminPassword") private var adminPassword: String = "admin"
+
     var body: some View {
         let spouseBinding = Binding<String>(
             get: { viewModel.detail.spouse },
             set: { viewModel.detail.spouse = isEmployee ? formatSSN($0) : $0 }
         )
         Section("Misc") {
-            labeledTextField(
-                isVendor ? "Web Page:" : isEmployee ? "Social Security:" : "Spouse:",
-                placeholder: isVendor ? "web page" : isEmployee ? "###-##-####" : "spouse",
-                text: spouseBinding,
-                keyboardType: isEmployee ? .numberPad : .default
-            )
+            if isEmployee {
+                if ssnUnlocked {
+                    labeledTextField("Social Security:", placeholder: "###-##-####", text: spouseBinding, keyboardType: .numberPad)
+                } else {
+                    ssnLockedRow
+                }
+            } else {
+                labeledTextField(
+                    isVendor ? "Web Page:" : "Spouse:",
+                    placeholder: isVendor ? "web page" : "spouse",
+                    text: spouseBinding
+                )
+            }
             if !isEmployee && !isVendor {
                 ratingRow(rate: $viewModel.detail.rate, items: pickerviewModel.pickRate, themeColor: themeColor)
             }
@@ -380,6 +390,38 @@ struct CustomerFormMiscSection: View {
                 commentsRow
             }
             labeledTextField("Photo:", placeholder: "photo", text: $viewModel.detail.photo)
+        }
+        .alert("Admin Access Required", isPresented: $showPasswordPrompt) {
+            SecureField("Password", text: $passwordEntry)
+            Button("Unlock") {
+                if passwordEntry == adminPassword {
+                    ssnUnlocked = true
+                }
+                passwordEntry = ""
+            }
+            Button("Cancel", role: .cancel) { passwordEntry = "" }
+        } message: {
+            Text("Enter administrator password to view Social Security Number.")
+        }
+    }
+
+    private var ssnLockedRow: some View {
+        HStack {
+            Text("Social Security:")
+                .formTextStyle()
+            Spacer()
+            if !viewModel.detail.spouse.isEmpty {
+                Text("•••-••-••••")
+                    .foregroundStyle(Color.secondary)
+            }
+            Button {
+                passwordEntry = ""
+                showPasswordPrompt = true
+            } label: {
+                Image(systemName: "lock.fill")
+                    .foregroundStyle(themeColor)
+            }
+            .buttonStyle(.plain)
         }
     }
 

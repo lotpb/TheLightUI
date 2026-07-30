@@ -139,39 +139,11 @@ struct AppsSection: View {
         )
     ]
 
-    private var socialItems: [FullscreenMenuItem] {
-        #if DEBUG
-        [
-            FullscreenMenuItem(
-                route: .instagram,
-                title: "Instagram",
-                subtitle: "Social feed",
-                systemImage: "camera.circle.fill",
-                iconColor: .pink
-            ),
-            FullscreenMenuItem(
-                route: .tweet,
-                title: "Twitter",
-                subtitle: "Social feed",
-                systemImage: "text.bubble.fill",
-                iconColor: .blue
-            )
-        ]
-        #else
-        []
-        #endif
-    }
-
     var body: some View {
         Section {
             ForEach(items) { item in
                 MenuRouteButton(item: item) {
                     onSelect(item.route)
-                }
-            }
-            ForEach(socialItems) { item in
-                MenuRouteButton(item: item) {
-                    onSelectRoute(item.route)
                 }
             }
         } header: {

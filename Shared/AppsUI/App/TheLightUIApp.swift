@@ -8,7 +8,6 @@
 import SwiftUI
 import Firebase
 
-@available(iOS 18.0, *)
 @main
 struct TheLightUIApp: App {
     private let dependencies: AppDependencies
@@ -43,7 +42,6 @@ struct TheLightUIApp: App {
     }
 }
 
-@available(iOS 18.0, *)
 private struct AppRootView: View {
     @State private var showLaunch = true
     let dependencies: AppDependencies

@@ -24,8 +24,8 @@ extension LeadDetailUI {
             CustomerDetailField(name: detail.contractor, label: CustomerLabels.contractor),
             CustomerDetailField(name: detail.spouse, label: CustomerLabels.spouse),
             CustomerDetailField(name: detail.email, label: CustomerLabels.email),
-            CustomerDetailField(name: detail.formattedLastUpdateDate, label: CustomerLabels.lastUpdated),
             CustomerDetailField(name: detail.rate, label: CustomerLabels.rating),
+            CustomerDetailField(name: detail.adNo, label: CustomerLabels.adNo),
             CustomerDetailField(name: detail.salesman, label: CustomerLabels.salesman),
             CustomerDetailField(name: detail.job, label: CustomerLabels.job),
             CustomerDetailField(name: detail.product, label: CustomerLabels.product),
@@ -33,13 +33,11 @@ extension LeadDetailUI {
             CustomerDetailField(name: detail.formattedStartDate, label: isLead ? CustomerLabels.aptDate : CustomerLabels.startDate),
             CustomerDetailField(name: detail.formattedCompletionDate, label: CustomerLabels.complete),
             CustomerDetailField(name: detail.callback, label: CustomerLabels.callback),
-            CustomerDetailField(name: detail.adNo, label: CustomerLabels.adNo),
+            CustomerDetailField(name: detail.formattedLastUpdateDate, label: CustomerLabels.lastUpdated),
             CustomerDetailField(name: detail.photo, label: CustomerLabels.photo)
         ]
         if isLead {
             fields.removeAll { $0.label == CustomerLabels.contractor || $0.label == CustomerLabels.complete }
-        } else {
-            fields.removeAll { $0.label == CustomerLabels.callback }
         }
         return fields
     }
@@ -47,7 +45,7 @@ extension LeadDetailUI {
     // Employee records store their specific data in repurposed CustomerItem fields;
     // this list uses the correct labels for each slot.
     var employeeDetailFields: [CustomerDetailField] {
-        [
+        var fields = [
             CustomerDetailField(name: detail.first, label: CustomerLabels.first),
             CustomerDetailField(name: detail.phone, label: CustomerLabels.phone),
             CustomerDetailField(name: detail.spouse, label: CustomerLabels.socialSecurity),
@@ -57,9 +55,12 @@ extension LeadDetailUI {
             CustomerDetailField(name: detail.callback, label: CustomerLabels.middle),
             CustomerDetailField(name: detail.formattedStartDate, label: CustomerLabels.startDate),
             CustomerDetailField(name: detail.formattedCompletionDate, label: CustomerLabels.complete),
+            CustomerDetailField(name: detail.callback, label: CustomerLabels.callback),
             CustomerDetailField(name: detail.formattedLastUpdateDate, label: CustomerLabels.lastUpdated),
             CustomerDetailField(name: detail.photo, label: CustomerLabels.photo)
         ]
+        fields.removeAll { $0.label == CustomerLabels.middle && $0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        return fields
     }
 
     // Vendor records store their specific data in repurposed CustomerItem fields;
@@ -73,6 +74,7 @@ extension LeadDetailUI {
             CustomerDetailField(name: detail.lastname, label: CustomerLabels.profession),
             CustomerDetailField(name: detail.callback, label: CustomerLabels.manager),
             CustomerDetailField(name: detail.rate, label: CustomerLabels.rating),
+            CustomerDetailField(name: detail.callback, label: CustomerLabels.callback),
             CustomerDetailField(name: detail.formattedLastUpdateDate, label: CustomerLabels.lastUpdated),
             CustomerDetailField(name: detail.photo, label: CustomerLabels.photo)
         ]

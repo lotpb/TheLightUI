@@ -95,7 +95,7 @@ struct MainMenuCoordinator {
     func dataDestination(_ route: MainMenuDataRoute) -> some View {
         switch route {
         case .snapshot:
-            MacbookPro()
+            SnapshotView()
         case .leads:
             CustomerUI(
                 customerService: makeCustomerService(),

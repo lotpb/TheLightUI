@@ -28,6 +28,7 @@ struct SettingView: View {
     }
 
     @State private var settings: AppSettingsStore
+    @AppStorage("adminPassword") private var adminPassword: String = "admin"
 
     init(settings: AppSettingsStore = AppSettingsStore()) {
         _settings = State(initialValue: settings)
@@ -52,6 +53,7 @@ struct SettingView: View {
             mapSection
             calendarSection
             generalSection
+            securitySection
         }
     }
 
@@ -121,6 +123,20 @@ struct SettingView: View {
                 settingsTextField("", text: $settings.emailMessage)
             }
             settingsTextField("Version", text: $settings.version)
+        }
+    }
+
+    private var securitySection: some View {
+        Section("Security") {
+            HStack {
+                Text("Admin Password")
+                Spacer()
+                SecureField("required", text: $adminPassword)
+                    .settingsFieldStyle()
+                    .textContentType(.password)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+            }
         }
     }
 
