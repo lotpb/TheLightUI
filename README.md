@@ -1,5 +1,6 @@
 # TheLight Software
 
+# Works on iPhone, iPad, iMac
 
 
 <img width="295" height="640" alt="Content - Dark" src="https://github.com/user-attachments/assets/c0ea5142-ca59-415b-aa60-cf3450993032" />
