@@ -42,8 +42,8 @@ struct ListRowView: View {
                     .contentTransition(.symbolEffect(.replace))
 
                 Text(item.createdAt, format: .dateTime.month(.abbreviated).day())
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                    .font(.footnote)
+                    .foregroundStyle(.primary)
             }
         }
         .padding(.vertical, 8)
