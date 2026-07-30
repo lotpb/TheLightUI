@@ -66,7 +66,7 @@ extension CustomerItem {
 
         self.init(
             id: document.documentID,
-            isActive: document.stringValue(for: fields.active) == "1",
+            isActive: document.boolValue(for: fields.active),
             first: document.stringValue(for: fields.first),
             lastname: document.stringValue(for: fields.lastname),
             street: street,
@@ -115,6 +115,14 @@ private extension QueryDocumentSnapshot {
 
     func dateValue(for field: String) -> Date? {
         (get(field) as? Timestamp)?.dateValue()
+    }
+
+    // Handles active stored as Bool true, String "1", or Int 1.
+    func boolValue(for field: String) -> Bool {
+        if let b = get(field) as? Bool { return b }
+        if let s = get(field) as? String { return s == "1" }
+        if let n = get(field) as? NSNumber { return n.intValue == 1 }
+        return false
     }
 }
 

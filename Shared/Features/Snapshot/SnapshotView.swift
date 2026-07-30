@@ -16,6 +16,9 @@ private final class SnapshotViewModel {
     var salesCompletionCount: Int = 0
     var appointmentsToday: [CustomerItem] = []
     var jobsStartingToday: [CustomerItem] = []
+    var activeCustomerCount: Int = 0
+    var activeLeadCount: Int = 0
+    var totalCustomerSales: Int = 0
     var isLoading = false
     var errorMessage: String?
 
@@ -62,8 +65,22 @@ private final class SnapshotViewModel {
             .whereField(CustomerFirestoreSchema.Field.completion, isLessThan: Timestamp(date: end))
             .order(by: CustomerFirestoreSchema.Field.completion, descending: true)
             .getDocuments()
+        async let activeCustomerSnap = Firestore.firestore()
+            .collection(CustomerFirestoreSchema.collection)
+            .whereField(CustomerFirestoreSchema.Field.active, isEqualTo: "1")
+            .whereField(CustomerFirestoreSchema.Field.category, isEqualTo: CustomerItem.Category.customer.rawValue)
+            .getDocuments()
+        async let activeLeadSnap = Firestore.firestore()
+            .collection(CustomerFirestoreSchema.collection)
+            .whereField(CustomerFirestoreSchema.Field.active, isEqualTo: "1")
+            .whereField(CustomerFirestoreSchema.Field.category, isEqualTo: CustomerItem.Category.lead.rawValue)
+            .getDocuments()
+        async let allCustomerSalesSnap = Firestore.firestore()
+            .collection(CustomerFirestoreSchema.collection)
+            .whereField(CustomerFirestoreSchema.Field.category, isEqualTo: CustomerItem.Category.customer.rawValue)
+            .getDocuments()
         do {
-            let (leads, appts, sales) = try await (leadsSnap, apptSnap, salesSnap)
+            let (leads, appts, sales, activeCustomers, activeLeads, allCustomers) = try await (leadsSnap, apptSnap, salesSnap, activeCustomerSnap, activeLeadSnap, allCustomerSalesSnap)
             let allCreatedToday = leads.documents.map(CustomerItem.init)
             leadsToday = allCreatedToday.filter { CustomerItem.Category.lead.matches($0.category) }
             customersToday = allCreatedToday.filter { CustomerItem.Category.customer.matches($0.category) }
@@ -80,6 +97,9 @@ private final class SnapshotViewModel {
             let fromCreation = customersToday.filter { $0.amount > 0 }
             let existingIds = Set(fromCompletion.map(\.id))
             salesToday = fromCompletion + fromCreation.filter { !existingIds.contains($0.id) }
+            activeCustomerCount = activeCustomers.documents.count
+            activeLeadCount = activeLeads.documents.count
+            totalCustomerSales = allCustomers.documents.map(CustomerItem.init).reduce(0) { $0 + $1.amount }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -143,6 +163,20 @@ struct SnapshotView: View {
             }
             .padding(.vertical, 4)
             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 4, trailing: 16))
+
+            HStack(spacing: 6) {
+                SnapshotStatCard(title: "Active Leads", value: "\(viewModel.activeLeadCount)", color: themeColor)
+                    .frame(maxWidth: .infinity)
+                SnapshotStatCard(title: "Active Customers", value: "\(viewModel.activeCustomerCount)", color: .mint)
+                    .frame(maxWidth: .infinity)
+                SnapshotStatCard(
+                    title: "Total Sales",
+                    value: CustomerPresentationFormatters.currency.string(from: NSNumber(value: viewModel.totalCustomerSales)) ?? "$0",
+                    color: .green
+                )
+                .frame(maxWidth: .infinity)
+            }
+            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 4, trailing: 16))
 
             // Count bar chart
             Chart(barEntries) { entry in
@@ -310,7 +344,7 @@ struct SnapshotView: View {
                 }
             } header: {
                 HStack {
-                    Text("Jobs Starting Today")
+                    Text("Jobs in Progress")
                         .foregroundStyle(.teal)
                     Spacer()
                     if !viewModel.jobsStartingToday.isEmpty {

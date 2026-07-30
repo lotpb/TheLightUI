@@ -52,6 +52,10 @@ final class ChartViewModel {
         customerItems.count
     }
 
+    var activeCustomerCount: Int {
+        customerItems.filter(\.isActive).count
+    }
+
     var formattedTotalAmount: String {
         ChartFormatters.currency(customerItems.reduce(0) { $0 + $1.amount })
     }

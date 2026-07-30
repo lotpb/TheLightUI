@@ -591,6 +591,7 @@
 				AF4F5DD32FC746910003B277 /* MainMenu */,
 				AF4F5DE12FC7506F0003B277 /* Customers */,
 				AF4F5DDA2FC74EAB0003B277 /* Auth */,
+				AFD1E3B3301B7CFD00C13A8E /* Snapshot */,
 				AF4F5DD02FC7468A0003B277 /* Chat */,
 				AFD5D8842FF4552F008934BE /* SharedUI */,
 				AFD5D86A2FF4538C008934BE /* UserForm */,
@@ -725,7 +726,6 @@
 				AF2E4BA93011D2DC00D77F40 /* LeadDetailCalendarHelpers.swift */,
 				AF2E4BAC3011D2EC00D77F40 /* LeadDetailPrint.swift */,
 				AF2E4BA03011D2AF00D77F40 /* RoundedContainerList.swift */,
-				AF4651B4301A5807006D5B56 /* SnapshotView.swift */,
 			);
 			path = Customers;
 			sourceTree = "<group>";
@@ -782,12 +782,12 @@
 			children = (
 				AF92B8902678130800729208 /* TheLightUI--iOS--Info.plist */,
 				AF0E0D97267BB63C00E6CC7D /* GoogleService-Info.plist */,
+				AF093964301810F1000C7201 /* GoogleService-Info-TheLightUI.plist */,
+				AFF04CFA300C24D300A6E9A5 /* GoogleService-Info.plist.example */,
 				AF92B859267812A100729208 /* Shared */,
 				AF92B862267812A300729208 /* Products */,
 				AF488F8A2FE0358700E5F294 /* PrivacyInfo.xcprivacy */,
-				AFF04CFA300C24D300A6E9A5 /* GoogleService-Info.plist.example */,
 				AFF04CFD300C290400A6E9A5 /* APIKeys.xcconfig */,
-				AF093964301810F1000C7201 /* GoogleService-Info-TheLightUI.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -879,6 +879,14 @@
 				AF5CF3E4277B42150044B06E /* FurnitureDetail.swift */,
 			);
 			path = Furniture;
+			sourceTree = "<group>";
+		};
+		AFD1E3B3301B7CFD00C13A8E /* Snapshot */ = {
+			isa = PBXGroup;
+			children = (
+				AF4651B4301A5807006D5B56 /* SnapshotView.swift */,
+			);
+			path = Snapshot;
 			sourceTree = "<group>";
 		};
 		AFD5D8582FF450AC008934BE /* Membership */ = {
