@@ -3,6 +3,8 @@
 
 
 <img width="295" height="640" alt="Content - Dark" src="https://github.com/user-attachments/assets/c0ea5142-ca59-415b-aa60-cf3450993032" />
+
+<img width="295" height="640" alt="SnapshotView" src="https://github.com/user-attachments/assets/d770dbcf-d647-416d-a97c-59ac77a3644d" />
 <img width="295" height="640" alt="Charts - Dark" src="https://github.com/user-attachments/assets/937d145e-eda3-456b-a890-57187a5676b5" />
 <img width="295" height="640" alt="Expenses (Dark Appearance)" src="https://github.com/user-attachments/assets/85e3fd80-54ff-4779-958d-f4d2fef26bf9" />
 
