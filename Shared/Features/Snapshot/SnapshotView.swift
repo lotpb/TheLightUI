@@ -167,7 +167,7 @@ struct SnapshotView: View {
             HStack(spacing: 6) {
                 SnapshotStatCard(title: "Active Leads", value: "\(viewModel.activeLeadCount)", color: themeColor)
                     .frame(maxWidth: .infinity)
-                SnapshotStatCard(title: "Active Customers", value: "\(viewModel.activeCustomerCount)", color: .mint)
+                SnapshotStatCard(title: "Active Customers", value: "\(viewModel.activeCustomerCount)", color: .indigo)
                     .frame(maxWidth: .infinity)
                 SnapshotStatCard(
                     title: "Total Sales",

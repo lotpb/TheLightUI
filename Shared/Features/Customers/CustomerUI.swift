@@ -150,15 +150,26 @@ struct CustomerUI: View {
             } else if viewModel.items.isEmpty {
                 Text("No Customers")
             } else {
-                activeOnlyToggle(count: listViewModel.displayedItems.count)
-                customerRows(items: listViewModel.displayedItems)
+                activeOnlyToggle
+                let sections = listViewModel.displayedSections
+                if sections.isEmpty {
+                    customerRows(items: listViewModel.displayedItems)
+                } else {
+                    ForEach(sections, id: \.header) { section in
+                        Section(section.header) {
+                            customerRows(items: section.items)
+                        }
+                    }
+                }
             }
         }
     }
 
-    private func activeOnlyToggle(count: Int) -> some View {
+    private var activeOnlyToggle: some View {
         Toggle(isOn: $listViewModel.isActiveOnly) {
-            Text("\(count) Active Only")
+            Text(listViewModel.isActiveOnly
+                 ? "\(listViewModel.displayedItems.count) Active"
+                 : "\(listViewModel.totalCount) \(listViewModel.categoryFilter?.listTitle ?? "Total")")
                 .foregroundStyle(themeColor)
         }
         .toggleStyle(.switch)
@@ -219,6 +230,13 @@ struct CustomerUI: View {
 
     @ViewBuilder
     private func trailingSwipeActions(for item: CustomerItem) -> some View {
+        Button {
+            toggleActive(item)
+        } label: {
+            Label(item.isActive ? "Inactive" : "Active", systemImage: item.isActive ? "minus.circle" : "checkmark.circle")
+        }
+        .tint(item.isActive ? .gray : .blue)
+
         Button(role: .destructive) {
             deleteItems([item])
         } label: {
@@ -350,6 +368,23 @@ struct CustomerUI: View {
             dateComponents: dateComponents,
             repeats: true
         )
+    }
+
+    private func toggleActive(_ item: CustomerItem) {
+        var modified = item
+        modified.isActive = !item.isActive
+        let payload = CustomerFormPayload(
+            customer: modified,
+            amount: modified.amount,
+            quantity: modified.quantity,
+            rate: modified.rate,
+            creationDate: modified.creationDate,
+            startDate: modified.startDate,
+            completionDate: modified.completionDate
+        )
+        Task {
+            try? await formService.updateCustomer(id: item.id, payload: payload)
+        }
     }
 
     private func deleteItems(_ items: [CustomerItem]) {

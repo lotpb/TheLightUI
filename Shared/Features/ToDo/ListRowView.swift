@@ -29,16 +29,22 @@ struct ListRowView: View {
 
             Spacer()
 
-            Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
-                .font(.title2)
-                .foregroundStyle(item.isCompleted ? Color.green : .clear)
-                .background(
-                    Circle().stroke(
-                        AngularGradient(gradient: Gradient(colors: CustomColor.gradColors), center: .center),
-                        style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round)
+            VStack(alignment: .trailing, spacing: 4) {
+                Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
+                    .font(.title2)
+                    .foregroundStyle(item.isCompleted ? Color.green : .clear)
+                    .background(
+                        Circle().stroke(
+                            AngularGradient(gradient: Gradient(colors: CustomColor.gradColors), center: .center),
+                            style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round)
+                        )
                     )
-                )
-                .contentTransition(.symbolEffect(.replace))
+                    .contentTransition(.symbolEffect(.replace))
+
+                Text(item.createdAt, format: .dateTime.month(.abbreviated).day())
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
         }
         .padding(.vertical, 8)
     }

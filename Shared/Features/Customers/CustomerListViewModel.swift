@@ -55,6 +55,32 @@ final class CustomerListViewModel {
     // Derived collection: already filtered and sorted, ready for ForEach.
     private(set) var displayedItems: [CustomerItem] = []
 
+    // Total records for the current route — scoped to categoryFilter when set.
+    var totalCount: Int {
+        guard let categoryFilter else { return allItems.count }
+        return allItems.filter { categoryFilter.matches($0.category) }.count
+    }
+
+    // Sections grouped by category — only populated when no categoryFilter is set.
+    // Each section contains the subset of displayedItems matching that category.
+    var displayedSections: [(header: String, items: [CustomerItem])] {
+        guard categoryFilter == nil else { return [] }
+        var sections: [(header: String, items: [CustomerItem])] = []
+        for cat in CustomerItem.Category.allCases {
+            let catItems = displayedItems.filter { cat.matches($0.category) }
+            if !catItems.isEmpty {
+                sections.append((header: cat.listTitle, items: catItems))
+            }
+        }
+        let uncategorized = displayedItems.filter { item in
+            !CustomerItem.Category.allCases.contains(where: { $0.matches(item.category) })
+        }
+        if !uncategorized.isEmpty {
+            sections.append((header: "Other", items: uncategorized))
+        }
+        return sections
+    }
+
     private func recomputeDisplayedItems() {
         let filteredItems = filteredItems(from: allItems)
 
