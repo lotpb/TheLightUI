@@ -282,3 +282,64 @@ enum ChatRepositoryError: LocalizedError {
         }
     }
 }
+
+// MARK: - Local JSON
+
+private struct NoOpChatListener: ChatListener {
+    func remove() {}
+}
+
+/// Reads recent messages from Documents/MessagesBackup.json.
+/// Used when "Store Data on Device" is enabled in Settings.
+final class LocalJSONChatRepository: ChatRepositoryProtocol, Sendable {
+    static let fileName = "MessagesBackup.json"
+
+    private static var fileURL: URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(fileName)
+    }
+
+    var currentUserId: String? { "local-user" }
+
+    func signOut() throws {}
+
+    func fetchCurrentUser() async throws -> UserModel {
+        let email = SecureSettingsStore.loadString(forKey: SettingsUI.emailKey)
+        return UserModel(uid: "local-user", email: email.isEmpty ? "local@device" : email, profileImageUrl: "")
+    }
+
+    func fetchAvailableUsers() async throws -> [UserModel] { [] }
+
+    func listenForRecentMessages(
+        userId: String,
+        onChange: @escaping ([RecentMessage]) -> Void,
+        onError: @escaping (Error) -> Void
+    ) -> ChatListener {
+        do {
+            let data = try Data(contentsOf: Self.fileURL)
+            let records = try MessageJSONTransfer.decodeRecords(from: data)
+            onChange(records.map(\.recentMessage))
+        } catch {
+            let nsError = error as NSError
+            if nsError.domain == NSCocoaErrorDomain && nsError.code == NSFileReadNoSuchFileError {
+                onChange([])
+            } else {
+                onError(error)
+            }
+        }
+        return NoOpChatListener()
+    }
+
+    func listenForMessages(
+        fromId: String,
+        toId: String,
+        onMessages: @escaping ([ChatMessage]) -> Void,
+        onError: @escaping (Error) -> Void
+    ) -> ChatListener {
+        onMessages([])
+        return NoOpChatListener()
+    }
+
+    func sendTextMessage(_ text: String, to chatUser: UserModel) async throws {}
+    func sendImageMessage(_ imageData: Data, to chatUser: UserModel) async throws {}
+}

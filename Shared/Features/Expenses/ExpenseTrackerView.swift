@@ -148,7 +148,7 @@ struct ExpenseTrackerView: View {
             isPresented: $isExporting,
             document: exportDocument,
             contentType: .json,
-            defaultFilename: "Expenseswift.json"
+            defaultFilename: "ExpenseBackup.json"
         ) { result in
             if case .failure(let error) = result {
                 showTransferMessage("Export failed: \(error.localizedDescription)")

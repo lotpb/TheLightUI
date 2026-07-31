@@ -23,7 +23,7 @@ struct AppDependencies {
         makeLoginService: { FirebaseLoginService() },
         makeAuthenticationService: { AuthenticationService() },
         appBadgeManager: LiveAppBadgeManager(),
-        makeChatRepository: { FirebaseChatRepository() },
+        makeChatRepository: { AppDataStorage.isFirebase ? FirebaseChatRepository() as ChatRepositoryProtocol : LocalJSONChatRepository() },
         makeCustomerService: { AppDataStorage.isFirebase ? FirebaseCustomerService() as CustomerServicing : LocalJSONCustomerService() },
         makeCustomerFormService: { FirebaseCustomerFormService() },
         makeWeatherManager: { WeatherManager() },

@@ -39,9 +39,9 @@ struct MainMessagesView: View {
     init(
         isAuthenticated: Bool,
         onSignOut: @escaping () -> Void,
-        repository: ChatRepositoryProtocol = FirebaseChatRepository(),
-        chatLogRepository: ChatRepositoryProtocol = FirebaseChatRepository(),
-        makeChatRepository: @escaping () -> ChatRepositoryProtocol = { FirebaseChatRepository() }
+        repository: ChatRepositoryProtocol = AppDataStorage.isFirebase ? FirebaseChatRepository() as ChatRepositoryProtocol : LocalJSONChatRepository(),
+        chatLogRepository: ChatRepositoryProtocol = AppDataStorage.isFirebase ? FirebaseChatRepository() as ChatRepositoryProtocol : LocalJSONChatRepository(),
+        makeChatRepository: @escaping () -> ChatRepositoryProtocol = { AppDataStorage.isFirebase ? FirebaseChatRepository() as ChatRepositoryProtocol : LocalJSONChatRepository() }
     ) {
         self.isAuthenticated = isAuthenticated
         self.onSignOut = onSignOut

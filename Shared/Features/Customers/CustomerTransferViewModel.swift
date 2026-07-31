@@ -39,12 +39,34 @@ final class CustomerTransferViewModel {
         }
     }
 
-    // Reads the picked file, then upserts its decoded records into Firestore.
-    // Records that keep their exported document id overwrite the matching
-    // document, so re-importing a backup restores edits instead of duplicating
-    // customers. `existingItems` distinguishes updates from inserts in the result message.
-    func handleImport(_ result: Result<URL, Error>, existingItems: [CustomerItem]) {
+    // Reads the picked file and either writes it to the local JSON store (device
+    // mode) or upserts the records into Firestore (Firebase mode). `onLocalComplete`
+    // is called after a successful device-mode write so the caller can refresh
+    // the customer store without requiring a pull-to-refresh.
+    func handleImport(_ result: Result<URL, Error>, existingItems: [CustomerItem], onLocalComplete: (() -> Void)? = nil) {
         guard !isTransferring else { return }
+
+        if !AppDataStorage.isFirebase {
+            isTransferring = true
+            Task {
+                defer { isTransferring = false }
+                do {
+                    let url = try result.get()
+                    let records = try await Self.loadRecords(from: url)
+                    let fileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                        .appendingPathComponent(LocalJSONCustomerService.fileName)
+                    let data = try CustomerJSONTransfer.exportData(for: records.map(\.customerItem))
+                    try data.write(to: fileURL, options: .atomic)
+                    onLocalComplete?()
+                    showAlert("Imported \(records.count) customer\(records.count == 1 ? "" : "s") to device.")
+                } catch {
+                    showAlert("Import failed: \(error.localizedDescription)")
+                }
+            }
+            return
+        }
+
+        // Firebase mode: upsert into Firestore.
         // setData without a uid strips the field from every existing document; require sign-in.
         guard let userId = formService.currentUserId else {
             showAlert("Sign in before importing customers.")

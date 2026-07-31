@@ -127,13 +127,15 @@ struct CustomerUI: View {
             // .data is included because fileExporter on some iOS versions saves without
             // a .json extension, which the system types as generic data (greying it out).
             .fileImporter(isPresented: $transferViewModel.isImporting, allowedContentTypes: [.json, .plainText, .data]) { result in
-                transferViewModel.handleImport(result, existingItems: viewModel.items)
+                transferViewModel.handleImport(result, existingItems: viewModel.items) {
+                    viewModel.fetchData(showsLoadingIndicator: false)
+                }
             }
             .fileExporter(
                 isPresented: $transferViewModel.isExporting,
                 document: transferViewModel.exportDocument,
                 contentType: .json,
-                defaultFilename: "Customerswift.json"
+                defaultFilename: "CustomerBackup.json"
             ) { result in
                 transferViewModel.finishExport(result)
             }

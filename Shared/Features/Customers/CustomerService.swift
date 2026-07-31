@@ -63,10 +63,10 @@ private struct NoOpCustomerListener: CustomerListener {
     func remove() {}
 }
 
-/// Reads and writes customers from Documents/Customerswift.json.
+/// Reads and writes customers from Documents/CustomerBackup.json.
 /// Used when "Store Data on Device" is enabled in Settings.
 final class LocalJSONCustomerService: CustomerServicing, Sendable {
-    static let fileName = "Customerswift.json"
+    static let fileName = "CustomerBackup.json"
 
     private static var fileURL: URL {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
