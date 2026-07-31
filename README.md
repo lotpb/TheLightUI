@@ -1,9 +1,18 @@
 <img width="575" height="400" alt="495b3004-d960-4c43-a21c-c1771f263769" src="https://github.com/user-attachments/assets/b027d421-94f0-4381-9e0d-9f9ea3e60b05" />
 
 
-Works on iPhone, iPad, iMac
-
-
+  •	Built a multiplatform SwiftUI app from a shared codebase targeting iPhone, iPad, and Mac, maximizing code reuse across Apple platforms
+	
+  •	Integrated Firebase for backend data and authentication, handling asynchronous data flow between a live service and the UI
+	
+  •	Implemented interactive data visualizations with Swift Charts, including full light/dark mode support following Apple’s Human Interface Guidelines
+	
+  •	Authored Apple’s required App Store privacy manifest (PrivacyInfo.xcprivacy), demonstrating familiarity with current submission requirements
+	
+  •	Separated secrets from source using xcconfig files and template configs, following team-standard security practices
+	
+  •	Maintained the project across 100+ commits with disciplined Git hygiene (.gitignore, .gitattributes) and build automation scripts
+  
 <img width="295" height="640" alt="MainMenuUI (Dark Appearance)" src="https://github.com/user-attachments/assets/3da89dba-4389-403e-a47b-dc884cdf78d8" />
 <img width="295" height="640" alt="SnapshotView" src="https://github.com/user-attachments/assets/d770dbcf-d647-416d-a97c-59ac77a3644d" />
 <img width="295" height="640" alt="ListView (Dark Appearance)" src="https://github.com/user-attachments/assets/41aa4553-4819-4564-a162-7267159e2a3d" />
