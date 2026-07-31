@@ -1,9 +1,9 @@
-# TheLight Software
+<img width="575" height="400" alt="495b3004-d960-4c43-a21c-c1771f263769" src="https://github.com/user-attachments/assets/b027d421-94f0-4381-9e0d-9f9ea3e60b05" />
+
 
 Works on iPhone, iPad, iMac
 
 
-<img width="295" height="640" alt="Content - Dark" src="https://github.com/user-attachments/assets/c0ea5142-ca59-415b-aa60-cf3450993032" />
 <img width="295" height="640" alt="SnapshotView" src="https://github.com/user-attachments/assets/d770dbcf-d647-416d-a97c-59ac77a3644d" />
 <img width="295" height="640" alt="ListView (Dark Appearance)" src="https://github.com/user-attachments/assets/41aa4553-4819-4564-a162-7267159e2a3d" />
 
