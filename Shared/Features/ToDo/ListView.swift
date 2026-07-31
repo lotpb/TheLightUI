@@ -143,32 +143,36 @@ struct ListView: View {
                     }
                     .disabled(listViewModel.items.isEmpty)
                     Divider()
-                    // Import stays enabled with an empty list so a backup can
-                    // restore it; export needs items to write.
-                    Button {
-                        transferViewModel.isImporting = true
+                    Menu {
+                        // Import stays enabled with an empty list so a backup
+                        // can restore it; export needs items to write.
+                        Button {
+                            transferViewModel.isImporting = true
+                        } label: {
+                            Label("Import JSON", systemImage: "square.and.arrow.down")
+                        }
+                        Button {
+                            transferViewModel.startExport(items: listViewModel.items)
+                        } label: {
+                            Label("Export JSON", systemImage: "square.and.arrow.up")
+                        }
+                        .disabled(listViewModel.items.isEmpty)
+                        Divider()
+                        Button {
+                            backUpToFirebase()
+                        } label: {
+                            Label("Back Up to Firebase", systemImage: "icloud.and.arrow.up")
+                        }
+                        .disabled(listViewModel.items.isEmpty || isSyncing)
+                        Button {
+                            restoreFromFirebase()
+                        } label: {
+                            Label("Restore from Firebase", systemImage: "icloud.and.arrow.down")
+                        }
+                        .disabled(isSyncing)
                     } label: {
-                        Label("Import JSON", systemImage: "square.and.arrow.down")
+                        Label("Backup", systemImage: "externaldrive")
                     }
-                    Button {
-                        transferViewModel.startExport(items: listViewModel.items)
-                    } label: {
-                        Label("Export JSON", systemImage: "square.and.arrow.up")
-                    }
-                    .disabled(listViewModel.items.isEmpty)
-                    Divider()
-                    Button {
-                        backUpToFirebase()
-                    } label: {
-                        Label("Back Up to Firebase", systemImage: "icloud.and.arrow.up")
-                    }
-                    .disabled(listViewModel.items.isEmpty || isSyncing)
-                    Button {
-                        restoreFromFirebase()
-                    } label: {
-                        Label("Restore from Firebase", systemImage: "icloud.and.arrow.down")
-                    }
-                    .disabled(isSyncing)
                     Button {
                         printList()
                     } label: {

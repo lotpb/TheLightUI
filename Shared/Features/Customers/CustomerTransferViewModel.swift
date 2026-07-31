@@ -148,6 +148,49 @@ final class CustomerTransferViewModel {
         }
     }
 
+    func backUp(items: [CustomerItem]) {
+        guard !isTransferring else { return }
+        guard let userId = formService.currentUserId else {
+            showAlert("Sign in before backing up customers.")
+            return
+        }
+        isTransferring = true
+        Task {
+            defer { isTransferring = false }
+            let entries = items.map { item in
+                (
+                    id: item.id,
+                    payload: CustomerFormPayload(
+                        customer: item,
+                        amount: item.amount,
+                        quantity: item.quantity,
+                        rate: item.rate,
+                        creationDate: item.creationDate,
+                        startDate: item.startDate,
+                        completionDate: item.completionDate,
+                        lastUpdateDate: item.lastUpdateDate,
+                        userId: userId
+                    )
+                )
+            }
+            var committed = 0
+            do {
+                for start in stride(from: 0, to: entries.count, by: Self.batchLimit) {
+                    let chunk = Array(entries[start..<min(start + Self.batchLimit, entries.count)])
+                    try await formService.upsertCustomersBatch(chunk)
+                    committed += chunk.count
+                }
+                showAlert("Backed up \(items.count) customer\(items.count == 1 ? "" : "s") to Firebase.")
+            } catch {
+                showAlert("Backup failed after \(committed) of \(items.count) customers: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    func showSyncMessage(_ message: String) {
+        showAlert(message)
+    }
+
     private func showAlert(_ message: String) {
         alertMessage = message
         isShowingAlert = true

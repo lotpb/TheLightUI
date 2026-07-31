@@ -255,17 +255,36 @@ struct CustomerUI: View {
                 }
             }
             Divider()
-            Button {
-                transferViewModel.isImporting = true
+            Menu {
+                // Import stays enabled with an empty list so a backup can
+                // restore it; export and back-up need items to write.
+                Button {
+                    transferViewModel.isImporting = true
+                } label: {
+                    Label("Import JSON", systemImage: "square.and.arrow.down")
+                }
+                Button {
+                    transferViewModel.startExport(items: viewModel.items)
+                } label: {
+                    Label("Export JSON", systemImage: "square.and.arrow.up")
+                }
+                .disabled(viewModel.items.isEmpty)
+                Divider()
+                Button {
+                    backUpToFirebase()
+                } label: {
+                    Label("Back Up to Firebase", systemImage: "icloud.and.arrow.up")
+                }
+                .disabled(viewModel.items.isEmpty || transferViewModel.isTransferring)
+                Button {
+                    restoreFromFirebase()
+                } label: {
+                    Label("Restore from Firebase", systemImage: "icloud.and.arrow.down")
+                }
+                .disabled(transferViewModel.isTransferring)
             } label: {
-                Label("Import JSON", systemImage: "square.and.arrow.down")
+                Label("Backup", systemImage: "externaldrive")
             }
-            Button {
-                transferViewModel.startExport(items: viewModel.items)
-            } label: {
-                Label("Export JSON", systemImage: "square.and.arrow.up")
-            }
-            .disabled(viewModel.items.isEmpty)
             Divider()
             Button {
                 printList()
@@ -277,6 +296,15 @@ struct CustomerUI: View {
         } label: {
             Label("Sort", systemImage: "line.3.horizontal.decrease.circle")
         }
+    }
+
+    private func backUpToFirebase() {
+        transferViewModel.backUp(items: viewModel.items)
+    }
+
+    private func restoreFromFirebase() {
+        viewModel.fetchData()
+        transferViewModel.showSyncMessage("Customers restored from Firebase.")
     }
 
     private func printList() {
