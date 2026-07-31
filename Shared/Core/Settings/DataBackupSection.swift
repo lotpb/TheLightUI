@@ -13,7 +13,7 @@ import SwiftData
 struct DataBackupSection: View {
     private enum BackendOption: String, CaseIterable, Identifiable {
         case firebase = "Firebase"
-        case parse = "Parse"
+        case none = "None"
 
         var id: Self { self }
     }

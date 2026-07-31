@@ -24,7 +24,7 @@ struct AppDependencies {
         makeAuthenticationService: { AuthenticationService() },
         appBadgeManager: LiveAppBadgeManager(),
         makeChatRepository: { FirebaseChatRepository() },
-        makeCustomerService: { FirebaseCustomerService() },
+        makeCustomerService: { AppDataStorage.isFirebase ? FirebaseCustomerService() as CustomerServicing : LocalJSONCustomerService() },
         makeCustomerFormService: { FirebaseCustomerFormService() },
         makeWeatherManager: { WeatherManager() },
         makeWeatherLocationProvider: { LocationWeatherManager() },

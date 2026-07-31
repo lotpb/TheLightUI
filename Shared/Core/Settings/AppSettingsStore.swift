@@ -97,9 +97,9 @@ final class AppSettingsStore {
     var username: String = "" { didSet { defaults.set(username, forKey: SettingsUI.usernameKey) } }
     //var website: String = "" { didSet { defaults.set(website, forKey: SettingsUI.websiteKey) } }
 
-    var companyName: String = "TheLight Software" { didSet { defaults.set(companyName, forKey: SettingsUI.isCompanyNameKey) } }
-    var isSubscriber: Bool = false { didSet { defaults.set(isSubscriber, forKey: SettingsUI.isSubscribedKey) } }
-    var backend: String = "Firebase" { didSet { defaults.set(backend, forKey: SettingsUI.backend) } }
+    var companyName: String = "TheLight" { didSet { defaults.set(companyName, forKey: SettingsUI.isCompanyNameKey) } }
+    var isSubscriber: Bool = true { didSet { defaults.set(isSubscriber, forKey: SettingsUI.isSubscribedKey) } }
+    var backend: String = "None" { didSet { defaults.set(backend, forKey: SettingsUI.backend) } }
     var isFirebaseData: Bool = false { didSet { defaults.set(isFirebaseData, forKey: SettingsUI.isFirebaseDataKey) } }
     var isBackfetch: Bool = false { didSet { defaults.set(isBackfetch, forKey: SettingsUI.isBackfetch) } }
     var color: Int = 0 { didSet { defaults.set(color, forKey: SettingsUI.color) } }

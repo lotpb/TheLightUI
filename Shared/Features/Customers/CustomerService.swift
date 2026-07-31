@@ -56,3 +56,47 @@ final class FirebaseCustomerService: CustomerServicing, @unchecked Sendable {
             .delete()
     }
 }
+
+// MARK: - Local JSON
+
+private struct NoOpCustomerListener: CustomerListener {
+    func remove() {}
+}
+
+/// Reads and writes customers from Documents/Customerswift.json.
+/// Used when "Store Data on Device" is enabled in Settings.
+final class LocalJSONCustomerService: CustomerServicing, Sendable {
+    static let fileName = "Customerswift.json"
+
+    private static var fileURL: URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(fileName)
+    }
+
+    func listenForCustomers(onChange: @escaping @Sendable (Result<[CustomerItem], Error>) -> Void) -> CustomerListener {
+        Task {
+            do {
+                let data = try Data(contentsOf: Self.fileURL)
+                let records = try CustomerJSONTransfer.decodeRecords(from: data)
+                onChange(.success(records.map(\.customerItem)))
+            } catch {
+                let nsError = error as NSError
+                if nsError.domain == NSCocoaErrorDomain && nsError.code == NSFileReadNoSuchFileError {
+                    onChange(.success([]))
+                } else {
+                    onChange(.failure(error))
+                }
+            }
+        }
+        return NoOpCustomerListener()
+    }
+
+    func deleteCustomer(id: String) async throws {
+        let url = Self.fileURL
+        guard let data = try? Data(contentsOf: url) else { return }
+        var records = try CustomerJSONTransfer.decodeRecords(from: data)
+        records.removeAll { $0.id == id }
+        let updated = try CustomerJSONTransfer.exportData(for: records.map(\.customerItem))
+        try updated.write(to: url, options: .atomic)
+    }
+}
