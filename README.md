@@ -4,6 +4,7 @@
 Works on iPhone, iPad, iMac
 
 
+<img width="295" height="640" alt="MainMenuUI (Dark Appearance)" src="https://github.com/user-attachments/assets/3da89dba-4389-403e-a47b-dc884cdf78d8" />
 <img width="295" height="640" alt="SnapshotView" src="https://github.com/user-attachments/assets/d770dbcf-d647-416d-a97c-59ac77a3644d" />
 <img width="295" height="640" alt="ListView (Dark Appearance)" src="https://github.com/user-attachments/assets/41aa4553-4819-4564-a162-7267159e2a3d" />
 
