@@ -1,4 +1,9 @@
-<img width="550" height="400" alt="495b3004-d960-4c43-a21c-c1771f263769" src="https://github.com/user-attachments/assets/b027d421-94f0-4381-9e0d-9f9ea3e60b05" />
+
+
+
+<img width="500" height="400" alt="FCC75B9D-7AA3-4C3D-9F3F-D72FB0A394CE" src="https://github.com/user-attachments/assets/529cc248-ade0-41e1-b067-fef061a89804" />
+
+
 
 
   •	Built a multiplatform SwiftUI app from a shared codebase targeting iPhone, iPad, and Mac, maximizing code reuse across Apple platforms
