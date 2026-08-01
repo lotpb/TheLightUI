@@ -25,6 +25,7 @@ struct ListRowView: View {
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+
             }
 
             Spacer()
@@ -41,9 +42,9 @@ struct ListRowView: View {
                     )
                     .contentTransition(.symbolEffect(.replace))
 
-                Text(item.createdAt, format: .dateTime.month(.abbreviated).day())
-                    .font(.footnote)
-                    .foregroundStyle(.primary)
+                Text(item.createdAt, format: .dateTime.month().day())
+                    .font(.caption)
+                    .foregroundStyle(Color.secondary)
             }
         }
         .padding(.vertical, 8)

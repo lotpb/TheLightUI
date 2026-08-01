@@ -47,7 +47,7 @@ struct IGFeedPost: Identifiable, Hashable, Sendable {
             author: "TheLight Studio",
             location: "Cupertino, California",
             avatarImageName: "taylor_swift_profile",
-            imageName: "ZuckBuddist",
+            imageName: "TheLight Logo",
             likesText: "1,248 likes",
             caption: "TheLight Studio New SwiftUI interaction study with cleaner motion and a tighter content layout.",
             timeAgo: "12 minutes ago"
@@ -65,7 +65,7 @@ struct IGFeedPost: Identifiable, Hashable, Sendable {
             author: "Design Notes",
             location: "New York, New York",
             avatarImageName: "profile-rabbit-toy",
-            imageName: "ZuckBuddist",
+            imageName: "TheLight Logo",
             likesText: "2,419 likes",
             caption: "Design Notes Balancing dense controls with generous reading space for everyday app surfaces.",
             timeAgo: "3 hours ago"

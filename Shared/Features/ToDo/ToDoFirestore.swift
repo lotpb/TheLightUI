@@ -18,17 +18,20 @@ enum ToDoFirestoreSchema {
         static let isCompleted = "isCompleted"
         static let position = "position"
         static let lastUpdate = "lastUpdate"
+        static let createdAt = "createdAt"
     }
 }
 
 extension ItemModel {
     init(document: QueryDocumentSnapshot) {
         let fields = ToDoFirestoreSchema.Field.self
+        let createdAtTimestamp = document.get(fields.createdAt) as? Timestamp
         self.init(
             id: document.documentID,
             title: document.get(fields.title) as? String ?? "",
             notes: document.get(fields.notes) as? String ?? "",
-            isCompleted: document.get(fields.isCompleted) as? Bool ?? false
+            isCompleted: document.get(fields.isCompleted) as? Bool ?? false,
+            createdAt: createdAtTimestamp?.dateValue() ?? Date()
         )
     }
 
@@ -40,7 +43,8 @@ extension ItemModel {
             ToDoFirestoreSchema.Field.notes: notes,
             ToDoFirestoreSchema.Field.isCompleted: isCompleted,
             ToDoFirestoreSchema.Field.position: position,
-            ToDoFirestoreSchema.Field.lastUpdate: Timestamp(date: Date())
+            ToDoFirestoreSchema.Field.lastUpdate: Timestamp(date: Date()),
+            ToDoFirestoreSchema.Field.createdAt: Timestamp(date: createdAt)
         ]
     }
 }

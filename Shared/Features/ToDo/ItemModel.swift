@@ -39,4 +39,8 @@ struct ItemModel: Identifiable, Codable {
     func updatingContent(title: String, notes: String) -> ItemModel {
         ItemModel(id: id, title: title, notes: notes, isCompleted: isCompleted, createdAt: createdAt)
     }
+
+    func preservingCreatedAt(_ date: Date) -> ItemModel {
+        ItemModel(id: id, title: title, notes: notes, isCompleted: isCompleted, createdAt: date)
+    }
 }

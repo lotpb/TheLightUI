@@ -103,7 +103,6 @@ struct ListView: View {
                         // rounded card, like Reminders.
                         .listRowSpacing(10)
                         .refreshable {
-                            listViewModel.getItems()
                             await listViewModel.refreshFromFirebase()
                         }
                     }

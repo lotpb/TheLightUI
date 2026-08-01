@@ -173,7 +173,10 @@ class ListViewModel {
         var merged = items
         for item in importedItems {
             if let index = merged.firstIndex(where: { $0.id == item.id }) {
-                merged[index] = item
+                // Always keep the *older* of the two dates — a true creation
+                // date is always earlier than any sync-time fallback.
+                let oldest = min(item.createdAt, merged[index].createdAt)
+                merged[index] = item.preservingCreatedAt(oldest)
                 updated += 1
             } else {
                 merged.append(item)
