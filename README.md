@@ -1,8 +1,4 @@
-
-
-
-<img width="500" height="400" alt="FCC75B9D-7AA3-4C3D-9F3F-D72FB0A394CE" src="https://github.com/user-attachments/assets/529cc248-ade0-41e1-b067-fef061a89804" />
-
+<img width="500" height="400" alt="The Light Logo" src="https://github.com/user-attachments/assets/8300b28b-c8bc-438d-8117-164ae52dce1f" />
 
 
 
