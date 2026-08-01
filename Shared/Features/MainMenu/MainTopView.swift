@@ -18,7 +18,7 @@ struct MainTopView: View {
 
     @AppStorage("color") private var color: Int?
     @AppStorage(SettingsUI.isCompanyNameKey) private var companyName: String = "Main Menu"
-    @AppStorage(SettingsUI.backend) private var backEnd: String = "None"
+    @AppStorage(SettingsUI.backend) private var backEnd: String = "SwiftData"
     @State private var currentTemperatureText = "--°F"
     @State private var currentWeatherSystemImage = "cloud.sun.fill"
     @State private var currentStepsText = "--"

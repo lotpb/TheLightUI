@@ -13,7 +13,7 @@ import SwiftData
 struct DataBackupSection: View {
     private enum BackendOption: String, CaseIterable, Identifiable {
         case firebase = "Firebase"
-        case none = "None"
+        case none = "SwiftData"
 
         var id: Self { self }
     }
@@ -32,13 +32,16 @@ struct DataBackupSection: View {
     var body: some View {
         Section {
             Picker("Cloud Storage", selection: $backend) {
-                ForEach(BackendOption.allCases) { option in
-                    Text(option.rawValue)
-                        .tag(option.rawValue)
+                if !isFirebaseData {
+                    ForEach(BackendOption.allCases) { option in
+                        Text(option.rawValue)
+                            .tag(option.rawValue)
+                    }
+                } else {
+                    Text(BackendOption.firebase.rawValue)
+                        .tag(BackendOption.firebase.rawValue)
                 }
             }
-            // Inverted presentation of isFirebaseData: on = keep data on
-            // this device, off = store in Firebase.
             Toggle(isOn: Binding(
                 get: { !isFirebaseData },
                 set: { isFirebaseData = !$0 }
@@ -48,7 +51,10 @@ struct DataBackupSection: View {
             .disabled(isSyncing)
             .onChange(of: isFirebaseData) { _, enabled in
                 if enabled {
+                    backend = BackendOption.firebase.rawValue
                     seedFirebase()
+                } else {
+                    backend = BackendOption.none.rawValue
                 }
             }
             .alert(resultMessage ?? "", isPresented: $isShowingResult) {
@@ -84,6 +90,32 @@ struct DataBackupSection: View {
             if !items.isEmpty {
                 try await ToDoFirestoreService().backUp(items)
                 pushed.append("\(items.count) to-do item\(items.count == 1 ? "" : "s")")
+            }
+            let fileURL = FileManager.default
+                .urls(for: .documentDirectory, in: .userDomainMask)[0]
+                .appendingPathComponent(LocalJSONCustomerService.fileName)
+            if let data = try? Data(contentsOf: fileURL) {
+                let customers = try CustomerJSONTransfer.decodeRecords(from: data).map(\.customerItem)
+                if !customers.isEmpty {
+                    let service = FirebaseCustomerFormService()
+                    let entries = customers.map { item in
+                        (id: item.id, payload: CustomerFormPayload(
+                            customer: item,
+                            amount: item.amount,
+                            quantity: item.quantity,
+                            rate: item.rate,
+                            creationDate: item.creationDate,
+                            startDate: item.startDate,
+                            completionDate: item.completionDate,
+                            lastUpdateDate: item.lastUpdateDate
+                        ))
+                    }
+                    for start in stride(from: 0, to: entries.count, by: 500) {
+                        let chunk = Array(entries[start..<min(start + 500, entries.count)])
+                        try await service.upsertCustomersBatch(chunk)
+                    }
+                    pushed.append("\(customers.count) customer\(customers.count == 1 ? "" : "s")")
+                }
             }
             guard !pushed.isEmpty else {
                 return "Firebase storage is on. New data will save to Firebase."
