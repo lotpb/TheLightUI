@@ -65,30 +65,28 @@ struct ListView: View {
                         List {
                             Section {
                                 ForEach(listViewModel.visibleItems) { item in
-                                    ListRowView(item: item)
-                                        .contentShape(.rect)
-                                        .onTapGesture {
-                                            withAnimation(.snappy) {
-                                                listViewModel.updateItem(item: item)
-                                            }
+                                    ListRowView(item: item) {
+                                        withAnimation(.snappy) {
+                                            listViewModel.updateItem(item: item)
                                         }
-                                        .swipeActions(edge: .leading) {
-                                            Button {
-                                                editingItem = item
-                                            } label: {
-                                                Label("Edit", systemImage: "pencil")
-                                            }
-                                            .tint(.blue)
+                                    }
+                                    .swipeActions(edge: .leading) {
+                                        Button {
+                                            editingItem = item
+                                        } label: {
+                                            Label("Edit", systemImage: "pencil")
                                         }
-                                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                            Button(role: .destructive) {
-                                                withAnimation(.easeInOut) {
-                                                    listViewModel.deleteItem(item)
-                                                }
-                                            } label: {
-                                                Label("Delete", systemImage: "trash")
+                                        .tint(.blue)
+                                    }
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                        Button(role: .destructive) {
+                                            withAnimation(.easeInOut) {
+                                                listViewModel.deleteItem(item)
                                             }
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
                                         }
+                                    }
                                 }
                                 .onDelete(perform: listViewModel.deleteItem)
                                 .onMove(perform: listViewModel.moveItem)

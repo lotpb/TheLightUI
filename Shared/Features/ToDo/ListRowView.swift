@@ -10,6 +10,7 @@ import SwiftUI
 
 struct ListRowView: View {
     let item: ItemModel
+    var onToggle: () -> Void = {}
 
     var body: some View {
         HStack(alignment: .top, spacing: 14) {
@@ -31,16 +32,19 @@ struct ListRowView: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 4) {
-                Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
-                    .font(.title2)
-                    .foregroundStyle(item.isCompleted ? Color.green : .clear)
-                    .background(
-                        Circle().stroke(
-                            AngularGradient(gradient: Gradient(colors: CustomColor.gradColors), center: .center),
-                            style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round)
+                Button(action: onToggle) {
+                    Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
+                        .font(.title2)
+                        .foregroundStyle(item.isCompleted ? Color.green : .clear)
+                        .background(
+                            Circle().stroke(
+                                AngularGradient(gradient: Gradient(colors: CustomColor.gradColors), center: .center),
+                                style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round)
+                            )
                         )
-                    )
-                    .contentTransition(.symbolEffect(.replace))
+                        .contentTransition(.symbolEffect(.replace))
+                }
+                .buttonStyle(.plain)
 
                 Text(item.createdAt, format: .dateTime.month().day())
                     .font(.caption)
