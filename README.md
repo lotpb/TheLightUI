@@ -1,4 +1,4 @@
-<img width="500" height="400" alt="The Light Logo" src="https://github.com/user-attachments/assets/8300b28b-c8bc-438d-8117-164ae52dce1f" />
+<img width="450" height="400" alt="The Light Logo" src="https://github.com/user-attachments/assets/8300b28b-c8bc-438d-8117-164ae52dce1f" />
 
 
 
