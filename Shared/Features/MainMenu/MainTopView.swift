@@ -47,6 +47,13 @@ struct MainTopView: View {
                 .minimumScaleFactor(0.9)
                 .padding(.top, 15)
                 .padding(.leading, 15)
+            Spacer()
+            Image("The Light Logo")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 60)
+                .padding(.trailing, 15)
+                .padding(.top, 15)
         }
     }
 

@@ -21,6 +21,8 @@ struct CustomerCellView: View, Equatable {
     let data: CustomerItem
     // Whether to enable the comments action.
     let showsComments: Bool
+    // Whether to show the inline action icons at the bottom of the cell.
+    var showsActions: Bool = true
     // Persisted theme color choice passed down from the parent list.
     let color: Int?
 
@@ -63,7 +65,9 @@ struct CustomerCellView: View, Equatable {
                 .customerCellSingleLineText()
                 .accessibilityLabel(Text("Address \(data.address)"))
 
-            rowActions
+            if showsActions {
+                rowActions
+            }
         }
         .padding(.leading, 10)
     }

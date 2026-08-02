@@ -51,6 +51,7 @@ final class GeofenceManager {
     private var monitor: CLMonitor?
     private var eventTask: Task<Void, Never>?
     private var alertPlayer: AVAudioPlayer?
+    private var startDate: Date = .distantPast
 
     private init() {}
 
@@ -70,6 +71,9 @@ final class GeofenceManager {
         let monitor = await CLMonitor(Self.monitorName)
         self.monitor = monitor
         await restoreGeofences(from: monitor)
+        // Set startDate after full initialization so CLMonitor's initial state
+        // delivery events (date ≈ now) don't slip past the guard in handle(_:).
+        startDate = Date()
         observeEvents(of: monitor)
     }
 
@@ -128,6 +132,9 @@ final class GeofenceManager {
 
     private func handle(_ event: CLMonitor.Event) {
         guard alertsEnabled else { return }
+        // CLMonitor replays buffered events from while the app was killed.
+        // Skip any event older than this session's start to avoid spurious notifications on launch.
+        guard event.date > startDate else { return }
         let geofenceEvent: GeofenceEvent
         switch event.state {
         case .satisfied:

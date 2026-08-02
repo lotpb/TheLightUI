@@ -49,6 +49,7 @@ struct ListRowView: View {
                 Text(item.createdAt, format: .dateTime.month().day())
                     .font(.caption)
                     .foregroundStyle(Color.secondary)
+                    .padding(.top, 6)
             }
         }
         .padding(.vertical, 8)

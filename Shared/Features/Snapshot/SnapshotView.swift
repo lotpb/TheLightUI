@@ -227,7 +227,7 @@ struct SnapshotView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(viewModel.leadsToday) { item in
-                        CustomerCellView(data: item, showsComments: !item.comments.isEmpty, color: color)
+                        CustomerCellView(data: item, showsComments: !item.comments.isEmpty, showsActions: false, color: color)
                     }
                 }
             } header: {
@@ -255,7 +255,7 @@ struct SnapshotView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(viewModel.appointmentsToday) { item in
-                        CustomerCellView(data: item, showsComments: !item.comments.isEmpty, color: color)
+                        CustomerCellView(data: item, showsComments: !item.comments.isEmpty, showsActions: false, color: color)
                     }
                 }
             } header: {
@@ -283,7 +283,7 @@ struct SnapshotView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(viewModel.customersToday) { item in
-                        CustomerCellView(data: item, showsComments: !item.comments.isEmpty, color: color)
+                        CustomerCellView(data: item, showsComments: !item.comments.isEmpty, showsActions: false, color: color)
                     }
                 }
             } header: {
@@ -311,7 +311,7 @@ struct SnapshotView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(viewModel.salesToday) { item in
-                        CustomerCellView(data: item, showsComments: !item.comments.isEmpty, color: color)
+                        CustomerCellView(data: item, showsComments: !item.comments.isEmpty, showsActions: false, color: color)
                     }
                 }
             } header: {
@@ -339,7 +339,7 @@ struct SnapshotView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(viewModel.jobsStartingToday) { item in
-                        CustomerCellView(data: item, showsComments: !item.comments.isEmpty, color: color)
+                        CustomerCellView(data: item, showsComments: !item.comments.isEmpty, showsActions: false, color: color)
                     }
                 }
             } header: {

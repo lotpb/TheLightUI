@@ -9,16 +9,16 @@ struct LaunchScreenView: View {
 
             // Center the launch icon and app name
             VStack(spacing: 12) {
-                Text("TheLight")
-                    .font(.system(size: 50, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .accessibilityLabel("App Name: TheLight")
+//                Text("TheLight")
+//                    .font(.system(size: 50, weight: .semibold))
+//                    .foregroundStyle(.white)
+//                    .accessibilityLabel("App Name: TheLight")
 
-                Image("Icon167")
+                Image("The Light Logo")
                     .resizable()
                     .scaledToFit()
-                    .frame(maxWidth: 125, maxHeight: 125)
-                    .padding(.top, 30)
+                    .frame(maxWidth: 350, maxHeight: 350)
+                    .padding(.top, 10)
                     .accessibilityLabel("App Launch Icon")
             }
         }
