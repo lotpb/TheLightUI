@@ -10,15 +10,17 @@ import SwiftUI
 // MARK: - Main Menu
 @MainActor
 struct MainMenuUI: View {
-    @AppStorage("color") private var color: Int?
+    @AppStorage(SettingsUI.color) private var color: Int?
     @Environment(\.tabBarOverlap) private var tabBarOverlap
     let isAuthenticated: Bool
     let onSignOut: () -> Void
-    private let makeCustomerService: () -> CustomerServicing
     private let makeCustomerFormService: () -> CustomerFormServicing
     private let makeWeatherManager: () -> WeatherManaging
     private let makeWeatherLocationProvider: () -> WeatherLocationProviding
     private let appBadgeManager: AppBadgeManaging
+    // Single store shared across all four customer routes (leads/customers/vendors/employee)
+    // so only one Firestore listener is open regardless of how many routes the user visits.
+    @State private var customerStore: CustomerStore
     @State private var showingLogOut = false
     @State private var activeSheet: MainMenuSheet?
     @State private var activeRoute: MainMenuFullscreenRoute?
@@ -37,11 +39,11 @@ struct MainMenuUI: View {
     ) {
         self.isAuthenticated = isAuthenticated
         self.onSignOut = onSignOut
-        self.makeCustomerService = makeCustomerService
         self.makeCustomerFormService = makeCustomerFormService
         self.makeWeatherManager = makeWeatherManager
         self.makeWeatherLocationProvider = makeWeatherLocationProvider
         self.appBadgeManager = appBadgeManager
+        _customerStore = State(initialValue: CustomerStore(customerService: makeCustomerService()))
     }
 
     private var themeColor: Color {
@@ -50,12 +52,11 @@ struct MainMenuUI: View {
 
     private var coordinator: MainMenuCoordinator {
         MainMenuCoordinator(
-            makeCustomerService: makeCustomerService,
+            customerStore: customerStore,
             makeCustomerFormService: makeCustomerFormService,
             makeWeatherManager: makeWeatherManager,
             makeWeatherLocationProvider: makeWeatherLocationProvider,
             appBadgeManager: appBadgeManager,
-            dismissSheet: { activeSheet = nil },
             isAuthenticated: isAuthenticated,
             onSignOut: onSignOut
         )
@@ -91,7 +92,7 @@ struct MainMenuUI: View {
             Button("Sign Out", role: .destructive) { handleSignOut() }
         }
         .sheet(item: $activeSheet) { sheet in
-            coordinator.sheetContent(sheet)
+            coordinator.sheetContent(sheet, dismiss: { activeSheet = nil })
         }
     }
 

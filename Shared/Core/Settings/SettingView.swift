@@ -28,7 +28,7 @@ struct SettingView: View {
     }
 
     @State private var settings: AppSettingsStore
-    @AppStorage("adminPassword") private var adminPassword: String = "admin"
+    @AppStorage(SettingsUI.adminPasswordKey) private var adminPassword: String = "admin"
 
     init(settings: AppSettingsStore = AppSettingsStore()) {
         _settings = State(initialValue: settings)

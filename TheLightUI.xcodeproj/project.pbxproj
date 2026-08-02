@@ -288,6 +288,10 @@
 		AFE71225301234A700B9D6A7 /* BottomSheetContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE71223301234A700B9D6A7 /* BottomSheetContentView.swift */; };
 		AFEAAA9D30099D6D0064126D /* DataBackupSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEAAA9C30099D6D0064126D /* DataBackupSection.swift */; };
 		AFEE000A27285BB900D75C7C /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEE000927285BB900D75C7C /* LoginView.swift */; };
+		AFEE7953301E387D00F733AF /* iMacUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEE7950301E387D00F733AF /* iMacUI.swift */; };
+		AFEE7954301E387D00F733AF /* MacbookPro.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEE7951301E387D00F733AF /* MacbookPro.swift */; };
+		AFEE7955301E387D00F733AF /* WaveUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEE7952301E387D00F733AF /* WaveUI.swift */; };
+		AFEE7956301E387D00F733AF /* WaveUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEE7952301E387D00F733AF /* WaveUI.swift */; };
 		AFEFA4CC30027795004C61A5 /* CustomerCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEFA4CB30027795004C61A5 /* CustomerCellView.swift */; };
 		AFEFA4CD30027795004C61A5 /* CustomerCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEFA4CB30027795004C61A5 /* CustomerCellView.swift */; };
 		AFF04CFB300C24D300A6E9A5 /* GoogleService-Info.plist.example in Resources */ = {isa = PBXBuildFile; fileRef = AFF04CFA300C24D300A6E9A5 /* GoogleService-Info.plist.example */; };
@@ -471,33 +475,15 @@
 		AFE71223301234A700B9D6A7 /* BottomSheetContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetContentView.swift; sourceTree = "<group>"; };
 		AFEAAA9C30099D6D0064126D /* DataBackupSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataBackupSection.swift; sourceTree = "<group>"; };
 		AFEE000927285BB900D75C7C /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		AFEE7950301E387D00F733AF /* iMacUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iMacUI.swift; sourceTree = "<group>"; };
+		AFEE7951301E387D00F733AF /* MacbookPro.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacbookPro.swift; sourceTree = "<group>"; };
+		AFEE7952301E387D00F733AF /* WaveUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveUI.swift; sourceTree = "<group>"; };
 		AFEFA4CB30027795004C61A5 /* CustomerCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerCellView.swift; sourceTree = "<group>"; };
 		AFF04CFA300C24D300A6E9A5 /* GoogleService-Info.plist.example */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "GoogleService-Info.plist.example"; sourceTree = "<group>"; };
 		AFF04CFD300C290400A6E9A5 /* APIKeys.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = APIKeys.xcconfig; sourceTree = "<group>"; };
 		AFF95EF7274816EF00724250 /* UserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModel.swift; sourceTree = "<group>"; };
 		AFF9FE05279E4536006DB401 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		AF997FB92FE3309800797FD5 /* Exceptions for "Sample Apps" folder in "TheLightUI (macOS)" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				WaveUI.swift,
-			);
-			target = AF92B866267812A300729208 /* TheLightUI (macOS) */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		AF997FB82FE3307100797FD5 /* Sample Apps */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				AF997FB92FE3309800797FD5 /* Exceptions for "Sample Apps" folder in "TheLightUI (macOS)" target */,
-			);
-			path = "Sample Apps";
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		AF92B85E267812A300729208 /* Frameworks */ = {
@@ -608,6 +594,10 @@
 				AF488F7D2FE02FA200E5F294 /* Expenses */,
 				AF997FB02FE3242A00797FD5 /* Tip */,
 				AF997FB42FE32A9900797FD5 /* Steps */,
+				AFEE7957301E3D5500F733AF /* SampleApps */,
+				AFA0D2EB277BA19A00506DB6 /* Furniture */,
+				AF2A62122690B39B005B7527 /* Instagram */,
+				AF92B8AD267816A600729208 /* SpotifyUI */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -769,14 +759,6 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
-		AF54E4DC2773B1260062B1F4 /* AppsUI */ = {
-			isa = PBXGroup;
-			children = (
-				AF4F5DCB2FC746870003B277 /* App */,
-			);
-			path = AppsUI;
-			sourceTree = "<group>";
-		};
 		AF92B854267812A100729208 = {
 			isa = PBXGroup;
 			children = (
@@ -794,15 +776,11 @@
 		AF92B859267812A100729208 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				AF54E4DC2773B1260062B1F4 /* AppsUI */,
+				AF4F5DCB2FC746870003B277 /* App */,
 				AF4F5DCF2FC746890003B277 /* Features */,
 				AF4F5DCC2FC746880003B277 /* Core */,
-				AFA0D2EB277BA19A00506DB6 /* Furniture */,
-				AF2A62122690B39B005B7527 /* Instagram */,
-				AF92B8AD267816A600729208 /* SpotifyUI */,
 				AF92B85C267812A300729208 /* Assets.xcassets */,
 				AFF9FE05279E4536006DB401 /* Launch Screen.storyboard */,
-				AF997FB82FE3307100797FD5 /* Sample Apps */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -1029,6 +1007,16 @@
 			path = Settings;
 			sourceTree = "<group>";
 		};
+		AFEE7957301E3D5500F733AF /* SampleApps */ = {
+			isa = PBXGroup;
+			children = (
+				AFEE7950301E387D00F733AF /* iMacUI.swift */,
+				AFEE7951301E387D00F733AF /* MacbookPro.swift */,
+				AFEE7952301E387D00F733AF /* WaveUI.swift */,
+			);
+			path = SampleApps;
+			sourceTree = "<group>";
+		};
 		AFF40FA1275291CF0080CE8E /* Movies */ = {
 			isa = PBXGroup;
 			children = (
@@ -1051,9 +1039,6 @@
 				AF92B85F267812A300729208 /* Resources */,
 			);
 			buildRules = (
-			);
-			fileSystemSynchronizedGroups = (
-				AF997FB82FE3307100797FD5 /* Sample Apps */,
 			);
 			name = "TheLightUI (iOS)";
 			packageProductDependencies = (
@@ -1230,6 +1215,9 @@
 				AFD5D8902FF4552F008934BE /* CustomCorners.swift in Sources */,
 				AFD5D8912FF4552F008934BE /* MessageComposeView.swift in Sources */,
 				AFD5D8922FF4552F008934BE /* MailUI.swift in Sources */,
+				AFEE7953301E387D00F733AF /* iMacUI.swift in Sources */,
+				AFEE7954301E387D00F733AF /* MacbookPro.swift in Sources */,
+				AFEE7955301E387D00F733AF /* WaveUI.swift in Sources */,
 				AFD5D8932FF4552F008934BE /* GradientUI.swift in Sources */,
 				AFD5D86C2FF4538C008934BE /* UserFormUI.swift in Sources */,
 				AF86C0642FDF1B3B00F450F9 /* CustomerListViewModel.swift in Sources */,
@@ -1351,6 +1339,7 @@
 				AFE712183012348C00B9D6A7 /* BottomSheetRouteSummaryView.swift in Sources */,
 				AF4A670827565F40005D1D8B /* AuthenticationService.swift in Sources */,
 				AF745F1127513D4F00E9DB74 /* ChatLogView.swift in Sources */,
+				AFEE7956301E387D00F733AF /* WaveUI.swift in Sources */,
 				AFEFA4CC30027795004C61A5 /* CustomerCellView.swift in Sources */,
 				AFB760A22FE22C78002D1A83 /* MainTopView.swift in Sources */,
 				AFE4AE0C2FC8698F00F86B2E /* AppDependencies.swift in Sources */,

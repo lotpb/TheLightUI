@@ -11,6 +11,12 @@ enum ExpenseFormat {
     static var currency: FloatingPointFormatStyle<Double>.Currency {
         .currency(code: Locale.current.currency?.identifier ?? "USD")
     }
+
+    static let weekday: DateFormatter = {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "EEE"
+        return fmt
+    }()
 }
 
 @Model

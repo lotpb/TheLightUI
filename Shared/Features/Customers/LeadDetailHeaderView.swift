@@ -6,7 +6,7 @@
 import SwiftUI
 
 struct LeadDetailHeaderView: View {
-    @AppStorage("activeColor") private var activeColor: Int?
+    @AppStorage(SettingsUI.activeColorKey) private var activeColor: Int?
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @Binding var detail: CustomerItem

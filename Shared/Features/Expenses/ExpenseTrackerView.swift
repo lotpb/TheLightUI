@@ -9,8 +9,8 @@ import SwiftData
 import UniformTypeIdentifiers
 
 struct ExpenseTrackerView: View {
-    @AppStorage("color") private var color: Int?
-    @AppStorage("expenseWeeklyChartVisible") private var weeklyChartVisible = true
+    @AppStorage(SettingsUI.color) private var color: Int?
+    @AppStorage(SettingsUI.expenseWeeklyChartVisibleKey) private var weeklyChartVisible = true
     @Environment(\.tabBarOverlap) private var tabBarOverlap
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
@@ -24,10 +24,6 @@ struct ExpenseTrackerView: View {
     @State private var jsonPreview: ExpenseJSONPreview?
     @State private var isSyncing = false
 
-    private var visibleExpenses: [Expense] {
-        viewModel.visibleExpenses(from: expenses)
-    }
-
     private var themeColor: Color {
         AppTheme.accentColor(for: color)
     }
@@ -35,14 +31,12 @@ struct ExpenseTrackerView: View {
     private var weeklyDays: [(day: String, total: Double, isToday: Bool)] {
         let cal = Calendar.current
         let startOfWeek = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: .now)) ?? .now
-        let fmt = DateFormatter()
-        fmt.dateFormat = "EEE"
         return (0..<7).map { offset in
             let date = cal.date(byAdding: .day, value: offset, to: startOfWeek) ?? startOfWeek
             let total = expenses
                 .filter { cal.isDate($0.date, inSameDayAs: date) }
                 .reduce(0) { $0 + $1.amount }
-            return (fmt.string(from: date), total, cal.isDateInToday(date))
+            return (ExpenseFormat.weekday.string(from: date), total, cal.isDateInToday(date))
         }
     }
 
@@ -109,6 +103,7 @@ struct ExpenseTrackerView: View {
         // No-op unless "Store Data in Firebase" is on in Settings.
         .task { await viewModel.refreshFromFirebase(in: modelContext) }
         .refreshable { await viewModel.refreshFromFirebase(in: modelContext) }
+        .onChange(of: expenses, initial: true) { _, _ in viewModel.updateSource(expenses) }
         .searchable(text: $viewModel.searchText, prompt: "Search expenses")
         .tint(themeColor)
         .toolbar {
@@ -246,7 +241,7 @@ struct ExpenseTrackerView: View {
         } label: {
             Label("Print", systemImage: "printer")
         }
-        .disabled(visibleExpenses.isEmpty)
+        .disabled(viewModel.displayedExpenses.isEmpty)
     }
 
     private func showJSONPreview() {
@@ -338,7 +333,7 @@ struct ExpenseTrackerView: View {
 
     private var printableHTML: String {
         let dateLabel = viewModel.dateRange.rawValue
-        let total = viewModel.totalAmount(of: visibleExpenses)
+        let total = viewModel.totalAmount(of: viewModel.displayedExpenses)
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
         let totalString = formatter.string(from: NSNumber(value: total)) ?? "$\(total)"
@@ -347,7 +342,7 @@ struct ExpenseTrackerView: View {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .medium
         dateFormatter.timeStyle = .none
-        for expense in visibleExpenses {
+        for expense in viewModel.displayedExpenses {
             let name = expense.title
                 .replacingOccurrences(of: "&", with: "&amp;")
                 .replacingOccurrences(of: "<", with: "&lt;")
@@ -389,7 +384,7 @@ struct ExpenseTrackerView: View {
         <body>
           <div class="header">
             <div class="title">Expense Report</div>
-            <div class="subtitle">\(dateLabel) &bull; \(visibleExpenses.count) expense\(visibleExpenses.count == 1 ? "" : "s")</div>
+            <div class="subtitle">\(dateLabel) &bull; \(viewModel.displayedExpenses.count) expense\(viewModel.displayedExpenses.count == 1 ? "" : "s")</div>
           </div>
           <table>
             <tr><th>Date</th><th>Description</th><th>Category</th><th>Amount</th><th>Reimburse</th></tr>
@@ -427,7 +422,7 @@ struct ExpenseTrackerView: View {
                         Text("Tracked Spend")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
-                        Text(viewModel.totalAmount(of: visibleExpenses), format: ExpenseFormat.currency)
+                        Text(viewModel.totalAmount(of: viewModel.displayedExpenses), format: ExpenseFormat.currency)
                             .font(.system(.largeTitle, design: .rounded, weight: .bold))
                             .contentTransition(.numericText())
                             .lineLimit(1)
@@ -442,13 +437,13 @@ struct ExpenseTrackerView: View {
                 HStack(spacing: 12) {
                     SummaryMetricView(
                         title: "Entries",
-                        value: "\(visibleExpenses.count)",
+                        value: "\(viewModel.displayedExpenses.count)",
                         systemImage: "list.bullet.rectangle",
                         accentColor: themeColor
                     )
                     SummaryMetricView(
                         title: "Reimburse",
-                        value: viewModel.reimbursableTotal(of: visibleExpenses).formatted(ExpenseFormat.currency),
+                        value: viewModel.reimbursableTotal(of: viewModel.displayedExpenses).formatted(ExpenseFormat.currency),
                         systemImage: "arrow.triangle.2.circlepath",
                         accentColor: themeColor
                     )
@@ -477,7 +472,7 @@ struct ExpenseTrackerView: View {
 
     @ViewBuilder
     private var expenseSection: some View {
-        if visibleExpenses.isEmpty {
+        if viewModel.displayedExpenses.isEmpty {
             Section {
                 if viewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     ContentUnavailableView(
@@ -490,7 +485,7 @@ struct ExpenseTrackerView: View {
                 }
             }
         } else {
-            let categoryTotals = viewModel.categoryTotals(for: visibleExpenses)
+            let categoryTotals = viewModel.categoryTotals(for: viewModel.displayedExpenses)
             if !categoryTotals.isEmpty {
                 Section("By Category") {
                     CategoryBreakdownChart(categoryTotals: categoryTotals)
@@ -509,7 +504,7 @@ struct ExpenseTrackerView: View {
             }
 
             Section("Recent Expenses") {
-                ForEach(visibleExpenses) { expense in
+                ForEach(viewModel.displayedExpenses) { expense in
                     // Value-based link: this screen can be pushed onto the
                     // main menu's path-bound NavigationStack, where
                     // view-destination links trap on tap.

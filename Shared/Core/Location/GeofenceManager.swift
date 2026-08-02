@@ -116,7 +116,7 @@ final class GeofenceManager {
                     self?.handle(event)
                 }
             } catch {
-                print("Geofence monitoring stopped: \(error.localizedDescription)")
+                // Monitor task ended; geofencing is inactive until restarted.
             }
         }
     }
@@ -147,16 +147,13 @@ final class GeofenceManager {
 
     /// Plays the Tornado alert from the asset catalog when a fence fires.
     private func playAlertSound() {
-        guard let asset = NSDataAsset(name: "Tornado") else {
-            print("Geofence alert sound asset not found")
-            return
-        }
+        guard let asset = NSDataAsset(name: "Tornado") else { return }
         do {
             let player = try AVAudioPlayer(data: asset.data, fileTypeHint: AVFileType.caf.rawValue)
             alertPlayer = player
             player.play()
         } catch {
-            print("Failed to play geofence alert sound: \(error.localizedDescription)")
+            // Audio playback failure is non-critical; the notification still fires.
         }
     }
 

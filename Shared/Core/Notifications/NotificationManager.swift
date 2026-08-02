@@ -36,7 +36,6 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         do {
             return try await notificationCenter.requestAuthorization(options: authorizationOptions)
         } catch {
-            print("Notification authorization failed: \(error.localizedDescription)")
             return false
         }
     }
@@ -48,7 +47,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     }
     
     /// Schedules a calendar-based local notification.
-    /// - Parameters: title, body, categoryIdentifier, dateComponents, repeats
+    /// - Parameters: title, body, categoryIdentifier, dateComponents, repeats, identifier
     /// - Returns: The identifier of the scheduled request.
     @discardableResult
     func scheduleNotification(
@@ -56,28 +55,31 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         body: String,
         categoryIdentifier: String,
         dateComponents: DateComponents,
-        repeats: Bool
+        repeats: Bool,
+        identifier: String = UUID().uuidString
     ) -> String {
         let request = makeNotificationRequest(
             title: title,
             body: body,
             categoryIdentifier: categoryIdentifier,
             dateComponents: dateComponents,
-            repeats: repeats
+            repeats: repeats,
+            identifier: identifier
         )
-        
+
         // Enqueue the notification request with the system.
         Task {
-            do {
-                try await notificationCenter.add(request)
-            } catch {
-                print("Failed to schedule notification: \(error.localizedDescription)")
-            }
+            try? await notificationCenter.add(request)
         }
-        
+
         return request.identifier
     }
-    
+
+    /// Cancels a single pending notification by its identifier.
+    func cancelNotification(withIdentifier identifier: String) {
+        notificationCenter.removePendingNotificationRequests(withIdentifiers: [identifier])
+    }
+
     /// Posts a local notification for immediate delivery (no trigger).
     /// - Parameters: title, body, categoryIdentifier
     /// - Returns: The identifier of the delivered request.
@@ -102,26 +104,23 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         )
         
         Task {
-            do {
-                try await notificationCenter.add(request)
-            } catch {
-                print("Failed to post notification: \(error.localizedDescription)")
-            }
+            try? await notificationCenter.add(request)
         }
-        
+
         return request.identifier
     }
-    
-    /// Debug helper to print next trigger dates for all pending calendar notifications.
+
+    #if DEBUG
+    /// Debug helper — lists next trigger dates for pending calendar notifications.
     func printNotifications() {
         notificationCenter.getPendingNotificationRequests { requests in
             for request in requests {
-                // Only interested in calendar triggers here.
                 guard let trigger = request.trigger as? UNCalendarNotificationTrigger else { continue }
                 print(trigger.nextTriggerDate()?.description ?? "Invalid next trigger date")
             }
         }
     }
+    #endif
     
     /// Builds the UNNotificationRequest with content, trigger, and optional image attachment.
     private func makeNotificationRequest(
@@ -129,7 +128,8 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         body: String,
         categoryIdentifier: String,
         dateComponents: DateComponents,
-        repeats: Bool
+        repeats: Bool,
+        identifier: String = UUID().uuidString
     ) -> UNNotificationRequest {
         // Configure the notification's visible content.
         let content = UNMutableNotificationContent()
@@ -141,16 +141,16 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         content.sound = .default
         // Increment the app icon badge by one.
         content.badge = 1
-        
+
         // Attach a local image (if available) to enrich the notification.
         if let attachment = imageAttachment(named: "chair_2", fileExtension: "png") {
             content.attachments = [attachment]
         }
-        
+
         // Fire based on the provided date components, optionally repeating.
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: repeats)
         return UNNotificationRequest(
-            identifier: UUID().uuidString,
+            identifier: identifier,
             content: content,
             trigger: trigger
         )

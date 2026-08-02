@@ -24,7 +24,15 @@ enum SettingsUI {
     static let isAutolockKey = "isautolock"
 
     static let color = "color"
+    static let activeColorKey = "activeColor"
+    static let adminPasswordKey = "adminPassword"
     static let useThemeMenuIconsKey = "useThemeMenuIcons"
+
+    static let mapHomeAddressKey = "mapHomeAddress"
+    static let mapWorkAddressKey = "mapWorkAddress"
+    static let mapCustomFavoritesKey = "mapCustomFavorites"
+
+    static let expenseWeeklyChartVisibleKey = "expenseWeeklyChartVisible"
 
     //static let isSpeakKey = "isSpeak"
     //static let isMusicKey = "isMusic"
@@ -35,12 +43,12 @@ enum SettingsUI {
     static let showGeofencePinsKey = "showGeofencePins"
 
     static let eventKey = "event"
-    static let durationKey = "120"
+    static let durationKey = "duration"
 
-    static let areacodeKey = "516"
-    static let emailTitleKey = "TheLight Support"
-    static let emailMessageKey = "Thank you for using TheLight"
-    static let versionKey = "1.0"
+    static let areacodeKey = "areaCode"
+    static let emailTitleKey = "emailTitle"
+    static let emailMessageKey = "emailMessage"
+    static let versionKey = "version"
 }
 
 enum SecureSettingsStore {
@@ -130,6 +138,14 @@ final class AppSettingsStore {
         self.defaults = defaults
         self.passwordStore = passwordStore
 
+        // Migrate values stored under the old keys (which accidentally used
+        // default values as key strings) to the correct symbolic key names.
+        Self.migrateLegacyKey(from: "120", to: SettingsUI.durationKey, defaults: defaults)
+        Self.migrateLegacyKey(from: "516", to: SettingsUI.areacodeKey, defaults: defaults)
+        Self.migrateLegacyKey(from: "TheLight Support", to: SettingsUI.emailTitleKey, defaults: defaults)
+        Self.migrateLegacyKey(from: "Thank you for using TheLight", to: SettingsUI.emailMessageKey, defaults: defaults)
+        Self.migrateLegacyKey(from: "1.0", to: SettingsUI.versionKey, defaults: defaults)
+
         firstName = Self.loadSecureString(forKey: SettingsUI.firstNameKey, defaults: defaults, passwordStore: passwordStore)
         lastName = Self.loadSecureString(forKey: SettingsUI.lastNameKey, defaults: defaults, passwordStore: passwordStore)
         email = Self.loadSecureString(forKey: SettingsUI.emailKey, defaults: defaults, passwordStore: passwordStore)
@@ -171,6 +187,12 @@ final class AppSettingsStore {
             defaults: defaults,
             passwordStore: passwordStore
         )
+    }
+
+    private static func migrateLegacyKey(from oldKey: String, to newKey: String, defaults: UserDefaults) {
+        guard let value = defaults.string(forKey: oldKey), defaults.string(forKey: newKey) == nil else { return }
+        defaults.set(value, forKey: newKey)
+        defaults.removeObject(forKey: oldKey)
     }
 
     private static func loadSecureString(

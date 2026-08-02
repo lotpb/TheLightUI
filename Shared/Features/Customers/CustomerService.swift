@@ -16,6 +16,8 @@ protocol CustomerServicing: Sendable {
     func deleteCustomer(id: String) async throws
 }
 
+// `@unchecked Sendable`: wraps Firebase's ListenerRegistration, which is
+// thread-safe by contract but lacks Sendable conformance in the SDK.
 final class FirebaseCustomerListener: CustomerListener, @unchecked Sendable {
     private let registration: ListenerRegistration
 
@@ -28,6 +30,8 @@ final class FirebaseCustomerListener: CustomerListener, @unchecked Sendable {
     }
 }
 
+// `@unchecked Sendable`: holds a Firestore reference, which is thread-safe
+// by Firebase contract but lacks Sendable conformance in the SDK.
 final class FirebaseCustomerService: CustomerServicing, @unchecked Sendable {
     private let firestore: Firestore
     init(firestore: Firestore = Firestore.firestore()) {

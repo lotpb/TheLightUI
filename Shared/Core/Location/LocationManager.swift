@@ -48,7 +48,7 @@ final class LocationManager: NSObject {
             } catch is CancellationError {
                 // Ignored: a newer geocode request superseded this one
             } catch {
-                print("Error reverse geocoding location: \(error.localizedDescription)")
+                // Geocoding failure is non-critical; location is still updated.
             }
         }
     }
@@ -171,7 +171,6 @@ extension LocationManager: @preconcurrency CLLocationManagerDelegate {
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         lastLocationError = error
-        print("Error getting location: \(error.localizedDescription)")
     }
 }
 

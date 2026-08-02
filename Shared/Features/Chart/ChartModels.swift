@@ -8,7 +8,7 @@ import Foundation
 // MARK: - Chart Item
 /// A single category/value pair plotted as one mark in a chart.
 struct ChartItem: Identifiable {
-    let id = UUID()
+    var id: String { type }
     let type: String
     let value: Double
 

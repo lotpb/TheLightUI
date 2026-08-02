@@ -23,8 +23,8 @@ struct ChartView: View {
     @State private var selectedContractor: String?
     private let sampleItems = ChartItem.sampleItems
 
-    init(customerService: CustomerServicing = FirebaseCustomerService()) {
-        _viewModel = State(initialValue: ChartViewModel(customerService: customerService))
+    init(customerStore: CustomerStore) {
+        _viewModel = State(initialValue: ChartViewModel(customerStore: customerStore))
     }
 
     // No NavigationStack here: this view is pushed onto the main menu's
@@ -256,7 +256,7 @@ struct ChartView: View {
 // MARK: - Preview
 #Preview("Charts - Dark") {
     NavigationStack {
-        ChartView(customerService: PreviewCustomerService())
+        ChartView(customerStore: CustomerStore(customerService: PreviewCustomerService()))
     }
     .preferredColorScheme(.dark)
 }

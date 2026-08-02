@@ -187,7 +187,7 @@ final class LoginViewModel {
                 email: settings.email.isEmpty ? email : settings.email,
                 phoneNumber: settings.phoneNumber
             )
-            loginStatusMessage = "Successfully logged in user: \(uid)"
+            loginStatusMessage = ""
             didCompleteLoginProcess()
         } catch is CancellationError {
             return
@@ -207,11 +207,11 @@ final class LoginViewModel {
             try loginService.validateRegistration(firstName: firstName, lastName: lastName, email: email, phoneNumber: phoneNumber)
             let uid = try await loginService.createUser(email: email, password: password)
             guard !Task.isCancelled else { return }
-            loginStatusMessage = "Successfully created user: \(uid)"
+            loginStatusMessage = "Creating your account…"
 
             let imageURL = try await loginService.uploadProfileImage(imageData, userId: uid)
             guard !Task.isCancelled else { return }
-            loginStatusMessage = "Successfully stored image with url: \(imageURL.absoluteString)"
+            loginStatusMessage = "Uploading profile photo…"
 
             try await loginService.storeUserInformation(
                 email: email,

@@ -108,7 +108,7 @@ private final class SnapshotViewModel {
 }
 
 struct SnapshotView: View {
-    @AppStorage("color") private var color: Int?
+    @AppStorage(SettingsUI.color) private var color: Int?
     @Environment(\.tabBarOverlap) private var tabBarOverlap
     @State private var viewModel: SnapshotViewModel
 
@@ -379,7 +379,7 @@ struct SnapshotView: View {
 // MARK: - Summary section helpers
 
 private struct SnapshotBarEntry: Identifiable {
-    let id = UUID()
+    var id: String { label }
     let label: String
     let count: Int
     let color: Color

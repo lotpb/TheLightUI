@@ -19,6 +19,12 @@ struct StacksView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var searchText = ""
 
+    private let customerStore: CustomerStore
+
+    init(customerStore: CustomerStore = CustomerStore(customerService: FirebaseCustomerService())) {
+        self.customerStore = customerStore
+    }
+
     private let columns = [
         GridItem(.flexible(), spacing: Layout.gridSpacing),
         GridItem(.flexible(), spacing: Layout.gridSpacing)
@@ -104,7 +110,7 @@ struct StacksView: View {
         case .furniture:
             FurnitureUI()
         case .chart:
-            ChartView()
+            ChartView(customerStore: customerStore)
         case .iMac:
             iMacUI()
         case .spotify:
@@ -251,7 +257,7 @@ private struct PressableCardStyle: ButtonStyle {
 
 // MARK: - Preview
 #Preview("Stacks - Dark") {
-    StacksView()
+    StacksView(customerStore: CustomerStore(customerService: PreviewCustomerService()))
         .preferredColorScheme(.dark)
 }
 

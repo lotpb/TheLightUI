@@ -110,12 +110,11 @@ final class CustomerFormViewModel {
         }
         let payload = makePayload(userId: uid)
         performSave {
-            let documentID = try await self.formService.addCustomer(payload)
+            _ = try await self.formService.addCustomer(payload)
             guard !Task.isCancelled else { return }
             self.detail.resetEditableFields()
             self.showAlertUpdate = true
             self.errorMessage = ""
-            print("Document added with ID: \(documentID)")
         }
     }
 

@@ -17,9 +17,13 @@ struct ContentView: View {
     @State private var tabBarHeight: CGFloat = 0
 
     private let dependencies: AppDependencies
+    // Single repository instance shared between the inbox view model and the
+    // chat-log view model so both share the same auth state and listener.
+    private let chatRepository: ChatRepositoryProtocol
 
     init(dependencies: AppDependencies = .live) {
         self.dependencies = dependencies
+        self.chatRepository = dependencies.makeChatRepository()
         _session = State(
             initialValue: SessionViewModel(sessionService: dependencies.sessionService)
         )
@@ -126,8 +130,8 @@ struct ContentView: View {
             MainMessagesView(
                 isAuthenticated: session.isAuthenticated,
                 onSignOut: session.signOut,
-                repository: dependencies.makeChatRepository(),
-                chatLogRepository: dependencies.makeChatRepository(),
+                repository: chatRepository,
+                chatLogRepository: chatRepository,
                 makeChatRepository: dependencies.makeChatRepository
             )
         case .ToDo:

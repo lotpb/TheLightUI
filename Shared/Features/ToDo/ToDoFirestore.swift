@@ -49,6 +49,8 @@ extension ItemModel {
     }
 }
 
+// `@unchecked Sendable`: holds a Firestore reference, which is thread-safe
+// by Firebase contract but lacks Sendable conformance in the SDK.
 final class ToDoFirestoreService: @unchecked Sendable {
     private let firestore: Firestore
 

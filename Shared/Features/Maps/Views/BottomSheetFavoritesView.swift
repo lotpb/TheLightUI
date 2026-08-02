@@ -16,9 +16,9 @@ struct BottomSheetFavoritesView: View {
     let favorites: [BottomSheetFavorite]
     var onFavoriteRoute: ((MapDestination) -> Void)? = nil
 
-    @AppStorage("mapHomeAddress") private var homeAddress: String = ""
-    @AppStorage("mapWorkAddress") private var workAddress: String = ""
-    @AppStorage("mapCustomFavorites") private var customFavoritesData: Data = Data()
+    @AppStorage(SettingsUI.mapHomeAddressKey) private var homeAddress: String = ""
+    @AppStorage(SettingsUI.mapWorkAddressKey) private var workAddress: String = ""
+    @AppStorage(SettingsUI.mapCustomFavoritesKey) private var customFavoritesData: Data = Data()
 
     // Home / Work editor state
     @State private var editingTitle: String = ""

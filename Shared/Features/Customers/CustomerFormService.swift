@@ -16,6 +16,8 @@ protocol CustomerFormServicing: Sendable {
     func upsertCustomersBatch(_ entries: [(id: String, payload: CustomerFormPayload)]) async throws
 }
 
+// `@unchecked Sendable`: holds FirebaseManager.shared, which is itself
+// @unchecked Sendable and thread-safe by Firebase contract.
 final class FirebaseCustomerFormService: CustomerFormServicing, @unchecked Sendable {
     private let manager: FirebaseManager
 

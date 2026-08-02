@@ -34,8 +34,8 @@ struct LeadDetailUI: View {
     // Live customer list — used to sync detail after the edit form saves to Firestore.
     @Environment(CustomerStore.self) private var customerStore
     // User-configurable settings stored in AppStorage.
-    @AppStorage("color") private var color: Int?
-    @AppStorage("activeColor") private var activeColor: Int?
+    @AppStorage(SettingsUI.color) private var color: Int?
+    @AppStorage(SettingsUI.activeColorKey) private var activeColor: Int?
     // Internal so calendar extension can read these settings.
     @AppStorage(SettingsUI.eventKey) var calendarEventTitle: String = ""
     @AppStorage(SettingsUI.durationKey) var calendarEventDuration: String = ""
@@ -58,7 +58,7 @@ struct LeadDetailUI: View {
     @State private var ssnUnlocked = false
     @State private var showSSNPasswordPrompt = false
     @State private var ssnPasswordEntry = ""
-    @AppStorage("adminPassword") private var adminPassword: String = "admin"
+    @AppStorage(SettingsUI.adminPasswordKey) private var adminPassword: String = "admin"
 
     init(
         detail: CustomerItem,

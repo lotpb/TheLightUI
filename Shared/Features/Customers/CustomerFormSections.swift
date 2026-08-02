@@ -14,7 +14,7 @@ struct CustomerFormProfileSection: View {
     @Bindable var viewModel: CustomerFormViewModel
     @FocusState.Binding var firstNameInFocus: Bool
 
-    @AppStorage("color") private var color: Int?
+    @AppStorage(SettingsUI.color) private var color: Int?
     private var themeColor: Color { AppTheme.accentColor(for: color) }
     private var isVendor: Bool { CustomerItem.Category.vendor.matches(viewModel.detail.category) }
 
@@ -164,7 +164,7 @@ struct CustomerFormJobSection: View {
     @Binding var managingPickerType: PickerType?
     @Environment(PickerDataModel.self) private var pickerviewModel
 
-    @AppStorage("color") private var color: Int?
+    @AppStorage(SettingsUI.color) private var color: Int?
     private var themeColor: Color { AppTheme.accentColor(for: color) }
     private var isEmployee: Bool { CustomerItem.Category.employee.matches(viewModel.detail.category) }
     private var isVendor: Bool { CustomerItem.Category.vendor.matches(viewModel.detail.category) }
@@ -340,7 +340,7 @@ struct CustomerFormMiscSection: View {
     @Binding var managingPickerType: PickerType?
     @Environment(PickerDataModel.self) private var pickerviewModel
 
-    @AppStorage("color") private var color: Int?
+    @AppStorage(SettingsUI.color) private var color: Int?
     private var themeColor: Color { AppTheme.accentColor(for: color) }
     private var isEmployee: Bool { CustomerItem.Category.employee.matches(viewModel.detail.category) }
     private var isVendor: Bool { CustomerItem.Category.vendor.matches(viewModel.detail.category) }
@@ -351,7 +351,7 @@ struct CustomerFormMiscSection: View {
     @State private var ssnUnlocked = false
     @State private var showPasswordPrompt = false
     @State private var passwordEntry = ""
-    @AppStorage("adminPassword") private var adminPassword: String = "admin"
+    @AppStorage(SettingsUI.adminPasswordKey) private var adminPassword: String = "admin"
 
     var body: some View {
         let spouseBinding = Binding<String>(

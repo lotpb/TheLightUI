@@ -12,7 +12,7 @@ import UIKit
 #endif
 
 struct StepsTodayView: View {
-    @AppStorage("color") private var color: Int?
+    @AppStorage(SettingsUI.color) private var color: Int?
     @State private var viewModel = StepsTodayViewModel()
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL

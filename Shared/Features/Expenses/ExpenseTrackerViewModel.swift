@@ -10,10 +10,11 @@ import SwiftData
 @MainActor
 @Observable
 final class ExpenseTrackerViewModel {
-    var selectedFilter: ExpenseFilter = .all
-    var sortOrder: ExpenseSortOrder = .date
-    var dateRange: ExpenseDateRange = .thisMonth
-    var searchText = ""
+    var selectedFilter: ExpenseFilter = .all { didSet { recomputeDisplayedExpenses() } }
+    var sortOrder: ExpenseSortOrder = .date { didSet { recomputeDisplayedExpenses() } }
+    var dateRange: ExpenseDateRange = .thisMonth { didSet { recomputeDisplayedExpenses() } }
+    var searchText = "" { didSet { recomputeDisplayedExpenses() } }
+    private(set) var displayedExpenses: [Expense] = []
     var title = ""
     var amountText = ""
     var category: ExpenseCategory = .meals
@@ -21,6 +22,7 @@ final class ExpenseTrackerViewModel {
     var notes = ""
     var isReimbursable = false
 
+    @ObservationIgnored private var allExpenses: [Expense] = []
     @ObservationIgnored private var editingExpense: Expense?
 
     var canSave: Bool {
@@ -33,9 +35,14 @@ final class ExpenseTrackerViewModel {
         return amount
     }
 
-    func visibleExpenses(from expenses: [Expense]) -> [Expense] {
+    func updateSource(_ expenses: [Expense]) {
+        allExpenses = expenses
+        recomputeDisplayedExpenses()
+    }
+
+    private func recomputeDisplayedExpenses() {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        let filtered = expenses.filter { expense in
+        let filtered = allExpenses.filter { expense in
             guard selectedFilter.includes(expense) else { return false }
             guard dateRange.includes(expense.date) else { return false }
             guard !query.isEmpty else { return true }
@@ -43,24 +50,20 @@ final class ExpenseTrackerViewModel {
                 || expense.category.rawValue.localizedCaseInsensitiveContains(query)
                 || expense.notes.localizedCaseInsensitiveContains(query)
         }
-
         switch sortOrder {
         case .date:
-            return filtered.sorted { $0.date > $1.date }
+            displayedExpenses = filtered.sorted { $0.date > $1.date }
         case .name:
-            return filtered.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+            displayedExpenses = filtered.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
         }
     }
 
-    /// Expects the already-filtered list from `visibleExpenses(from:)` so the
-    /// filter isn't recomputed for every metric.
-    func totalAmount(of visibleExpenses: [Expense]) -> Double {
-        visibleExpenses.reduce(0) { $0 + $1.amount }
+    func totalAmount(of expenses: [Expense]) -> Double {
+        expenses.reduce(0) { $0 + $1.amount }
     }
 
-    /// Expects the already-filtered list from `visibleExpenses(from:)`.
-    func reimbursableTotal(of visibleExpenses: [Expense]) -> Double {
-        visibleExpenses.filter(\.isReimbursable).reduce(0) { $0 + $1.amount }
+    func reimbursableTotal(of expenses: [Expense]) -> Double {
+        expenses.filter(\.isReimbursable).reduce(0) { $0 + $1.amount }
     }
 
     func categoryTotals(for expenses: [Expense]) -> [(category: ExpenseCategory, total: Double)] {

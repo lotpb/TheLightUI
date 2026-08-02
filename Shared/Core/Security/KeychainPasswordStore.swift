@@ -37,7 +37,10 @@ struct KeychainPasswordStore: PasswordStoring {
         }
 
         let data = Data(password.utf8)
-        let attributes: [String: Any] = [kSecValueData as String: data]
+        let attributes: [String: Any] = [
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        ]
         let status = SecItemUpdate(baseQuery(for: account) as CFDictionary, attributes as CFDictionary)
 
         if status == errSecItemNotFound {

@@ -53,24 +53,25 @@ enum MainMenuDataRoute: Hashable {
 
 @MainActor
 struct MainMenuCoordinator {
-    let makeCustomerService: () -> CustomerServicing
+    let customerStore: CustomerStore
     let makeCustomerFormService: () -> CustomerFormServicing
     let makeWeatherManager: () -> WeatherManaging
     let makeWeatherLocationProvider: () -> WeatherLocationProviding
     let appBadgeManager: AppBadgeManaging
-    let dismissSheet: () -> Void
     let isAuthenticated: Bool
     let onSignOut: () -> Void
 
+    // `dismiss` is passed at the call site so the coordinator itself never
+    // captures a closure over mutable view state.
     @ViewBuilder
-    func sheetContent(_ sheet: MainMenuSheet) -> some View {
+    func sheetContent(_ sheet: MainMenuSheet, dismiss: @escaping () -> Void) -> some View {
         switch sheet {
         case .modal(let modal):
             modalContent(modal)
         case .email:
             MailView(
                 content: .theLightSupport(),
-                onResult: { _ in dismissSheet() }
+                onResult: { _ in dismiss() }
             )
         }
     }
@@ -98,28 +99,28 @@ struct MainMenuCoordinator {
             SnapshotView()
         case .leads:
             CustomerUI(
-                customerService: makeCustomerService(),
+                viewModel: customerStore,
                 formService: makeCustomerFormService(),
                 appBadgeManager: appBadgeManager,
                 categoryFilter: .lead
             )
         case .customers:
             CustomerUI(
-                customerService: makeCustomerService(),
+                viewModel: customerStore,
                 formService: makeCustomerFormService(),
                 appBadgeManager: appBadgeManager,
                 categoryFilter: .customer
             )
         case .vendors:
             CustomerUI(
-                customerService: makeCustomerService(),
+                viewModel: customerStore,
                 formService: makeCustomerFormService(),
                 appBadgeManager: appBadgeManager,
                 categoryFilter: .vendor
             )
         case .employee:
             CustomerUI(
-                customerService: makeCustomerService(),
+                viewModel: customerStore,
                 formService: makeCustomerFormService(),
                 appBadgeManager: appBadgeManager,
                 categoryFilter: .employee
@@ -132,7 +133,7 @@ struct MainMenuCoordinator {
         case .steps:
             StepsTodayView()
         case .chart:
-            ChartView()
+            ChartView(customerStore: customerStore)
         case .todo:
             ListView()
         }
@@ -151,7 +152,7 @@ struct MainMenuCoordinator {
                 locationManager: makeWeatherLocationProvider()
             )
         case .stacks:
-            StacksView()
+            StacksView(customerStore: customerStore)
         case .instagram:
             InstagramHome()
         case .tweet:
@@ -160,7 +161,7 @@ struct MainMenuCoordinator {
             // ChartView no longer owns a NavigationStack (it can be pushed
             // from the main menu), so standalone presentation wraps it here.
             NavigationStack {
-                ChartView()
+                ChartView(customerStore: customerStore)
             }
         case .chat:
             MainMessagesView(

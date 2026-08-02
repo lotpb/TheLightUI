@@ -18,11 +18,7 @@ struct LiveAppBadgeManager: AppBadgeManaging {
     func clearBadge() {
         UserDefaults.standard.set(0, forKey: "badgeNumber")
 
-        UNUserNotificationCenter.current().setBadgeCount(0) { error in
-            if let error {
-                print("Failed to clear badge: \(error)")
-            }
-        }
+        UNUserNotificationCenter.current().setBadgeCount(0) { _ in }
     }
 }
 

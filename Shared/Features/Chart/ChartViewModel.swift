@@ -16,11 +16,11 @@ final class ChartViewModel {
     @ObservationIgnored private var observationTask: Task<Void, Never>?
     let categoryOptions: [String]
 
-    init(customerService: CustomerServicing = FirebaseCustomerService()) {
+    init(customerStore: CustomerStore) {
         let picker = PickerDataModel()
         pickerData = picker
         categoryOptions = picker.pickCategory.filter { !$0.isEmpty }
-        customerData = CustomerStore(customerService: customerService)
+        customerData = customerStore
         startObservingData()
     }
 

@@ -16,7 +16,7 @@ enum DisplayType {
 struct PlaceSearch: View {
     
     @Environment(\.dismiss) var dismiss
-    @AppStorage("color") private var color: Int?
+    @AppStorage(SettingsUI.color) private var color: Int?
     @State private var viewModel: PlaceListViewModel
     @State private var locationManager = LocationManager()
 

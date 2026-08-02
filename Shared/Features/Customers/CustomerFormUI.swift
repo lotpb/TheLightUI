@@ -27,7 +27,7 @@ struct CustomerFormUI: View {
     }
 
     // Persisted theme color choice.
-    @AppStorage("color") private var color: Int?
+    @AppStorage(SettingsUI.color) private var color: Int?
     // Shared picklist values used by multiple pickers.
     @Environment(PickerDataModel.self) private var pickerviewModel
     // Dismiss action from the environment.

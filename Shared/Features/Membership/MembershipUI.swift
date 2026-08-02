@@ -249,8 +249,8 @@ struct MembershipUI: View {
         switch result {
         case .success(let result):
             addProspect(from: result.string)
-        case .failure(let error):
-            print("Scanning failed: \(error.localizedDescription)")
+        case .failure:
+            break
         }
     }
 

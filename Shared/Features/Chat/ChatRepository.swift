@@ -33,6 +33,8 @@ protocol ChatRepositoryProtocol: Sendable {
     func sendImageMessage(_ imageData: Data, to chatUser: UserModel) async throws
 }
 
+// `@unchecked Sendable`: wraps Firebase's ListenerRegistration, which is
+// thread-safe by contract but lacks Sendable conformance in the SDK.
 final class FirebaseChatListener: ChatListener, @unchecked Sendable {
     private let registration: ListenerRegistration
 

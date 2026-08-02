@@ -50,12 +50,12 @@ public struct MailContent {
 
 public extension MailContent {
     static var theLightSupportSubject: String {
-        let emailTitle = AppSettingsStore().emailTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        let emailTitle = (UserDefaults.standard.string(forKey: SettingsUI.emailTitleKey) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         return emailTitle.isEmpty ? "Email support" : emailTitle
     }
 
     static var theLightSupportMessage: String {
-        let emailMessage = AppSettingsStore().emailMessage.trimmingCharacters(in: .whitespacesAndNewlines)
+        let emailMessage = (UserDefaults.standard.string(forKey: SettingsUI.emailMessageKey) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         return emailMessage.isEmpty ? defaultSupportMessage : "\(emailMessage)\n\(defaultSupportMessage)"
     }
 

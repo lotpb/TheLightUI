@@ -16,7 +16,7 @@ struct MainTopView: View {
         static let titleSize: CGFloat = 32
     }
 
-    @AppStorage("color") private var color: Int?
+    @AppStorage(SettingsUI.color) private var color: Int?
     @AppStorage(SettingsUI.isCompanyNameKey) private var companyName: String = "Main Menu"
     @AppStorage(SettingsUI.backend) private var backEnd: String = "SwiftData"
     @State private var currentTemperatureText = "--°F"
@@ -24,7 +24,6 @@ struct MainTopView: View {
     @State private var currentStepsText = "--"
     @State private var isActive = true
 
-    private let pedometer = CMPedometer()
     private let makeWeatherManager: () -> WeatherManaging
     private let makeWeatherLocationProvider: () -> WeatherLocationProviding
 
@@ -98,7 +97,6 @@ struct MainTopView: View {
         }
         .onDisappear {
             isActive = false
-            pedometer.stopUpdates()
         }
     }
 
@@ -126,18 +124,19 @@ struct MainTopView: View {
             currentStepsText = "Unavailable"
             return
         }
-
+        // Pedometer is scoped to this task. defer guarantees stopUpdates is
+        // called on the exact same instance that started updates, regardless
+        // of whether the task exits normally or is cancelled on view disappear.
+        let pedometer = CMPedometer()
+        defer { pedometer.stopUpdates() }
         let startOfDay = Calendar.current.startOfDay(for: .now)
-
-        // Seed with today's accumulated steps, then stream live updates.
-        applySteps(await todaySteps(from: startOfDay))
-
-        for await steps in stepUpdates(from: startOfDay) {
+        applySteps(await todaySteps(from: startOfDay, pedometer: pedometer))
+        for await steps in stepUpdates(from: startOfDay, pedometer: pedometer) {
             applySteps(steps)
         }
     }
 
-    private func todaySteps(from startOfDay: Date) async -> Int? {
+    private func todaySteps(from startOfDay: Date, pedometer: CMPedometer) async -> Int? {
         await withCheckedContinuation { continuation in
             // CoreMotion invokes this handler on its own background queue. The
             // explicit `@Sendable` strips the `@MainActor` isolation this closure
@@ -151,7 +150,7 @@ struct MainTopView: View {
         }
     }
 
-    private func stepUpdates(from startOfDay: Date) -> AsyncStream<Int> {
+    private func stepUpdates(from startOfDay: Date, pedometer: CMPedometer) -> AsyncStream<Int> {
         AsyncStream { continuation in
             pedometer.startUpdates(from: startOfDay) { @Sendable data, _ in
                 guard let data else { return }

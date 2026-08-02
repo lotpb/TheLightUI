@@ -13,9 +13,11 @@ final class LocationCaptureManager: NSObject, LocationCaptureManaging {
     private var timeoutTask: Task<Void, Never>?
     private var isUpdatingLocation = false
 
+    // Delegate is NOT set in init because init is nonisolated (NSObject requirement)
+    // and setting it there would allow callbacks to fire before @MainActor isolation
+    // is established. It is set lazily on the first actual request instead.
     nonisolated override init() {
         super.init()
-        locationManager.delegate = self
     }
 
     func requestSingleLocation() async -> CLLocationCoordinate2D? {
@@ -27,6 +29,7 @@ final class LocationCaptureManager: NSObject, LocationCaptureManaging {
     }
 
     private func requestSingleLocation(completion: @escaping (CLLocationCoordinate2D?) -> Void) {
+        locationManager.delegate = self  // safe: this method runs on @MainActor
         guard self.completion == nil else {
             // A request is already in progress; report no result for this one.
             completion(nil)

@@ -49,7 +49,10 @@ final class CustomerStore {
             for item in itemsToDelete {
                 do {
                     try await customerService.deleteCustomer(id: item.id)
-                    items.removeAll { $0.id == item.id }
+                    // No optimistic removal: the live Firestore listener updates
+                    // `items` once the delete is confirmed, which is the correct
+                    // source of truth. Optimistic removal races the listener and
+                    // can restore a deleted item if the snapshot arrives first.
                 } catch {
                     errorMessage = error.localizedDescription
                 }

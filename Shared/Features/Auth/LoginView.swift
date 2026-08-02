@@ -263,6 +263,7 @@ struct LoginView: View {
                 .background(statusColor.opacity(0.12), in: RoundedRectangle(cornerRadius: Layout.cornerRadius, style: .continuous))
                 .accessibilityIdentifier("loginStatusMessage")
 
+            #if DEBUG
             let savedLat = SecureSettingsStore.loadString(forKey: SettingsUI.latitudeKey)
             let savedLon = SecureSettingsStore.loadString(forKey: SettingsUI.longitudeKey)
             if !savedLat.isEmpty || !savedLon.isEmpty {
@@ -271,6 +272,7 @@ struct LoginView: View {
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
+            #endif
         }
     }
 

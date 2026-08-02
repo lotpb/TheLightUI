@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CustomerUI: View {
-    @AppStorage("color") private var color: Int?
+    @AppStorage(SettingsUI.color) private var color: Int?
     @Environment(\.tabBarOverlap) private var tabBarOverlap
     @State private var viewModel: CustomerStore
     @State private var listViewModel: CustomerListViewModel
@@ -94,10 +94,7 @@ struct CustomerUI: View {
             .navigationBarTitleDisplayMode(.inline)
             .tint(themeColor)
             .toolbar { toolbarContent }
-            .searchable(text: $listViewModel.searchText, placement: .navigationBarDrawer(displayMode: .always)) {
-                Text("Balsamo").searchCompletion("Balsamo")
-                Text("Rosch").searchCompletion("Rosch")
-            }
+            .searchable(text: $listViewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
             .refreshable {
                 viewModel.fetchData()
             }
@@ -115,10 +112,9 @@ struct CustomerUI: View {
                 isPresented: $confirmMarkContacted,
                 titleVisibility: .visible,
                 presenting: pendingContactItem
-            ) { _ in
+            ) { item in
                 Button("Confirm", role: .destructive) {
-                    // TODO: Ideally cancel notifications scoped to this customer only.
-                    notificationManager.deleteNotifications()
+                    notificationManager.cancelNotification(withIdentifier: "reminder-\(item.id)")
                 }
                 Button("Cancel", role: .cancel) {}
             } message: { item in
@@ -396,7 +392,8 @@ struct CustomerUI: View {
             body: "Email \(item.email)",
             categoryIdentifier: "reminder",
             dateComponents: dateComponents,
-            repeats: true
+            repeats: true,
+            identifier: "reminder-\(item.id)"
         )
     }
 

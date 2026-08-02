@@ -25,7 +25,7 @@ struct GradientUI: View {
             VStack(spacing: Layout.stackSpacing) {
                 TitleText("TheLight")
                 SubtitleText("Software")
-                VersionText(AppSettingsStore().version)
+                VersionText(UserDefaults.standard.string(forKey: SettingsUI.versionKey) ?? "1.0")
             }
             .padding(.horizontal, Layout.titlePadding)
             .multilineTextAlignment(.center)
