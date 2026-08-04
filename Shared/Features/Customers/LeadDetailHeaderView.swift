@@ -15,7 +15,6 @@ struct LeadDetailHeaderView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             profileRow
-            followMapRow
             Divider()
             saleSummaryRow
         }
@@ -43,90 +42,76 @@ struct LeadDetailHeaderView: View {
     }
 
     private var profileRow: some View {
-        HStack(alignment: .center, spacing: 12) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(CustomerItem.Category.vendor.matches(detail.category) ? detail.first : detail.lastname)
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
-
-                Text(detail.street)
-                    .font(horizontalSizeClass == .regular ? .callout : .subheadline)
-                    .foregroundStyle(Color.secondary)
-                    .lineLimit(1)
-                Text(detail.address)
-                    .font(horizontalSizeClass == .regular ? .callout : .subheadline)
-                    .foregroundStyle(Color.secondary)
-                    .lineLimit(1)
-            }
-
-            Spacer(minLength: 1)
-
-            VStack(spacing: 8) {
-                InitialsAvatarView(firstName: detail.first, lastName: detail.lastname, size: 88)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top, spacing: 12) {
+                InitialsAvatarView(firstName: detail.first, lastName: detail.lastname, size: 60)
                     .overlay(Circle().stroke(.white.opacity(0.7), lineWidth: 1))
                     .shadow(radius: 2)
 
-                Text(detail.id)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-                    .frame(width:25)
-            }
-        }
-    }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(CustomerItem.Category.vendor.matches(detail.category) ? detail.first : "\(detail.first) \(detail.lastname)")
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
 
-    private var followMapRow: some View {
-        HStack(alignment: .center, spacing: 12) {
-            // A Button (rather than onTapGesture) gives VoiceOver the button trait
-            // and standard press feedback.
-            Button {
-                toggleActive()
-            } label: {
-                HStack(spacing: 6) {
-                    if horizontalSizeClass == .regular {
-                        Text(detail.isActive ? "Following" : "Follow")
-                    } else {
-                        Text(detail.isActive ? "Following" : "Follow")
-                            .foregroundStyle(Color.accentColor)
+                    if CustomerItem.Category.vendor.matches(detail.category) {
+                        Text(detail.lastname)
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(Color.white.opacity(0.85))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
+                    } else if !CustomerItem.Category.employee.matches(detail.category) {
+                        Text(detail.formattedAmount)
+                            .font(horizontalSizeClass == .compact ? .title2.weight(.bold) : .title.weight(.bold))
+                            .foregroundStyle(Color.green)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
                     }
-                    Image(systemName: detail.isActive ? "star.fill" : "star")
-                        .foregroundStyle(detail.isActive ? Color.yellow : Color.secondary)
                 }
-                .font(.subheadline.weight(.semibold))
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Toggle Follow")
 
-            Spacer()
-
-            Button {
-                showFullscreen.toggle()
-            } label: {
-                Label("Map", systemImage: "map")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 13)
-                    .padding(.vertical, 6)
-                    .background(Color.blue.opacity(0.9), in: Capsule())
+                Spacer(minLength: 0)
             }
-            .buttonStyle(.plain)
+
+            HStack(spacing: 6) {
+                Text(detail.category.capitalized)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.accentColor)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.accentColor.opacity(0.15).gradient, in: Capsule())
+
+                if detail.isActive {
+                    Text("Active")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Color.green)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.green.opacity(0.15).gradient, in: Capsule())
+                }
+
+                if !detail.rate.isEmpty {
+                    HStack(spacing: 3) {
+                        Image(systemName: "star.fill")
+                            .foregroundStyle(Color.yellow)
+                        Text(detail.rate)
+                    }
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.yellow)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.yellow.opacity(0.15).gradient, in: Capsule())
+                }
+
+                Spacer(minLength: 0)
+            }
+            .padding(.leading, 4)
         }
     }
 
     private var saleSummaryRow: some View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 4) {
-                let isVendor = CustomerItem.Category.vendor.matches(detail.category)
-                let isEmployee = CustomerItem.Category.employee.matches(detail.category)
-                Text(isVendor ? detail.lastname : isEmployee ? detail.adNo : detail.formattedAmount)
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .lineLimit(1)
-                Text(isVendor ? CustomerLabels.profession : isEmployee ? CustomerLabels.department : CustomerLabels.saleDate)
-                    .font(.caption)
-                    .foregroundStyle(Color.secondary)
                 Text(detail.formattedCreationDate)
                     .font(.headline)
             }
@@ -141,6 +126,18 @@ struct LeadDetailHeaderView: View {
                     .background(Color.red.opacity(0.9), in: Capsule())
                     .foregroundStyle(.white)
             }
+
+            Button {
+                showFullscreen.toggle()
+            } label: {
+                Label("Map", systemImage: "map")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 13)
+                    .padding(.vertical, 6)
+                    .background(Color.blue.opacity(0.9), in: Capsule())
+            }
+            .buttonStyle(.plain)
         }
     }
 

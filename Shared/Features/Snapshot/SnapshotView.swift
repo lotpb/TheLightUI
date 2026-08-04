@@ -136,8 +136,7 @@ struct SnapshotView: View {
         [
             SnapshotBarEntry(label: "Leads",   count: viewModel.leadsToday.count,        color: themeColor),
             SnapshotBarEntry(label: "Appts",   count: viewModel.appointmentsToday.count, color: .orange),
-            SnapshotBarEntry(label: "Customers", count: viewModel.customersToday.count,  color: .indigo),
-            SnapshotBarEntry(label: "Sales",   count: viewModel.salesToday.count,        color: .green),
+            SnapshotBarEntry(label: "Customer", count: viewModel.customersToday.count,  color: .indigo),
             SnapshotBarEntry(label: "Jobs",    count: viewModel.jobsStartingToday.count, color: .teal)
         ]
     }
@@ -150,7 +149,7 @@ struct SnapshotView: View {
                     .frame(maxWidth: .infinity)
                 SnapshotStatCard(title: "Appts",     value: "\(viewModel.appointmentsToday.count)", color: .orange)
                     .frame(maxWidth: .infinity)
-                SnapshotStatCard(title: "Customers", value: "\(viewModel.customersToday.count)",    color: .indigo)
+                SnapshotStatCard(title: "Customer", value: "\(viewModel.customersToday.count)",    color: .indigo)
                     .frame(maxWidth: .infinity)
                 SnapshotStatCard(
                     title: "Sales",
@@ -178,26 +177,28 @@ struct SnapshotView: View {
             }
             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 4, trailing: 16))
 
-            // Count bar chart
-            Chart(barEntries) { entry in
-                BarMark(
-                    x: .value("Category", entry.label),
-                    y: .value("Count", entry.count)
-                )
-                .foregroundStyle(entry.color)
-                .cornerRadius(6)
-                .annotation(position: .top, alignment: .center) {
-                    if entry.count > 0 {
-                        Text("\(entry.count)")
-                            .font(.caption2.bold())
-                            .foregroundStyle(.secondary)
+            // Count bar chart — only shown when at least one category has data
+            if barEntries.contains(where: { $0.count > 0 }) {
+                Chart(barEntries) { entry in
+                    BarMark(
+                        x: .value("Category", entry.label),
+                        y: .value("Count", entry.count)
+                    )
+                    .foregroundStyle(entry.color)
+                    .cornerRadius(6)
+                    .annotation(position: .top, alignment: .center) {
+                        if entry.count > 0 {
+                            Text("\(entry.count)")
+                                .font(.caption2.bold())
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
+                .chartYAxis(.hidden)
+                .frame(height: 150)
+                .padding(.vertical, 8)
+                .animation(.easeInOut(duration: 0.4), value: barEntries.map(\.count))
             }
-            .chartYAxis(.hidden)
-            .frame(height: 150)
-            .padding(.vertical, 8)
-            .animation(.easeInOut(duration: 0.4), value: barEntries.map(\.count))
         } header: {
             HStack {
                 Text("Today's Summary")
@@ -397,6 +398,7 @@ private struct SnapshotStatCard: View {
                 .foregroundStyle(color)
                 .minimumScaleFactor(0.6)
                 .lineLimit(1)
+                .frame(height: 30)
             Text(title)
                 .font(.caption2)
                 .foregroundStyle(.secondary)

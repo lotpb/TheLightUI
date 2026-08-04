@@ -48,11 +48,12 @@ struct MainTopView: View {
                 .padding(.top, 15)
                 .padding(.leading, 15)
             Spacer()
-            Image("The Light Logo")
+            Image("TheLight trans2")
                 .resizable()
                 .scaledToFit()
                 .frame(height: 60)
-                .padding(.trailing, 15)
+                .overlay(RoundedRectangle(cornerRadius: 6).stroke(.white, lineWidth: 1.5))
+                .padding(.trailing, 20)
                 .padding(.top, 15)
         }
     }

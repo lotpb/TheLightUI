@@ -108,17 +108,17 @@ struct CustomerUI: View {
                 listViewModel.allItems = viewModel.items
             }
             .confirmationDialog(
-                "Mark as contacted?",
+                "Cancel reminder?",
                 isPresented: $confirmMarkContacted,
                 titleVisibility: .visible,
                 presenting: pendingContactItem
             ) { item in
-                Button("Confirm", role: .destructive) {
+                Button("Cancel Reminder", role: .destructive) {
                     notificationManager.cancelNotification(withIdentifier: "reminder-\(item.id)")
                 }
                 Button("Cancel", role: .cancel) {}
             } message: { item in
-                Text("This will remove any pending reminders for \(item.lastname).")
+                Text("This will remove the pending reminder for \(item.lastname).")
             }
             // .data is included because fileExporter on some iOS versions saves without
             // a .json extension, which the system types as generic data (greying it out).
@@ -214,7 +214,7 @@ struct CustomerUI: View {
             pendingContactItem = item
             confirmMarkContacted = true
         } label: {
-            Label("Mark Contacted", systemImage: "person.crop.circle.fill.badge.checkmark")
+            Label("Cancel Reminder", systemImage: "bell.slash")
         }
         .tint(.green)
 

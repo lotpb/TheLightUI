@@ -197,16 +197,17 @@ struct TwitterUI: View {
     private var tweetFeed: some View {
         VStack(spacing: 18) {
             TweetView(
-                tweet: "New iPhone 12 Purple Review By iJustine 🥳🥳🥳🥳.......",
-                tweetImage: "ZuckBuddist",
+                tweet: "New TheLight Logo 🥳🥳🥳🥳.......",
+                tweetImage: "The Light Logo",
                 profileImageUrl: viewModel.chatUser?.profileImageUrl
             )
 
             Divider()
 
-            ForEach(1...20, id: \.self) { _ in
+            ForEach(1...10, id: \.self) { _ in
                 TweetView(
                     tweet: TweetView.sampleText,
+                    tweetImage: "The Light Logo",
                     profileImageUrl: viewModel.chatUser?.profileImageUrl
                 )
                 Divider()

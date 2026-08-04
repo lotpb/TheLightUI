@@ -58,7 +58,7 @@ struct LeadDetailUI: View {
     @State private var ssnUnlocked = false
     @State private var showSSNPasswordPrompt = false
     @State private var ssnPasswordEntry = ""
-    @AppStorage(SettingsUI.adminPasswordKey) private var adminPassword: String = "admin"
+    @State private var adminPassword: String = ""
 
     init(
         detail: CustomerItem,
@@ -126,6 +126,9 @@ struct LeadDetailUI: View {
         }
         // Mirror the customer's active state into AppStorage to drive theme accents.
         .onAppear(perform: syncActiveColor)
+        .onAppear {
+            adminPassword = SecureSettingsStore.loadString(forKey: SettingsUI.adminPasswordKey, defaultValue: "admin")
+        }
         .onChange(of: detail.isActive) {
             syncActiveColor()
         }
@@ -144,15 +147,245 @@ struct LeadDetailUI: View {
     }
 
     // Reusable list of labeled customer fields with rounded card containers.
+    // Customer category splits Phone and Email into a dedicated Contact section.
+    @ViewBuilder
     private var detailFieldList: some View {
-        RoundedContainerList(detailFields) { field in
-            if isEmployee && field.label == CustomerLabels.socialSecurity {
-                ssnDetailRow(field: field)
-            } else {
+        if isCustomer {
+            customerSectionedFieldList
+        } else if isLead {
+            leadSectionedFieldList
+        } else if isVendor {
+            vendorSectionedFieldList
+        } else if isEmployee {
+            employeeSectionedFieldList
+        } else {
+            RoundedContainerList(detailFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            .padding(.horizontal)
+        }
+    }
+
+    private var customerSectionedFieldList: some View {
+        let contactLabels: Set<String> = [CustomerLabels.phone, CustomerLabels.email, CustomerLabels.callback]
+        let jobInfoLabels: Set<String> = [CustomerLabels.salesman, CustomerLabels.job, CustomerLabels.product, CustomerLabels.contractor, CustomerLabels.quantity, CustomerLabels.adNo]
+        let dateLabels: Set<String> = ["Sale Date", CustomerLabels.startDate, CustomerLabels.complete, CustomerLabels.lastUpdated]
+        let personalLabels: Set<String> = [CustomerLabels.spouse, CustomerLabels.photo]
+        let addressLabels: Set<String> = ["Street", "City", "State", "Zip"]
+        let allSectionLabels = contactLabels.union(jobInfoLabels).union(dateLabels).union(personalLabels).union(addressLabels)
+        let mainFields = detailFields.filter { !allSectionLabels.contains($0.label) }
+        let contactFields = detailFields.filter { contactLabels.contains($0.label) }
+        let jobInfoFields = detailFields.filter { jobInfoLabels.contains($0.label) }
+        let dateFields = detailFields.filter { dateLabels.contains($0.label) }
+        let personalFields = detailFields.filter { personalLabels.contains($0.label) }
+        let addressFields = detailFields.filter { addressLabels.contains($0.label) }
+        return VStack(spacing: LeadDetailLayout.containerSpacing) {
+            RoundedContainerList(mainFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            addressSectionHeader
+            RoundedContainerList(addressFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            contactSectionHeader
+            RoundedContainerList(contactFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            jobInfoSectionHeader
+            RoundedContainerList(jobInfoFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            datesSectionHeader
+            RoundedContainerList(dateFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            personalSectionHeader
+            RoundedContainerList(personalFields) { field in
                 LeadDetailFieldRow(formData: field)
             }
         }
         .padding(.horizontal)
+    }
+
+    private var leadSectionedFieldList: some View {
+        let addressLabels: Set<String> = ["Street", "City", "State", "Zip"]
+        let contactLabels: Set<String> = [CustomerLabels.phone, CustomerLabels.email]
+        let jobInfoLabels: Set<String> = [CustomerLabels.salesman, CustomerLabels.job, CustomerLabels.product, CustomerLabels.contractor, CustomerLabels.quantity, CustomerLabels.callback, CustomerLabels.adNo]
+        let dateLabels: Set<String> = ["Sale Date", CustomerLabels.aptDate, CustomerLabels.complete, CustomerLabels.lastUpdated]
+        let personalLabels: Set<String> = [CustomerLabels.spouse, CustomerLabels.photo]
+        let allSectionLabels = addressLabels.union(contactLabels).union(jobInfoLabels).union(dateLabels).union(personalLabels)
+        let mainFields = detailFields.filter { !allSectionLabels.contains($0.label) }
+        let addressFields = detailFields.filter { addressLabels.contains($0.label) }
+        let contactFields = detailFields.filter { contactLabels.contains($0.label) }
+        let jobInfoFields = detailFields.filter { jobInfoLabels.contains($0.label) }
+        let dateFields = detailFields.filter { dateLabels.contains($0.label) }
+        let personalFields = detailFields.filter { personalLabels.contains($0.label) }
+        return VStack(spacing: LeadDetailLayout.containerSpacing) {
+            RoundedContainerList(mainFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            contactSectionHeader
+            RoundedContainerList(contactFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            addressSectionHeader
+            RoundedContainerList(addressFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            jobInfoSectionHeader
+            RoundedContainerList(jobInfoFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            datesSectionHeader
+            RoundedContainerList(dateFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            personalSectionHeader
+            RoundedContainerList(personalFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+        }
+        .padding(.horizontal)
+    }
+
+    private var vendorSectionedFieldList: some View {
+        let addressLabels: Set<String> = ["Street", "City", "State", "Zip"]
+        let jobInfoLabels: Set<String> = [CustomerLabels.profession, CustomerLabels.manager, CustomerLabels.callback]
+        let contactLabels: Set<String> = [CustomerLabels.phone, CustomerLabels.email, CustomerLabels.website, CustomerLabels.photo]
+        let dateLabels: Set<String> = ["Date Added", CustomerLabels.lastUpdated]
+        let allSectionLabels = addressLabels.union(jobInfoLabels).union(contactLabels).union(dateLabels)
+        let mainFields = detailFields.filter { !allSectionLabels.contains($0.label) }
+        let addressFields = detailFields.filter { addressLabels.contains($0.label) }
+        let jobInfoFields = detailFields.filter { jobInfoLabels.contains($0.label) }
+        let contactFields = detailFields.filter { contactLabels.contains($0.label) }
+        let dateFields = detailFields.filter { dateLabels.contains($0.label) }
+        return VStack(spacing: LeadDetailLayout.containerSpacing) {
+            RoundedContainerList(mainFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            contactSectionHeader
+            RoundedContainerList(contactFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            addressSectionHeader
+            RoundedContainerList(addressFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            jobInfoSectionHeader
+            RoundedContainerList(jobInfoFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            datesSectionHeader
+            RoundedContainerList(dateFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+        }
+        .padding(.horizontal)
+    }
+
+    private var employeeSectionedFieldList: some View {
+        let addressLabels: Set<String> = ["Street", "City", "State", "Zip"]
+        let employeeInfoLabels: Set<String> = [CustomerLabels.phone, CustomerLabels.email, CustomerLabels.department, CustomerLabels.callback, CustomerLabels.photo]
+        let dateLabels: Set<String> = ["Date Added", CustomerLabels.startDate, CustomerLabels.endDate, CustomerLabels.birthDate, CustomerLabels.lastUpdated]
+        let personalLabels: Set<String> = [CustomerLabels.socialSecurity, CustomerLabels.driverLicense, CustomerLabels.spouse]
+        let allSectionLabels = addressLabels.union(employeeInfoLabels).union(dateLabels).union(personalLabels)
+        let mainFields = detailFields.filter { !allSectionLabels.contains($0.label) }
+        let addressFields = detailFields.filter { addressLabels.contains($0.label) }
+        let employeeInfoFields = detailFields.filter { employeeInfoLabels.contains($0.label) }
+        let dateFields = detailFields.filter { dateLabels.contains($0.label) }
+        let personalFields = detailFields.filter { personalLabels.contains($0.label) }
+        return VStack(spacing: LeadDetailLayout.containerSpacing) {
+            RoundedContainerList(mainFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            addressSectionHeader
+            RoundedContainerList(addressFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            employeeInfoSectionHeader
+            RoundedContainerList(employeeInfoFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            datesSectionHeader
+            RoundedContainerList(dateFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            personalSectionHeader
+            RoundedContainerList(personalFields) { field in
+                if field.label == CustomerLabels.socialSecurity {
+                    ssnDetailRow(field: field)
+                } else {
+                    LeadDetailFieldRow(formData: field)
+                }
+            }
+        }
+        .padding(.horizontal)
+    }
+
+    private var addressSectionHeader: some View {
+        HStack {
+            Text("Address")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(themeColor)
+                .textCase(.uppercase)
+            Spacer()
+        }
+        .padding(.top, 0)
+    }
+
+    private var personalSectionHeader: some View {
+        HStack {
+            Text("Personal")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(themeColor)
+                .textCase(.uppercase)
+            Spacer()
+        }
+        .padding(.top, 4)
+    }
+
+    private var datesSectionHeader: some View {
+        HStack {
+            Text("Dates")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(themeColor)
+                .textCase(.uppercase)
+            Spacer()
+        }
+        .padding(.top, 4)
+    }
+
+    private var jobInfoSectionHeader: some View {
+        HStack {
+            Text("Job Info")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(themeColor)
+                .textCase(.uppercase)
+            Spacer()
+        }
+        .padding(.top, 4)
+    }
+
+    private var contactSectionHeader: some View {
+        HStack {
+            Text("Contact")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(themeColor)
+                .textCase(.uppercase)
+            Spacer()
+        }
+        .padding(.top, 4)
+    }
+
+    private var employeeInfoSectionHeader: some View {
+        HStack {
+            Text("Employee Info")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(themeColor)
+                .textCase(.uppercase)
+            Spacer()
+        }
+        .padding(.top, 4)
     }
 
     @ViewBuilder

@@ -46,6 +46,8 @@ enum CustomerFirestoreSchema {
         static let category = "category"
         static let callback = "callback"
         static let adNo = "adNo"
+        static let birthDate = "birthDate"
+        static let driverLicense = "driverLicense"
     }
 }
 
@@ -91,7 +93,9 @@ extension CustomerItem {
             product: document.stringValue(for: fields.product),
             category: document.stringValue(for: fields.category),
             callback: document.stringValue(for: fields.callback),
-            adNo: adNoValue
+            adNo: adNoValue,
+            birthDate: document.stringValue(for: fields.birthDate),
+            driverLicense: document.stringValue(for: fields.driverLicense)
         )
     }
 }
@@ -154,6 +158,8 @@ struct CustomerFormPayload {
     var category: String
     var callback: String
     var adNo: String
+    var birthDate: String
+    var driverLicense: String
 
     init(
         customer: CustomerItem,
@@ -193,6 +199,8 @@ struct CustomerFormPayload {
         self.category = customer.category
         self.callback = customer.callback
         self.adNo = customer.adNo
+        self.birthDate = customer.birthDate
+        self.driverLicense = customer.driverLicense
     }
 
     var firestoreData: [String: Any] {
@@ -221,7 +229,9 @@ struct CustomerFormPayload {
             CustomerFirestoreSchema.Field.lastUpdate: Timestamp(date: lastUpdateDate),
             CustomerFirestoreSchema.Field.creationDate: Timestamp(date: creationDate),
             CustomerFirestoreSchema.Field.callback: callback,
-            CustomerFirestoreSchema.Field.adNo: adNo
+            CustomerFirestoreSchema.Field.adNo: adNo,
+            CustomerFirestoreSchema.Field.birthDate: birthDate,
+            CustomerFirestoreSchema.Field.driverLicense: driverLicense
         ]
 
         if let userId {

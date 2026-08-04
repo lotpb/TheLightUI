@@ -28,7 +28,7 @@ struct SettingView: View {
     }
 
     @State private var settings: AppSettingsStore
-    @AppStorage(SettingsUI.adminPasswordKey) private var adminPassword: String = "admin"
+    @State private var adminPassword: String = ""
 
     init(settings: AppSettingsStore = AppSettingsStore()) {
         _settings = State(initialValue: settings)
@@ -38,6 +38,12 @@ struct SettingView: View {
         NavigationStack {
             settingsForm
                 .navigationTitle("Settings")
+        }
+        .onAppear {
+            adminPassword = SecureSettingsStore.loadString(forKey: SettingsUI.adminPasswordKey, defaultValue: "admin")
+        }
+        .onChange(of: adminPassword) { _, newValue in
+            SecureSettingsStore.saveString(newValue, forKey: SettingsUI.adminPasswordKey)
         }
     }
 

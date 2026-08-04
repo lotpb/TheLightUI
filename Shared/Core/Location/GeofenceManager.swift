@@ -52,6 +52,9 @@ final class GeofenceManager {
     private var eventTask: Task<Void, Never>?
     private var alertPlayer: AVAudioPlayer?
     private var startDate: Date = .distantPast
+    // Keyed by identifier: the last known state at app launch. Cleared per-identifier
+    // after the first event arrives so that only startup re-delivery is suppressed.
+    private var knownStates: [String: CLMonitor.Event.State] = [:]
 
     private init() {}
 
@@ -105,9 +108,12 @@ final class GeofenceManager {
 
     private func restoreGeofences(from monitor: CLMonitor) async {
         var restored: [Geofence] = []
+        knownStates.removeAll()
         for identifier in await monitor.identifiers {
-            guard let condition = await monitor.record(for: identifier)?.condition as? CLMonitor.CircularGeographicCondition else { continue }
+            guard let record = await monitor.record(for: identifier),
+                  let condition = record.condition as? CLMonitor.CircularGeographicCondition else { continue }
             restored.append(Geofence(id: identifier, center: condition.center, radius: condition.radius))
+            knownStates[identifier] = record.lastEvent.state
         }
         geofences = restored
     }
@@ -132,9 +138,14 @@ final class GeofenceManager {
 
     private func handle(_ event: CLMonitor.Event) {
         guard alertsEnabled else { return }
-        // CLMonitor replays buffered events from while the app was killed.
-        // Skip any event older than this session's start to avoid spurious notifications on launch.
+        // Skip buffered events from before this session.
         guard event.date > startDate else { return }
+        // CLMonitor re-delivers the current state of every condition when the monitor opens.
+        // Suppress that initial re-delivery; only fire for actual state changes.
+        if let known = knownStates[event.identifier] {
+            knownStates.removeValue(forKey: event.identifier)
+            if known == event.state { return }
+        }
         let geofenceEvent: GeofenceEvent
         switch event.state {
         case .satisfied:

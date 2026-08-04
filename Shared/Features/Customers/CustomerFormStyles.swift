@@ -5,6 +5,19 @@
 
 import SwiftUI
 
+// Section header that uses a smaller font on iPad (regular width).
+struct FormSectionHeader: View {
+    let title: String
+    let color: Color
+    @Environment(\.horizontalSizeClass) private var sizeClass
+
+    var body: some View {
+        Text(title)
+            .foregroundStyle(color)
+            .font(sizeClass == .regular ? .caption.weight(.semibold) : nil)
+    }
+}
+
 // Shared label width — keep in sync with CustomerFormUI.Layout.labelWidth.
 private let formLabelWidth: CGFloat = 100
 
@@ -29,6 +42,7 @@ extension Text {
         self
             .font(.system(size: 18.0))
             .bold()
+            .foregroundStyle(Color.secondary)
             .lineLimit(1)
             .minimumScaleFactor(0.5)
             .frame(width: formLabelWidth, alignment: .leading)

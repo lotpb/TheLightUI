@@ -18,6 +18,7 @@ final class CustomerFormViewModel {
     var pickDate: Date
     var pickStartDate: Date
     var pickCompleteDate: Date
+    var pickBirthDate: Date
     var errorMessage = ""
     let mode: CustomerFormMode
     private(set) var shouldFocusFirstName = false
@@ -50,6 +51,7 @@ final class CustomerFormViewModel {
         self.pickDate = createDate
         self.pickStartDate = startDate
         self.pickCompleteDate = completeDate
+        self.pickBirthDate = CustomerPresentationFormatters.mediumDate.date(from: detail.birthDate) ?? Date()
         self.mode = mode
         self.formService = formService
     }
@@ -72,6 +74,7 @@ final class CustomerFormViewModel {
             pickDate = detail.creationDate
             pickStartDate = detail.startDate
             pickCompleteDate = detail.completionDate
+            pickBirthDate = CustomerPresentationFormatters.mediumDate.date(from: detail.birthDate) ?? Date()
         }
     }
 
@@ -127,7 +130,6 @@ final class CustomerFormViewModel {
         performSave {
             try await self.formService.updateCustomer(id: self.detail.id, payload: payload)
             guard !Task.isCancelled else { return }
-            self.detail.resetEditableFields()
             self.showAlertUpdate = true
             self.errorMessage = ""
         }
@@ -150,11 +152,17 @@ final class CustomerFormViewModel {
     }
 
     private func makePayload(userId: String? = nil) -> CustomerFormPayload {
-        CustomerFormPayload(
-            customer: detail,
-            amount: detail.amount,
-            quantity: detail.quantity,
-            rate: detail.rate,
+        var updatedDetail = detail
+        // Only employees have a birth date field; skip for other categories to avoid
+        // silently writing today's date when the stored value is empty or in a legacy format.
+        if CustomerItem.Category.employee.matches(detail.category) {
+            updatedDetail.birthDate = CustomerPresentationFormatters.mediumDate.string(from: pickBirthDate)
+        }
+        return CustomerFormPayload(
+            customer: updatedDetail,
+            amount: updatedDetail.amount,
+            quantity: updatedDetail.quantity,
+            rate: updatedDetail.rate,
             creationDate: pickDate,
             startDate: pickStartDate,
             completionDate: pickCompleteDate,

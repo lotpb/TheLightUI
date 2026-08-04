@@ -41,6 +41,9 @@ enum CustomerLabels {
     static let middle = "Middle"
     static let company = "Company"
     static let socialSecurity = "Social Security"
+    static let birthDate = "Birth Date"
+    static let driverLicense = "Driver License"
+    static let endDate = "End Date"
     // Vendor-specific labels (fields are stored in repurposed CustomerItem slots).
     static let vendorName = "Vendor"
     static let website = "Web Page"
@@ -78,7 +81,7 @@ extension CustomerItem {
 enum CustomerPresentationFormatters {
     static let mediumDate: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMM dd yyyy"
+        formatter.dateFormat = "MMM d yyyy"
         return formatter
     }()
 

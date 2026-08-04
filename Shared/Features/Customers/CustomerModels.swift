@@ -48,6 +48,8 @@ struct CustomerItem: Identifiable, Equatable, Hashable {
     var category: String = ""
     var callback: String = ""
     var adNo: String = ""
+    var birthDate: String = ""
+    var driverLicense: String = ""
 
     static var emptyCustomer: CustomerItem {
         CustomerItem(
@@ -125,6 +127,8 @@ struct CustomerItem: Identifiable, Equatable, Hashable {
         category = ""
         callback = ""
         adNo = ""
+        birthDate = ""
+        driverLicense = ""
     }
 }
 

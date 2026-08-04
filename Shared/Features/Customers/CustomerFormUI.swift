@@ -39,6 +39,7 @@ struct CustomerFormUI: View {
     @State private var viewModel: CustomerFormViewModel
     // Which editable picker sheet is open (nil = none).
     @State private var managingPickerType: PickerType? = nil
+    @State private var focusTask: Task<Void, Never>? = nil
 
     private var themeColor: Color {
         AppTheme.accentColor(for: color)
@@ -79,9 +80,10 @@ struct CustomerFormUI: View {
     var body: some View {
         NavigationStack {
             Form {
-                CustomerFormProfileSection(viewModel: viewModel, firstNameInFocus: $firstNameInFocus)
                 CustomerFormCategorySection(viewModel: viewModel)
-                CustomerFormContactSection(viewModel: viewModel)
+                CustomerFormContactInfoSection(viewModel: viewModel, firstNameInFocus: $firstNameInFocus)
+                CustomerFormAddressSection(viewModel: viewModel)
+                CustomerFormJobInfoSection(viewModel: viewModel, managingPickerType: $managingPickerType)
                 CustomerFormJobSection(viewModel: viewModel, managingPickerType: $managingPickerType)
                 CustomerFormMiscSection(viewModel: viewModel, managingPickerType: $managingPickerType)
             }
@@ -103,6 +105,10 @@ struct CustomerFormUI: View {
         }
         // Accent/tint color for controls.
         .tint(themeColor)
+        .onDisappear {
+            focusTask?.cancel()
+            focusTask = nil
+        }
     }
 
     // Toolbar actions: Close (dismiss) and Save (via view model).
@@ -126,7 +132,8 @@ struct CustomerFormUI: View {
     private func loadFormState() {
         viewModel.loadFormState()
         guard viewModel.shouldFocusFirstName else { return }
-        Task { @MainActor in
+        focusTask?.cancel()
+        focusTask = Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(700))
             guard !Task.isCancelled else { return }
             firstNameInFocus = true

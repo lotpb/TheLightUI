@@ -5,9 +5,8 @@
 
 import SwiftUI
 
-// A reusable list where each row renders as its own rounded card with spacing
-// between rows, like Reminders, matching the spaced list style used app-wide.
-// Rows are identified by their element's stable id so state and animations survive updates.
+// A reusable grouped list where all rows share a single rounded card background,
+// separated by inset dividers — matching the standard iOS grouped list style.
 struct RoundedContainerList<RowData: Identifiable, RowContent: View>: View {
     let rows: [RowData]
     let rowContent: (RowData) -> RowContent
@@ -18,19 +17,25 @@ struct RoundedContainerList<RowData: Identifiable, RowContent: View>: View {
     }
 
     var body: some View {
-        VStack(spacing: LeadDetailLayout.rowSpacing) {
-            ForEach(rows) { data in
-                rowContent(data)
-                    .padding(.horizontal, LeadDetailLayout.rowHorizontalPadding)
-                    .padding(.vertical, LeadDetailLayout.rowVerticalPadding)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(.secondarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: LeadDetailLayout.containerCornerRadius, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: LeadDetailLayout.containerCornerRadius, style: .continuous)
-                            .strokeBorder(Color(.separator).opacity(0.2))
-                    )
+        VStack(spacing: 0) {
+            ForEach(Array(rows.enumerated()), id: \.element.id) { index, data in
+                VStack(spacing: 0) {
+                    rowContent(data)
+                        .padding(.horizontal, LeadDetailLayout.rowHorizontalPadding)
+                        .padding(.vertical, LeadDetailLayout.rowVerticalPadding)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    if index < rows.count - 1 {
+                        Divider()
+                            .padding(.leading, LeadDetailLayout.rowHorizontalPadding)
+                    }
+                }
             }
         }
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: LeadDetailLayout.containerCornerRadius, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: LeadDetailLayout.containerCornerRadius, style: .continuous)
+                .strokeBorder(Color(.separator).opacity(0.2))
+        )
     }
 }
