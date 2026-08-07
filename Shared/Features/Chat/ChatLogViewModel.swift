@@ -50,6 +50,14 @@ final class ChatLogViewModel {
         guard let fromId = repository.currentUserId else { return }
         guard let toId = chatUser?.uid else { return }
 
+        // Fetch full profile so firstName/lastName populate the nav title
+        Task { [weak self] in
+            guard let self else { return }
+            if let fullUser = try? await repository.fetchUser(uid: toId) {
+                chatUser = fullUser
+            }
+        }
+
         stopListening()
         chatMessages.removeAll()
         listenerGeneration = UUID()

@@ -42,7 +42,7 @@ extension ExpenseRecord {
     }
 
     var firestoreData: [String: Any] {
-        [
+        var data: [String: Any] = [
             ExpenseFirestoreSchema.Field.title: title,
             ExpenseFirestoreSchema.Field.amount: amount,
             ExpenseFirestoreSchema.Field.category: category.rawValue,
@@ -53,6 +53,8 @@ extension ExpenseRecord {
             // compares when the expense actually changed.
             ExpenseFirestoreSchema.Field.lastUpdate: Timestamp(date: lastUpdate ?? Date())
         ]
+        if let companyId = CompanySession.companyId { data["companyId"] = companyId }
+        return data
     }
 }
 
@@ -84,8 +86,12 @@ actor ExpenseFirestoreService {
             .delete()
     }
 
+    /// Fetches only this account's expense records from Firestore.
     func fetchAll() async throws -> [ExpenseRecord] {
-        let snapshot = try await firestore.collection(ExpenseFirestoreSchema.collection).getDocuments()
+        guard let companyId = CompanySession.companyId else { return [] }
+        let snapshot = try await firestore.collection(ExpenseFirestoreSchema.collection)
+            .whereField("companyId", isEqualTo: companyId)
+            .getDocuments()
         return snapshot.documents.compactMap(ExpenseRecord.init)
     }
 }

@@ -58,6 +58,7 @@ struct CustomerFormContactInfoSection: View {
     @AppStorage(SettingsUI.color) private var color: Int?
     private var themeColor: Color { AppTheme.accentColor(for: color) }
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(PickerDataModel.self) private var pickerviewModel
     private var isVendor: Bool { CustomerItem.Category.vendor.matches(viewModel.detail.category) }
     private var isLead: Bool { CustomerItem.Category.lead.matches(viewModel.detail.category) }
 
@@ -76,7 +77,34 @@ struct CustomerFormContactInfoSection: View {
                         .formStyle()
                         .focused($firstNameInFocus)
                 }
-                if !isVendor {
+                if isVendor {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "phone.fill")
+                                .imageScale(.small)
+                                .foregroundStyle(viewModel.detail.salesman.lowercased() == "yes" ? Color.green : Color.gray)
+                            Text("Callback")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Color.secondary)
+                        }
+                        Menu {
+                            ForEach(pickerviewModel.pickCallback, id: \.self) { value in
+                                Button { viewModel.detail.salesman = value } label: {
+                                    Text(value.isEmpty ? "none" : value)
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Text(viewModel.detail.salesman.isEmpty ? "none" : viewModel.detail.salesman)
+                                    .foregroundStyle(viewModel.detail.salesman.isEmpty ? Color.gray : Color.primary)
+                                Image(systemName: "chevron.up.chevron.down")
+                                    .imageScale(.small)
+                                    .foregroundStyle(Color.primary)
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Last")
                             .font(.caption.weight(.semibold))
@@ -450,9 +478,14 @@ struct CustomerFormJobInfoSection: View {
 
     private var callbackColumn: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Callback")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(Color.secondary)
+            HStack(spacing: 4) {
+                Image(systemName: "phone.fill")
+                    .imageScale(.small)
+                    .foregroundStyle(viewModel.detail.callback.lowercased() == "yes" ? Color.green : Color.gray)
+                Text("Callback")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.secondary)
+            }
             Menu {
                 ForEach(pickerviewModel.pickCallback, id: \.self) { value in
                     Button { viewModel.detail.callback = value } label: {

@@ -237,7 +237,7 @@ private struct ChatNavigationTitle: View {
     let user: UserModel?
 
     private var displayName: String {
-        user?.username ?? "Chat"
+        user?.displayName ?? "Chat"
     }
 
     var body: some View {

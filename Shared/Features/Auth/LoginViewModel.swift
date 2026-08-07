@@ -165,6 +165,7 @@ final class LoginViewModel {
                     return
                 }
 
+                await CompanySession.refresh()
                 isAuthenticated = true
                 didCompleteLoginProcess()
             } catch is CancellationError {
@@ -187,6 +188,7 @@ final class LoginViewModel {
                 email: settings.email.isEmpty ? email : settings.email,
                 phoneNumber: settings.phoneNumber
             )
+            await CompanySession.refresh()
             loginStatusMessage = ""
             didCompleteLoginProcess()
         } catch is CancellationError {

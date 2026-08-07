@@ -197,6 +197,10 @@ struct PreviewChatRepository: ChatRepositoryProtocol {
         )
     }
 
+    func fetchUser(uid: String) async throws -> UserModel {
+        try await fetchCurrentUser()
+    }
+
     func fetchAvailableUsers() async throws -> [UserModel] {
         []
     }

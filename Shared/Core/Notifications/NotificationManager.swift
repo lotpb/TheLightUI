@@ -1,10 +1,3 @@
-//
-//  NotificationManager.swift
-//  TheLightUI (iOS)
-//
-//  Created by Peter Balsamo on 1/15/22.
-//
-
 // Utility for requesting notification permissions, scheduling notifications,
 // managing badge counts and attachments, and handling delegate presentation behavior.
 
@@ -30,11 +23,16 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     }
     
     /// Requests notification authorization to show alerts, play sounds, and update badges.
+    /// Also registers for remote notifications if permission is granted (required for FCM push).
     /// - Returns: `true` if the user granted permission.
     @discardableResult
     func requestAuthorization() async -> Bool {
         do {
-            return try await notificationCenter.requestAuthorization(options: authorizationOptions)
+            let granted = try await notificationCenter.requestAuthorization(options: authorizationOptions)
+            if granted {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+            return granted
         } catch {
             return false
         }

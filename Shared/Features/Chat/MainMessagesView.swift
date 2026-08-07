@@ -117,7 +117,7 @@ struct MainMessagesView: View {
             CurrentUserAvatar(urlString: vm.chatUser?.profileImageUrl)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(displayName(for: vm.chatUser?.email) ?? "Messages")
+                Text(vm.chatUser?.displayName ?? "Messages")
                     .font(.system(.title2, design: .rounded, weight: .bold))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
@@ -182,11 +182,13 @@ struct MainMessagesView: View {
                         .padding(.top, 44)
                 } else {
                     ForEach(vm.recentMessages) { recentMessage in
+                        let contactUid = vm.currentUserId == recentMessage.fromId ? recentMessage.toId : recentMessage.fromId
                         Button {
                             openChat(for: recentMessage)
                         } label: {
                             RecentMessageRow(
                                 recentMessage: recentMessage,
+                                contactProfile: vm.contactProfiles[contactUid],
                                 relativeTo: vm.relativeTimeReferenceDate
                             )
                         }
@@ -321,11 +323,12 @@ private struct CurrentUserAvatar: View {
 // Subview: a single row representing a recent conversation.
 private struct RecentMessageRow: View {
     let recentMessage: RecentMessage
+    let contactProfile: UserModel?
     let relativeTo: Date
 
     // Name to display for the conversation partner.
     private var displayName: String {
-        recentMessage.username
+        contactProfile?.displayName ?? recentMessage.username
     }
 
     var body: some View {

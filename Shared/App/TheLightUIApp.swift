@@ -1,15 +1,9 @@
-//
-//  TheLightUIApp.swift
-//  Shared
-//
-//  Created by Peter Balsamo on 6/14/21.
-//
-
 import SwiftUI
 import Firebase
 
 @main
 struct TheLightUIApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     private let dependencies: AppDependencies
 
     init() {
@@ -55,6 +49,8 @@ private struct AppRootView: View {
                     // Arm geofence monitoring for the whole session, not just
                     // while the map screen is open.
                     await GeofenceManager.shared.start()
+                    // Refresh cached companyId claim for already-authenticated users.
+                    await CompanySession.refresh()
                 }
 
             if showLaunch {

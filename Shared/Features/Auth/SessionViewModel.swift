@@ -53,6 +53,7 @@ final class SessionViewModel {
     func signOut() {
         do {
             try sessionService.signOut()
+            CompanySession.clear()
             isAuthenticated = false
             isLoginPresented = true
             errorMessage = ""

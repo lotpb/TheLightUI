@@ -16,9 +16,15 @@ struct RecentMessage: Codable, Identifiable {
     let toId: String
     let profileImageUrl: String
     let timestamp: Date
-    
+    let firstName: String?
+    let lastName: String?
+
     var username: String {
-        email.components(separatedBy: "@").first ?? email
+        let parts = [firstName, lastName].compactMap { s -> String? in
+            guard let s, !s.isEmpty else { return nil }
+            return s
+        }
+        return parts.isEmpty ? (email.components(separatedBy: "@").first ?? email) : parts.joined(separator: " ")
     }
 
     func daysAndHoursAgoText(relativeTo date: Date) -> String {

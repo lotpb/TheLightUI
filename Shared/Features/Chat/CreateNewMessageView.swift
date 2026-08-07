@@ -28,7 +28,10 @@ struct CreateNewMessageView: View {
     private var filteredUsers: [UserModel] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return vm.users }
-        return vm.users.filter { $0.email.localizedCaseInsensitiveContains(query) }
+        return vm.users.filter {
+            $0.email.localizedCaseInsensitiveContains(query) ||
+            $0.displayName.localizedCaseInsensitiveContains(query)
+        }
     }
 
     var body: some View {
@@ -150,7 +153,7 @@ private struct NewMessageUserRow: View {
     let user: UserModel
 
     private var displayName: String {
-        user.username
+        user.displayName
     }
 
     var body: some View {

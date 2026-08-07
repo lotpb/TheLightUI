@@ -1,10 +1,3 @@
-//
-//  FirebaseConstants.swift
-//  TheLightUI
-//
-//  Created by Peter Balsamo on 12/11/21.
-//
-
 import Foundation
 
 enum FirebaseConstants {
@@ -24,4 +17,5 @@ enum FirebaseConstants {
     static let messages = "messages"
     static let users = "users"
     static let recentMessages = "recent_messages"
+    static let fcmTokens = "fcmTokens"
 }

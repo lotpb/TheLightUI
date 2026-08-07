@@ -17,6 +17,7 @@ protocol ChatRepositoryProtocol: Sendable {
 
     func signOut() throws
     func fetchCurrentUser() async throws -> UserModel
+    func fetchUser(uid: String) async throws -> UserModel
     func fetchAvailableUsers() async throws -> [UserModel]
     func listenForRecentMessages(
         userId: String,
@@ -76,6 +77,14 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
 
         manager.currentUser = user
         return user
+    }
+
+    func fetchUser(uid: String) async throws -> UserModel {
+        let snapshot = try await manager.firestore
+            .collection(FirebaseConstants.users)
+            .document(uid)
+            .getDocument()
+        return try snapshot.data(as: UserModel.self)
     }
 
     func fetchAvailableUsers() async throws -> [UserModel] {
@@ -226,6 +235,8 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
             toId: chatUser.uid,
             profileImageUrl: chatUser.profileImageUrl,
             email: chatUser.email,
+            firstName: chatUser.firstName,
+            lastName: chatUser.lastName,
             timestamp: timestamp
         )
         let recipientRecentData = makeRecentMessageData(
@@ -234,6 +245,8 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
             toId: chatUser.uid,
             profileImageUrl: senderUser.profileImageUrl,
             email: senderUser.email,
+            firstName: senderUser.firstName,
+            lastName: senderUser.lastName,
             timestamp: timestamp
         )
 
@@ -260,9 +273,11 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
         toId: String,
         profileImageUrl: String,
         email: String,
+        firstName: String?,
+        lastName: String?,
         timestamp: Timestamp
     ) -> [String: Any] {
-        [
+        var data: [String: Any] = [
             FirebaseConstants.timestamp: timestamp,
             FirebaseConstants.text: text,
             FirebaseConstants.fromId: fromId,
@@ -270,6 +285,9 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
             FirebaseConstants.profileImageUrl: profileImageUrl,
             FirebaseConstants.email: email
         ]
+        if let firstName { data[FirebaseConstants.firstName] = firstName }
+        if let lastName  { data[FirebaseConstants.lastName]  = lastName  }
+        return data
     }
 
 }
@@ -308,6 +326,10 @@ final class LocalJSONChatRepository: ChatRepositoryProtocol, Sendable {
     func fetchCurrentUser() async throws -> UserModel {
         let email = SecureSettingsStore.loadString(forKey: SettingsUI.emailKey)
         return UserModel(uid: "local-user", email: email.isEmpty ? "local@device" : email, profileImageUrl: "")
+    }
+
+    func fetchUser(uid: String) async throws -> UserModel {
+        try await fetchCurrentUser()
     }
 
     func fetchAvailableUsers() async throws -> [UserModel] { [] }

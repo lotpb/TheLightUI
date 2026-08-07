@@ -87,7 +87,7 @@ extension LeadDetailUI {
             CustomerDetailField(name: detail.spouse, label: CustomerLabels.website),
             CustomerDetailField(name: detail.lastname, label: CustomerLabels.profession),
             CustomerDetailField(name: detail.callback, label: CustomerLabels.manager),
-            CustomerDetailField(name: detail.callback, label: CustomerLabels.callback),
+            CustomerDetailField(name: detail.salesman, label: CustomerLabels.callback),
             CustomerDetailField(name: detail.street, label: "Street"),
             CustomerDetailField(name: detail.city, label: "City"),
             CustomerDetailField(name: detail.state, label: "State"),

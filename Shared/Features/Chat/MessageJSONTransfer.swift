@@ -37,7 +37,9 @@ struct MessageJSONRecord: Codable, Equatable {
             fromId: fromId,
             toId: toId,
             profileImageUrl: profileImageUrl,
-            timestamp: timestamp
+            timestamp: timestamp,
+            firstName: nil,
+            lastName: nil
         )
     }
 }

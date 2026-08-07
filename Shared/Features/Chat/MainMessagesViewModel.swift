@@ -12,6 +12,7 @@ final class MainMessagesViewModel {
     var errorMessage = ""
     var chatUser: UserModel?
     var recentMessages = [RecentMessage]()
+    var contactProfiles: [String: UserModel] = [:]
     var relativeTimeReferenceDate = Date()
 
     @ObservationIgnored private let repository: ChatRepositoryProtocol
@@ -52,6 +53,7 @@ final class MainMessagesViewModel {
                         }
                         recentMessages.insert(recentMessage, at: 0)
                     }
+                    self.fetchMissingContactProfiles(for: messages)
                 }
             },
             onError: { [weak self] error in
@@ -109,6 +111,7 @@ final class MainMessagesViewModel {
         chatListener = nil
         chatUser = nil
         recentMessages.removeAll()
+        contactProfiles.removeAll()
     }
 
     // Merge messages imported from a JSON backup into the inbox, replacing
@@ -131,6 +134,20 @@ final class MainMessagesViewModel {
 
     func chatUser(for recentMessage: RecentMessage) -> UserModel {
         let uid = currentUserId == recentMessage.fromId ? recentMessage.toId : recentMessage.fromId
-        return UserModel(id: uid, uid: uid, email: recentMessage.email, profileImageUrl: recentMessage.profileImageUrl)
+        if let profile = contactProfiles[uid] { return profile }
+        return UserModel(id: uid, uid: uid, email: recentMessage.email, profileImageUrl: recentMessage.profileImageUrl, firstName: recentMessage.firstName, lastName: recentMessage.lastName)
+    }
+
+    private func fetchMissingContactProfiles(for messages: [RecentMessage]) {
+        for message in messages {
+            let uid = currentUserId == message.fromId ? message.toId : message.fromId
+            guard contactProfiles[uid] == nil else { continue }
+            Task { [weak self] in
+                guard let self else { return }
+                if let profile = try? await repository.fetchUser(uid: uid) {
+                    contactProfiles[uid] = profile
+                }
+            }
+        }
     }
 }

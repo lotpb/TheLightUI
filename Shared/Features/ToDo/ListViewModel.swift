@@ -22,7 +22,7 @@ enum ToDoFilter: String, CaseIterable, Identifiable {
         case .completed:
             "Completed"
         case .notCompleted:
-            "Not Completed"
+            "Active"
         }
     }
 

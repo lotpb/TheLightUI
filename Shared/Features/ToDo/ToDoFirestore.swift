@@ -35,10 +35,10 @@ extension ItemModel {
         )
     }
 
-    /// The position preserves the list's manual order, which the model
-    /// itself only carries implicitly as its array index.
+    /// Data written on every Firestore write. companyId is omitted when
+    /// CompanySession has no value (e.g. account has no custom claim yet).
     func firestoreData(position: Int) -> [String: Any] {
-        [
+        var data: [String: Any] = [
             ToDoFirestoreSchema.Field.title: title,
             ToDoFirestoreSchema.Field.notes: notes,
             ToDoFirestoreSchema.Field.isCompleted: isCompleted,
@@ -46,6 +46,8 @@ extension ItemModel {
             ToDoFirestoreSchema.Field.lastUpdate: Timestamp(date: Date()),
             ToDoFirestoreSchema.Field.createdAt: Timestamp(date: createdAt)
         ]
+        if let companyId = CompanySession.companyId { data["companyId"] = companyId }
+        return data
     }
 }
 
@@ -59,8 +61,10 @@ final class ToDoFirestoreService: @unchecked Sendable {
     }
 
     /// Uploads every item, overwriting documents with the same id so the
-    /// backup always reflects the current local state.
+    /// backup always reflects the current local state. Refreshes the auth
+    /// token first so companyId and rule checks are always current.
     func backUp(_ items: [ItemModel]) async throws {
+        await CompanySession.refresh()
         let collection = firestore.collection(ToDoFirestoreSchema.collection)
 
         // Firestore caps a write batch at 500 operations.
@@ -73,12 +77,17 @@ final class ToDoFirestoreService: @unchecked Sendable {
         }
     }
 
-    /// Overwrites the collection to exactly match the given items, deleting
-    /// documents for items that no longer exist locally. Used by the live
-    /// "Store Data in Firebase" mode so local deletions propagate.
+    /// Overwrites only this account's documents to match the given items,
+    /// deleting docs for items that no longer exist locally. Scoped to
+    /// companyId so it never touches another account's documents.
     func replaceAll(_ items: [ItemModel]) async throws {
+        guard let companyId = CompanySession.companyId else { return }
         let collection = firestore.collection(ToDoFirestoreSchema.collection)
-        let existingIDs = try await collection.getDocuments().documents.map(\.documentID)
+        // Only consider docs that belong to this company to avoid deleting
+        // another account's items that share the same collection.
+        let existingIDs = try await collection
+            .whereField("companyId", isEqualTo: companyId)
+            .getDocuments().documents.map(\.documentID)
         let keptIDs = Set(items.map(\.id))
 
         // Deletions first, then upserts, chunked at Firestore's 500-write cap.
@@ -101,11 +110,14 @@ final class ToDoFirestoreService: @unchecked Sendable {
         }
     }
 
-    /// Fetches items in their backed-up list order.
+    /// Fetches only this account's items from Firestore, sorted by creation date.
     func fetchAll() async throws -> [ItemModel] {
+        guard let companyId = CompanySession.companyId else { return [] }
         let snapshot = try await firestore.collection(ToDoFirestoreSchema.collection)
-            .order(by: ToDoFirestoreSchema.Field.position)
+            .whereField("companyId", isEqualTo: companyId)
             .getDocuments()
-        return snapshot.documents.map(ItemModel.init)
+        return snapshot.documents
+            .map(ItemModel.init)
+            .sorted { $0.createdAt < $1.createdAt }
     }
 }
