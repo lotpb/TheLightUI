@@ -182,6 +182,8 @@ struct PreviewCustomerFormService: CustomerFormServicing {
     func updateCustomer(id: String, payload: CustomerFormPayload) async throws { }
 
     func upsertCustomersBatch(_ entries: [(id: String, payload: CustomerFormPayload)]) async throws { }
+
+    func migrateCompanyId() async throws { }
 }
 
 struct PreviewChatRepository: ChatRepositoryProtocol {

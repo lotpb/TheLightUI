@@ -104,6 +104,9 @@ struct CustomerUI: View {
             .onAppear {
                 appBadgeManager.clearBadge()
             }
+            .task {
+                try? await formService.migrateCompanyId()
+            }
             .onChange(of: viewModel.items, initial: true) {
                 listViewModel.allItems = viewModel.items
             }

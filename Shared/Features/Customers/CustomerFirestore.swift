@@ -43,6 +43,7 @@ enum CustomerFirestoreSchema {
         static let lastUpdate = "lastUpdate"
         static let creationDate = "creationDate"
         static let uid = "uid"
+        static let companyId = "companyId"
         static let category = "category"
         static let callback = "callback"
         static let adNo = "adNo"
@@ -236,6 +237,10 @@ struct CustomerFormPayload {
 
         if let userId {
             data[CustomerFirestoreSchema.Field.uid] = userId
+        }
+
+        if let cid = CompanySession.companyId, !cid.isEmpty {
+            data[CustomerFirestoreSchema.Field.companyId] = cid
         }
 
         // Only written when present so documents that never had the legacy

@@ -70,7 +70,7 @@ final class CustomerListViewModel {
 
         switch selectedSort {
         case .date:
-            displayedItems = filteredItems
+            displayedItems = filteredItems.sorted { $0.creationDate > $1.creationDate }
         case .name:
             displayedItems = filteredItems.sorted {
                 $0.lastname.localizedCaseInsensitiveCompare($1.lastname) == .orderedAscending

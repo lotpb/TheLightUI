@@ -14,6 +14,9 @@ protocol CustomerFormServicing: Sendable {
     // Firestore's 500-writes-per-batch limit). Entries with an empty id
     // create new documents; the rest overwrite the document with that id.
     func upsertCustomersBatch(_ entries: [(id: String, payload: CustomerFormPayload)]) async throws
+    // One-time migration: stamps companyId on records written before multi-tenancy.
+    // Safe to call repeatedly — exits immediately once already migrated.
+    func migrateCompanyId() async throws
 }
 
 // `@unchecked Sendable`: holds FirebaseManager.shared, which is itself
@@ -51,5 +54,34 @@ final class FirebaseCustomerFormService: CustomerFormServicing, @unchecked Senda
             batch.setData(entry.payload.firestoreData, forDocument: document)
         }
         try await batch.commit()
+    }
+
+    func migrateCompanyId() async throws {
+        let key = "com.thelight.companyIdMigrationV1"
+        guard !UserDefaults.standard.bool(forKey: key) else { return }
+        guard let companyId = CompanySession.companyId, !companyId.isEmpty,
+              let userId = currentUserId else { return }
+
+        let snapshot = try await manager.firestore
+            .collection(CustomerFirestoreSchema.collection)
+            .whereField(CustomerFirestoreSchema.Field.uid, isEqualTo: userId)
+            .getDocuments()
+
+        let unmigrated = snapshot.documents.filter { doc in
+            let existing = doc.get(CustomerFirestoreSchema.Field.companyId) as? String ?? ""
+            return existing.isEmpty
+        }
+
+        let batchSize = 500
+        for start in stride(from: 0, to: unmigrated.count, by: batchSize) {
+            let chunk = Array(unmigrated[start..<min(start + batchSize, unmigrated.count)])
+            let batch = manager.firestore.batch()
+            for doc in chunk {
+                batch.updateData([CustomerFirestoreSchema.Field.companyId: companyId], forDocument: doc.reference)
+            }
+            try await batch.commit()
+        }
+
+        UserDefaults.standard.set(true, forKey: key)
     }
 }

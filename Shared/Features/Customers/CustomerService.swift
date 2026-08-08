@@ -39,8 +39,13 @@ final class FirebaseCustomerService: CustomerServicing, @unchecked Sendable {
     }
 
     func listenForCustomers(onChange: @escaping @Sendable (Result<[CustomerItem], Error>) -> Void) -> CustomerListener {
+        guard let companyId = CompanySession.companyId, !companyId.isEmpty else {
+            onChange(.success([]))
+            return NoOpCustomerListener()
+        }
+
         let registration = firestore.collection(CustomerFirestoreSchema.collection)
-            .order(by: CustomerFirestoreSchema.Field.creationDate, descending: true)
+            .whereField(CustomerFirestoreSchema.Field.companyId, isEqualTo: companyId)
             .addSnapshotListener { snapshot, error in
                 if let error {
                     onChange(.failure(error))
@@ -63,7 +68,7 @@ final class FirebaseCustomerService: CustomerServicing, @unchecked Sendable {
 
 // MARK: - Local JSON
 
-private struct NoOpCustomerListener: CustomerListener {
+struct NoOpCustomerListener: CustomerListener {
     func remove() {}
 }
 
