@@ -41,42 +41,53 @@ private final class SnapshotViewModel {
     func fetch() async {
         isLoading = true
         errorMessage = nil
+        guard let companyId = CompanySession.companyId, !companyId.isEmpty else {
+            isLoading = false
+            return
+        }
         let calendar = Calendar.current
         let start = calendar.startOfDay(for: Date())
         guard let end = calendar.date(byAdding: .day, value: 1, to: start) else {
             isLoading = false
             return
         }
+        let cid = CustomerFirestoreSchema.Field.companyId
         async let leadsSnap = Firestore.firestore()
             .collection(CustomerFirestoreSchema.collection)
+            .whereField(cid, isEqualTo: companyId)
             .whereField(CustomerFirestoreSchema.Field.creationDate, isGreaterThanOrEqualTo: Timestamp(date: start))
             .whereField(CustomerFirestoreSchema.Field.creationDate, isLessThan: Timestamp(date: end))
             .order(by: CustomerFirestoreSchema.Field.creationDate, descending: true)
             .getDocuments()
         async let apptSnap = Firestore.firestore()
             .collection(CustomerFirestoreSchema.collection)
+            .whereField(cid, isEqualTo: companyId)
             .whereField(CustomerFirestoreSchema.Field.start, isGreaterThanOrEqualTo: Timestamp(date: start))
             .whereField(CustomerFirestoreSchema.Field.start, isLessThan: Timestamp(date: end))
             .order(by: CustomerFirestoreSchema.Field.start, descending: false)
             .getDocuments()
         async let salesSnap = Firestore.firestore()
             .collection(CustomerFirestoreSchema.collection)
+            .whereField(cid, isEqualTo: companyId)
             .whereField(CustomerFirestoreSchema.Field.completion, isGreaterThanOrEqualTo: Timestamp(date: start))
             .whereField(CustomerFirestoreSchema.Field.completion, isLessThan: Timestamp(date: end))
             .order(by: CustomerFirestoreSchema.Field.completion, descending: true)
             .getDocuments()
         async let activeCustomerSnap = Firestore.firestore()
             .collection(CustomerFirestoreSchema.collection)
+            .whereField(cid, isEqualTo: companyId)
             .whereField(CustomerFirestoreSchema.Field.active, isEqualTo: "1")
             .whereField(CustomerFirestoreSchema.Field.category, isEqualTo: CustomerItem.Category.customer.rawValue)
             .getDocuments()
         async let activeLeadSnap = Firestore.firestore()
             .collection(CustomerFirestoreSchema.collection)
+            .whereField(cid, isEqualTo: companyId)
             .whereField(CustomerFirestoreSchema.Field.active, isEqualTo: "1")
             .whereField(CustomerFirestoreSchema.Field.category, isEqualTo: CustomerItem.Category.lead.rawValue)
             .getDocuments()
         async let allCustomerSalesSnap = Firestore.firestore()
             .collection(CustomerFirestoreSchema.collection)
+            .whereField(cid, isEqualTo: companyId)
             .whereField(CustomerFirestoreSchema.Field.category, isEqualTo: CustomerItem.Category.customer.rawValue)
             .getDocuments()
         do {

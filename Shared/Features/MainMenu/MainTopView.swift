@@ -48,13 +48,13 @@ struct MainTopView: View {
                 .padding(.top, 15)
                 .padding(.leading, 15)
             Spacer()
-            Image("TheLight trans2")
+            Image("TheLight,no backgound2")
                 .resizable()
                 .scaledToFit()
-                .frame(height: 60)
-                .overlay(RoundedRectangle(cornerRadius: 6).stroke(.white, lineWidth: 1.5))
-                .padding(.trailing, 20)
-                .padding(.top, 15)
+                .frame(height: 55)
+                //.overlay(RoundedRectangle(cornerRadius: 6).stroke(.white, lineWidth: 1.5))
+                .padding(.trailing, 50)
+                .padding(.top, 30)
         }
     }
 
@@ -73,7 +73,7 @@ struct MainTopView: View {
 
     private var weatherRow: some View {
         statusRow(title: "Temp:", value: currentTemperatureText, systemImage: currentWeatherSystemImage)
-            .padding(.bottom, 15)
+            .padding(.bottom, 30)
     }
 
     var body: some View {
