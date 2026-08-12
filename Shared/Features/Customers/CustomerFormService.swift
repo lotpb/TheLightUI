@@ -62,26 +62,58 @@ final class FirebaseCustomerFormService: CustomerFormServicing, @unchecked Senda
         guard let companyId = CompanySession.companyId, !companyId.isEmpty,
               let userId = currentUserId else { return }
 
-        let snapshot = try await manager.firestore
-            .collection(CustomerFirestoreSchema.collection)
-            .whereField(CustomerFirestoreSchema.Field.uid, isEqualTo: userId)
-            .getDocuments()
+        try await migrateCompanyIdPage(
+            companyId: companyId,
+            userId: userId,
+            after: nil
+        )
 
+        UserDefaults.standard.set(true, forKey: key)
+    }
+
+    // Fetches up to 500 documents per page for this userId, writes a batch
+    // update for any that are missing companyId, then recurses with a cursor
+    // until all pages have been processed.
+    private func migrateCompanyIdPage(
+        companyId: String,
+        userId: String,
+        after lastDoc: DocumentSnapshot?
+    ) async throws {
+        let col = manager.firestore.collection(CustomerFirestoreSchema.collection)
+        var query = col
+            .whereField(CustomerFirestoreSchema.Field.uid, isEqualTo: userId)
+            .limit(to: 500)
+        if let lastDoc {
+            query = query.start(afterDocument: lastDoc)
+        }
+
+        let snapshot = try await query.getDocuments()
+        guard !snapshot.documents.isEmpty else { return }
+
+        // Filter client-side: documents missing the field or with an empty value.
         let unmigrated = snapshot.documents.filter { doc in
             let existing = doc.get(CustomerFirestoreSchema.Field.companyId) as? String ?? ""
             return existing.isEmpty
         }
 
-        let batchSize = 500
-        for start in stride(from: 0, to: unmigrated.count, by: batchSize) {
-            let chunk = Array(unmigrated[start..<min(start + batchSize, unmigrated.count)])
+        if !unmigrated.isEmpty {
             let batch = manager.firestore.batch()
-            for doc in chunk {
-                batch.updateData([CustomerFirestoreSchema.Field.companyId: companyId], forDocument: doc.reference)
+            for doc in unmigrated {
+                batch.updateData(
+                    [CustomerFirestoreSchema.Field.companyId: companyId],
+                    forDocument: doc.reference
+                )
             }
             try await batch.commit()
         }
 
-        UserDefaults.standard.set(true, forKey: key)
+        // If a full page was returned there may be more; recurse with cursor.
+        if snapshot.documents.count == 500 {
+            try await migrateCompanyIdPage(
+                companyId: companyId,
+                userId: userId,
+                after: snapshot.documents.last
+            )
+        }
     }
 }

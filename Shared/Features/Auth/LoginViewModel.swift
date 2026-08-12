@@ -166,6 +166,7 @@ final class LoginViewModel {
                 }
 
                 await CompanySession.refresh()
+                try? await loginService.syncCompanyId(userId: loginService.currentUserId ?? "")
                 isAuthenticated = true
                 didCompleteLoginProcess()
             } catch is CancellationError {
@@ -189,6 +190,7 @@ final class LoginViewModel {
                 phoneNumber: settings.phoneNumber
             )
             await CompanySession.refresh()
+            try? await loginService.syncCompanyId(userId: uid)
             loginStatusMessage = ""
             didCompleteLoginProcess()
         } catch is CancellationError {

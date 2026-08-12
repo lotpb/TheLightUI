@@ -91,6 +91,7 @@ struct PreviewLoginService: LoginServicing {
     ) async throws { }
 
     func updateUserLocation(userId: String, latitude: Double, longitude: Double) async throws { }
+    func syncCompanyId(userId: String) async throws { }
 }
 
 struct PreviewCustomerService: CustomerServicing {

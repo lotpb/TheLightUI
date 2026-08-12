@@ -34,6 +34,7 @@ protocol LoginServicing: Sendable {
         profileImageURL: URL
     ) async throws
     func updateUserLocation(userId: String, latitude: Double, longitude: Double) async throws
+    func syncCompanyId(userId: String) async throws
 }
 
 struct FirebaseLoginService: LoginServicing {
@@ -97,7 +98,7 @@ struct FirebaseLoginService: LoginServicing {
     ) async throws {
         try validate(firstName: firstName, lastName: lastName, email: email, phoneNumber: phoneNumber)
 
-        let userData = [
+        var userData: [String: Any] = [
             FirebaseConstants.email: email,
             FirebaseConstants.uid: userId,
             FirebaseConstants.firstName: firstName,
@@ -105,10 +106,15 @@ struct FirebaseLoginService: LoginServicing {
             FirebaseConstants.phone: phoneNumber,
             FirebaseConstants.profileImageUrl: profileImageURL.absoluteString
         ]
+        // Include companyId so this write doesn't race with / overwrite the
+        // Cloud Function's onUserCreated write which sets the companyId claim.
+        if let companyId = CompanySession.companyId, !companyId.isEmpty {
+            userData["companyId"] = companyId
+        }
 
         try await manager.firestore.collection(FirebaseConstants.users)
             .document(userId)
-            .setData(userData)
+            .setData(userData, merge: true)
     }
 
     func updateUserLocation(userId: String, latitude: Double, longitude: Double) async throws {
@@ -129,6 +135,14 @@ struct FirebaseLoginService: LoginServicing {
 
     func validateRegistration(firstName: String, lastName: String, email: String, phoneNumber: String) throws {
         try validate(firstName: firstName, lastName: lastName, email: email, phoneNumber: phoneNumber)
+    }
+
+    func syncCompanyId(userId: String) async throws {
+        guard let companyId = CompanySession.companyId, !companyId.isEmpty else { return }
+        try await manager.firestore
+            .collection(FirebaseConstants.users)
+            .document(userId)
+            .setData(["companyId": companyId], merge: true)
     }
 
     // MARK: Private validation

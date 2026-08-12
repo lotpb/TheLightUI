@@ -57,7 +57,7 @@ extension CustomerItem {
     // schema's mixed value types (string-encoded bools/ints, missing dates).
     init(document: QueryDocumentSnapshot) {
         let fields = CustomerFirestoreSchema.Field.self
-        let fallbackDate = Date()
+        let fallbackDate = Date.distantPast
         let rawStreet = document.stringValue(for: fields.street)
         let street = rawStreet.isEmpty ? document.stringValue(for: "address") : rawStreet
         // adNo may be stored as Int (legacy numeric ad source) or String (picker value).

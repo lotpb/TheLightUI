@@ -83,7 +83,7 @@ final class LocalJSONCustomerService: CustomerServicing, Sendable {
     }
 
     func listenForCustomers(onChange: @escaping @Sendable (Result<[CustomerItem], Error>) -> Void) -> CustomerListener {
-        Task {
+        Task.detached(priority: .userInitiated) {
             do {
                 let data = try Data(contentsOf: Self.fileURL)
                 let records = try CustomerJSONTransfer.decodeRecords(from: data)

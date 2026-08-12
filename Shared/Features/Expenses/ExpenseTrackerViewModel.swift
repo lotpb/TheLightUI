@@ -35,8 +35,24 @@ final class ExpenseTrackerViewModel {
         return amount
     }
 
-    func updateSource(_ expenses: [Expense]) {
-        allExpenses = expenses
+    func updateSource(_ expenses: [Expense], context: ModelContext) {
+        let cid = CompanySession.companyId ?? ""
+        guard !cid.isEmpty else {
+            allExpenses = expenses
+            recomputeDisplayedExpenses()
+            return
+        }
+        // One-time migration: claim any expenses that pre-date multi-company
+        // support (companyId == "") for the current company. Runs once per
+        // company account; after that the flag prevents re-tagging.
+        let migrationKey = "com.thelight.expenses.claimed.\(cid)"
+        if !UserDefaults.standard.bool(forKey: migrationKey) {
+            let untagged = expenses.filter { $0.companyId.isEmpty }
+            untagged.forEach { $0.companyId = cid }
+            if !untagged.isEmpty { try? context.save() }
+            UserDefaults.standard.set(true, forKey: migrationKey)
+        }
+        allExpenses = expenses.filter { $0.companyId == cid }
         recomputeDisplayedExpenses()
     }
 
@@ -111,6 +127,9 @@ final class ExpenseTrackerViewModel {
             editingExpense.notes = trimmedNotes
             editingExpense.isReimbursable = isReimbursable
             editingExpense.lastUpdate = .now
+            if editingExpense.companyId.isEmpty {
+                editingExpense.companyId = CompanySession.companyId ?? ""
+            }
             savedExpense = editingExpense
         } else {
             let expense = Expense(
@@ -121,6 +140,7 @@ final class ExpenseTrackerViewModel {
                 notes: trimmedNotes,
                 isReimbursable: isReimbursable
             )
+            expense.companyId = CompanySession.companyId ?? ""
             context.insert(expense)
             savedExpense = expense
         }

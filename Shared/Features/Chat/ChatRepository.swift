@@ -88,8 +88,12 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
     }
 
     func fetchAvailableUsers() async throws -> [UserModel] {
+        guard let companyId = CompanySession.companyId, !companyId.isEmpty else {
+            return []
+        }
         let snapshot = try await manager.firestore
             .collection(FirebaseConstants.users)
+            .whereField("companyId", isEqualTo: companyId)
             .getDocuments()
 
         return snapshot.documents.compactMap { snapshot -> UserModel? in
@@ -339,16 +343,24 @@ final class LocalJSONChatRepository: ChatRepositoryProtocol, Sendable {
         onChange: @escaping ([RecentMessage]) -> Void,
         onError: @escaping (Error) -> Void
     ) -> ChatListener {
-        do {
-            let data = try Data(contentsOf: Self.fileURL)
-            let records = try MessageJSONTransfer.decodeRecords(from: data)
-            onChange(records.map(\.recentMessage))
-        } catch {
-            let nsError = error as NSError
-            if nsError.domain == NSCocoaErrorDomain && nsError.code == NSFileReadNoSuchFileError {
-                onChange([])
-            } else {
-                onError(error)
+        // Both closures are only ever called back on DispatchQueue.main, so
+        // boxing them as @unchecked Sendable is safe.
+        struct Box<T>: @unchecked Sendable { let fn: T }
+        let onChangeBox = Box(fn: onChange)
+        let onErrorBox  = Box(fn: onError)
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                let data = try Data(contentsOf: Self.fileURL)
+                let records = try MessageJSONTransfer.decodeRecords(from: data)
+                let messages = records.map(\.recentMessage)
+                DispatchQueue.main.async { onChangeBox.fn(messages) }
+            } catch {
+                let nsError = error as NSError
+                if nsError.domain == NSCocoaErrorDomain && nsError.code == NSFileReadNoSuchFileError {
+                    DispatchQueue.main.async { onChangeBox.fn([]) }
+                } else {
+                    DispatchQueue.main.async { onErrorBox.fn(error) }
+                }
             }
         }
         return NoOpChatListener()

@@ -33,6 +33,10 @@ final class Expense {
     /// rows saved before this property existed get on migration, so any
     /// timestamped remote copy wins over them.
     var lastUpdate: Date = Date.distantPast
+    /// Company that owns this expense. Empty string on records created before
+    /// multi-company support; those are treated as belonging to whoever is
+    /// currently signed in (backward-compatible).
+    var companyId: String = ""
 
     init(
         id: UUID = UUID(),
@@ -144,7 +148,9 @@ extension ExpenseRecord {
                     updated += 1
                 }
             } else {
-                context.insert(record.makeExpense())
+                let newExpense = record.makeExpense()
+                newExpense.companyId = CompanySession.companyId ?? ""
+                context.insert(newExpense)
                 inserted += 1
             }
         }

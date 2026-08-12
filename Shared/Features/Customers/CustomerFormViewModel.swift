@@ -112,7 +112,8 @@ final class CustomerFormViewModel {
             return
         }
         let payload = makePayload(userId: uid)
-        performSave {
+        performSave { [weak self] in
+            guard let self else { return }
             _ = try await self.formService.addCustomer(payload)
             guard !Task.isCancelled else { return }
             self.detail.resetEditableFields()
@@ -127,8 +128,10 @@ final class CustomerFormViewModel {
             return
         }
         let payload = makePayload()
-        performSave {
-            try await self.formService.updateCustomer(id: self.detail.id, payload: payload)
+        let recordId = detail.id
+        performSave { [weak self] in
+            guard let self else { return }
+            try await self.formService.updateCustomer(id: recordId, payload: payload)
             guard !Task.isCancelled else { return }
             self.showAlertUpdate = true
             self.errorMessage = ""
