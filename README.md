@@ -1,4 +1,5 @@
-<img width="450" height="400" alt="The Light Logo" src="https://github.com/user-attachments/assets/8300b28b-c8bc-438d-8117-164ae52dce1f" />
+
+<img width="1774" height="887" alt="TheLight Logo2" src="https://github.com/user-attachments/assets/82e3efb5-cff1-486e-b410-bc1fb2ee9af4" />
 
 ## Features
 
