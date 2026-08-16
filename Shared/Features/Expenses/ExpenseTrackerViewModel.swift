@@ -15,6 +15,9 @@ final class ExpenseTrackerViewModel {
     var dateRange: ExpenseDateRange = .thisMonth { didSet { recomputeDisplayedExpenses() } }
     var searchText = "" { didSet { recomputeDisplayedExpenses() } }
     private(set) var displayedExpenses: [Expense] = []
+    private(set) var currentCompanyExpenses: [Expense] = []
+    private(set) var weeklyDays: [(day: String, total: Double, isToday: Bool)] = []
+    private(set) var saveError: String?
     var title = ""
     var amountText = ""
     var category: ExpenseCategory = .meals
@@ -39,6 +42,8 @@ final class ExpenseTrackerViewModel {
         let cid = CompanySession.companyId ?? ""
         guard !cid.isEmpty else {
             allExpenses = expenses
+            currentCompanyExpenses = allExpenses
+            recomputeWeeklyDays()
             recomputeDisplayedExpenses()
             return
         }
@@ -49,10 +54,23 @@ final class ExpenseTrackerViewModel {
         if !UserDefaults.standard.bool(forKey: migrationKey) {
             let untagged = expenses.filter { $0.companyId.isEmpty }
             untagged.forEach { $0.companyId = cid }
-            if !untagged.isEmpty { try? context.save() }
-            UserDefaults.standard.set(true, forKey: migrationKey)
+            if !untagged.isEmpty {
+                do {
+                    try context.save()
+                    // Mark complete only after a successful save so the
+                    // migration retries on next launch if the save failed.
+                    UserDefaults.standard.set(true, forKey: migrationKey)
+                } catch {
+                    untagged.forEach { $0.companyId = "" }
+                    saveError = "Could not migrate expense data: \(error.localizedDescription)"
+                }
+            } else {
+                UserDefaults.standard.set(true, forKey: migrationKey)
+            }
         }
         allExpenses = expenses.filter { $0.companyId == cid }
+        currentCompanyExpenses = allExpenses
+        recomputeWeeklyDays()
         recomputeDisplayedExpenses()
     }
 
@@ -71,6 +89,18 @@ final class ExpenseTrackerViewModel {
             displayedExpenses = filtered.sorted { $0.date > $1.date }
         case .name:
             displayedExpenses = filtered.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+        }
+    }
+
+    private func recomputeWeeklyDays() {
+        let cal = Calendar.current
+        let startOfWeek = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: .now)) ?? .now
+        weeklyDays = (0..<7).map { offset in
+            let date = cal.date(byAdding: .day, value: offset, to: startOfWeek) ?? startOfWeek
+            let total = currentCompanyExpenses
+                .filter { cal.isDate($0.date, inSameDayAs: date) }
+                .reduce(0) { $0 + $1.amount }
+            return (ExpenseFormat.weekday.string(from: date), total, cal.isDateInToday(date))
         }
     }
 
@@ -145,19 +175,31 @@ final class ExpenseTrackerViewModel {
             savedExpense = expense
         }
 
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            saveError = "Failed to save expense: \(error.localizedDescription)"
+            return
+        }
         pushToFirebaseIfEnabled([ExpenseRecord(savedExpense)])
     }
 
     func delete(_ expense: Expense, from context: ModelContext) {
         let id = expense.id
         context.delete(expense)
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            saveError = "Failed to delete expense: \(error.localizedDescription)"
+            return
+        }
 
         if AppDataStorage.isFirebase {
             Task { try? await ExpenseFirestoreService().delete(id: id) }
         }
     }
+
+    func clearSaveError() { saveError = nil }
 
     /// Pulls expenses from Firebase and merges them into the local store
     /// when "Store Data in Firebase" is enabled in Settings.

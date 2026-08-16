@@ -92,6 +92,8 @@ struct PreviewLoginService: LoginServicing {
 
     func updateUserLocation(userId: String, latitude: Double, longitude: Double) async throws { }
     func syncCompanyId(userId: String) async throws { }
+    func deleteCurrentUser() async throws { }
+    func deleteProfileImage(userId: String) async throws { }
 }
 
 struct PreviewCustomerService: CustomerServicing {
@@ -211,6 +213,7 @@ struct PreviewChatRepository: ChatRepositoryProtocol {
     func listenForRecentMessages(
         userId: String,
         onChange: @escaping ([RecentMessage]) -> Void,
+        onRemoved: @escaping ([String]) -> Void,
         onError: @escaping (Error) -> Void
     ) -> ChatListener {
         onChange([])

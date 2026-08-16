@@ -207,13 +207,21 @@ final class LoginViewModel {
             return
         }
 
+        // Track which resources were created so they can be rolled back if a
+        // later step fails, preventing permanently orphaned Auth/Storage objects.
+        var createdUID: String?
+        var uploadedImageUserId: String?
+
         do {
             try loginService.validateRegistration(firstName: firstName, lastName: lastName, email: email, phoneNumber: phoneNumber)
+
             let uid = try await loginService.createUser(email: email, password: password)
+            createdUID = uid
             guard !Task.isCancelled else { return }
             loginStatusMessage = "Creating your account…"
 
             let imageURL = try await loginService.uploadProfileImage(imageData, userId: uid)
+            uploadedImageUserId = uid
             guard !Task.isCancelled else { return }
             loginStatusMessage = "Uploading profile photo…"
 
@@ -239,6 +247,14 @@ final class LoginViewModel {
         } catch is CancellationError {
             return
         } catch {
+            // Roll back in reverse creation order so a cleanup failure on one
+            // step does not prevent cleanup of earlier steps.
+            if uploadedImageUserId != nil {
+                try? await loginService.deleteProfileImage(userId: createdUID ?? "")
+            }
+            if createdUID != nil {
+                try? await loginService.deleteCurrentUser()
+            }
             loginStatusMessage = "Failed to create account: \(error.localizedDescription)"
         }
     }

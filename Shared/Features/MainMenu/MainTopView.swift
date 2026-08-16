@@ -40,21 +40,20 @@ struct MainTopView: View {
     }
 
     private var titleRow: some View {
-        HStack {
+        HStack(spacing: 10) {
+            Image("TheLight.background5")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 55)
+                .frame(width: 40)
+                .padding(.leading, 15)
+                .padding(.top, 25)
             Text(companyName)
                 .font(.system(size: Layout.titleSize, weight: .bold, design: .rounded))
                 .lineLimit(1)
                 .minimumScaleFactor(0.9)
-                .padding(.top, 15)
-                .padding(.leading, 15)
+                .padding(.top, 13)
             Spacer()
-            Image("TheLight,no backgound2")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 55)
-                //.overlay(RoundedRectangle(cornerRadius: 6).stroke(.white, lineWidth: 1.5))
-                .padding(.trailing, 50)
-                .padding(.top, 30)
         }
     }
 

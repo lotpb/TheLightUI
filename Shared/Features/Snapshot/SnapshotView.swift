@@ -164,7 +164,7 @@ struct SnapshotView: View {
                     .frame(maxWidth: .infinity)
                 SnapshotStatCard(
                     title: "Sales",
-                    value: CustomerPresentationFormatters.currency.string(from: NSNumber(value: salesTotal)) ?? "$0",
+                    value: abbreviatedCurrency(salesTotal),
                     color: .green
                 )
                 .frame(maxWidth: .infinity)
@@ -181,7 +181,7 @@ struct SnapshotView: View {
                     .frame(maxWidth: .infinity)
                 SnapshotStatCard(
                     title: "Total Sales",
-                    value: CustomerPresentationFormatters.currency.string(from: NSNumber(value: viewModel.totalCustomerSales)) ?? "$0",
+                    value: abbreviatedCurrency(viewModel.totalCustomerSales),
                     color: .green
                 )
                 .frame(maxWidth: .infinity)
@@ -397,6 +397,19 @@ private struct SnapshotBarEntry: Identifiable {
     let color: Color
 }
 
+private func abbreviatedCurrency(_ value: Int) -> String {
+    switch value {
+    case 1_000_000...:
+        let v = Double(value) / 1_000_000
+        return String(format: v.truncatingRemainder(dividingBy: 1) == 0 ? "$%.0fM" : "$%.1fM", v)
+    case 1_000...:
+        let v = Double(value) / 1_000
+        return String(format: v.truncatingRemainder(dividingBy: 1) == 0 ? "$%.0fK" : "$%.1fK", v)
+    default:
+        return "$\(value)"
+    }
+}
+
 private struct SnapshotStatCard: View {
     let title: String
     let value: String
@@ -407,14 +420,16 @@ private struct SnapshotStatCard: View {
             Text(value)
                 .font(.title2.bold())
                 .foregroundStyle(color)
-                .minimumScaleFactor(0.6)
+                .minimumScaleFactor(0.3)
+                .allowsTightening(true)
                 .lineLimit(1)
                 .frame(height: 30)
             Text(title)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
-                .minimumScaleFactor(0.5)
+                .minimumScaleFactor(0.3)
+                .allowsTightening(true)
         }
         .frame(maxWidth: .infinity, minHeight: 58)
         .background(.quaternary, in: RoundedRectangle(cornerRadius: 12, style: .continuous))

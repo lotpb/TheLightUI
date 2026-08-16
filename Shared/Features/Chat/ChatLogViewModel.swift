@@ -6,13 +6,27 @@
 import Foundation
 import Observation
 
+// A chat message paired with a pre-computed date-header flag and formatted
+// timestamp string so neither is re-derived on every render pass.
+struct DisplayMessage: Identifiable {
+    let message: ChatMessage
+    let showsTimestamp: Bool
+    let sentDateText: String
+
+    var id: String { message.id ?? "\(message.fromId)-\(message.timestamp.timeIntervalSince1970)" }
+}
+
 @MainActor
 @Observable
 final class ChatLogViewModel {
     var chatText = ""
     var errorMessage = ""
     var chatMessages = [ChatMessage]()
+    private(set) var displayMessages = [DisplayMessage]()
     var isUploadingImage = false
+    // True when the Firestore listener has fired onError and gone permanently
+    // dead. The UI should show a reconnect affordance when this is set.
+    private(set) var isListenerDead = false
 
     var chatUser: UserModel?
 
@@ -44,6 +58,12 @@ final class ChatLogViewModel {
         listenerGeneration = UUID()
         chatListener?.remove()
         chatListener = nil
+        displayMessages = []
+    }
+
+    func reconnect() {
+        errorMessage = ""
+        fetchMessages()
     }
 
     func fetchMessages() {
@@ -60,6 +80,7 @@ final class ChatLogViewModel {
 
         stopListening()
         chatMessages.removeAll()
+        isListenerDead = false
         listenerGeneration = UUID()
         let generation = listenerGeneration
 
@@ -70,15 +91,29 @@ final class ChatLogViewModel {
                 Task { @MainActor [weak self] in
                     guard let self, self.listenerGeneration == generation else { return }
                     chatMessages.append(contentsOf: newMessages)
+                    recomputeDisplayMessages()
                 }
             },
             onError: { [weak self] error in
                 Task { @MainActor [weak self] in
                     guard let self, self.listenerGeneration == generation else { return }
-                    errorMessage = "Failed to listen for messages: \(error.localizedDescription)"
+                    isListenerDead = true
+                    errorMessage = "Connection lost. Tap to reconnect."
                 }
             }
         )
+    }
+
+    private func recomputeDisplayMessages() {
+        displayMessages = chatMessages.enumerated().map { index, message in
+            let showsTimestamp = index == 0
+                || !Calendar.current.isDate(chatMessages[index - 1].timestamp, inSameDayAs: message.timestamp)
+            return DisplayMessage(
+                message: message,
+                showsTimestamp: showsTimestamp,
+                sentDateText: MessageDateFormatting.weekdayAndTime(for: message.timestamp)
+            )
+        }
     }
 
     func handleSendImage(_ imageData: Data) {

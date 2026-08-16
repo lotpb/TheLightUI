@@ -35,6 +35,8 @@ protocol LoginServicing: Sendable {
     ) async throws
     func updateUserLocation(userId: String, latitude: Double, longitude: Double) async throws
     func syncCompanyId(userId: String) async throws
+    func deleteCurrentUser() async throws
+    func deleteProfileImage(userId: String) async throws
 }
 
 struct FirebaseLoginService: LoginServicing {
@@ -143,6 +145,15 @@ struct FirebaseLoginService: LoginServicing {
             .collection(FirebaseConstants.users)
             .document(userId)
             .setData(["companyId": companyId], merge: true)
+    }
+
+    func deleteCurrentUser() async throws {
+        guard let user = manager.auth.currentUser else { return }
+        try await user.delete()
+    }
+
+    func deleteProfileImage(userId: String) async throws {
+        try await manager.storage.reference(withPath: userId).delete()
     }
 
     // MARK: Private validation

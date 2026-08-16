@@ -124,7 +124,9 @@ struct ContentView: View {
                 makeCustomerFormService: dependencies.makeCustomerFormService,
                 makeWeatherManager: dependencies.makeWeatherManager,
                 makeWeatherLocationProvider: dependencies.makeWeatherLocationProvider,
-                appBadgeManager: dependencies.appBadgeManager
+                appBadgeManager: dependencies.appBadgeManager,
+                chatRepository: chatRepository,
+                makeChatRepository: dependencies.makeChatRepository
             )
         case .chat:
             MainMessagesView(

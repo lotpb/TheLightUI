@@ -58,6 +58,8 @@ struct MainMenuCoordinator {
     let makeWeatherManager: () -> WeatherManaging
     let makeWeatherLocationProvider: () -> WeatherLocationProviding
     let appBadgeManager: AppBadgeManaging
+    let chatRepository: ChatRepositoryProtocol
+    let makeChatRepository: () -> ChatRepositoryProtocol
     let isAuthenticated: Bool
     let onSignOut: () -> Void
 
@@ -166,7 +168,10 @@ struct MainMenuCoordinator {
         case .chat:
             MainMessagesView(
                 isAuthenticated: isAuthenticated,
-                onSignOut: onSignOut
+                onSignOut: onSignOut,
+                repository: chatRepository,
+                chatLogRepository: chatRepository,
+                makeChatRepository: makeChatRepository
             )
         }
     }

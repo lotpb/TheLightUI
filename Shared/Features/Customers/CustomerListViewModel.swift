@@ -60,12 +60,12 @@ final class CustomerListViewModel {
     private(set) var displayedSections: [(header: String, items: [CustomerItem])] = []
 
     // Total records for the current route — scoped to categoryFilter when set.
-    var totalCount: Int {
-        guard let categoryFilter else { return allItems.count }
-        return allItems.filter { categoryFilter.matches($0.category) }.count
-    }
+    // Stored so the view never triggers an O(n) filter on every access.
+    private(set) var totalCount: Int = 0
 
     private func recomputeDisplayedItems() {
+        totalCount = categoryFilter.map { f in allItems.filter { f.matches($0.category) }.count } ?? allItems.count
+
         let filteredItems = filteredItems(from: allItems)
 
         switch selectedSort {

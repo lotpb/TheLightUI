@@ -54,11 +54,12 @@ struct ChatLogView: View {
                             .padding(.top, 120)
                     }
 
-                    ForEach(displayMessages) { item in
+                    ForEach(vm.displayMessages) { item in
                         MessageView(
                             message: item.message,
                             currentUserId: vm.currentUserId,
-                            showsTimestamp: item.showsTimestamp
+                            showsTimestamp: item.showsTimestamp,
+                            sentDateText: item.sentDateText
                         )
                     }
 
@@ -93,26 +94,6 @@ struct ChatLogView: View {
             return 0
         }
         return Layout.messageBarBottomPadding
-    }
-
-    // A chat message paired with whether it should display a date header, identified
-    // by its stable Firestore document id so the list can diff rows by identity.
-    private struct DisplayMessage: Identifiable {
-        let message: ChatMessage
-        let showsTimestamp: Bool
-
-        var id: String { message.id ?? "\(message.fromId)-\(message.timestamp.timeIntervalSince1970)" }
-    }
-
-    // Build the rows once, computing each message's date-header visibility from its
-    // predecessor (a header is shown when the day changes between consecutive messages).
-    private var displayMessages: [DisplayMessage] {
-        let messages = vm.chatMessages
-        return messages.enumerated().map { index, message in
-            let showsTimestamp = index == 0
-                || !Calendar.current.isDate(messages[index - 1].timestamp, inSameDayAs: message.timestamp)
-            return DisplayMessage(message: message, showsTimestamp: showsTimestamp)
-        }
     }
 
     private func scrollToBottom(using scrollViewProxy: ScrollViewProxy, animated: Bool) {
@@ -208,16 +189,32 @@ struct ChatLogView: View {
     @ViewBuilder
     private var errorBanner: some View {
         if !vm.errorMessage.isEmpty {
-            Text(vm.errorMessage)
-                .font(.footnote.weight(.medium))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .background(Color.red.opacity(0.92), in: Capsule())
-                .padding(.horizontal)
-                .padding(.top, 8)
-                .transition(.move(edge: .top).combined(with: .opacity))
+            let pill = HStack(spacing: 6) {
+                Text(vm.errorMessage)
+                    .font(.footnote.weight(.medium))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                if vm.isListenerDead {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.footnote.weight(.bold))
+                        .foregroundStyle(.white)
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(Color.red.opacity(0.92), in: Capsule())
+            .padding(.horizontal)
+            .padding(.top, 8)
+
+            Group {
+                if vm.isListenerDead {
+                    Button { vm.reconnect() } label: { pill }
+                        .buttonStyle(.plain)
+                } else {
+                    pill
+                }
+            }
+            .transition(.move(edge: .top).combined(with: .opacity))
         }
     }
 }
@@ -293,6 +290,7 @@ struct MessageView: View {
     let message: ChatMessage
     let currentUserId: String?
     let showsTimestamp: Bool
+    let sentDateText: String
 
     private var isCurrentUserMessage: Bool {
         message.fromId == currentUserId
@@ -321,7 +319,7 @@ struct MessageView: View {
             }
 
             if showsTimestamp {
-                Text(message.sentDateText)
+                Text(sentDateText)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)

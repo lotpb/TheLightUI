@@ -19,6 +19,7 @@ final class MainMessagesViewModel {
     @ObservationIgnored private var chatListener: ChatListener?
     @ObservationIgnored private var refreshTask: Task<Void, Never>?
     @ObservationIgnored private var listenerGeneration = UUID()
+    @ObservationIgnored private var profileFetchTasks: [String: Task<Void, Never>] = [:]
 
     var currentUserId: String? {
         repository.currentUserId
@@ -31,6 +32,7 @@ final class MainMessagesViewModel {
     deinit {
         refreshTask?.cancel()
         chatListener?.remove()
+        profileFetchTasks.values.forEach { $0.cancel() }
     }
 
     func fetchRecentMessages() {
@@ -54,6 +56,12 @@ final class MainMessagesViewModel {
                         recentMessages.insert(recentMessage, at: 0)
                     }
                     self.fetchMissingContactProfiles(for: messages)
+                }
+            },
+            onRemoved: { [weak self] ids in
+                Task { @MainActor [weak self] in
+                    guard let self, self.listenerGeneration == generation else { return }
+                    recentMessages.removeAll { msg in ids.contains(msg.id ?? "") }
                 }
             },
             onError: { [weak self] error in
@@ -112,6 +120,8 @@ final class MainMessagesViewModel {
         chatUser = nil
         recentMessages.removeAll()
         contactProfiles.removeAll()
+        profileFetchTasks.values.forEach { $0.cancel() }
+        profileFetchTasks.removeAll()
     }
 
     // Merge messages imported from a JSON backup into the inbox, replacing
@@ -141,12 +151,14 @@ final class MainMessagesViewModel {
     private func fetchMissingContactProfiles(for messages: [RecentMessage]) {
         for message in messages {
             let uid = currentUserId == message.fromId ? message.toId : message.fromId
-            guard contactProfiles[uid] == nil else { continue }
-            Task { [weak self] in
+            // Skip if already fetched or a fetch is already in flight for this uid
+            guard contactProfiles[uid] == nil, profileFetchTasks[uid] == nil else { continue }
+            profileFetchTasks[uid] = Task { [weak self] in
                 guard let self else { return }
                 if let profile = try? await repository.fetchUser(uid: uid) {
                     contactProfiles[uid] = profile
                 }
+                profileFetchTasks.removeValue(forKey: uid)
             }
         }
     }

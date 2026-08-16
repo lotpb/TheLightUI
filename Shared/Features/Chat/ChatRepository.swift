@@ -22,6 +22,7 @@ protocol ChatRepositoryProtocol: Sendable {
     func listenForRecentMessages(
         userId: String,
         onChange: @escaping ([RecentMessage]) -> Void,
+        onRemoved: @escaping ([String]) -> Void,
         onError: @escaping (Error) -> Void
     ) -> ChatListener
     func listenForMessages(
@@ -107,6 +108,7 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
     func listenForRecentMessages(
         userId: String,
         onChange: @escaping ([RecentMessage]) -> Void,
+        onRemoved: @escaping ([String]) -> Void,
         onError: @escaping (Error) -> Void
     ) -> ChatListener {
         let registration = manager.firestore
@@ -120,10 +122,22 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
                     return
                 }
 
-                let messages = querySnapshot?.documentChanges.compactMap { change -> RecentMessage? in
-                    try? change.document.data(as: RecentMessage.self)
-                } ?? []
-                onChange(messages)
+                var upserted: [RecentMessage] = []
+                var removedIds: [String] = []
+                for change in querySnapshot?.documentChanges ?? [] {
+                    switch change.type {
+                    case .added, .modified:
+                        if let message = try? change.document.data(as: RecentMessage.self) {
+                            upserted.append(message)
+                        }
+                    case .removed:
+                        removedIds.append(change.document.documentID)
+                    @unknown default:
+                        break
+                    }
+                }
+                if !upserted.isEmpty { onChange(upserted) }
+                if !removedIds.isEmpty { onRemoved(removedIds) }
             }
 
         return FirebaseChatListener(registration: registration)
@@ -180,10 +194,13 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
         metadata.contentType = "image/jpeg"
 
         _ = try await storageRef.putDataAsync(imageData, metadata: metadata)
-        let imageURL = try await storageRef.downloadURL().absoluteString
+        let downloadedURL = try await storageRef.downloadURL()
+        guard downloadedURL.scheme == "https" else {
+            throw ChatRepositoryError.invalidImageURL
+        }
 
         try await sendMessage(
-            text: imageURL,
+            text: downloadedURL.absoluteString,
             recentMessageText: "Photo",
             messageType: .image,
             fromId: fromId,
@@ -298,11 +315,14 @@ final class FirebaseChatRepository: ChatRepositoryProtocol {
 
 enum ChatRepositoryError: LocalizedError {
     case missingCurrentUser
+    case invalidImageURL
 
     var errorDescription: String? {
         switch self {
         case .missingCurrentUser:
             return "Could not find the current user."
+        case .invalidImageURL:
+            return "The image URL returned by Storage is not a valid HTTPS URL."
         }
     }
 }
@@ -341,6 +361,7 @@ final class LocalJSONChatRepository: ChatRepositoryProtocol, Sendable {
     func listenForRecentMessages(
         userId: String,
         onChange: @escaping ([RecentMessage]) -> Void,
+        onRemoved: @escaping ([String]) -> Void,
         onError: @escaping (Error) -> Void
     ) -> ChatListener {
         // Both closures are only ever called back on DispatchQueue.main, so

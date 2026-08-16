@@ -28,25 +28,6 @@ struct ExpenseTrackerView: View {
         AppTheme.accentColor(for: color)
     }
 
-    /// Expenses belonging to the current company.
-    private var currentCompanyExpenses: [Expense] {
-        let cid = CompanySession.companyId ?? ""
-        guard !cid.isEmpty else { return expenses }
-        return expenses.filter { $0.companyId == cid }
-    }
-
-    private var weeklyDays: [(day: String, total: Double, isToday: Bool)] {
-        let cal = Calendar.current
-        let startOfWeek = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: .now)) ?? .now
-        return (0..<7).map { offset in
-            let date = cal.date(byAdding: .day, value: offset, to: startOfWeek) ?? startOfWeek
-            let total = currentCompanyExpenses
-                .filter { cal.isDate($0.date, inSameDayAs: date) }
-                .reduce(0) { $0 + $1.amount }
-            return (ExpenseFormat.weekday.string(from: date), total, cal.isDateInToday(date))
-        }
-    }
-
     private var weeklyChartSection: some View {
         Section {
             VStack(alignment: .leading, spacing: 8) {
@@ -55,7 +36,7 @@ struct ExpenseTrackerView: View {
                         Text("This Week")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
-                        Text(weeklyDays.reduce(0) { $0 + $1.total }, format: ExpenseFormat.currency)
+                        Text(viewModel.weeklyDays.reduce(0) { $0 + $1.total }, format: ExpenseFormat.currency)
                             .font(.title3.weight(.bold))
                             .foregroundStyle(themeColor)
                             .contentTransition(.numericText())
@@ -65,7 +46,7 @@ struct ExpenseTrackerView: View {
                         .font(.title3)
                         .foregroundStyle(themeColor)
                 }
-                Chart(weeklyDays, id: \.day) { item in
+                Chart(viewModel.weeklyDays, id: \.day) { item in
                     BarMark(
                         x: .value("Day", item.day),
                         y: .value("Amount", item.total)
@@ -111,6 +92,12 @@ struct ExpenseTrackerView: View {
         .task { await viewModel.refreshFromFirebase(in: modelContext) }
         .refreshable { await viewModel.refreshFromFirebase(in: modelContext) }
         .onChange(of: expenses, initial: true) { _, _ in viewModel.updateSource(expenses, context: modelContext) }
+        .onChange(of: viewModel.saveError) { _, error in
+            if let error {
+                showTransferMessage(error)
+                viewModel.clearSaveError()
+            }
+        }
         .searchable(text: $viewModel.searchText, prompt: "Search expenses")
         .tint(themeColor)
         .toolbar {
@@ -219,20 +206,20 @@ struct ExpenseTrackerView: View {
             } label: {
                 Label("Export JSON", systemImage: "square.and.arrow.up")
             }
-            .disabled(currentCompanyExpenses.isEmpty)
+            .disabled(viewModel.currentCompanyExpenses.isEmpty)
             Button {
                 showJSONPreview()
             } label: {
                 Label("View JSON", systemImage: "doc.text.magnifyingglass")
             }
-            .disabled(currentCompanyExpenses.isEmpty)
+            .disabled(viewModel.currentCompanyExpenses.isEmpty)
             Divider()
             Button {
                 backUpToFirebase()
             } label: {
                 Label("Back Up to Firebase", systemImage: "icloud.and.arrow.up")
             }
-            .disabled(currentCompanyExpenses.isEmpty || isSyncing)
+            .disabled(viewModel.currentCompanyExpenses.isEmpty || isSyncing)
             Button {
                 restoreFromFirebase()
             } label: {
@@ -253,7 +240,7 @@ struct ExpenseTrackerView: View {
 
     private func showJSONPreview() {
         do {
-            let data = try viewModel.exportData(for: currentCompanyExpenses)
+            let data = try viewModel.exportData(for: viewModel.currentCompanyExpenses)
             jsonPreview = ExpenseJSONPreview(text: String(decoding: data, as: UTF8.self))
         } catch {
             showTransferMessage("Could not generate JSON: \(error.localizedDescription)")
@@ -262,7 +249,7 @@ struct ExpenseTrackerView: View {
 
     private func startExport() {
         do {
-            exportDocument = ExpenseJSONDocument(data: try viewModel.exportData(for: currentCompanyExpenses))
+            exportDocument = ExpenseJSONDocument(data: try viewModel.exportData(for: viewModel.currentCompanyExpenses))
             isExporting = true
         } catch {
             showTransferMessage("Export failed: \(error.localizedDescription)")
@@ -272,7 +259,7 @@ struct ExpenseTrackerView: View {
     private func backUpToFirebase() {
         // The service is created here rather than stored on the view so
         // previews, which never configure Firebase, don't touch Firestore.
-        let records = currentCompanyExpenses.map(ExpenseRecord.init)
+        let records = viewModel.currentCompanyExpenses.map(ExpenseRecord.init)
         isSyncing = true
         Task {
             defer { isSyncing = false }

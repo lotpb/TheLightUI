@@ -166,6 +166,8 @@ class PickerDataModel {
     // Values match the main-menu route filters (Leads/Customers/Vendors/Employee).
     var pickCategory    = [""] + CustomerItem.Category.allCases.map(\.rawValue)
 
+    @ObservationIgnored private var fetchTask: Task<Void, Never>?
+
     init() {
         // Start with local cache so UI is ready immediately.
         pickSalesman   = Self.load(key: Self.salesmanKey,   default: Self.defaultSalesman)
@@ -180,65 +182,70 @@ class PickerDataModel {
     func addSalesman(_ name: String) {
         pickSalesman.append(name)
         persist(pickSalesman, key: Self.salesmanKey)
-        saveToFirestore()
+        updatePickerField("salesman", arrayUnion: [name])
     }
 
     func deleteSalesman(at offsets: IndexSet) {
+        let removed = offsets.map { pickSalesman[$0] }
         pickSalesman.remove(atOffsets: offsets)
         persist(pickSalesman, key: Self.salesmanKey)
-        saveToFirestore()
+        updatePickerField("salesman", arrayRemove: removed)
     }
 
     // MARK: Job
     func addJob(_ name: String) {
         pickJob.append(name)
         persist(pickJob, key: Self.jobKey)
-        saveToFirestore()
+        updatePickerField("job", arrayUnion: [name])
     }
 
     func deleteJob(at offsets: IndexSet) {
+        let removed = offsets.map { pickJob[$0] }
         pickJob.remove(atOffsets: offsets)
         persist(pickJob, key: Self.jobKey)
-        saveToFirestore()
+        updatePickerField("job", arrayRemove: removed)
     }
 
     // MARK: Product
     func addProduct(_ name: String) {
         pickProduct.append(name)
         persist(pickProduct, key: Self.productKey)
-        saveToFirestore()
+        updatePickerField("product", arrayUnion: [name])
     }
 
     func deleteProduct(at offsets: IndexSet) {
+        let removed = offsets.map { pickProduct[$0] }
         pickProduct.remove(atOffsets: offsets)
         persist(pickProduct, key: Self.productKey)
-        saveToFirestore()
+        updatePickerField("product", arrayRemove: removed)
     }
 
     // MARK: Advertiser
     func addAdvertiser(_ name: String) {
         pickAdvertiser.append(name)
         persist(pickAdvertiser, key: Self.advertiserKey)
-        saveToFirestore()
+        updatePickerField("advertiser", arrayUnion: [name])
     }
 
     func deleteAdvertiser(at offsets: IndexSet) {
+        let removed = offsets.map { pickAdvertiser[$0] }
         pickAdvertiser.remove(atOffsets: offsets)
         persist(pickAdvertiser, key: Self.advertiserKey)
-        saveToFirestore()
+        updatePickerField("advertiser", arrayRemove: removed)
     }
 
     // MARK: Contractor
     func addContractor(_ name: String) {
         pickContractor.append(name)
         persist(pickContractor, key: Self.contractorKey)
-        saveToFirestore()
+        updatePickerField("contractor", arrayUnion: [name])
     }
 
     func deleteContractor(at offsets: IndexSet) {
+        let removed = offsets.map { pickContractor[$0] }
         pickContractor.remove(atOffsets: offsets)
         persist(pickContractor, key: Self.contractorKey)
-        saveToFirestore()
+        updatePickerField("contractor", arrayRemove: removed)
     }
 
     // MARK: Private helpers
@@ -259,8 +266,9 @@ class PickerDataModel {
     // Fetches the picker lists from Firestore and overwrites local state.
     // Silently falls back to the UserDefaults cache if the fetch fails.
     private func fetchFromFirestore() {
+        fetchTask?.cancel()
         let ref = Firestore.firestore().collection(Self.fsCollection).document(Self.fsDocument)
-        Task { [weak self] in
+        fetchTask = Task { [weak self] in
             guard let self else { return }
             guard let doc = try? await ref.getDocument(), doc.exists else { return }
             if let v = doc.get("salesman") as? [String], !v.isEmpty {
@@ -281,18 +289,23 @@ class PickerDataModel {
         }
     }
 
-    // Writes all five picker lists to Firestore. Called after every add/delete.
-    private func saveToFirestore() {
+    deinit {
+        fetchTask?.cancel()
+    }
+
+    // Atomically adds values to a single Firestore array field.
+    // setData(merge:true) creates the document if absent, so this is safe
+    // for first-time writes and concurrent calls from multiple devices.
+    private func updatePickerField(_ field: String, arrayUnion values: [String]) {
+        guard !values.isEmpty else { return }
         let ref = Firestore.firestore().collection(Self.fsCollection).document(Self.fsDocument)
-        let data: [String: Any] = [
-            "salesman":   pickSalesman,
-            "job":        pickJob,
-            "product":    pickProduct,
-            "advertiser": pickAdvertiser,
-            "contractor": pickContractor
-        ]
-        Task {
-            try? await ref.setData(data)
-        }
+        Task { try? await ref.setData([field: FieldValue.arrayUnion(values)], merge: true) }
+    }
+
+    // Atomically removes values from a single Firestore array field.
+    private func updatePickerField(_ field: String, arrayRemove values: [String]) {
+        guard !values.isEmpty else { return }
+        let ref = Firestore.firestore().collection(Self.fsCollection).document(Self.fsDocument)
+        Task { try? await ref.setData([field: FieldValue.arrayRemove(values)], merge: true) }
     }
 }

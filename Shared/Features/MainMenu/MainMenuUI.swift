@@ -18,6 +18,8 @@ struct MainMenuUI: View {
     private let makeWeatherManager: () -> WeatherManaging
     private let makeWeatherLocationProvider: () -> WeatherLocationProviding
     private let appBadgeManager: AppBadgeManaging
+    private let chatRepository: ChatRepositoryProtocol
+    private let makeChatRepository: () -> ChatRepositoryProtocol
     // Single store shared across all four customer routes (leads/customers/vendors/employee)
     // so only one Firestore listener is open regardless of how many routes the user visits.
     @State private var customerStore: CustomerStore
@@ -35,7 +37,9 @@ struct MainMenuUI: View {
         makeCustomerFormService: @escaping () -> CustomerFormServicing = { FirebaseCustomerFormService() },
         makeWeatherManager: @escaping () -> WeatherManaging = { WeatherManager() },
         makeWeatherLocationProvider: @escaping () -> WeatherLocationProviding = { LocationWeatherManager() },
-        appBadgeManager: AppBadgeManaging = LiveAppBadgeManager()
+        appBadgeManager: AppBadgeManaging = LiveAppBadgeManager(),
+        chatRepository: ChatRepositoryProtocol = AppDataStorage.isFirebase ? FirebaseChatRepository() : LocalJSONChatRepository(),
+        makeChatRepository: @escaping () -> ChatRepositoryProtocol = { AppDataStorage.isFirebase ? FirebaseChatRepository() : LocalJSONChatRepository() }
     ) {
         self.isAuthenticated = isAuthenticated
         self.onSignOut = onSignOut
@@ -43,6 +47,8 @@ struct MainMenuUI: View {
         self.makeWeatherManager = makeWeatherManager
         self.makeWeatherLocationProvider = makeWeatherLocationProvider
         self.appBadgeManager = appBadgeManager
+        self.chatRepository = chatRepository
+        self.makeChatRepository = makeChatRepository
         _customerStore = State(initialValue: CustomerStore(customerService: makeCustomerService()))
     }
 
@@ -57,6 +63,8 @@ struct MainMenuUI: View {
             makeWeatherManager: makeWeatherManager,
             makeWeatherLocationProvider: makeWeatherLocationProvider,
             appBadgeManager: appBadgeManager,
+            chatRepository: chatRepository,
+            makeChatRepository: makeChatRepository,
             isAuthenticated: isAuthenticated,
             onSignOut: onSignOut
         )

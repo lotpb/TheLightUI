@@ -40,9 +40,25 @@ extension AppDelegate: MessagingDelegate {
 enum FCMTokenService {
     static func save(token: String) async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
-        try? await Firestore.firestore()
+        let ref = Firestore.firestore()
             .collection(FirebaseConstants.users)
             .document(uid)
-            .updateData([FirebaseConstants.fcmTokens: FieldValue.arrayUnion([token])])
+        let payload: [String: Any] = [FirebaseConstants.fcmTokens: FieldValue.arrayUnion([token])]
+
+        do {
+            // updateData is preferred: it is atomic and will not clobber other
+            // fields. It requires the document to already exist.
+            try await ref.updateData(payload)
+        } catch {
+            print("[FCM] Token save failed (\(error.localizedDescription)). Retrying with merge…")
+            do {
+                // setData(merge:true) creates the document when absent, which
+                // handles the race between FCM callback and first-time account
+                // creation.
+                try await ref.setData(payload, merge: true)
+            } catch {
+                print("[FCM] Token save retry failed: \(error.localizedDescription)")
+            }
+        }
     }
 }

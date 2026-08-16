@@ -55,7 +55,7 @@ final class LocationCaptureManager: NSObject, LocationCaptureManaging {
         locationManager.startUpdatingLocation()
         timeoutTask?.cancel()
         timeoutTask = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(10))
+            try? await Task.sleep(for: .seconds(30))
             self?.complete(with: nil)
         }
     }
