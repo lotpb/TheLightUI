@@ -44,9 +44,20 @@ extension LeadDetailUI {
         ]
         if isLead {
             fields.removeAll { $0.label == CustomerLabels.contractor || $0.label == CustomerLabels.complete || $0.label == CustomerLabels.first || $0.label == CustomerLabels.rating }
+            fields += [
+                CustomerDetailField(name: detail.leadStatus, label: CustomerLabels.leadStatus),
+                CustomerDetailField(name: detail.lastContactDate, label: CustomerLabels.lastContactDate),
+                CustomerDetailField(name: detail.contactAttempts == 0 ? "" : "\(detail.contactAttempts)", label: CustomerLabels.contactAttempts)
+            ]
         }
         if isCustomer {
             fields.removeAll { $0.label == CustomerLabels.first || $0.label == CustomerLabels.rating }
+            fields += [
+                CustomerDetailField(name: detail.companyName, label: CustomerLabels.companyName),
+                CustomerDetailField(name: detail.leadSource, label: CustomerLabels.leadSource),
+                CustomerDetailField(name: detail.paymentStatus, label: CustomerLabels.paymentStatus),
+                CustomerDetailField(name: detail.paymentTerms, label: CustomerLabels.paymentTerms)
+            ]
         }
         return fields
     }
@@ -75,6 +86,12 @@ extension LeadDetailUI {
         ]
         let emptyHiddenLabels: Set<String> = [CustomerLabels.middle, CustomerLabels.birthDate, CustomerLabels.driverLicense]
         fields.removeAll { emptyHiddenLabels.contains($0.label) && $0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        fields += [
+            CustomerDetailField(name: detail.payType, label: CustomerLabels.payType),
+            CustomerDetailField(name: detail.commissionRate, label: CustomerLabels.commissionRate),
+            CustomerDetailField(name: detail.userRole, label: CustomerLabels.userRole),
+            CustomerDetailField(name: detail.lastLogin, label: CustomerLabels.lastLogin)
+        ]
         return fields
     }
 
@@ -88,6 +105,9 @@ extension LeadDetailUI {
             CustomerDetailField(name: detail.lastname, label: CustomerLabels.profession),
             CustomerDetailField(name: detail.callback, label: CustomerLabels.manager),
             CustomerDetailField(name: detail.salesman, label: CustomerLabels.callback),
+            CustomerDetailField(name: detail.paymentTerms, label: CustomerLabels.paymentTerms),
+            CustomerDetailField(name: detail.taxId, label: CustomerLabels.taxId),
+            CustomerDetailField(name: detail.accountNumber, label: CustomerLabels.accountNumber),
             CustomerDetailField(name: detail.street, label: "Street"),
             CustomerDetailField(name: detail.city, label: "City"),
             CustomerDetailField(name: detail.state, label: "State"),

@@ -11,6 +11,7 @@ import UniformTypeIdentifiers
 struct ExpenseTrackerView: View {
     @AppStorage(SettingsUI.color) private var color: Int?
     @AppStorage(SettingsUI.expenseWeeklyChartVisibleKey) private var weeklyChartVisible = true
+    @AppStorage(SettingsUI.expenseCategoryChartVisibleKey) private var categoryChartVisible = true
     @Environment(\.tabBarOverlap) private var tabBarOverlap
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
@@ -185,10 +186,12 @@ struct ExpenseTrackerView: View {
         }
         Divider()
         Button {
-            weeklyChartVisible.toggle()
+            let newValue = !(weeklyChartVisible && categoryChartVisible)
+            weeklyChartVisible = newValue
+            categoryChartVisible = newValue
         } label: {
-            Label(weeklyChartVisible ? "Hide Weekly Chart" : "Show Weekly Chart",
-                  systemImage: "chart.bar.xaxis")
+            Label((weeklyChartVisible && categoryChartVisible) ? "Hide Charts" : "Show Charts",
+                  systemImage: "chart.bar.doc.horizontal")
         }
     }
 
@@ -480,7 +483,7 @@ struct ExpenseTrackerView: View {
             }
         } else {
             let categoryTotals = viewModel.categoryTotals(for: viewModel.displayedExpenses)
-            if !categoryTotals.isEmpty {
+            if !categoryTotals.isEmpty && categoryChartVisible {
                 Section("By Category") {
                     CategoryBreakdownChart(categoryTotals: categoryTotals)
                         .frame(height: 220)

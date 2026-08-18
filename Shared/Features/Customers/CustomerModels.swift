@@ -50,6 +50,19 @@ struct CustomerItem: Identifiable, Equatable, Hashable {
     var adNo: String = ""
     var birthDate: String = ""
     var driverLicense: String = ""
+    var companyName: String = ""
+    var leadSource: String = ""
+    var paymentStatus: String = ""
+    var paymentTerms: String = ""
+    var leadStatus: String = ""
+    var lastContactDate: String = ""
+    var contactAttempts: Int = 0
+    var taxId: String = ""
+    var accountNumber: String = ""
+    var payType: String = ""
+    var commissionRate: String = ""
+    var userRole: String = ""
+    var lastLogin: String = ""
 
     static var emptyCustomer: CustomerItem {
         CustomerItem(
@@ -129,6 +142,19 @@ struct CustomerItem: Identifiable, Equatable, Hashable {
         adNo = ""
         birthDate = ""
         driverLicense = ""
+        companyName = ""
+        leadSource = ""
+        paymentStatus = ""
+        paymentTerms = ""
+        leadStatus = ""
+        lastContactDate = ""
+        contactAttempts = 0
+        taxId = ""
+        accountNumber = ""
+        payType = ""
+        commissionRate = ""
+        userRole = ""
+        lastLogin = ""
     }
 }
 

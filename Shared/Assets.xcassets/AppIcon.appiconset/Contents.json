@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "Icon-167 1.png",
+      "filename" : "TheLight icon6.jpg",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -13,7 +13,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "Icon-167.png",
+      "filename" : "TheLight icon6 1.jpg",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -25,7 +25,7 @@
           "value" : "tinted"
         }
       ],
-      "filename" : "Icon-167 2.png",
+      "filename" : "TheLight icon6 2.jpg",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"

@@ -35,6 +35,7 @@ protocol LoginServicing: Sendable {
     ) async throws
     func updateUserLocation(userId: String, latitude: Double, longitude: Double) async throws
     func syncCompanyId(userId: String) async throws
+    func updatePresence(userId: String, email: String) async throws
     func deleteCurrentUser() async throws
     func deleteProfileImage(userId: String) async throws
 }
@@ -145,6 +146,18 @@ struct FirebaseLoginService: LoginServicing {
             .collection(FirebaseConstants.users)
             .document(userId)
             .setData(["companyId": companyId], merge: true)
+    }
+
+    func updatePresence(userId: String, email: String) async throws {
+        var data: [String: Any] = [
+            "isOnline": true,
+            "lastSeen": FieldValue.serverTimestamp()
+        ]
+        if !email.isEmpty { data["email"] = email }
+        try await manager.firestore
+            .collection(FirebaseConstants.users)
+            .document(userId)
+            .setData(data, merge: true)
     }
 
     func deleteCurrentUser() async throws {

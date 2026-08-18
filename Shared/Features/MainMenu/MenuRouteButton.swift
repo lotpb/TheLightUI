@@ -65,13 +65,14 @@ struct MenuRouteButton: View {
         Button(action: action) {
             HStack(spacing: isCompact ? 12 : 14) {
                 RoundedRectangle(cornerRadius: isCompact ? 7 : 8)
-                    .fill(resolvedIconColor)
+                    .fill(resolvedIconColor.gradient)
                     .frame(width: iconSize, height: iconSize)
                     .overlay {
                         Image(systemName: systemImage)
                             .font(.system(size: isCompact ? 16 : 19, weight: .medium))
                             .foregroundStyle(.white)
                     }
+                    .shadow(color: resolvedIconColor.opacity(0.35), radius: 4, x: 0, y: 2)
 
                 VStack(alignment: .leading, spacing: isCompact ? 1 : 2) {
                     Text(title)

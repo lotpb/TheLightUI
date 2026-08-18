@@ -49,6 +49,19 @@ enum CustomerFirestoreSchema {
         static let adNo = "adNo"
         static let birthDate = "birthDate"
         static let driverLicense = "driverLicense"
+        static let companyName = "companyName"
+        static let leadSource = "leadSource"
+        static let paymentStatus = "paymentStatus"
+        static let paymentTerms = "paymentTerms"
+        static let leadStatus = "leadStatus"
+        static let lastContactDate = "lastContactDate"
+        static let contactAttempts = "contactAttempts"
+        static let taxId = "taxId"
+        static let accountNumber = "accountNumber"
+        static let payType = "payType"
+        static let commissionRate = "commissionRate"
+        static let userRole = "userRole"
+        static let lastLogin = "lastLogin"
     }
 }
 
@@ -96,7 +109,20 @@ extension CustomerItem {
             callback: document.stringValue(for: fields.callback),
             adNo: adNoValue,
             birthDate: document.stringValue(for: fields.birthDate),
-            driverLicense: document.stringValue(for: fields.driverLicense)
+            driverLicense: document.stringValue(for: fields.driverLicense),
+            companyName: document.stringValue(for: fields.companyName),
+            leadSource: document.stringValue(for: fields.leadSource),
+            paymentStatus: document.stringValue(for: fields.paymentStatus),
+            paymentTerms: document.stringValue(for: fields.paymentTerms),
+            leadStatus: document.stringValue(for: fields.leadStatus),
+            lastContactDate: document.stringValue(for: fields.lastContactDate),
+            contactAttempts: document.intValue(for: fields.contactAttempts),
+            taxId: document.stringValue(for: fields.taxId),
+            accountNumber: document.stringValue(for: fields.accountNumber),
+            payType: document.stringValue(for: fields.payType),
+            commissionRate: document.stringValue(for: fields.commissionRate),
+            userRole: document.stringValue(for: fields.userRole),
+            lastLogin: document.stringValue(for: fields.lastLogin)
         )
     }
 }
@@ -161,6 +187,19 @@ struct CustomerFormPayload {
     var adNo: String
     var birthDate: String
     var driverLicense: String
+    var companyName: String
+    var leadSource: String
+    var paymentStatus: String
+    var paymentTerms: String
+    var leadStatus: String
+    var lastContactDate: String
+    var contactAttempts: Int
+    var taxId: String
+    var accountNumber: String
+    var payType: String
+    var commissionRate: String
+    var userRole: String
+    var lastLogin: String
 
     init(
         customer: CustomerItem,
@@ -202,6 +241,19 @@ struct CustomerFormPayload {
         self.adNo = customer.adNo
         self.birthDate = customer.birthDate
         self.driverLicense = customer.driverLicense
+        self.companyName = customer.companyName
+        self.leadSource = customer.leadSource
+        self.paymentStatus = customer.paymentStatus
+        self.paymentTerms = customer.paymentTerms
+        self.leadStatus = customer.leadStatus
+        self.lastContactDate = customer.lastContactDate
+        self.contactAttempts = customer.contactAttempts
+        self.taxId = customer.taxId
+        self.accountNumber = customer.accountNumber
+        self.payType = customer.payType
+        self.commissionRate = customer.commissionRate
+        self.userRole = customer.userRole
+        self.lastLogin = customer.lastLogin
     }
 
     var firestoreData: [String: Any] {
@@ -232,7 +284,20 @@ struct CustomerFormPayload {
             CustomerFirestoreSchema.Field.callback: callback,
             CustomerFirestoreSchema.Field.adNo: adNo,
             CustomerFirestoreSchema.Field.birthDate: birthDate,
-            CustomerFirestoreSchema.Field.driverLicense: driverLicense
+            CustomerFirestoreSchema.Field.driverLicense: driverLicense,
+            CustomerFirestoreSchema.Field.companyName: companyName,
+            CustomerFirestoreSchema.Field.leadSource: leadSource,
+            CustomerFirestoreSchema.Field.paymentStatus: paymentStatus,
+            CustomerFirestoreSchema.Field.paymentTerms: paymentTerms,
+            CustomerFirestoreSchema.Field.leadStatus: leadStatus,
+            CustomerFirestoreSchema.Field.lastContactDate: lastContactDate,
+            CustomerFirestoreSchema.Field.contactAttempts: contactAttempts,
+            CustomerFirestoreSchema.Field.taxId: taxId,
+            CustomerFirestoreSchema.Field.accountNumber: accountNumber,
+            CustomerFirestoreSchema.Field.payType: payType,
+            CustomerFirestoreSchema.Field.commissionRate: commissionRate,
+            CustomerFirestoreSchema.Field.userRole: userRole,
+            CustomerFirestoreSchema.Field.lastLogin: lastLogin
         ]
 
         if let userId {

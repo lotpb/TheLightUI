@@ -11,7 +11,7 @@ struct CustomerCellView: View, Equatable {
     // Layout constants for sizes used in the cell.
     fileprivate enum Layout {
         static let avatarSize: CGFloat = 50
-        static let actionIconSize: CGFloat = 20
+        static let actionIconSize: CGFloat = 16
         static let summaryWidth: CGFloat = 90
         static let summaryHeight: CGFloat = 25
         static let textMinimumScaleFactor = 0.5
@@ -31,12 +31,18 @@ struct CustomerCellView: View, Equatable {
         AppTheme.accentColor(for: color)
     }
 
-    // Row layout: avatar, summary, spacer, and amount/date summary.
+    private var fullName: String {
+        if CustomerItem.Category.vendor.matches(data.category) {
+            return data.first
+        }
+        return [data.first, data.lastname].filter { !$0.isEmpty }.joined(separator: " ")
+    }
+
+    // Row layout: avatar, summary (expands), amount/date summary (fixed).
     var body: some View {
         HStack(alignment: .top) {
             avatar
             customerSummary
-            Spacer()
             amountSummary
         }
     }
@@ -48,16 +54,17 @@ struct CustomerCellView: View, Equatable {
             .padding(.top, 5)
     }
 
-    // Name, address, and row-level actions.
+    // Name, address, and row-level actions — expands to fill all space not used by amountSummary.
     private var customerSummary: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(CustomerItem.Category.vendor.matches(data.category) ? data.first : data.lastname)
+            Text(fullName)
                 .font(.title3)
                 .fontWeight(.bold)
                 .foregroundStyle(.primary)
-                .customerCellSingleLineText()
+                .lineLimit(1)
+                .minimumScaleFactor(Layout.textMinimumScaleFactor)
                 .padding(.top, 3)
-                .accessibilityLabel(Text("Customer name \(CustomerItem.Category.vendor.matches(data.category) ? data.first : data.lastname)"))
+                .accessibilityLabel(Text("Customer name \(fullName)"))
 
             Text(data.address)
                 .font(.subheadline)
@@ -70,6 +77,7 @@ struct CustomerCellView: View, Equatable {
             }
         }
         .padding(.leading, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     // Inline action icons (message-like and like).
@@ -90,20 +98,28 @@ struct CustomerCellView: View, Equatable {
 
     // Right-aligned date and amount summary.
     private var amountSummary: some View {
-        VStack(alignment: .trailing, spacing: 6) {
+        let amountText = CustomerItem.Category.vendor.matches(data.category)
+            ? data.lastname
+            : CustomerItem.Category.employee.matches(data.category)
+                ? data.adNo
+                : data.formattedAmount
+
+        return VStack(alignment: .trailing, spacing: 6) {
             Text(data.formattedCreationDate)
-                .frame(width: Layout.summaryWidth, height: Layout.summaryHeight)
                 .font(.caption2)
                 .foregroundStyle(themeColor)
-                .customerCellScaledText()
+                .lineLimit(1)
+                .minimumScaleFactor(Layout.textMinimumScaleFactor)
+                .frame(width: Layout.summaryWidth, height: Layout.summaryHeight)
                 .padding(.top, 3)
                 .accessibilityLabel(Text("Created on \(data.formattedCreationDate)"))
 
-            Text(CustomerItem.Category.vendor.matches(data.category) ? data.lastname : CustomerItem.Category.employee.matches(data.category) ? data.adNo : data.formattedAmount)
-                .frame(width: Layout.summaryWidth, height: Layout.summaryHeight)
-                .customerCellSingleLineText()
-                .foregroundStyle(.primary)
+            Text(amountText)
                 .font(.headline)
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(Layout.textMinimumScaleFactor)
+                .frame(width: Layout.summaryWidth, height: Layout.summaryHeight)
                 .accessibilityLabel(Text(CustomerItem.Category.vendor.matches(data.category) ? "Profession \(data.lastname)" : CustomerItem.Category.employee.matches(data.category) ? "Department \(data.adNo)" : "Amount \(data.formattedAmount)"))
         }
     }

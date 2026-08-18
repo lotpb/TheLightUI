@@ -92,6 +92,7 @@ struct PreviewLoginService: LoginServicing {
 
     func updateUserLocation(userId: String, latitude: Double, longitude: Double) async throws { }
     func syncCompanyId(userId: String) async throws { }
+    func updatePresence(userId: String, email: String) async throws { }
     func deleteCurrentUser() async throws { }
     func deleteProfileImage(userId: String) async throws { }
 }

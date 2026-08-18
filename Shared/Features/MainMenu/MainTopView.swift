@@ -10,10 +10,9 @@ import SwiftUI
 struct MainTopView: View {
     private enum Layout {
         @MainActor static var height: CGFloat {
-            UIDevice.current.userInterfaceIdiom == .pad ? 200 : 145
+            UIDevice.current.userInterfaceIdiom == .pad ? 200 : 150
         }
-        static let cornerRadius: CGFloat = 20
-        static let titleSize: CGFloat = 32
+        static let cornerRadius: CGFloat = 18
     }
 
     @AppStorage(SettingsUI.color) private var color: Int?
@@ -39,58 +38,81 @@ struct MainTopView: View {
         AppTheme.accentColor(for: color)
     }
 
-    private var titleRow: some View {
+    // MARK: - Subviews
+
+    private var logoRow: some View {
         HStack(spacing: 10) {
-            Image("TheLight.background5")
+            Image("TheLight Logo3")
                 .resizable()
                 .scaledToFit()
-                .frame(height: 55)
-                .frame(width: 40)
-                .padding(.leading, 15)
-                .padding(.top, 25)
-            Text(companyName)
-                .font(.system(size: Layout.titleSize, weight: .bold, design: .rounded))
-                .lineLimit(1)
-                .minimumScaleFactor(0.9)
-                .padding(.top, 13)
-            Spacer()
+                .frame(height: 80)
+                .frame(width: 160)
+                .padding(.leading, 16)
+                .padding(.top, 14)
+            //Spacer()
         }
     }
 
-    private var backendRow: some View {
-        statusRow(title: "Backend:", value: backEnd, systemImage: "circle.hexagongrid.fill")
-            .symbolEffect(
-                .variableColor
-                .iterative
-                .reversing
-            )
+    private var statsRow: some View {
+        HStack(spacing: 6) {
+            backendChip
+            Spacer()
+            stepsChip
+            weatherChip
+        }
+        .padding(.horizontal, 14)
+        .padding(.bottom, 14)
     }
 
-    private var stepsRow: some View {
-        statusRow(title: "Steps:", value: currentStepsText, systemImage: "figure.walk", iconColor: .mint)
+    private var backendChip: some View {
+        HStack(spacing: 5) {
+            Image(systemName: "circle.hexagongrid.fill")
+                .font(.caption)
+                .symbolEffect(.variableColor.iterative.reversing)
+            Text(backEnd)
+                .font(.caption.weight(.semibold))
+                .lineLimit(1)
+        }
+        .chipStyle()
     }
 
-    private var weatherRow: some View {
-        statusRow(title: "Temp:", value: currentTemperatureText, systemImage: currentWeatherSystemImage)
-            .padding(.bottom, 30)
+    private var stepsChip: some View {
+        HStack(spacing: 5) {
+            Image(systemName: "figure.walk")
+                .foregroundStyle(.mint)
+                .font(.caption)
+            Text(currentStepsText)
+                .font(.caption.weight(.semibold))
+        }
+        .chipStyle()
     }
+
+    private var weatherChip: some View {
+        HStack(spacing: 5) {
+            Image(systemName: currentWeatherSystemImage)
+                .font(.caption)
+            Text(currentTemperatureText)
+                .font(.caption.weight(.semibold))
+        }
+        .chipStyle()
+    }
+
+    // MARK: - Body
 
     var body: some View {
-        VStack(alignment: .leading) {
-            titleRow
-            Divider()
-            backendRow
-            Spacer()
-            stepsRow
-            Spacer()
-            weatherRow
+        VStack(alignment: .leading, spacing: 0) {
+            logoRow
+            Spacer(minLength: 8)
+            statsRow
         }
         .symbolRenderingMode(.multicolor)
         .foregroundStyle(.white)
-        .background(themeColor)
-        .clipShape(.rect(cornerRadius: Layout.cornerRadius))
+        .background(headerGradient)
+        .clipShape(RoundedRectangle(cornerRadius: Layout.cornerRadius))
+        .shadow(color: themeColor.opacity(0.35), radius: 12, x: 0, y: 6)
         .frame(height: Layout.height, alignment: .leading)
-        .padding()
+        .padding(.horizontal)
+        .padding(.top, 4)
         .task {
             #if DEBUG
             if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
@@ -106,6 +128,16 @@ struct MainTopView: View {
             isActive = false
         }
     }
+
+    private var headerGradient: LinearGradient {
+        LinearGradient(
+            colors: [themeColor, themeColor.opacity(0.72)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    // MARK: - Data Loading
 
     @MainActor
     private func loadCurrentTemperature() async {
@@ -131,9 +163,6 @@ struct MainTopView: View {
             currentStepsText = "Unavailable"
             return
         }
-        // Pedometer is scoped to this task. defer guarantees stopUpdates is
-        // called on the exact same instance that started updates, regardless
-        // of whether the task exits normally or is cancelled on view disappear.
         let pedometer = CMPedometer()
         defer { pedometer.stopUpdates() }
         let startOfDay = Calendar.current.startOfDay(for: .now)
@@ -145,12 +174,6 @@ struct MainTopView: View {
 
     private func todaySteps(from startOfDay: Date, pedometer: CMPedometer) async -> Int? {
         await withCheckedContinuation { continuation in
-            // CoreMotion invokes this handler on its own background queue. The
-            // explicit `@Sendable` strips the `@MainActor` isolation this closure
-            // would otherwise inherit from the enclosing context — without it the
-            // Swift runtime traps with a dispatch queue assertion when CoreMotion
-            // calls back off the main actor. It captures only the `Sendable`
-            // continuation and hands off through a `nonisolated` converter.
             pedometer.queryPedometerData(from: startOfDay, to: .now) { @Sendable data, _ in
                 continuation.resume(returning: data.map(Self.stepCount(from:)))
             }
@@ -166,9 +189,6 @@ struct MainTopView: View {
         }
     }
 
-    /// Extracts a `Sendable` step count so pedometer readings can cross from
-    /// CoreMotion's background queue to the main actor without carrying the
-    /// non-`Sendable` `CMPedometerData` across the boundary.
     private nonisolated static func stepCount(from data: CMPedometerData) -> Int {
         data.numberOfSteps.intValue
     }
@@ -180,65 +200,37 @@ struct MainTopView: View {
             currentStepsText = stepsUnavailableText
             return
         }
-
         currentStepsText = steps.formatted(.number)
     }
 
-    /// Distinguishes a permission problem (fixable in Settings) from missing
-    /// step-counting hardware, which both surface as a nil pedometer result.
     private var stepsUnavailableText: String {
         switch CMPedometer.authorizationStatus() {
-        case .denied, .restricted:
-            "Off in Settings"
-        default:
-            "Unavailable"
+        case .denied, .restricted: "Off in Settings"
+        default: "Unavailable"
         }
     }
 
     private func systemImage(for weather: API.CurrentWeather.Response.WeatherResponse?) -> String {
         guard let weather else { return "cloud.sun.fill" }
-
         switch weather.main.lowercased() {
-        case "clear":
-            return weather.icon.hasSuffix("n") ? "moon.stars.fill" : "sun.max.fill"
-        case "clouds":
-            return "cloud.fill"
-        case "rain", "drizzle":
-            return "cloud.rain.fill"
-        case "thunderstorm":
-            return "cloud.bolt.rain.fill"
-        case "snow":
-            return "cloud.snow.fill"
-        case "mist", "smoke", "haze", "dust", "fog", "sand", "ash", "squall", "tornado":
-            return "cloud.fog.fill"
-        default:
-            return "cloud.sun.fill"
+        case "clear":        return weather.icon.hasSuffix("n") ? "moon.stars.fill" : "sun.max.fill"
+        case "clouds":       return "cloud.fill"
+        case "rain", "drizzle": return "cloud.rain.fill"
+        case "thunderstorm": return "cloud.bolt.rain.fill"
+        case "snow":         return "cloud.snow.fill"
+        default:             return "cloud.sun.fill"
         }
     }
+}
 
-    private func statusRow(title: String, value: String, systemImage: String, iconColor: Color? = nil) -> some View {
-        HStack {
-            Text(title)
-            Spacer()
-            Text(value)
-            statusIcon(systemImage: systemImage, iconColor: iconColor)
-        }
-        .font(.callout.bold())
-        .padding(.horizontal)
-    }
+// MARK: - Chip Style
 
-    @ViewBuilder
-    private func statusIcon(systemImage: String, iconColor: Color?) -> some View {
-        if let iconColor {
-            Image(systemName: systemImage)
-                .symbolRenderingMode(.monochrome)
-                .foregroundStyle(iconColor)
-                .font(.callout)
-                .imageScale(.large)
-        } else {
-            Image(systemName: systemImage)
-                .font(.callout)
-                .imageScale(.large)
-        }
+private extension View {
+    func chipStyle() -> some View {
+        self
+            .padding(.horizontal, 9)
+            .padding(.vertical, 5)
+            .background(Color.white.opacity(0.2))
+            .clipShape(Capsule())
     }
 }

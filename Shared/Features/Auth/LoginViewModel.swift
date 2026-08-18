@@ -166,7 +166,9 @@ final class LoginViewModel {
                 }
 
                 await CompanySession.refresh()
-                try? await loginService.syncCompanyId(userId: loginService.currentUserId ?? "")
+                let uid = loginService.currentUserId ?? ""
+                try? await loginService.syncCompanyId(userId: uid)
+                try? await loginService.updatePresence(userId: uid, email: "")
                 isAuthenticated = true
                 didCompleteLoginProcess()
             } catch is CancellationError {
@@ -183,14 +185,16 @@ final class LoginViewModel {
             guard !Task.isCancelled else { return }
             let settings = try await loginService.fetchUserSettings(userId: uid)
             guard !Task.isCancelled else { return }
+            let resolvedEmail = settings.email.isEmpty ? email : settings.email
             updateSettings(
                 firstName: settings.firstName,
                 lastName: settings.lastName,
-                email: settings.email.isEmpty ? email : settings.email,
+                email: resolvedEmail,
                 phoneNumber: settings.phoneNumber
             )
             await CompanySession.refresh()
             try? await loginService.syncCompanyId(userId: uid)
+            try? await loginService.updatePresence(userId: uid, email: resolvedEmail)
             loginStatusMessage = ""
             didCompleteLoginProcess()
         } catch is CancellationError {

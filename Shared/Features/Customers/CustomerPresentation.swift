@@ -50,6 +50,22 @@ enum CustomerLabels {
     static let profession = "Profession"
     static let assistant = "Assistant"
     static let vendorCategory = "Category"
+    static let paymentTerms = "Payment Terms"
+    static let taxId = "Tax ID"
+    static let accountNumber = "Account #"
+    // Lead-specific labels.
+    static let leadStatus = "Lead Status"
+    static let lastContactDate = "Last Contact"
+    static let contactAttempts = "Attempts"
+    // Customer-specific labels.
+    static let companyName = "Company"
+    static let leadSource = "Lead Source"
+    static let paymentStatus = "Payment Status"
+    // Employee-specific extended labels.
+    static let payType = "Pay Type"
+    static let commissionRate = "Commission"
+    static let userRole = "Role"
+    static let lastLogin = "Last Login"
 }
 
 extension CustomerItem {
@@ -81,7 +97,7 @@ extension CustomerItem {
 enum CustomerPresentationFormatters {
     static let mediumDate: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d yyyy"
+        formatter.dateFormat = "MMM d yy"
         return formatter
     }()
 

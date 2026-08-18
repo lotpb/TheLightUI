@@ -179,17 +179,18 @@ struct MainMenuUI: View {
 
     private var listContent: some View {
         List {
-            IncomingSection(themeColor: themeColor)
-            DataSection(themeColor: themeColor) { route in
+            AnalyticsSection(themeColor: themeColor) { route in
+                path.append(route)
+            }
+            CRMSection(themeColor: themeColor) { route in
+                path.append(route)
+            }
+            CommunicationSection(themeColor: themeColor, onSelectRoute: showRoute)
+            ToolsSection(themeColor: themeColor) { route in
                 path.append(route)
             }
             ExploreSection(
                 themeColor: themeColor,
-                onSelectRoute: showRoute
-            )
-            AppsSection(
-                themeColor: themeColor,
-                onSelect: { route in path.append(route) },
                 onSelectRoute: showRoute
             )
         }

@@ -37,6 +37,19 @@ struct CustomerJSONRecord: Codable, Equatable {
     var category: String
     var callback: String
     var adNo: String
+    var companyName: String
+    var leadSource: String
+    var paymentStatus: String
+    var paymentTerms: String
+    var leadStatus: String
+    var lastContactDate: String
+    var contactAttempts: Int
+    var taxId: String
+    var accountNumber: String
+    var payType: String
+    var commissionRate: String
+    var userRole: String
+    var lastLogin: String
 
     init(_ item: CustomerItem) {
         id = item.id
@@ -66,6 +79,19 @@ struct CustomerJSONRecord: Codable, Equatable {
         category = item.category
         callback = item.callback
         adNo = item.adNo
+        companyName = item.companyName
+        leadSource = item.leadSource
+        paymentStatus = item.paymentStatus
+        paymentTerms = item.paymentTerms
+        leadStatus = item.leadStatus
+        lastContactDate = item.lastContactDate
+        contactAttempts = item.contactAttempts
+        taxId = item.taxId
+        accountNumber = item.accountNumber
+        payType = item.payType
+        commissionRate = item.commissionRate
+        userRole = item.userRole
+        lastLogin = item.lastLogin
     }
 
     // Custom decoder so JSON files exported before the string-picker migration
@@ -96,9 +122,22 @@ struct CustomerJSONRecord: Codable, Equatable {
         salesman       = try c.decodeIfPresent(String.self, forKey: .salesman)  ?? ""
         job            = try c.decodeIfPresent(String.self, forKey: .job)       ?? ""
         product        = try c.decodeIfPresent(String.self, forKey: .product)   ?? ""
-        category       = try c.decodeIfPresent(String.self, forKey: .category)  ?? ""
-        callback       = try c.decodeIfPresent(String.self, forKey: .callback)  ?? ""
-        adNo           = try c.decodeIfPresent(String.self, forKey: .adNo)      ?? ""
+        category       = try c.decodeIfPresent(String.self, forKey: .category)       ?? ""
+        callback       = try c.decodeIfPresent(String.self, forKey: .callback)       ?? ""
+        adNo           = try c.decodeIfPresent(String.self, forKey: .adNo)           ?? ""
+        companyName    = try c.decodeIfPresent(String.self, forKey: .companyName)    ?? ""
+        leadSource     = try c.decodeIfPresent(String.self, forKey: .leadSource)     ?? ""
+        paymentStatus  = try c.decodeIfPresent(String.self, forKey: .paymentStatus)  ?? ""
+        paymentTerms   = try c.decodeIfPresent(String.self, forKey: .paymentTerms)   ?? ""
+        leadStatus     = try c.decodeIfPresent(String.self, forKey: .leadStatus)     ?? ""
+        lastContactDate = try c.decodeIfPresent(String.self, forKey: .lastContactDate) ?? ""
+        contactAttempts = try c.decodeIfPresent(Int.self,    forKey: .contactAttempts) ?? 0
+        taxId          = try c.decodeIfPresent(String.self, forKey: .taxId)          ?? ""
+        accountNumber  = try c.decodeIfPresent(String.self, forKey: .accountNumber)  ?? ""
+        payType        = try c.decodeIfPresent(String.self, forKey: .payType)        ?? ""
+        commissionRate = try c.decodeIfPresent(String.self, forKey: .commissionRate) ?? ""
+        userRole       = try c.decodeIfPresent(String.self, forKey: .userRole)       ?? ""
+        lastLogin      = try c.decodeIfPresent(String.self, forKey: .lastLogin)      ?? ""
     }
 
     var customerItem: CustomerItem {
@@ -129,7 +168,20 @@ struct CustomerJSONRecord: Codable, Equatable {
             product: product,
             category: category,
             callback: callback,
-            adNo: adNo
+            adNo: adNo,
+            companyName: companyName,
+            leadSource: leadSource,
+            paymentStatus: paymentStatus,
+            paymentTerms: paymentTerms,
+            leadStatus: leadStatus,
+            lastContactDate: lastContactDate,
+            contactAttempts: contactAttempts,
+            taxId: taxId,
+            accountNumber: accountNumber,
+            payType: payType,
+            commissionRate: commissionRate,
+            userRole: userRole,
+            lastLogin: lastLogin
         )
     }
 }

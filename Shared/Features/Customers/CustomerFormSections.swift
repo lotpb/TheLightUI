@@ -104,7 +104,7 @@ struct CustomerFormContactInfoSection: View {
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                } else {
+                } else if !isVendor {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Last")
                             .font(.caption.weight(.semibold))
@@ -551,6 +551,9 @@ struct CustomerFormJobSection: View {
     private var themeColor: Color { AppTheme.accentColor(for: color) }
     private var isEmployee: Bool { CustomerItem.Category.employee.matches(viewModel.detail.category) }
 
+    private static let payTypeOptions = ["", "Hourly", "Salary", "Commission", "Contract"]
+    private static let userRoleOptions = ["", "Admin", "Manager", "Sales", "Support", "Viewer"]
+
     var body: some View {
         if isEmployee {
             Section(header: FormSectionHeader(title: "EMPLOYEE INFO", color: themeColor)) {
@@ -586,8 +589,62 @@ struct CustomerFormJobSection: View {
                     }
                     .pickerStyle(.segmented)
                 }
+                HStack(spacing: 12) {
+                    menuPickerField(
+                        label: "Pay Type",
+                        value: viewModel.detail.payType,
+                        options: Self.payTypeOptions
+                    ) { viewModel.detail.payType = $0 }
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Commission")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Color.secondary)
+                        TextField("rate", text: $viewModel.detail.commissionRate)
+                            .formStyle()
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                HStack(spacing: 12) {
+                    menuPickerField(
+                        label: "Role",
+                        value: viewModel.detail.userRole,
+                        options: Self.userRoleOptions
+                    ) { viewModel.detail.userRole = $0 }
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Last Login")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Color.secondary)
+                        TextField("date", text: $viewModel.detail.lastLogin)
+                            .formStyle()
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
         }
+    }
+
+    private func menuPickerField(label: String, value: String, options: [String], onSelect: @escaping (String) -> Void) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color.secondary)
+            Menu {
+                ForEach(options, id: \.self) { opt in
+                    Button { onSelect(opt) } label: {
+                        Text(opt.isEmpty ? "none" : opt)
+                    }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text(value.isEmpty ? "none" : value)
+                        .foregroundStyle(value.isEmpty ? Color.gray : Color.primary)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .imageScale(.small)
+                        .foregroundStyle(Color.primary)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
 }
@@ -606,6 +663,11 @@ struct CustomerFormMiscSection: View {
     private var isLead: Bool { CustomerItem.Category.lead.matches(viewModel.detail.category) }
     private var isCustomer: Bool { CustomerItem.Category.customer.matches(viewModel.detail.category) }
     private var canEditPickers: Bool { isLead || isCustomer }
+
+    private static let paymentTermsOptions = ["", "Due on Receipt", "Net 15", "Net 30", "Net 60"]
+    private static let leadSourceOptions = ["", "Website", "Referral", "Social Media", "Cold Call", "Walk In", "Other"]
+    private static let paymentStatusOptions = ["", "Pending", "Paid", "Overdue", "Cancelled"]
+    private static let leadStatusOptions = ["", "New", "Contacted", "Qualified", "Proposal", "Negotiation", "Closed Won", "Closed Lost"]
 
     @State private var ssnUnlocked = false
     @State private var showPasswordPrompt = false
@@ -685,18 +747,32 @@ struct CustomerFormMiscSection: View {
             if isVendor {
                 Section(header: FormSectionHeader(title: "JOB INFO", color: themeColor)) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Profession")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(Color.secondary)
-                        TextField("profession", text: $viewModel.detail.lastname)
-                            .formStyle()
-                    }
-                    VStack(alignment: .leading, spacing: 6) {
                         Text("Manager")
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(Color.secondary)
                         TextField("manager", text: $viewModel.detail.callback)
                             .formStyle()
+                    }
+                    miscMenuPickerField(label: "Payment Terms", value: viewModel.detail.paymentTerms, options: Self.paymentTermsOptions) {
+                        viewModel.detail.paymentTerms = $0
+                    }
+                    HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Tax ID")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Color.secondary)
+                            TextField("tax id", text: $viewModel.detail.taxId)
+                                .formStyle()
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Account #")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Color.secondary)
+                            TextField("account #", text: $viewModel.detail.accountNumber)
+                                .formStyle()
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Photo")
@@ -788,6 +864,62 @@ struct CustomerFormMiscSection: View {
                             .formStyle()
                     }
                 }
+                Section(header: FormSectionHeader(title: "LEAD INFO", color: themeColor)) {
+                    miscMenuPickerField(label: "Status", value: viewModel.detail.leadStatus, options: Self.leadStatusOptions) {
+                        viewModel.detail.leadStatus = $0
+                    }
+                    HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Last Contact")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Color.secondary)
+                            TextField("date", text: $viewModel.detail.lastContactDate)
+                                .formStyle()
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Attempts")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Color.secondary)
+                            Stepper {
+                                TextField("", text: Binding(
+                                    get: { viewModel.detail.contactAttempts == 0 ? "" : "\(viewModel.detail.contactAttempts)" },
+                                    set: { viewModel.detail.contactAttempts = Int($0) ?? 0 }
+                                ))
+                                .formStyle()
+                                .frame(minWidth: 40, maxWidth: 60)
+                                .keyboardType(.numberPad)
+                            } onIncrement: {
+                                viewModel.detail.contactAttempts += 1
+                            } onDecrement: {
+                                if viewModel.detail.contactAttempts > 0 { viewModel.detail.contactAttempts -= 1 }
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+            }
+            if isCustomer {
+                Section(header: FormSectionHeader(title: "ACCOUNT", color: themeColor)) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Company Name")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Color.secondary)
+                        TextField("company", text: $viewModel.detail.companyName)
+                            .formStyle()
+                    }
+                    HStack(spacing: 12) {
+                        miscMenuPickerField(label: "Lead Source", value: viewModel.detail.leadSource, options: Self.leadSourceOptions) {
+                            viewModel.detail.leadSource = $0
+                        }
+                        miscMenuPickerField(label: "Payment Terms", value: viewModel.detail.paymentTerms, options: Self.paymentTermsOptions) {
+                            viewModel.detail.paymentTerms = $0
+                        }
+                    }
+                    miscMenuPickerField(label: "Payment Status", value: viewModel.detail.paymentStatus, options: Self.paymentStatusOptions) {
+                        viewModel.detail.paymentStatus = $0
+                    }
+                }
             }
             if isLead || isCustomer || isEmployee || isVendor {
                 Section(header: FormSectionHeader(title: "COMMENTS", color: themeColor)) {
@@ -859,5 +991,29 @@ struct CustomerFormMiscSection: View {
             }
         }
         return result
+    }
+
+    private func miscMenuPickerField(label: String, value: String, options: [String], onSelect: @escaping (String) -> Void) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color.secondary)
+            Menu {
+                ForEach(options, id: \.self) { opt in
+                    Button { onSelect(opt) } label: {
+                        Text(opt.isEmpty ? "none" : opt)
+                    }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text(value.isEmpty ? "none" : value)
+                        .foregroundStyle(value.isEmpty ? Color.gray : Color.primary)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .imageScale(.small)
+                        .foregroundStyle(Color.primary)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

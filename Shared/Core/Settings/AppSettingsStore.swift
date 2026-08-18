@@ -33,6 +33,7 @@ enum SettingsUI {
     static let mapCustomFavoritesKey = "mapCustomFavorites"
 
     static let expenseWeeklyChartVisibleKey = "expenseWeeklyChartVisible"
+    static let expenseCategoryChartVisibleKey = "expenseCategoryChartVisible"
 
     //static let isSpeakKey = "isSpeak"
     //static let isMusicKey = "isMusic"
