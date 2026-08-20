@@ -62,6 +62,11 @@ enum CustomerFirestoreSchema {
         static let commissionRate = "commissionRate"
         static let userRole = "userRole"
         static let lastLogin = "lastLogin"
+        static let profession = "profession"
+        static let manager = "manager"
+        static let followUpDate = "followUpDate"
+        static let tags = "tags"
+        static let employeeStatus = "employeeStatus"
     }
 }
 
@@ -122,7 +127,12 @@ extension CustomerItem {
             payType: document.stringValue(for: fields.payType),
             commissionRate: document.stringValue(for: fields.commissionRate),
             userRole: document.stringValue(for: fields.userRole),
-            lastLogin: document.stringValue(for: fields.lastLogin)
+            lastLogin: document.stringValue(for: fields.lastLogin),
+            profession: document.stringValue(for: fields.profession),
+            manager: document.stringValue(for: fields.manager),
+            followUpDate: document.dateValue(for: fields.followUpDate),
+            tags: document.get(fields.tags) as? [String] ?? [],
+            employeeStatus: document.stringValue(for: fields.employeeStatus)
         )
     }
 }
@@ -177,8 +187,8 @@ struct CustomerFormPayload {
     var comments: String
     var spouse: String
     var photo: String
-    var startDate: Date
-    var completionDate: Date
+    var startDate: Date?
+    var completionDate: Date?
     var lastUpdateDate: Date
     var creationDate: Date
     var userId: String?
@@ -200,6 +210,11 @@ struct CustomerFormPayload {
     var commissionRate: String
     var userRole: String
     var lastLogin: String
+    var profession: String
+    var manager: String
+    var followUpDate: Date?
+    var tags: [String]
+    var employeeStatus: String
 
     init(
         customer: CustomerItem,
@@ -207,8 +222,8 @@ struct CustomerFormPayload {
         quantity: Int,
         rate: String,
         creationDate: Date,
-        startDate: Date,
-        completionDate: Date,
+        startDate: Date?,
+        completionDate: Date?,
         lastUpdateDate: Date = Date(),
         userId: String? = nil
     ) {
@@ -254,6 +269,11 @@ struct CustomerFormPayload {
         self.commissionRate = customer.commissionRate
         self.userRole = customer.userRole
         self.lastLogin = customer.lastLogin
+        self.profession = customer.profession
+        self.manager = customer.manager
+        self.followUpDate = customer.followUpDate
+        self.tags = customer.tags
+        self.employeeStatus = customer.employeeStatus
     }
 
     var firestoreData: [String: Any] {
@@ -277,8 +297,8 @@ struct CustomerFormPayload {
             CustomerFirestoreSchema.Field.comments: comments,
             CustomerFirestoreSchema.Field.spouse: spouse,
             CustomerFirestoreSchema.Field.photo: photo,
-            CustomerFirestoreSchema.Field.start: Timestamp(date: startDate),
-            CustomerFirestoreSchema.Field.completion: Timestamp(date: completionDate),
+            CustomerFirestoreSchema.Field.start: startDate.map { Timestamp(date: $0) } ?? NSNull(),
+            CustomerFirestoreSchema.Field.completion: completionDate.map { Timestamp(date: $0) } ?? NSNull(),
             CustomerFirestoreSchema.Field.lastUpdate: Timestamp(date: lastUpdateDate),
             CustomerFirestoreSchema.Field.creationDate: Timestamp(date: creationDate),
             CustomerFirestoreSchema.Field.callback: callback,
@@ -297,7 +317,12 @@ struct CustomerFormPayload {
             CustomerFirestoreSchema.Field.payType: payType,
             CustomerFirestoreSchema.Field.commissionRate: commissionRate,
             CustomerFirestoreSchema.Field.userRole: userRole,
-            CustomerFirestoreSchema.Field.lastLogin: lastLogin
+            CustomerFirestoreSchema.Field.lastLogin: lastLogin,
+            CustomerFirestoreSchema.Field.profession: profession,
+            CustomerFirestoreSchema.Field.manager: manager,
+            CustomerFirestoreSchema.Field.tags: tags,
+            CustomerFirestoreSchema.Field.employeeStatus: employeeStatus,
+            CustomerFirestoreSchema.Field.followUpDate: followUpDate.map { Timestamp(date: $0) } ?? NSNull()
         ]
 
         if let userId {

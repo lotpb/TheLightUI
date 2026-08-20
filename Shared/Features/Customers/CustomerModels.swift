@@ -63,6 +63,11 @@ struct CustomerItem: Identifiable, Equatable, Hashable {
     var commissionRate: String = ""
     var userRole: String = ""
     var lastLogin: String = ""
+    var profession: String = ""
+    var manager: String = ""
+    var followUpDate: Date? = nil
+    var tags: [String] = []
+    var employeeStatus: String = ""
 
     static var emptyCustomer: CustomerItem {
         CustomerItem(
@@ -155,6 +160,11 @@ struct CustomerItem: Identifiable, Equatable, Hashable {
         commissionRate = ""
         userRole = ""
         lastLogin = ""
+        profession = ""
+        manager = ""
+        followUpDate = nil
+        tags = []
+        employeeStatus = ""
     }
 }
 

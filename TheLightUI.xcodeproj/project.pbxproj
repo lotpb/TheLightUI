@@ -291,6 +291,14 @@
 		AFE71222301234A000B9D6A7 /* BottomSheetLocationSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE71220301234A000B9D6A7 /* BottomSheetLocationSectionView.swift */; };
 		AFE71224301234A700B9D6A7 /* BottomSheetContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE71223301234A700B9D6A7 /* BottomSheetContentView.swift */; };
 		AFE71225301234A700B9D6A7 /* BottomSheetContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE71223301234A700B9D6A7 /* BottomSheetContentView.swift */; };
+		AFE749783036A59B00E5B26C /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE749773036A59B00E5B26C /* CalendarView.swift */; };
+		AFE749793036A59B00E5B26C /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE749773036A59B00E5B26C /* CalendarView.swift */; };
+		AFE7497C3036A74500E5B26C /* HeatMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE7497B3036A74500E5B26C /* HeatMapView.swift */; };
+		AFE7497D3036A74500E5B26C /* HeatMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE7497B3036A74500E5B26C /* HeatMapView.swift */; };
+		AFE749803036A8F700E5B26C /* ReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE7497F3036A8F700E5B26C /* ReportsView.swift */; };
+		AFE749813036A8F700E5B26C /* ReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE7497F3036A8F700E5B26C /* ReportsView.swift */; };
+		AFE749843036AB5D00E5B26C /* ForecastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE749833036AB5D00E5B26C /* ForecastView.swift */; };
+		AFE749853036AB5D00E5B26C /* ForecastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE749833036AB5D00E5B26C /* ForecastView.swift */; };
 		AFEAAA9D30099D6D0064126D /* DataBackupSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEAAA9C30099D6D0064126D /* DataBackupSection.swift */; };
 		AFEE000A27285BB900D75C7C /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEE000927285BB900D75C7C /* LoginView.swift */; };
 		AFEE7953301E387D00F733AF /* iMacUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEE7950301E387D00F733AF /* iMacUI.swift */; };
@@ -480,6 +488,10 @@
 		AFE7121D3012349700B9D6A7 /* BottomSheetLocationCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetLocationCardView.swift; sourceTree = "<group>"; };
 		AFE71220301234A000B9D6A7 /* BottomSheetLocationSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetLocationSectionView.swift; sourceTree = "<group>"; };
 		AFE71223301234A700B9D6A7 /* BottomSheetContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetContentView.swift; sourceTree = "<group>"; };
+		AFE749773036A59B00E5B26C /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		AFE7497B3036A74500E5B26C /* HeatMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeatMapView.swift; sourceTree = "<group>"; };
+		AFE7497F3036A8F700E5B26C /* ReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsView.swift; sourceTree = "<group>"; };
+		AFE749833036AB5D00E5B26C /* ForecastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastView.swift; sourceTree = "<group>"; };
 		AFEAAA9C30099D6D0064126D /* DataBackupSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataBackupSection.swift; sourceTree = "<group>"; };
 		AFEE000927285BB900D75C7C /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		AFEE7950301E387D00F733AF /* iMacUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iMacUI.swift; sourceTree = "<group>"; };
@@ -614,6 +626,10 @@
 				AFA0D2EB277BA19A00506DB6 /* Furniture */,
 				AF2A62122690B39B005B7527 /* Instagram */,
 				AF92B8AD267816A600729208 /* SpotifyUI */,
+				AFE749763036A59B00E5B26C /* Calendar */,
+				AFE7497A3036A74500E5B26C /* HeatMap */,
+				AFE7497E3036A8F700E5B26C /* Reports */,
+				AFE749823036AAFA00E5B26C /* Forecast */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -1025,6 +1041,38 @@
 			path = Settings;
 			sourceTree = "<group>";
 		};
+		AFE749763036A59B00E5B26C /* Calendar */ = {
+			isa = PBXGroup;
+			children = (
+				AFE749773036A59B00E5B26C /* CalendarView.swift */,
+			);
+			path = Calendar;
+			sourceTree = "<group>";
+		};
+		AFE7497A3036A74500E5B26C /* HeatMap */ = {
+			isa = PBXGroup;
+			children = (
+				AFE7497B3036A74500E5B26C /* HeatMapView.swift */,
+			);
+			path = HeatMap;
+			sourceTree = "<group>";
+		};
+		AFE7497E3036A8F700E5B26C /* Reports */ = {
+			isa = PBXGroup;
+			children = (
+				AFE7497F3036A8F700E5B26C /* ReportsView.swift */,
+			);
+			path = Reports;
+			sourceTree = "<group>";
+		};
+		AFE749823036AAFA00E5B26C /* Forecast */ = {
+			isa = PBXGroup;
+			children = (
+				AFE749833036AB5D00E5B26C /* ForecastView.swift */,
+			);
+			path = Forecast;
+			sourceTree = "<group>";
+		};
 		AFEE7957301E3D5500F733AF /* SampleApps */ = {
 			isa = PBXGroup;
 			children = (
@@ -1180,6 +1228,7 @@
 				AF4F5DE92FC750B60003B277 /* CustomerStore.swift in Sources */,
 				AF5CF3E3277B40360044B06E /* FurnitureUI.swift in Sources */,
 				AF0EAE9630001D6900A7247D /* CustomerJSONTransfer.swift in Sources */,
+				AFE7497D3036A74500E5B26C /* HeatMapView.swift in Sources */,
 				AF4F5DC72FC743040003B277 /* ChatLogViewModel.swift in Sources */,
 				AFBCC5DF27645EB800F0B0A8 /* MainMenuUI.swift in Sources */,
 				AF697E852778C93F00219026 /* LocationWeatherManager.swift in Sources */,
@@ -1208,6 +1257,7 @@
 				AFEFA4CD30027795004C61A5 /* CustomerCellView.swift in Sources */,
 				AF03D36C27886D720021493A /* ColorOptions.swift in Sources */,
 				AFDE91D52793364D00302CF2 /* LandMarkListView.swift in Sources */,
+				AFE749793036A59B00E5B26C /* CalendarView.swift in Sources */,
 				AF892F5C2FFEFC8A004D9563 /* ExpenseDetailView.swift in Sources */,
 				AFE7120F3012348200B9D6A7 /* BottomSheetFavorite.swift in Sources */,
 				AF2F674A2FF7F6CD00741D30 /* UserFormModel.swift in Sources */,
@@ -1248,7 +1298,9 @@
 				AFB760A92FE22CA2002D1A83 /* MenuRouteButton.swift in Sources */,
 				AFDE91D32793361700302CF2 /* LandMarkCategoryView.swift in Sources */,
 				AF2E4BA83011D2D200D77F40 /* LeadDetailContactHelpers.swift in Sources */,
+				AFE749853036AB5D00E5B26C /* ForecastView.swift in Sources */,
 				AF4F5DC12FC742E40003B277 /* ChatRepository.swift in Sources */,
+				AFE749803036A8F700E5B26C /* ReportsView.swift in Sources */,
 				AF92B8A62678157100729208 /* ExtensionUI.swift in Sources */,
 				AF892F592FFEFC86004D9563 /* ExpenseRowView.swift in Sources */,
 				AFE712153012348500B9D6A7 /* BottomSheetShareButton.swift in Sources */,
@@ -1345,6 +1397,7 @@
 				AFE2C80D2FE08CA80086C5C8 /* SwiftUIRouteMapView.swift in Sources */,
 				AF4F5E072FC75D870003B277 /* MapButtonView.swift in Sources */,
 				AF4F5DC92FC7430B0003B277 /* CreateNewMessageViewModel.swift in Sources */,
+				AFE749783036A59B00E5B26C /* CalendarView.swift in Sources */,
 				AF4F5DE62FC750A80003B277 /* CustomerService.swift in Sources */,
 				AFBCC5E027645EB800F0B0A8 /* MainMenuUI.swift in Sources */,
 				AFB4D01A3007B19B0003650A /* MessageJSONTransfer.swift in Sources */,
@@ -1362,10 +1415,12 @@
 				AF4A670827565F40005D1D8B /* AuthenticationService.swift in Sources */,
 				AF745F1127513D4F00E9DB74 /* ChatLogView.swift in Sources */,
 				AFEE7956301E387D00F733AF /* WaveUI.swift in Sources */,
+				AFE7497C3036A74500E5B26C /* HeatMapView.swift in Sources */,
 				AFEFA4CC30027795004C61A5 /* CustomerCellView.swift in Sources */,
 				AFB760A22FE22C78002D1A83 /* MainTopView.swift in Sources */,
 				AFE4AE0C2FC8698F00F86B2E /* AppDependencies.swift in Sources */,
 				AF2E4BA23011D2AF00D77F40 /* RoundedContainerList.swift in Sources */,
+				AFE749813036A8F700E5B26C /* ReportsView.swift in Sources */,
 				AF3AC45D268FF5E400562D20 /* ReelsView.swift in Sources */,
 				AFC519522FC89A98003A4AEA /* MessageDateFormatting.swift in Sources */,
 				AFB760A52FE22CA2002D1A83 /* MainMenuSections.swift in Sources */,
@@ -1434,6 +1489,7 @@
 				AF108C0B276260C700084752 /* RecentMessage.swift in Sources */,
 				AFD7D8D43002744E00EF9101 /* CustomerTransferViewModel.swift in Sources */,
 				AF792F452690047C0011D787 /* Reel.swift in Sources */,
+				AFE749843036AB5D00E5B26C /* ForecastView.swift in Sources */,
 				AF4F5DC32FC742F30003B277 /* MainMessagesViewModel.swift in Sources */,
 				AF2E4B9B3011D02500D77F40 /* CustomerFormComponents.swift in Sources */,
 				AF4F5DEF2FC758540003B277 /* CustomerFirestore.swift in Sources */,

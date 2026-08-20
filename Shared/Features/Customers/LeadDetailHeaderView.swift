@@ -114,6 +114,15 @@ struct LeadDetailHeaderView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(detail.formattedCreationDate)
                     .font(.headline)
+                if CustomerItem.Category.lead.matches(detail.category) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "calendar.badge.clock")
+                            .font(.caption)
+                        Text(detail.followUpDate.map { CustomerPresentationFormatters.mediumDate.string(from: $0) } ?? "No Follow Up")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .foregroundStyle(detail.followUpDate != nil ? Color.orange : Color.secondary)
+                }
             }
 
             Spacer()

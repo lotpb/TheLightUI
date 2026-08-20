@@ -102,8 +102,12 @@ struct AnalyticsSection: View {
     }
 
     private let items: [Item] = [
-        Item(id: .snapshot, title: "Snapshot", subtitle: "Live overview",  systemImage: "camera.viewfinder", iconColor: .green),
-        Item(id: .chart,    title: "Chart",    subtitle: "Visualize data", systemImage: "chart.bar.fill",    iconColor: .purple),
+        Item(id: .snapshot, title: "Snapshot",  subtitle: "Live overview",       systemImage: "camera.viewfinder",    iconColor: .green),
+        Item(id: .chart,    title: "Chart",     subtitle: "Visualize data",      systemImage: "chart.bar.fill",       iconColor: .purple),
+        Item(id: .calendar, title: "Calendar",  subtitle: "Events & schedule",   systemImage: "calendar.badge.clock", iconColor: .orange),
+        Item(id: .heatmap,  title: "Heat Map",  subtitle: "Geographic density",  systemImage: "map.fill",                      iconColor: .red),
+        Item(id: .reports,   title: "Reports",   subtitle: "Performance & trends",  systemImage: "doc.text.magnifyingglass",    iconColor: .cyan),
+        Item(id: .forecast,  title: "Forecast",  subtitle: "Revenue projection",    systemImage: "chart.line.uptrend.xyaxis",   iconColor: .teal),
     ]
 
     var body: some View {

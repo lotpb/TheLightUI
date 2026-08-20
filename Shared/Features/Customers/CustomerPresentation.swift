@@ -43,7 +43,7 @@ enum CustomerLabels {
     static let socialSecurity = "Social Security"
     static let birthDate = "Birth Date"
     static let driverLicense = "Driver License"
-    static let endDate = "End Date"
+    static let endDate = "Termination"
     // Vendor-specific labels (fields are stored in repurposed CustomerItem slots).
     static let vendorName = "Vendor"
     static let website = "Web Page"
@@ -66,6 +66,10 @@ enum CustomerLabels {
     static let commissionRate = "Commission"
     static let userRole = "Role"
     static let lastLogin = "Last Login"
+    static let employeeStatus = "Emp Status"
+    // Common extended labels.
+    static let followUpDate = "Follow Up"
+    static let tags = "Tags"
 }
 
 extension CustomerItem {
@@ -86,11 +90,15 @@ extension CustomerItem {
     }
 
     var formattedStartDate: String {
-        CustomerPresentationFormatters.mediumDate.string(from: startDate)
+        startDate <= Date.distantPast.addingTimeInterval(86400) ? "" : CustomerPresentationFormatters.mediumDate.string(from: startDate)
     }
 
     var formattedCompletionDate: String {
-        CustomerPresentationFormatters.mediumDate.string(from: completionDate)
+        completionDate <= Date.distantPast.addingTimeInterval(86400) ? "" : CustomerPresentationFormatters.mediumDate.string(from: completionDate)
+    }
+
+    var formattedBirthDate: String {
+        CustomerPresentationFormatters.parsedBirthDate(from: birthDate)
     }
 }
 
@@ -100,6 +108,22 @@ enum CustomerPresentationFormatters {
         formatter.dateFormat = "MMM d yy"
         return formatter
     }()
+
+    private static let birthDateInputFormats = ["MM/dd/yyyy", "M/d/yyyy", "yyyy-MM-dd"]
+    private static let birthDateInputParsers: [DateFormatter] = birthDateInputFormats.map {
+        let f = DateFormatter(); f.dateFormat = $0; f.locale = Locale(identifier: "en_US_POSIX"); return f
+    }
+
+    static func parsedBirthDate(from raw: String) -> String {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed != "0000-00-00" else { return trimmed }
+        for parser in birthDateInputParsers {
+            if let date = parser.date(from: trimmed) {
+                return mediumDate.string(from: date)
+            }
+        }
+        return trimmed
+    }
 
     static let currency: NumberFormatter = {
         let formatter = NumberFormatter()

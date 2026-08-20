@@ -49,6 +49,10 @@ enum MainMenuDataRoute: Hashable {
     case steps
     case chart
     case todo
+    case calendar
+    case heatmap
+    case reports
+    case forecast
 }
 
 @MainActor
@@ -138,6 +142,14 @@ struct MainMenuCoordinator {
             ChartView(customerStore: customerStore)
         case .todo:
             ListView()
+        case .calendar:
+            CalendarView(customerStore: customerStore)
+        case .heatmap:
+            HeatMapView(customerStore: customerStore)
+        case .reports:
+            ReportsView(customerStore: customerStore)
+        case .forecast:
+            ForecastView(customerStore: customerStore)
         }
     }
 

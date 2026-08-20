@@ -35,9 +35,9 @@ extension LeadDetailUI {
             CustomerDetailField(name: detail.job, label: CustomerLabels.job),
             CustomerDetailField(name: detail.product, label: CustomerLabels.product),
             CustomerDetailField(name: "\(detail.quantity)", label: CustomerLabels.quantity),
-            CustomerDetailField(name: detail.formattedCreationDate, label: "Sale Date"),
             CustomerDetailField(name: detail.formattedStartDate, label: isLead ? CustomerLabels.aptDate : CustomerLabels.startDate),
             CustomerDetailField(name: detail.formattedCompletionDate, label: CustomerLabels.complete),
+            CustomerDetailField(name: detail.formattedCreationDate, label: "Date Added"),
             CustomerDetailField(name: detail.callback, label: CustomerLabels.callback),
             CustomerDetailField(name: detail.formattedLastUpdateDate, label: CustomerLabels.lastUpdated),
             CustomerDetailField(name: detail.photo, label: CustomerLabels.photo)
@@ -47,13 +47,17 @@ extension LeadDetailUI {
             fields += [
                 CustomerDetailField(name: detail.leadStatus, label: CustomerLabels.leadStatus),
                 CustomerDetailField(name: detail.lastContactDate, label: CustomerLabels.lastContactDate),
-                CustomerDetailField(name: detail.contactAttempts == 0 ? "" : "\(detail.contactAttempts)", label: CustomerLabels.contactAttempts)
+                CustomerDetailField(name: detail.contactAttempts == 0 ? "" : "\(detail.contactAttempts)", label: CustomerLabels.contactAttempts),
+                CustomerDetailField(name: detail.followUpDate.map { CustomerPresentationFormatters.mediumDate.string(from: $0) } ?? "", label: CustomerLabels.followUpDate),
+                CustomerDetailField(name: detail.tags.joined(separator: ", "), label: CustomerLabels.tags)
             ]
         }
         if isCustomer {
             fields.removeAll { $0.label == CustomerLabels.first || $0.label == CustomerLabels.rating }
+            if !detail.companyName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                fields.append(CustomerDetailField(name: detail.companyName, label: CustomerLabels.companyName))
+            }
             fields += [
-                CustomerDetailField(name: detail.companyName, label: CustomerLabels.companyName),
                 CustomerDetailField(name: detail.leadSource, label: CustomerLabels.leadSource),
                 CustomerDetailField(name: detail.paymentStatus, label: CustomerLabels.paymentStatus),
                 CustomerDetailField(name: detail.paymentTerms, label: CustomerLabels.paymentTerms)
@@ -69,20 +73,19 @@ extension LeadDetailUI {
             CustomerDetailField(name: detail.phone, label: CustomerLabels.phone),
             CustomerDetailField(name: detail.spouse, label: CustomerLabels.socialSecurity),
             CustomerDetailField(name: detail.email, label: CustomerLabels.email),
+            CustomerDetailField(name: detail.employeeStatus, label: CustomerLabels.employeeStatus),
+            CustomerDetailField(name: detail.salesman, label: "Salesperson"),
             CustomerDetailField(name: detail.adNo, label: CustomerLabels.department),
             CustomerDetailField(name: detail.callback, label: CustomerLabels.middle),
             CustomerDetailField(name: detail.formattedStartDate, label: CustomerLabels.startDate),
             CustomerDetailField(name: detail.formattedCompletionDate, label: CustomerLabels.endDate),
             CustomerDetailField(name: detail.callback, label: CustomerLabels.callback),
-            CustomerDetailField(name: detail.birthDate, label: CustomerLabels.birthDate),
+            CustomerDetailField(name: detail.formattedBirthDate, label: CustomerLabels.birthDate),
             CustomerDetailField(name: detail.driverLicense, label: CustomerLabels.driverLicense),
             CustomerDetailField(name: detail.street, label: "Street"),
-            CustomerDetailField(name: detail.city, label: "City"),
-            CustomerDetailField(name: detail.state, label: "State"),
-            CustomerDetailField(name: detail.zip, label: "Zip"),
+            CustomerDetailField(name: [detail.city, detail.state, detail.zip].filter { !$0.isEmpty }.joined(separator: ", "), label: "City, State, Zip"),
             CustomerDetailField(name: detail.formattedCreationDate, label: "Date Added"),
-            CustomerDetailField(name: detail.formattedLastUpdateDate, label: CustomerLabels.lastUpdated),
-            CustomerDetailField(name: detail.photo, label: CustomerLabels.photo)
+            CustomerDetailField(name: detail.formattedLastUpdateDate, label: CustomerLabels.lastUpdated)
         ]
         let emptyHiddenLabels: Set<String> = [CustomerLabels.middle, CustomerLabels.birthDate, CustomerLabels.driverLicense]
         fields.removeAll { emptyHiddenLabels.contains($0.label) && $0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
@@ -90,7 +93,8 @@ extension LeadDetailUI {
             CustomerDetailField(name: detail.payType, label: CustomerLabels.payType),
             CustomerDetailField(name: detail.commissionRate, label: CustomerLabels.commissionRate),
             CustomerDetailField(name: detail.userRole, label: CustomerLabels.userRole),
-            CustomerDetailField(name: detail.lastLogin, label: CustomerLabels.lastLogin)
+            CustomerDetailField(name: detail.lastLogin, label: CustomerLabels.lastLogin),
+            CustomerDetailField(name: detail.photo, label: CustomerLabels.photo)
         ]
         return fields
     }
@@ -102,8 +106,8 @@ extension LeadDetailUI {
             CustomerDetailField(name: detail.phone, label: CustomerLabels.phone),
             CustomerDetailField(name: detail.email, label: CustomerLabels.email),
             CustomerDetailField(name: detail.spouse, label: CustomerLabels.website),
-            CustomerDetailField(name: detail.lastname, label: CustomerLabels.profession),
-            CustomerDetailField(name: detail.callback, label: CustomerLabels.manager),
+            CustomerDetailField(name: detail.profession, label: CustomerLabels.profession),
+            CustomerDetailField(name: detail.manager, label: CustomerLabels.manager),
             CustomerDetailField(name: detail.salesman, label: CustomerLabels.callback),
             CustomerDetailField(name: detail.paymentTerms, label: CustomerLabels.paymentTerms),
             CustomerDetailField(name: detail.taxId, label: CustomerLabels.taxId),

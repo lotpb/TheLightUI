@@ -58,7 +58,7 @@ struct CustomerCellView: View, Equatable {
     private var customerSummary: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(fullName)
-                .font(.title3)
+                .font(.body)
                 .fontWeight(.bold)
                 .foregroundStyle(.primary)
                 .lineLimit(1)
@@ -98,11 +98,17 @@ struct CustomerCellView: View, Equatable {
 
     // Right-aligned date and amount summary.
     private var amountSummary: some View {
+        let isLead = CustomerItem.Category.lead.matches(data.category)
         let amountText = CustomerItem.Category.vendor.matches(data.category)
             ? data.lastname
             : CustomerItem.Category.employee.matches(data.category)
                 ? data.adNo
-                : data.formattedAmount
+                : isLead
+                    ? (data.leadStatus.isEmpty ? "" : data.leadStatus)
+                    : data.formattedAmount
+        let followUpText = isLead
+            ? data.followUpDate.map { CustomerPresentationFormatters.mediumDate.string(from: $0) } ?? ""
+            : ""
 
         return VStack(alignment: .trailing, spacing: 6) {
             Text(data.formattedCreationDate)
@@ -114,13 +120,33 @@ struct CustomerCellView: View, Equatable {
                 .padding(.top, 3)
                 .accessibilityLabel(Text("Created on \(data.formattedCreationDate)"))
 
+            if CustomerItem.Category.vendor.matches(data.category), !data.profession.isEmpty {
+                Text(data.profession)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(Layout.textMinimumScaleFactor)
+                    .frame(width: Layout.summaryWidth)
+                    .accessibilityLabel(Text("Profession \(data.profession)"))
+            }
+
             Text(amountText)
-                .font(.headline)
+                .font(.subheadline)
                 .foregroundStyle(.primary)
                 .lineLimit(1)
                 .minimumScaleFactor(Layout.textMinimumScaleFactor)
                 .frame(width: Layout.summaryWidth, height: Layout.summaryHeight)
-                .accessibilityLabel(Text(CustomerItem.Category.vendor.matches(data.category) ? "Profession \(data.lastname)" : CustomerItem.Category.employee.matches(data.category) ? "Department \(data.adNo)" : "Amount \(data.formattedAmount)"))
+                .accessibilityLabel(Text(CustomerItem.Category.vendor.matches(data.category) ? "Profession \(data.lastname)" : CustomerItem.Category.employee.matches(data.category) ? "Department \(data.adNo)" : isLead ? "Lead Status \(data.leadStatus)" : "Amount \(data.formattedAmount)"))
+
+            if isLead, !followUpText.isEmpty {
+                Text(followUpText)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.orange)
+                    .lineLimit(1)
+                    .minimumScaleFactor(Layout.textMinimumScaleFactor)
+                    .frame(width: Layout.summaryWidth)
+                    .accessibilityLabel(Text("Follow up \(followUpText)"))
+            }
         }
     }
 

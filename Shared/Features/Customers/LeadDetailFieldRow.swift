@@ -55,6 +55,60 @@ struct LeadDetailFieldRow: View {
                     .minimumScaleFactor(0.8)
             }
             .accessibilityLabel(hasPhoto ? "Photo: \(trimmedValue)" : "Add Photo")
+        } else if formData.label == CustomerLabels.userRole, !trimmedValue.isEmpty {
+            let roleColor: Color = {
+                switch trimmedValue.lowercased() {
+                case "owner":    return .yellow
+                case "admin":    return .indigo
+                case "salesman": return .green
+                case "viewer":   return .gray
+                default:         return .orange
+                }
+            }()
+            Text(trimmedValue)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(roleColor)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(roleColor.opacity(0.15).gradient, in: Capsule())
+                .accessibilityLabel("Role: \(trimmedValue)")
+        } else if formData.label == CustomerLabels.endDate, !trimmedValue.isEmpty {
+            Text(trimmedValue)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.indigo)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.indigo.opacity(0.15).gradient, in: Capsule())
+                .accessibilityLabel("Termination: \(trimmedValue)")
+        } else if formData.label == "Salesperson", !trimmedValue.isEmpty {
+            let isYes = trimmedValue.caseInsensitiveCompare("yes") == .orderedSame
+            let spColor: Color = isYes ? .green : .red
+            Text(trimmedValue)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(spColor)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(spColor.opacity(0.15).gradient, in: Capsule())
+                .accessibilityLabel("Salesperson: \(trimmedValue)")
+        } else if formData.label == CustomerLabels.salesman, !trimmedValue.isEmpty {
+            Text(trimmedValue)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color.teal)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.teal.opacity(0.15).gradient, in: Capsule())
+                .accessibilityLabel("Salesman: \(trimmedValue)")
+        } else if formData.label == CustomerLabels.employeeStatus {
+            let isActive = trimmedValue.caseInsensitiveCompare("active") == .orderedSame
+            let label = trimmedValue.isEmpty ? "Inactive" : formData.name
+            let color: Color = isActive ? .green : .red
+            Text(label)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(color)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(color.opacity(0.15).gradient, in: Capsule())
+                .accessibilityLabel("Employee Status: \(label)")
         } else if formData.label == CustomerLabels.callback {
             let isYes = trimmedValue.caseInsensitiveCompare("YES") == .orderedSame
             HStack(spacing: 6) {
@@ -69,9 +123,9 @@ struct LeadDetailFieldRow: View {
             }
             .accessibilityLabel("Callback: \(trimmedValue.isEmpty ? "No" : formData.name)")
         } else {
-            Text(formData.name)
+            Text(trimmedValue.isEmpty ? "—" : formData.name)
                 .font(.body)
-                .foregroundStyle(Color.primary)
+                .foregroundStyle(trimmedValue.isEmpty ? Color.secondary : Color.primary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
         }

@@ -82,6 +82,7 @@ struct CustomerFormUI: View {
             Form {
                 CustomerFormCategorySection(viewModel: viewModel)
                 CustomerFormContactInfoSection(viewModel: viewModel, firstNameInFocus: $firstNameInFocus)
+                CustomerFormLeadInfoSection(viewModel: viewModel)
                 CustomerFormAddressSection(viewModel: viewModel)
                 CustomerFormJobInfoSection(viewModel: viewModel, managingPickerType: $managingPickerType)
                 CustomerFormJobSection(viewModel: viewModel, managingPickerType: $managingPickerType)

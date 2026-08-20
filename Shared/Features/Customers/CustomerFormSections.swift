@@ -61,6 +61,8 @@ struct CustomerFormContactInfoSection: View {
     @Environment(PickerDataModel.self) private var pickerviewModel
     private var isVendor: Bool { CustomerItem.Category.vendor.matches(viewModel.detail.category) }
     private var isLead: Bool { CustomerItem.Category.lead.matches(viewModel.detail.category) }
+    private var isCustomer: Bool { CustomerItem.Category.customer.matches(viewModel.detail.category) }
+    private var isEmployee: Bool { CustomerItem.Category.employee.matches(viewModel.detail.category) }
 
     var body: some View {
         let phoneBinding = Binding<String>(
@@ -112,6 +114,15 @@ struct CustomerFormContactInfoSection: View {
                         TextField("last", text: $viewModel.detail.lastname)
                             .formStyle()
                     }
+                }
+            }
+            if isLead || isCustomer {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Company Name")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Color.secondary)
+                    TextField("company", text: $viewModel.detail.companyName)
+                        .formStyle()
                 }
             }
             if sizeClass == .regular {
@@ -553,6 +564,7 @@ struct CustomerFormJobSection: View {
 
     private static let payTypeOptions = ["", "Hourly", "Salary", "Commission", "Contract"]
     private static let userRoleOptions = ["", "Admin", "Manager", "Sales", "Support", "Viewer"]
+    private static let employeeStatusOptions = ["", "Active", "Inactive", "Leave", "Terminated"]
 
     var body: some View {
         if isEmployee {
@@ -619,6 +631,11 @@ struct CustomerFormJobSection: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                menuPickerField(
+                    label: "Emp Status",
+                    value: viewModel.detail.employeeStatus,
+                    options: Self.employeeStatusOptions
+                ) { viewModel.detail.employeeStatus = $0 }
             }
         }
     }
@@ -647,6 +664,102 @@ struct CustomerFormJobSection: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+}
+
+// MARK: - Lead Info Section
+
+struct CustomerFormLeadInfoSection: View {
+    @Bindable var viewModel: CustomerFormViewModel
+
+    @AppStorage(SettingsUI.color) private var color: Int?
+    private var themeColor: Color { AppTheme.accentColor(for: color) }
+    private var isLead: Bool { CustomerItem.Category.lead.matches(viewModel.detail.category) }
+
+    private static let leadStatusOptions = ["", "New", "Contacted", "Qualified", "Proposal", "Negotiation", "Closed Won", "Closed Lost"]
+
+    var body: some View {
+        if isLead {
+            Section(header: FormSectionHeader(title: "LEAD INFO", color: themeColor)) {
+                leadStatusPicker
+                HStack(spacing: 12) {
+                    lastContactField
+                    attemptsField
+                }
+                tagsField
+            }
+        }
+    }
+
+    private var leadStatusPicker: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Status")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color.secondary)
+            Menu {
+                ForEach(Self.leadStatusOptions, id: \.self) { opt in
+                    Button { viewModel.detail.leadStatus = opt } label: {
+                        Text(opt.isEmpty ? "none" : opt)
+                    }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text(viewModel.detail.leadStatus.isEmpty ? "none" : viewModel.detail.leadStatus)
+                        .foregroundStyle(viewModel.detail.leadStatus.isEmpty ? Color.gray : Color.primary)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .imageScale(.small)
+                        .foregroundStyle(Color.primary)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var lastContactField: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Last Contact")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color.secondary)
+            TextField("date", text: $viewModel.detail.lastContactDate)
+                .formStyle()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var attemptsField: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Attempts")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color.secondary)
+            Stepper {
+                TextField("", text: Binding(
+                    get: { viewModel.detail.contactAttempts == 0 ? "" : "\(viewModel.detail.contactAttempts)" },
+                    set: { viewModel.detail.contactAttempts = Int($0) ?? 0 }
+                ))
+                .formStyle()
+                .frame(minWidth: 40, maxWidth: 60)
+                .keyboardType(.numberPad)
+            } onIncrement: {
+                viewModel.detail.contactAttempts += 1
+            } onDecrement: {
+                if viewModel.detail.contactAttempts > 0 { viewModel.detail.contactAttempts -= 1 }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var tagsField: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Tags")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color.secondary)
+            TextField("tag1, tag2", text: Binding(
+                get: { viewModel.detail.tags.joined(separator: ", ") },
+                set: { viewModel.detail.tags = $0.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty } }
+            ))
+            .formStyle()
+            .textInputAutocapitalization(.never)
+        }
+    }
 }
 
 // MARK: - Misc Section
@@ -694,6 +807,17 @@ struct CustomerFormMiscSection: View {
                             .labelsHidden()
                             .environment(\.locale, Locale(identifier: "en_US"))
                     }
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Follow Up")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Color.secondary)
+                        DatePicker("Follow Up", selection: Binding(
+                            get: { viewModel.detail.followUpDate ?? Date() },
+                            set: { viewModel.detail.followUpDate = $0 }
+                        ), displayedComponents: .date)
+                        .labelsHidden()
+                        .environment(\.locale, Locale(identifier: "en_US"))
+                    }
                 }
             }
             if isCustomer {
@@ -703,18 +827,50 @@ struct CustomerFormMiscSection: View {
                             Text("Start")
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(Color.secondary)
-                            DatePicker("Start", selection: $viewModel.pickStartDate, displayedComponents: .date)
-                                .labelsHidden()
-                                .environment(\.locale, Locale(identifier: "en_US"))
+                            if viewModel.hasPickedStartDate {
+                                HStack(spacing: 8) {
+                                    DatePicker("Start", selection: $viewModel.pickStartDate, displayedComponents: .date)
+                                        .labelsHidden()
+                                        .environment(\.locale, Locale(identifier: "en_US"))
+                                    Button { viewModel.hasPickedStartDate = false } label: {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .foregroundStyle(Color.secondary)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            } else {
+                                Button { viewModel.pickStartDate = Date(); viewModel.hasPickedStartDate = true } label: {
+                                    Text("—")
+                                        .font(.body)
+                                        .foregroundStyle(Color.secondary)
+                                }
+                                .buttonStyle(.plain)
+                            }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Complete")
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(Color.secondary)
-                            DatePicker("Complete", selection: $viewModel.pickCompleteDate, displayedComponents: .date)
-                                .labelsHidden()
-                                .environment(\.locale, Locale(identifier: "en_US"))
+                            if viewModel.hasPickedCompleteDate {
+                                HStack(spacing: 8) {
+                                    DatePicker("Complete", selection: $viewModel.pickCompleteDate, displayedComponents: .date)
+                                        .labelsHidden()
+                                        .environment(\.locale, Locale(identifier: "en_US"))
+                                    Button { viewModel.hasPickedCompleteDate = false } label: {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .foregroundStyle(Color.secondary)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            } else {
+                                Button { viewModel.pickCompleteDate = Date(); viewModel.hasPickedCompleteDate = true } label: {
+                                    Text("—")
+                                        .font(.body)
+                                        .foregroundStyle(Color.secondary)
+                                }
+                                .buttonStyle(.plain)
+                            }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -746,12 +902,23 @@ struct CustomerFormMiscSection: View {
             }
             if isVendor {
                 Section(header: FormSectionHeader(title: "JOB INFO", color: themeColor)) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Manager")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(Color.secondary)
-                        TextField("manager", text: $viewModel.detail.callback)
-                            .formStyle()
+                    HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Profession")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Color.secondary)
+                            TextField("profession", text: $viewModel.detail.profession)
+                                .formStyle()
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Manager")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Color.secondary)
+                            TextField("manager", text: $viewModel.detail.manager)
+                                .formStyle()
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     miscMenuPickerField(label: "Payment Terms", value: viewModel.detail.paymentTerms, options: Self.paymentTermsOptions) {
                         viewModel.detail.paymentTerms = $0
@@ -836,12 +1003,28 @@ struct CustomerFormMiscSection: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("End Date")
+                            Text("Termination")
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(Color.secondary)
-                            DatePicker("End Date", selection: $viewModel.pickCompleteDate, displayedComponents: .date)
-                                .labelsHidden()
-                                .environment(\.locale, Locale(identifier: "en_US"))
+                            if viewModel.hasPickedCompleteDate {
+                                HStack(spacing: 8) {
+                                    DatePicker("Termination", selection: $viewModel.pickCompleteDate, displayedComponents: .date)
+                                        .labelsHidden()
+                                        .environment(\.locale, Locale(identifier: "en_US"))
+                                    Button { viewModel.hasPickedCompleteDate = false } label: {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .foregroundStyle(Color.secondary)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            } else {
+                                Button { viewModel.pickCompleteDate = Date(); viewModel.hasPickedCompleteDate = true } label: {
+                                    Text("—")
+                                        .font(.body)
+                                        .foregroundStyle(Color.secondary)
+                                }
+                                .buttonStyle(.plain)
+                            }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -864,50 +1047,10 @@ struct CustomerFormMiscSection: View {
                             .formStyle()
                     }
                 }
-                Section(header: FormSectionHeader(title: "LEAD INFO", color: themeColor)) {
-                    miscMenuPickerField(label: "Status", value: viewModel.detail.leadStatus, options: Self.leadStatusOptions) {
-                        viewModel.detail.leadStatus = $0
-                    }
-                    HStack(spacing: 12) {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("Last Contact")
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(Color.secondary)
-                            TextField("date", text: $viewModel.detail.lastContactDate)
-                                .formStyle()
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("Attempts")
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(Color.secondary)
-                            Stepper {
-                                TextField("", text: Binding(
-                                    get: { viewModel.detail.contactAttempts == 0 ? "" : "\(viewModel.detail.contactAttempts)" },
-                                    set: { viewModel.detail.contactAttempts = Int($0) ?? 0 }
-                                ))
-                                .formStyle()
-                                .frame(minWidth: 40, maxWidth: 60)
-                                .keyboardType(.numberPad)
-                            } onIncrement: {
-                                viewModel.detail.contactAttempts += 1
-                            } onDecrement: {
-                                if viewModel.detail.contactAttempts > 0 { viewModel.detail.contactAttempts -= 1 }
-                            }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                }
+
             }
             if isCustomer {
                 Section(header: FormSectionHeader(title: "ACCOUNT", color: themeColor)) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Company Name")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(Color.secondary)
-                        TextField("company", text: $viewModel.detail.companyName)
-                            .formStyle()
-                    }
                     HStack(spacing: 12) {
                         miscMenuPickerField(label: "Lead Source", value: viewModel.detail.leadSource, options: Self.leadSourceOptions) {
                             viewModel.detail.leadSource = $0

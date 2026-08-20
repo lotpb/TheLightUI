@@ -167,28 +167,34 @@ struct LeadDetailUI: View {
     }
 
     private var customerSectionedFieldList: some View {
-        let contactLabels: Set<String> = [CustomerLabels.phone, CustomerLabels.email, CustomerLabels.callback]
+        let contactLabels: Set<String> = [CustomerLabels.phone, CustomerLabels.email]
         let jobInfoLabels: Set<String> = [CustomerLabels.salesman, CustomerLabels.job, CustomerLabels.product, CustomerLabels.contractor, CustomerLabels.quantity, CustomerLabels.adNo]
-        let dateLabels: Set<String> = ["Sale Date", CustomerLabels.startDate, CustomerLabels.complete, CustomerLabels.lastUpdated]
+        let dateLabels: Set<String> = ["Date Added", CustomerLabels.startDate, CustomerLabels.complete, CustomerLabels.lastUpdated]
         let personalLabels: Set<String> = [CustomerLabels.spouse, CustomerLabels.photo]
         let addressLabels: Set<String> = ["Street", "City", "State", "Zip"]
-        let allSectionLabels = contactLabels.union(jobInfoLabels).union(dateLabels).union(personalLabels).union(addressLabels)
+        let customerInfoLabels: Set<String> = [CustomerLabels.leadSource, CustomerLabels.paymentStatus, CustomerLabels.paymentTerms, CustomerLabels.callback]
+        let allSectionLabels = contactLabels.union(jobInfoLabels).union(dateLabels).union(personalLabels).union(addressLabels).union(customerInfoLabels)
         let mainFields = detailFields.filter { !allSectionLabels.contains($0.label) }
         let contactFields = detailFields.filter { contactLabels.contains($0.label) }
         let jobInfoFields = detailFields.filter { jobInfoLabels.contains($0.label) }
         let dateFields = detailFields.filter { dateLabels.contains($0.label) }
         let personalFields = detailFields.filter { personalLabels.contains($0.label) }
         let addressFields = detailFields.filter { addressLabels.contains($0.label) }
+        let customerInfoFields = detailFields.filter { customerInfoLabels.contains($0.label) }
         return VStack(spacing: LeadDetailLayout.containerSpacing) {
             RoundedContainerList(mainFields) { field in
                 LeadDetailFieldRow(formData: field)
             }
-            addressSectionHeader
-            RoundedContainerList(addressFields) { field in
-                LeadDetailFieldRow(formData: field)
-            }
             contactSectionHeader
             RoundedContainerList(contactFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            customerInfoSectionHeader
+            RoundedContainerList(customerInfoFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            addressSectionHeader
+            RoundedContainerList(addressFields) { field in
                 LeadDetailFieldRow(formData: field)
             }
             jobInfoSectionHeader
@@ -210,22 +216,28 @@ struct LeadDetailUI: View {
     private var leadSectionedFieldList: some View {
         let addressLabels: Set<String> = ["Street", "City", "State", "Zip"]
         let contactLabels: Set<String> = [CustomerLabels.phone, CustomerLabels.email]
-        let jobInfoLabels: Set<String> = [CustomerLabels.salesman, CustomerLabels.job, CustomerLabels.product, CustomerLabels.contractor, CustomerLabels.quantity, CustomerLabels.callback, CustomerLabels.adNo]
-        let dateLabels: Set<String> = ["Sale Date", CustomerLabels.aptDate, CustomerLabels.complete, CustomerLabels.lastUpdated]
+        let jobInfoLabels: Set<String> = [CustomerLabels.salesman, CustomerLabels.job, CustomerLabels.product, CustomerLabels.contractor, CustomerLabels.quantity, CustomerLabels.adNo]
+        let dateLabels: Set<String> = ["Date Added", CustomerLabels.aptDate, CustomerLabels.complete, CustomerLabels.lastUpdated]
         let personalLabels: Set<String> = [CustomerLabels.spouse, CustomerLabels.photo]
-        let allSectionLabels = addressLabels.union(contactLabels).union(jobInfoLabels).union(dateLabels).union(personalLabels)
+        let leadInfoLabels: Set<String> = [CustomerLabels.leadStatus, CustomerLabels.lastContactDate, CustomerLabels.contactAttempts, CustomerLabels.followUpDate, CustomerLabels.callback]
+        let allSectionLabels = addressLabels.union(contactLabels).union(jobInfoLabels).union(dateLabels).union(personalLabels).union(leadInfoLabels)
         let mainFields = detailFields.filter { !allSectionLabels.contains($0.label) }
+        let leadInfoFields = detailFields.filter { leadInfoLabels.contains($0.label) }
         let addressFields = detailFields.filter { addressLabels.contains($0.label) }
         let contactFields = detailFields.filter { contactLabels.contains($0.label) }
         let jobInfoFields = detailFields.filter { jobInfoLabels.contains($0.label) }
         let dateFields = detailFields.filter { dateLabels.contains($0.label) }
         let personalFields = detailFields.filter { personalLabels.contains($0.label) }
         return VStack(spacing: LeadDetailLayout.containerSpacing) {
-            RoundedContainerList(mainFields) { field in
-                LeadDetailFieldRow(formData: field)
-            }
             contactSectionHeader
             RoundedContainerList(contactFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            leadInfoSectionHeader
+            RoundedContainerList(leadInfoFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            RoundedContainerList(mainFields) { field in
                 LeadDetailFieldRow(formData: field)
             }
             addressSectionHeader
@@ -250,7 +262,7 @@ struct LeadDetailUI: View {
 
     private var vendorSectionedFieldList: some View {
         let addressLabels: Set<String> = ["Street", "City", "State", "Zip"]
-        let jobInfoLabels: Set<String> = [CustomerLabels.profession, CustomerLabels.manager, CustomerLabels.callback]
+        let jobInfoLabels: Set<String> = [CustomerLabels.profession, CustomerLabels.manager, CustomerLabels.callback, CustomerLabels.paymentTerms, CustomerLabels.taxId, CustomerLabels.accountNumber]
         let contactLabels: Set<String> = [CustomerLabels.phone, CustomerLabels.email, CustomerLabels.website, CustomerLabels.photo]
         let dateLabels: Set<String> = ["Date Added", CustomerLabels.lastUpdated]
         let allSectionLabels = addressLabels.union(jobInfoLabels).union(contactLabels).union(dateLabels)
@@ -284,18 +296,24 @@ struct LeadDetailUI: View {
     }
 
     private var employeeSectionedFieldList: some View {
-        let addressLabels: Set<String> = ["Street", "City", "State", "Zip"]
-        let employeeInfoLabels: Set<String> = [CustomerLabels.phone, CustomerLabels.email, CustomerLabels.department, CustomerLabels.callback, CustomerLabels.photo]
+        let addressLabels: Set<String> = ["Street", "City, State, Zip"]
+        let contactLabels: Set<String> = [CustomerLabels.phone, CustomerLabels.email]
+        let employeeInfoLabels: Set<String> = [CustomerLabels.department, CustomerLabels.callback, CustomerLabels.photo, CustomerLabels.payType, CustomerLabels.commissionRate, CustomerLabels.userRole, CustomerLabels.lastLogin, CustomerLabels.employeeStatus, "Salesperson"]
         let dateLabels: Set<String> = ["Date Added", CustomerLabels.startDate, CustomerLabels.endDate, CustomerLabels.birthDate, CustomerLabels.lastUpdated]
         let personalLabels: Set<String> = [CustomerLabels.socialSecurity, CustomerLabels.driverLicense, CustomerLabels.spouse]
-        let allSectionLabels = addressLabels.union(employeeInfoLabels).union(dateLabels).union(personalLabels)
+        let allSectionLabels = addressLabels.union(contactLabels).union(employeeInfoLabels).union(dateLabels).union(personalLabels)
         let mainFields = detailFields.filter { !allSectionLabels.contains($0.label) }
         let addressFields = detailFields.filter { addressLabels.contains($0.label) }
+        let contactFields = detailFields.filter { contactLabels.contains($0.label) }
         let employeeInfoFields = detailFields.filter { employeeInfoLabels.contains($0.label) }
         let dateFields = detailFields.filter { dateLabels.contains($0.label) }
         let personalFields = detailFields.filter { personalLabels.contains($0.label) }
         return VStack(spacing: LeadDetailLayout.containerSpacing) {
             RoundedContainerList(mainFields) { field in
+                LeadDetailFieldRow(formData: field)
+            }
+            contactSectionHeader
+            RoundedContainerList(contactFields) { field in
                 LeadDetailFieldRow(formData: field)
             }
             addressSectionHeader
@@ -320,6 +338,28 @@ struct LeadDetailUI: View {
             }
         }
         .padding(.horizontal)
+    }
+
+    private var customerInfoSectionHeader: some View {
+        HStack {
+            Text("Customer Info")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(themeColor)
+                .textCase(.uppercase)
+            Spacer()
+        }
+        .padding(.top, 0)
+    }
+
+    private var leadInfoSectionHeader: some View {
+        HStack {
+            Text("Lead Info")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(themeColor)
+                .textCase(.uppercase)
+            Spacer()
+        }
+        .padding(.top, 0)
     }
 
     private var addressSectionHeader: some View {

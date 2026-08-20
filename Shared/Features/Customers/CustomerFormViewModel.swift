@@ -18,6 +18,8 @@ final class CustomerFormViewModel {
     var pickDate: Date
     var pickStartDate: Date
     var pickCompleteDate: Date
+    var hasPickedStartDate: Bool = false
+    var hasPickedCompleteDate: Bool = false
     var pickBirthDate: Date
     var errorMessage = ""
     let mode: CustomerFormMode
@@ -75,6 +77,8 @@ final class CustomerFormViewModel {
             pickStartDate = detail.startDate
             pickCompleteDate = detail.completionDate
             pickBirthDate = CustomerPresentationFormatters.mediumDate.date(from: detail.birthDate) ?? Date()
+            hasPickedStartDate = detail.startDate > Date.distantPast.addingTimeInterval(86400)
+            hasPickedCompleteDate = detail.completionDate > Date.distantPast.addingTimeInterval(86400)
         }
     }
 
@@ -167,8 +171,8 @@ final class CustomerFormViewModel {
             quantity: updatedDetail.quantity,
             rate: updatedDetail.rate,
             creationDate: pickDate,
-            startDate: pickStartDate,
-            completionDate: pickCompleteDate,
+            startDate: hasPickedStartDate ? pickStartDate : nil,
+            completionDate: hasPickedCompleteDate ? pickCompleteDate : nil,
             userId: userId
         )
     }

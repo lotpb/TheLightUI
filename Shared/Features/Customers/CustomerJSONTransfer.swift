@@ -50,6 +50,11 @@ struct CustomerJSONRecord: Codable, Equatable {
     var commissionRate: String
     var userRole: String
     var lastLogin: String
+    var profession: String
+    var manager: String
+    var followUpDate: Date?
+    var tags: [String]
+    var employeeStatus: String
 
     init(_ item: CustomerItem) {
         id = item.id
@@ -92,6 +97,11 @@ struct CustomerJSONRecord: Codable, Equatable {
         commissionRate = item.commissionRate
         userRole = item.userRole
         lastLogin = item.lastLogin
+        profession = item.profession
+        manager = item.manager
+        followUpDate = item.followUpDate
+        tags = item.tags
+        employeeStatus = item.employeeStatus
     }
 
     // Custom decoder so JSON files exported before the string-picker migration
@@ -138,6 +148,11 @@ struct CustomerJSONRecord: Codable, Equatable {
         commissionRate = try c.decodeIfPresent(String.self, forKey: .commissionRate) ?? ""
         userRole       = try c.decodeIfPresent(String.self, forKey: .userRole)       ?? ""
         lastLogin      = try c.decodeIfPresent(String.self, forKey: .lastLogin)      ?? ""
+        profession     = try c.decodeIfPresent(String.self,  forKey: .profession)     ?? ""
+        manager        = try c.decodeIfPresent(String.self,  forKey: .manager)        ?? ""
+        followUpDate   = try c.decodeIfPresent(Date.self,    forKey: .followUpDate)
+        tags           = try c.decodeIfPresent([String].self, forKey: .tags)          ?? []
+        employeeStatus = try c.decodeIfPresent(String.self,  forKey: .employeeStatus) ?? ""
     }
 
     var customerItem: CustomerItem {
@@ -181,7 +196,12 @@ struct CustomerJSONRecord: Codable, Equatable {
             payType: payType,
             commissionRate: commissionRate,
             userRole: userRole,
-            lastLogin: lastLogin
+            lastLogin: lastLogin,
+            profession: profession,
+            manager: manager,
+            followUpDate: followUpDate,
+            tags: tags,
+            employeeStatus: employeeStatus
         )
     }
 }

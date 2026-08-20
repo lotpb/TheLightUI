@@ -10,7 +10,7 @@ import SwiftUI
 struct MainTopView: View {
     private enum Layout {
         @MainActor static var height: CGFloat {
-            UIDevice.current.userInterfaceIdiom == .pad ? 200 : 150
+            UIDevice.current.userInterfaceIdiom == .pad ? 160 : 150
         }
         static let cornerRadius: CGFloat = 18
     }
@@ -67,10 +67,10 @@ struct MainTopView: View {
     private var backendChip: some View {
         HStack(spacing: 5) {
             Image(systemName: "circle.hexagongrid.fill")
-                .font(.caption)
+                .font(.subheadline)
                 .symbolEffect(.variableColor.iterative.reversing)
             Text(backEnd)
-                .font(.caption.weight(.semibold))
+                .font(.subheadline.weight(.semibold))
                 .lineLimit(1)
         }
         .chipStyle()
@@ -80,9 +80,9 @@ struct MainTopView: View {
         HStack(spacing: 5) {
             Image(systemName: "figure.walk")
                 .foregroundStyle(.mint)
-                .font(.caption)
+                .font(.subheadline)
             Text(currentStepsText)
-                .font(.caption.weight(.semibold))
+                .font(.subheadline.weight(.semibold))
         }
         .chipStyle()
     }
@@ -90,9 +90,9 @@ struct MainTopView: View {
     private var weatherChip: some View {
         HStack(spacing: 5) {
             Image(systemName: currentWeatherSystemImage)
-                .font(.caption)
+                .font(.subheadline)
             Text(currentTemperatureText)
-                .font(.caption.weight(.semibold))
+                .font(.subheadline.weight(.semibold))
         }
         .chipStyle()
     }
@@ -228,8 +228,8 @@ struct MainTopView: View {
 private extension View {
     func chipStyle() -> some View {
         self
-            .padding(.horizontal, 9)
-            .padding(.vertical, 5)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
             .background(Color.white.opacity(0.2))
             .clipShape(Capsule())
     }

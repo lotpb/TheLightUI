@@ -8,64 +8,229 @@
 import SwiftUI
 import Charts
 
-// MARK: - Charts
-struct ChartView: View {
-    private enum Layout {
-        static let maxContentWidth: CGFloat = 700
-        static let sectionSpacing: CGFloat = 24
-    }
+// MARK: - Private helpers (file-scope so chart axis closures can capture without self)
 
+private func chartShortK(_ n: Int) -> String {
+    if n >= 1_000_000 { return String(format: "$%.1fM", Double(n) / 1_000_000) }
+    if n >= 1_000     { return String(format: "$%.0fk", Double(n) / 1_000) }
+    return "$\(n)"
+}
+
+// MARK: - ChartView
+
+struct ChartView: View {
     @Environment(\.tabBarOverlap) private var tabBarOverlap
     @State private var viewModel: ChartViewModel
-    @State private var selectedJob: String?
-    @State private var selectedProduct: String?
-    @State private var selectedSalesman: String?
-    @State private var selectedContractor: String?
-    private let sampleItems = ChartItem.sampleItems
 
+    // No NavigationStack here: this view is pushed onto the main menu's
+    // stack, and a nested stack inside a pushed destination is unsupported.
+    // Standalone presentations wrap it at the call site.
     init(customerStore: CustomerStore) {
         _viewModel = State(initialValue: ChartViewModel(customerStore: customerStore))
     }
 
-    // No NavigationStack here: this view is pushed onto the main menu's
-    // stack, and a nested stack inside a pushed destination is unsupported.
-    // Standalone presentations (fullscreen cover, previews) wrap it in a
-    // NavigationStack at the call site.
     var body: some View {
-        chartContent
-            .frame(maxWidth: Layout.maxContentWidth)
-            .navigationTitle("Charts")
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    categoryFilterMenu
-                }
-            }
-    }
+        ScrollView {
+            VStack(spacing: 16) {
+                categoryTabs
+                    .padding(.top, 8)
 
-    private var categoryFilterMenu: some View {
-        Menu {
-            Picker("Category", selection: $viewModel.categoryFilter) {
-                ForEach(viewModel.categoryOptions, id: \.self) { option in
-                    Text(option)
+                if viewModel.isLoading {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 60)
+                } else if !viewModel.hasCustomers {
+                    emptyState
+                } else {
+                    statRow
+                    monthlyTrendCard
+                    if !viewModel.jobTotals.isEmpty {
+                        horizontalBarCard(title: "By Job",        items: viewModel.jobTotals,        color: .purple)
+                    }
+                    if !viewModel.productTotals.isEmpty {
+                        horizontalBarCard(title: "By Product",    items: viewModel.productTotals,    color: .cyan)
+                    }
+                    if !viewModel.salesmanTotals.isEmpty {
+                        horizontalBarCard(title: "By Salesman",   items: viewModel.salesmanTotals,   color: .green)
+                    }
+                    if !viewModel.contractorTotals.isEmpty {
+                        horizontalBarCard(title: "By Contractor", items: viewModel.contractorTotals, color: .orange)
+                    }
                 }
             }
-            Divider()
-            Button {
-                printChart()
-            } label: {
-                Label("Print", systemImage: "printer")
+            .padding(.horizontal, 16)
+            .padding(.bottom, 24)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            Color.clear.frame(height: tabBarOverlap)
+        }
+        .navigationTitle("Analytics")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button { printChart() } label: {
+                    Image(systemName: "printer")
+                }
+                .disabled(!viewModel.hasCustomers || viewModel.isLoading)
             }
-            .disabled(!viewModel.hasCustomers)
-        } label: {
-            Label("Category", systemImage: "line.3.horizontal.decrease.circle")
         }
     }
+
+    // MARK: - Category Tabs
+
+    private var categoryTabs: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(viewModel.categoryOptions, id: \.self) { cat in
+                    let active = viewModel.categoryFilter == cat
+                    Button(cat + "s") {
+                        viewModel.categoryFilter = cat
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 9)
+                    .background(active ? Color.indigo : Color(.secondarySystemGroupedBackground))
+                    .foregroundStyle(active ? Color.white : Color.secondary)
+                    .clipShape(Capsule())
+                    .shadow(color: active ? Color.indigo.opacity(0.35) : .clear, radius: 5, y: 3)
+                }
+            }
+            .padding(.horizontal, 1)
+        }
+    }
+
+    // MARK: - Empty State
+
+    private var emptyState: some View {
+        VStack(spacing: 10) {
+            Text("📊")
+                .font(.system(size: 40))
+            Text("No \(viewModel.categoryFilter.lowercased())s found")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(Color.secondary)
+            Text("Try selecting a different category")
+                .font(.caption)
+                .foregroundStyle(Color(.tertiaryLabel))
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 60)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    // MARK: - Stat Row
+
+    private var statRow: some View {
+        let activeRate = viewModel.customerCount > 0
+            ? Int(round(Double(viewModel.activeCustomerCount) / Double(viewModel.customerCount) * 100)) : 0
+        let monthCount = viewModel.monthlySales.count
+
+        return HStack(spacing: 10) {
+            ChartStatCard(label: "Total",
+                          value: "\(viewModel.customerCount)",
+                          sub: "\(viewModel.categoryFilter)s on record",
+                          color: .indigo)
+            ChartStatCard(label: "Active",
+                          value: "\(viewModel.activeCustomerCount)",
+                          sub: "\(activeRate)% activation rate",
+                          color: .green)
+            ChartStatCard(label: "Revenue",
+                          value: viewModel.formattedTotalAmount,
+                          sub: monthCount > 0 ? "across \(monthCount) months" : "no data yet",
+                          color: .orange)
+        }
+    }
+
+    // MARK: - Monthly Trend
+
+    private var monthlyTrendCard: some View {
+        ChartSectionCard(title: "Monthly Revenue Trend", accentColor: .indigo) {
+            if viewModel.monthlySales.isEmpty {
+                Text("No data")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.secondary)
+                    .frame(maxWidth: .infinity, minHeight: 80, alignment: .center)
+            } else {
+                Chart(viewModel.monthlySales) { entry in
+                    AreaMark(
+                        x: .value("Month", entry.label),
+                        y: .value("Revenue", entry.total)
+                    )
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [Color.indigo.opacity(0.45), Color.indigo.opacity(0)],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    )
+                    .interpolationMethod(.catmullRom)
+
+                    LineMark(
+                        x: .value("Month", entry.label),
+                        y: .value("Revenue", entry.total)
+                    )
+                    .foregroundStyle(Color.indigo)
+                    .lineStyle(StrokeStyle(lineWidth: 2.5))
+                    .interpolationMethod(.catmullRom)
+                }
+                .chartLegend(.hidden)
+                .chartXAxis {
+                    AxisMarks { _ in AxisValueLabel().font(.system(size: 12)) }
+                }
+                .chartYAxis {
+                    AxisMarks(values: .automatic(desiredCount: 4)) { value in
+                        AxisGridLine()
+                        AxisValueLabel {
+                            if let v = value.as(Int.self) {
+                                Text(chartShortK(v)).font(.system(size: 12))
+                            }
+                        }
+                    }
+                }
+                .frame(height: 200)
+            }
+        }
+    }
+
+    // MARK: - Horizontal Bar Charts
+
+    private func horizontalBarCard(title: String, items: [ChartItem], color: Color) -> some View {
+        let top = Array(items.prefix(10))
+        let chartHeight = CGFloat(max(2, top.count)) * 44.0
+
+        return ChartSectionCard(title: title, accentColor: color) {
+            Chart(top) { item in
+                BarMark(
+                    x: .value("Amount", item.value),
+                    y: .value("Name",   item.type)
+                )
+                .foregroundStyle(color.gradient)
+                .cornerRadius(4)
+            }
+            .chartLegend(.hidden)
+            .chartXAxis {
+                AxisMarks(values: .automatic(desiredCount: 3)) { value in
+                    AxisGridLine()
+                    AxisValueLabel {
+                        if let v = value.as(Double.self) {
+                            Text(chartShortK(Int(v))).font(.system(size: 12))
+                        }
+                    }
+                }
+            }
+            .chartYAxis {
+                AxisMarks { _ in AxisValueLabel().font(.system(size: 12)) }
+            }
+            .frame(height: chartHeight)
+        }
+    }
+
+    // MARK: - Print
 
     private var printableHTML: String {
         func tableSection(title: String, items: [ChartItem]) -> String {
             guard !items.isEmpty else { return "" }
-            let rows = items.map { item in
-                "<tr><td>\(item.type)</td><td class=\"amount\">\(ChartFormatters.currency(item.value))</td></tr>"
+            let rows = items.map {
+                "<tr><td>\($0.type)</td><td class=\"amount\">\(ChartFormatters.currency($0.value))</td></tr>"
             }.joined(separator: "\n")
             return """
             <h3>\(title)</h3>
@@ -76,8 +241,8 @@ struct ChartView: View {
             """
         }
 
-        let monthlyRows = viewModel.monthlySales.map { entry in
-            "<tr><td>\(entry.label)</td><td class=\"amount\">\(ChartFormatters.currency(entry.total))</td></tr>"
+        let monthlyRows = viewModel.monthlySales.map {
+            "<tr><td>\($0.label)</td><td class=\"amount\">\(ChartFormatters.currency($0.total))</td></tr>"
         }.joined(separator: "\n")
 
         let monthlySection = viewModel.monthlySales.isEmpty ? "" : """
@@ -95,12 +260,12 @@ struct ChartView: View {
         <meta charset="utf-8">
         <style>
           body { font-family: -apple-system, Helvetica Neue, Arial, sans-serif; margin: 40px; color: #1c1c1e; }
-          .header { border-bottom: 2px solid #ff9500; padding-bottom: 14px; margin-bottom: 24px; }
-          .title { font-size: 26px; font-weight: 700; color: #ff9500; }
+          .header { border-bottom: 2px solid #6366f1; padding-bottom: 14px; margin-bottom: 24px; }
+          .title { font-size: 26px; font-weight: 700; color: #6366f1; }
           .subtitle { font-size: 14px; color: #6e6e73; margin-top: 4px; }
           h3 { font-size: 15px; font-weight: 700; color: #3a3a3c; margin: 24px 0 8px; }
           table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
-          th { background: #ff9500; color: #fff; padding: 7px 12px; font-size: 13px; text-align: left; }
+          th { background: #6366f1; color: #fff; padding: 7px 12px; font-size: 13px; text-align: left; }
           tr:nth-child(even) { background-color: #f2f2f7; }
           td { padding: 7px 12px; font-size: 13px; }
           .amount { text-align: right; font-weight: 600; }
@@ -109,15 +274,15 @@ struct ChartView: View {
         </head>
         <body>
           <div class="header">
-            <div class="title">Sales Report — \(viewModel.categoryFilter)s</div>
-            <div class="subtitle">\(viewModel.customerCount) record\(viewModel.customerCount == 1 ? "" : "s") &bull; Total \(viewModel.formattedTotalAmount)</div>
+            <div class="title">Analytics — \(viewModel.categoryFilter)s</div>
+            <div class="subtitle">\(viewModel.customerCount) record\(viewModel.customerCount == 1 ? "" : "s") · Total \(viewModel.formattedTotalAmount)</div>
           </div>
           \(monthlySection)
-          \(tableSection(title: "By Job", items: viewModel.jobTotals))
-          \(tableSection(title: "By Product", items: viewModel.productTotals))
-          \(tableSection(title: "By Salesman", items: viewModel.salesmanTotals))
+          \(tableSection(title: "By Job",        items: viewModel.jobTotals))
+          \(tableSection(title: "By Product",    items: viewModel.productTotals))
+          \(tableSection(title: "By Salesman",   items: viewModel.salesmanTotals))
           \(tableSection(title: "By Contractor", items: viewModel.contractorTotals))
-          <div class="footer">Printed from The Light &bull; \(Date().formatted(date: .long, time: .omitted))</div>
+          <div class="footer">Printed from The Light · \(Date().formatted(date: .long, time: .omitted))</div>
         </body>
         </html>
         """
@@ -127,7 +292,7 @@ struct ChartView: View {
         #if canImport(UIKit)
         let printInfo = UIPrintInfo.printInfo()
         printInfo.outputType = .general
-        printInfo.jobName = "\(viewModel.categoryFilter) Sales Report"
+        printInfo.jobName = "\(viewModel.categoryFilter) Analytics Report"
         let controller = UIPrintInteractionController.shared
         controller.printInfo = printInfo
         let formatter = UIMarkupTextPrintFormatter(markupText: printableHTML)
@@ -135,125 +300,10 @@ struct ChartView: View {
         controller.present(animated: true)
         #endif
     }
-
-    private var chartContent: some View {
-        ScrollView {
-            VStack(spacing: Layout.sectionSpacing) {
-                salesSummaryCell
-                customerSalesSection
-                jobChartSection
-                productChartSection
-                salesmanChartSection
-                contractorChartSection
-                lineChartSection
-                areaChartSection
-            }
-            .padding()
-        }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            Color.clear.frame(height: tabBarOverlap)
-        }
-    }
-
-    private var salesSummaryCell: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Sales")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text(viewModel.formattedTotalAmount)
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(.orange)
-            }
-
-            Spacer()
-
-            VStack(alignment: .trailing, spacing: 4) {
-                Text("\(viewModel.categoryFilter)s")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text("\(viewModel.customerCount)")
-                    .font(.title3.weight(.semibold))
-            }
-        }
-        .padding()
-        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 12))
-    }
-
-    private var customerSalesSection: some View {
-        ChartSection(
-            title: "\(viewModel.categoryFilter) Sales",
-            color: .orange
-        ) {
-            // Categorical month labels give evenly spaced, full-width bars;
-            // a Date x-axis would scatter thin bars across the whole timeline.
-            Chart(viewModel.monthlySales) { entry in
-                BarMark(
-                    x: .value("Month", entry.label),
-                    y: .value("Amount", entry.total)
-                )
-                .foregroundStyle(Color.orange.gradient)
-            }
-            .chartXScale(domain: viewModel.monthlySales.map(\.label))
-            .overlay {
-                if !viewModel.hasCustomers {
-                    Text(viewModel.isLoading ? "Loading customers…" : "No customer data")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
-            }
-        }
-    }
-
-    private var jobChartSection: some View {
-        CategoryBarSection(title: "\(viewModel.categoryFilter) by Job", color: .red, categoryLabel: "Job",
-                           items: viewModel.jobTotals, selection: $selectedJob)
-    }
-
-    private var productChartSection: some View {
-        CategoryBarSection(title: "\(viewModel.categoryFilter) by Product", color: .purple, categoryLabel: "Product",
-                           items: viewModel.productTotals, selection: $selectedProduct)
-    }
-
-    private var salesmanChartSection: some View {
-        CategoryBarSection(title: "\(viewModel.categoryFilter) by Salesman", color: .teal, categoryLabel: "Salesman",
-                           items: viewModel.salesmanTotals, selection: $selectedSalesman)
-    }
-
-    private var contractorChartSection: some View {
-        CategoryBarSection(title: "\(viewModel.categoryFilter) by Contractor", color: .indigo, categoryLabel: "Contractor",
-                           items: viewModel.contractorTotals, selection: $selectedContractor)
-    }
-
-    private var lineChartSection: some View {
-        ChartSection(title: "Line", color: .blue) {
-            Chart(sampleItems) { item in
-                LineMark(
-                    x: .value("Department", item.type),
-                    y: .value("Profit", item.value)
-                )
-                .foregroundStyle(Color.blue.gradient)
-                .interpolationMethod(.catmullRom)
-                .symbol(.circle)
-            }
-        }
-    }
-
-    private var areaChartSection: some View {
-        ChartSection(title: "Area", color: .green) {
-            Chart(sampleItems) { item in
-                AreaMark(
-                    x: .value("Department", item.type),
-                    y: .value("Profit", item.value)
-                )
-                .foregroundStyle(Color.green.gradient)
-                .interpolationMethod(.catmullRom)
-            }
-        }
-    }
 }
 
 // MARK: - Preview
+
 #Preview("Charts - Dark") {
     NavigationStack {
         ChartView(customerStore: CustomerStore(customerService: PreviewCustomerService()))
