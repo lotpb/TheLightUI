@@ -29,9 +29,6 @@ enum MainMenuFullscreenRoute: Identifiable {
     case geotify
     case places
     case weather
-    case stacks
-    case instagram
-    case tweet
     case chart
     case chat
 
@@ -53,6 +50,7 @@ enum MainMenuDataRoute: Hashable {
     case heatmap
     case reports
     case forecast
+    case team
 }
 
 @MainActor
@@ -150,6 +148,8 @@ struct MainMenuCoordinator {
             ReportsView(customerStore: customerStore)
         case .forecast:
             ForecastView(customerStore: customerStore)
+        case .team:
+            TeamView()
         }
     }
 
@@ -165,12 +165,6 @@ struct MainMenuCoordinator {
                 apiManager: makeWeatherManager(),
                 locationManager: makeWeatherLocationProvider()
             )
-        case .stacks:
-            StacksView(customerStore: customerStore)
-        case .instagram:
-            InstagramHome()
-        case .tweet:
-            TwitterUI()
         case .chart:
             // ChartView no longer owns a NavigationStack (it can be pushed
             // from the main menu), so standalone presentation wraps it here.

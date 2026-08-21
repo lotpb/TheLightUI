@@ -26,8 +26,7 @@ final class CustomerFormViewModel {
     private(set) var shouldFocusFirstName = false
 
     @ObservationIgnored private let formService: CustomerFormServicing
-    // nonisolated(unsafe): accessed in nonisolated deinit; only written on @MainActor otherwise.
-    @ObservationIgnored private nonisolated(unsafe) var saveTask: Task<Void, Never>?
+    @ObservationIgnored private let saveTaskBox = TaskCancelBox()
 
     // True while a Firestore save or update is in flight. Drives isButtonDisabled
     // to prevent a second tap from launching a concurrent write.
@@ -59,7 +58,7 @@ final class CustomerFormViewModel {
     }
 
     deinit {
-        saveTask?.cancel()
+        saveTaskBox.cancel()
     }
 
     func loadFormState() {
@@ -143,8 +142,7 @@ final class CustomerFormViewModel {
     }
 
     private func performSave(_ work: @escaping () async throws -> Void) {
-        saveTask?.cancel()
-        saveTask = Task { [weak self] in
+        let newTask = Task { [weak self] in
             guard let self else { return }
             isSaving = true
             defer { isSaving = false }
@@ -156,6 +154,7 @@ final class CustomerFormViewModel {
                 errorMessage = error.localizedDescription
             }
         }
+        saveTaskBox.replace(with: newTask)
     }
 
     private func makePayload(userId: String? = nil) -> CustomerFormPayload {

@@ -42,13 +42,13 @@ struct MainTopView: View {
 
     private var logoRow: some View {
         HStack(spacing: 10) {
-            Image("TheLight Logo3")
+            Image("TheLight Logo10")
                 .resizable()
                 .scaledToFit()
                 .frame(height: 80)
                 .frame(width: 160)
                 .padding(.leading, 16)
-                .padding(.top, 14)
+                .padding(.top, 10)
             //Spacer()
         }
     }

@@ -1,17 +1,15 @@
 {
   "images" : [
     {
-      "filename" : "TheLight Logo3.jpg",
+      "filename" : "TheLight Logo10.jpg",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "TheLight Logo3 1.jpg",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "TheLight Logo3 2.jpg",
       "idiom" : "universal",
       "scale" : "3x"
     }

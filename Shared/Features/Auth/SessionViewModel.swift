@@ -48,11 +48,13 @@ final class SessionViewModel {
         isAuthenticated = true
         isLoginPresented = false
         errorMessage = ""
+        CompanySession.startWatchingClaimRefresh()
     }
 
     func signOut() {
         do {
             try sessionService.signOut()
+            CompanySession.stopWatchingClaimRefresh()
             CompanySession.clear()
             isAuthenticated = false
             isLoginPresented = true

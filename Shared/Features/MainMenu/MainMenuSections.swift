@@ -147,6 +147,7 @@ struct CRMSection: View {
         Item(id: .customers, title: "Customers", subtitle: "Active accounts",      systemImage: "person.2.fill",                 iconColor: .indigo),
         Item(id: .vendors,   title: "Vendors",   subtitle: "Suppliers & partners", systemImage: "shippingbox.fill",              iconColor: .brown),
         Item(id: .employee,  title: "Employee",  subtitle: "Team directory",       systemImage: "person.text.rectangle",         iconColor: .teal),
+        Item(id: .team,      title: "Team",      subtitle: "Members & roles",      systemImage: "person.3.fill",                 iconColor: .purple),
     ]
 
     var body: some View {
@@ -260,9 +261,6 @@ struct ExploreSection: View {
         Item(id: .geotify,   title: "Geotify",       subtitle: "Region monitoring",     systemImage: "mappin.and.ellipse",         iconColor: .red),
         Item(id: .places,    title: "Search Places", subtitle: "Find a place nearby",   systemImage: "magnifyingglass.circle.fill", iconColor: .mint),
         Item(id: .weather,   title: "Weather",       subtitle: "Forecast & conditions", systemImage: "cloud.sun.fill",              iconColor: .cyan),
-        Item(id: .instagram, title: "Instagram",     subtitle: "Photo feed viewer",     systemImage: "camera.fill",                iconColor: .pink),
-        Item(id: .tweet,     title: "Twitter",       subtitle: "Timeline viewer",       systemImage: "bird.fill",                  iconColor: Color(red: 0.11, green: 0.63, blue: 0.95)),
-        Item(id: .stacks,    title: "Stacks",        subtitle: "Layout demos",          systemImage: "square.stack.3d.up.fill",    iconColor: .gray),
     ]
 
     var body: some View {

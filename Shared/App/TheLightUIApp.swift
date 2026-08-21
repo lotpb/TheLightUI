@@ -46,11 +46,16 @@ private struct AppRootView: View {
                 .opacity(showLaunch ? 0 : 1)
                 .animation(.easeInOut(duration: 0.35), value: showLaunch)
                 .task {
-                    // Arm geofence monitoring for the whole session, not just
-                    // while the map screen is open.
-                    await GeofenceManager.shared.start()
+                    // Geofence monitoring is armed lazily by MapUI's own .task
+                    // the first time the user opens Maps (GeofenceManager.start()
+                    // is idempotent and stays armed for the rest of the process
+                    // lifetime once called). Not started here so users who never
+                    // touch Maps aren't shown the notification-permission prompt
+                    // at cold launch, before there's any context for it.
+                    //
                     // Refresh cached companyId claim for already-authenticated users.
                     await CompanySession.refresh()
+                    CompanySession.startWatchingClaimRefresh()
                 }
 
             if showLaunch {
