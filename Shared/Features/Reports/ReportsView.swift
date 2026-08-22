@@ -540,3 +540,12 @@ private struct RptKpiCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
+
+// MARK: - Preview
+
+#Preview("Reports - Dark") {
+    NavigationStack {
+        ReportsView(customerStore: CustomerStore(customerService: PreviewCustomerService()))
+    }
+    .preferredColorScheme(.dark)
+}

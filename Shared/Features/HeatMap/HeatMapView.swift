@@ -666,3 +666,12 @@ private struct KpiCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
+
+// MARK: - Preview
+
+#Preview("Heat Map - Dark") {
+    NavigationStack {
+        HeatMapView(customerStore: CustomerStore(customerService: PreviewCustomerService()))
+    }
+    .preferredColorScheme(.dark)
+}

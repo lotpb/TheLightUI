@@ -721,3 +721,12 @@ private struct CalEventRow: View {
         .contentShape(Rectangle())
     }
 }
+
+// MARK: - Preview
+
+#Preview("Calendar - Dark") {
+    NavigationStack {
+        CalendarView(customerStore: CustomerStore(customerService: PreviewCustomerService()))
+    }
+    .preferredColorScheme(.dark)
+}

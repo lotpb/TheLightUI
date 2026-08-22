@@ -740,3 +740,12 @@ private struct FcstKpiCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }
+
+// MARK: - Preview
+
+#Preview("Forecast - Dark") {
+    NavigationStack {
+        ForecastView(customerStore: CustomerStore(customerService: PreviewCustomerService()))
+    }
+    .preferredColorScheme(.dark)
+}
