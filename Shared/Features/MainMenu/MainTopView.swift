@@ -10,9 +10,16 @@ import SwiftUI
 struct MainTopView: View {
     private enum Layout {
         @MainActor static var height: CGFloat {
-            UIDevice.current.userInterfaceIdiom == .pad ? 160 : 150
+            UIDevice.current.userInterfaceIdiom == .pad ? 260 : 150
         }
         static let cornerRadius: CGFloat = 18
+
+        @MainActor static var logoHeight: CGFloat {
+            UIDevice.current.userInterfaceIdiom == .pad ? 180 : 80
+        }
+        @MainActor static var logoWidth: CGFloat {
+            UIDevice.current.userInterfaceIdiom == .pad ? 360 : 160
+        }
     }
 
     @AppStorage(SettingsUI.color) private var color: Int?
@@ -42,13 +49,13 @@ struct MainTopView: View {
 
     private var logoRow: some View {
         HStack(spacing: 10) {
-            Image("TheLight Logo10")
+            Image("TheLight background")
                 .resizable()
                 .scaledToFit()
-                .frame(height: 80)
-                .frame(width: 160)
+                .frame(height: Layout.logoHeight)
+                .frame(width: Layout.logoWidth)
                 .padding(.leading, 16)
-                .padding(.top, 10)
+                .padding(.top, 4)
             //Spacer()
         }
     }
@@ -102,8 +109,8 @@ struct MainTopView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             logoRow
-            Spacer(minLength: 8)
             statsRow
+            Spacer(minLength: 8)
         }
         .symbolRenderingMode(.multicolor)
         .foregroundStyle(.white)
